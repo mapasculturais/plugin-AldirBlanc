@@ -1,0 +1,1 @@
+<li><a href="#aldir-blanc"><?php \MapasCulturais\i::_e('Lei Aldir Blanc'); ?></a></li>
