@@ -12,10 +12,15 @@ class Plugin extends \MapasCulturais\Plugin
 {
     public function _init()
     {
-        $app = \MapasCulturais\App::i();
+        $app = App::i();
+
         // enqueue scripts and styles
+        $app->view->enqueueStyle('aldirblanc', 'app', 'aldirblanc/app.css');
 
         // add hooks
+        $app->hook('mapasculturais.styles', function () use($app) {
+            $app->view->printStyles('aldirblanc');
+        });
 
         $app->hook('template(subsite.<<create|edit>>.tabs):end', function () {
             $this->part('aldirblanc/subsite-tab');
