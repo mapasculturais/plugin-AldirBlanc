@@ -29,8 +29,8 @@ use MapasCulturais\i;
             <p class="lab-form-question">Sua pequena empresa ou coletivo é formalizado?</p>
             <div class="lab-form-boolean">
                 <span>
-                    <a class="btn btn-boolean btn-large" href="<?= $this->controller->createUrl( 'tipo', ['coletivo'] ) ?>"><?php i::_e('Sim') ?></a>
-                    <a class="btn btn-boolean btn-large" href="<?= $this->controller->createUrl( 'tipo', ['coletivo'] ) ?>"><?php i::_e('Não') ?></a>
+                    <a class="btn btn-boolean btn-large" href="<?= $this->controller->createUrl( 'coletivo' ) ?>"><?php i::_e('Sim') ?></a>
+                    <a class="btn btn-boolean btn-large" href="<?= $this->controller->createUrl( 'coletivo' ) ?>"><?php i::_e('Não') ?></a>
                 </span>
                 <a href="#"><span class="icon icon-go-back"></span><span class="screen-reader-text">Voltar</span></a>
             </div>

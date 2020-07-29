@@ -31,7 +31,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app->view->enqueueStyle('aldirblanc', 'app', 'aldirblanc/app.css');
 
         // add hooks
-        $app->hook('mapasculturais.styles', function () use($app) {
+        $app->hook('mapasculturais.styles', function () use ($app) {
             $app->view->printStyles('aldirblanc');
         });
 
@@ -42,8 +42,8 @@ class Plugin extends \MapasCulturais\Plugin
         $app->hook('template(subsite.<<create|edit>>.tabs-content):end', function () {
             $this->part('aldirblanc/subsite-tab-content');
         });
-    }    
-    
+    }
+
     /**
      * Registra os controladores e metadados das entidades
      *
@@ -54,7 +54,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
-        
+
         /* registrinado metadados do usuário */
 
         /**
