@@ -10,6 +10,19 @@ require_once 'Controllers/AldirBlanc.php';
 
 class Plugin extends \MapasCulturais\Plugin
 {
+    function __construct(array $config = [])
+    {
+        $config += [
+            'inciso1_enabled' => true,
+            'inciso2_enabled' => true,
+            'inciso1_opportunity_id' => null,
+            'inciso2_opportunity_ids' => [
+            ],
+        ];
+       
+        parent::__construct($config);
+    }
+
     public function _init()
     {
         $app = App::i();
