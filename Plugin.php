@@ -51,28 +51,37 @@ class Plugin extends \MapasCulturais\Plugin
         $this->registerUserMetadata('aldirblanc_tipo_usuario', [
             'label' => i::__('Tipo de Usuário'),
             'type' => 'select',
+            'private' => true,
             'options' => [
-                '' => i::__('Assistência Social'),
-                'proponente' => i::__('Proponente')
+                'assistente-social' => i::__('Assistência Social'),
+                'solicitante' => i::__('Solicitante')
             ]
         ]);
 
-        $this->registerUserMetadata('aldirblanc_tipo_cadastro', [
-            'label' => i::__('Inciso'),
-            'type' => 'select',
-            'options' => [
-                'individual' => i::__('Inciso I - Trabalhador da Cultura'),
-                'coletivo' => i::__('Inciso II - Espaços e Coletivos')
-            ]
-        ]);
+        if($this->config['inciso1_enabled']){
+            /**
+             * Id da inscrição no insico I
+             * @var string
+             */
+            $this->registerAgentMetadata('aldirblanc_inciso1_registration', [
+                'label' => i::__('Id da inscrição no Insiso I'),
+                'type' => 'string',
+                'private' => true,
+                // @todo: validação que impede a alteração do valor desse metadado
+            ]);
+        }
 
-        $this->registerUserMetadata('tipo_cadastro', [
-            'label' => i::__('Inciso'),
-            'type' => 'select',
-            'options' => [
-                'individual' => i::__('Inciso I - Trabalhador da Cultura'),
-                'coletivo' => i::__('Inciso II - Espaços e Coletivos')
-            ]
-        ]);
+        if($this->config['inciso2_enabled']){
+            /**
+             * Id da inscrição no insico II
+             * @var string
+             */
+            $this->registerAgentMetadata('aldirblanc_inciso2_registration', [
+                'label' => i::__('Id da inscrição no inciso II'),
+                'type' => 'string',
+                'private' => true,
+                // @todo: validação que impede a alteração do valor desse metadado
+            ]);
+        }
     }
 }

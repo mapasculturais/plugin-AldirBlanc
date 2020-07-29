@@ -22,22 +22,18 @@ class AldirBlanc extends \MapasCulturais\Controller
 
         $app = App::i();
 
-        switch ($app->user->aldirblanc_tipo_cadastro) {
+        if($app->user->aldirblanc_tipo_usuario == 'assistente-social'){
+            $app->redirect($this->createUrl('assistenteSocial'));
 
-            case 'individual':
-                $app->redirect($this->createUrl('individual'));
-                break;
+        } else if($app->user->aldirblanc_tipo_usuario == 'solicitante') {
+            $app->redirect($this->createUrl('cadastro'));
 
-            case 'coletivo':
-                $app->redirect($this->createUrl('coletivo'));
-                break;
-
-            case 'assistente-social':
-                $app->redirect($this->createUrl('assistenteSocial'));
-                break;
-
-            default:
-                $app->redirect($this->createUrl('cadastro'));
+        } else {
+            $app->user->aldirblanc_tipo_usuario = 'solicitante';
+            $app->disableAccessControl();
+            $app->user->save(true);
+            $app->enableAccessControl();
+            $app->redirect($this->createUrl('cadastro'));
         }
     }
 
@@ -74,9 +70,14 @@ class AldirBlanc extends \MapasCulturais\Controller
      */
     function GET_individual()
     {
-        $this->checkUserType('individual');
+        $this->checkUserType('solicitante');
+        $app = App::i();
+        // @todo definir registration
+        $registration = $app->repo('Registration')->find($app->user->profile->aldirblanc_inciso1_registration);
 
-        $this->render('individual');
+        $app->redirect($registration->singleUrl);
+        
+        $this->render('individual', ['registration' => $registration]);
     }
 
     /**
@@ -86,32 +87,13 @@ class AldirBlanc extends \MapasCulturais\Controller
      */
     function GET_coletivo()
     {
-        $this->checkUserType('coletivo');
+        $this->checkUserType('solicitante');
 
-        $this->render('coletivo');
-    }
 
-    /**
-     * Define o tipo de cadastro do usuário
-     *
-     * @return void
-     */
-    function GET_tipo()
-    {
-        $app = App::i();
-
-        $this->requireAuthentication();
-
-        $tipo_cadastro = isset($this->data[0]) ? $this->data[0] : null;
-
-        if (in_array($tipo_cadastro, ['individual', 'coletivo'])) {
-            $app->user->aldirblanc_tipo_cadastro = $tipo_cadastro;
-            $app->user->save(true);
-
-            $app->redirect($this->createUrl($tipo_cadastro));
-        } else {
-            $app->redirect($this->createUrl('index'));
-        }
+        // @todo definir registration
+        $registration = null;
+        
+        $this->render('coletivo', ['registration' => $registration]);
     }
 
     /**
@@ -126,6 +108,6 @@ class AldirBlanc extends \MapasCulturais\Controller
 
         $app = App::i();
 
-        return $app->user->aldirblanc_tipo_cadastro === $expected;
+        return $app->user->aldirblanc_tipo_usuario === $expected;
     }
 }
