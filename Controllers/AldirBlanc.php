@@ -18,23 +18,42 @@ class AldirBlanc extends \MapasCulturais\Controller
      */
     function GET_index()
     {
-        $this->requireAuthentication();
+        // $this->requireAuthentication();
 
         $app = App::i();
+        $config = $app->config['auth.config'];
 
-        if($app->user->aldirblanc_tipo_usuario == 'assistente-social'){
-            $app->redirect($this->createUrl('assistenteSocial'));
+        
 
-        } else if($app->user->aldirblanc_tipo_usuario == 'solicitante') {
-            $app->redirect($this->createUrl('cadastro'));
+        $app->view->enqueueScript('app', 'multipleLocal', 'js/multipleLocal.js');
+        $app->view->enqueueStyle('app', 'multipleLocal', 'css/multipleLocal.css');
 
-        } else {
-            $app->user->aldirblanc_tipo_usuario = 'solicitante';
-            $app->disableAccessControl();
-            $app->user->save(true);
-            $app->enableAccessControl();
-            $app->redirect($this->createUrl('cadastro'));
-        }
+        $app->render('auth/multiple-local', [
+            'redirectUrl' => '/aldirblanc/cadastro',
+            'config' => $config,
+            'register_form_action' => $app->auth->register_form_action,
+            'register_form_method' => $app->auth->register_form_method,
+            'login_form_action' => $app->createUrl('auth', 'login'),
+            'recover_form_action' => $app->createUrl('auth', 'recover'),
+            'feedback_success'        => $app->auth->feedback_success,
+            'feedback_msg'    => $app->auth->feedback_msg,   
+            'triedEmail' => $app->auth->triedEmail,
+            'triedName' => $app->auth->triedName,
+        ]);
+
+        // if($app->user->aldirblanc_tipo_usuario == 'assistente-social'){
+        //     $app->redirect($this->createUrl('assistenteSocial'));
+
+        // } else if($app->user->aldirblanc_tipo_usuario == 'solicitante') {
+        //     $app->redirect($this->createUrl('cadastro'));
+
+        // } else {
+        //     $app->user->aldirblanc_tipo_usuario = 'solicitante';
+        //     $app->disableAccessControl();
+        //     $app->user->save(true);
+        //     $app->enableAccessControl();
+        //     $app->redirect($this->createUrl('cadastro'));
+        // }
     }
 
     /**
@@ -44,7 +63,7 @@ class AldirBlanc extends \MapasCulturais\Controller
      */
     function GET_cadastro()
     {
-        $this->requireAuthentication();
+        // $this->requireAuthentication();
 
         $this->render('cadastro');
     }
