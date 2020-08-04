@@ -31,6 +31,9 @@ use MapasCulturais\i;
             $('.lab-form-item').hide();
             $('.lab-form-item:first').show();
         });
+        $('.icon-help').click(function(){
+            $('.lab-form-detail').toggle('1000');
+        });
     });
 </script>
 <section class="lab-form-intro">
@@ -42,7 +45,7 @@ use MapasCulturais\i;
                 <p>Por favor, responda às perguntas abaixo para iniciar seu cadastro.</p>
 
             <div class="lab-form-item">
-                <p class="lab-form-question">Para quem você está solicitando o auxílio?</p>           
+                <p class="lab-form-question">Para quem você está solicitando o auxílio? <a class="icon icon-help" href="#" title=""></a></p>           
                 <ul class="lab-form-filter">
                     <li>
                         <a id="option1" class="lab-form-option" href="#">
@@ -58,7 +61,7 @@ use MapasCulturais\i;
                     </li>
                     <li>
                         <a id="option3" class="lab-form-option" href="<?= $this->controller->createUrl( 'individual') ?>">
-                            <h3><?php i::_e('Trabalhador da Cultura') ?></h3>
+                            <h3><?php i::_e('Trabalhador da Cultura') ?> </h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
                         </a>
                     </li>
@@ -95,21 +98,29 @@ use MapasCulturais\i;
         </div><!-- End .box -->
     </details>
     <details>
-        <summary>Cadastro incompleto</summary>
+        <summary>Cadastro trabalhador incompleto</summary>
         <div class="box">
             <h1>Cadastro</h1>
             <p>Olá, <?php echo $app->user->profile->name ?>!</p>
             <div class="">
-                <p class="lab-form-question">O que você deseja fazer?</p>           
+                <p class="lab-form-question">O que você deseja fazer?<a class="icon icon-help" href="#" title=""></a></p>           
                 <ul class="lab-form-filter">
                     <li>
-                        <a id="option1" class="lab-form-option" href="#">
-                            <h3>Continuar o cadastro para [Nome do trabalhador ou espaço]</h3>
+                        <a id="option2" class="lab-form-option" href="#">
+                            <h3>Cadastrar Espaço Cultural</h3>
+                            <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
                         </a>
                     </li>
                     <li>
                         <a id="option2" class="lab-form-option" href="#">
-                            <h3>Fazer novo cadastro para trabalhador ou espaço</h3>
+                            <h3>Cadastrar Pequena empresa ou coletivo</h3>
+                            <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="option1" class="lab-form-option" href="#">
+                            <h3>Continuar cadastro iniciado para <?php echo $app->user->profile->name ?></h3>
+                            <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
                         </a>
                     </li>
                 </ul>
@@ -118,21 +129,112 @@ use MapasCulturais\i;
         </div><!-- End .box -->
     </details>
     <details>
-        <summary>Cadastro completo</summary>
+        <summary>Cadastro trabalhador completo</summary>
         <div class="box">
             <h1>Cadastro</h1>
             <p>Olá, <?php echo $app->user->profile->name ?>!</p>
             <div class="">
-                <p class="lab-form-question">O que você deseja fazer?</p>           
+            <p class="lab-form-question">O que você deseja fazer?<a class="icon icon-help" href="#" title=""></a></p>           
                 <ul class="lab-form-filter">
                     <li>
-                        <a id="option1" class="lab-form-option" href="#">
-                            <h3>Conferir o status do cadastro para [Nome do trabalhador ou espaço]</h3>
+                        <a id="option2" class="lab-form-option" href="#">
+                            <h3>Cadastrar Espaço Cultural</h3>
+                            <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
                         </a>
                     </li>
                     <li>
                         <a id="option2" class="lab-form-option" href="#">
-                            <h3>Fazer novo cadastro</h3>
+                            <h3>Cadastrar Pequena empresa ou coletivo</h3>
+                            <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
+                        </a>
+                    </li>
+                    <?php $this->part('aldirblanc/cadastro/application-status') ?>
+                </ul>
+            </div>
+
+        </div><!-- End .box -->
+    </details>
+    <details>
+        <summary>Cadastro Espaço/Pequena empresa ou coletivo incompleto</summary>
+        <div class="box">
+            <h1>Cadastro</h1>
+            <p>Olá, <?php echo $app->user->profile->name ?>!</p>
+            <div class="">
+            <p class="lab-form-question">O que você deseja fazer?<a class="icon icon-help" href="#" title=""></a></p>           
+                <ul class="lab-form-filter">
+                    <li>
+                        <a id="option2" class="lab-form-option" href="#">
+                            <h3>Continuar cadastro iniciado para [NOME DO ESPAÇO]</h3>
+                            <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="option1" class="lab-form-option" href="#">
+                            <h3>Cadastrar Trabalhador da Cultura</h3>
+                            <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div><!-- End .box -->
+    </details>
+    <details open>
+        <summary>Cadastro Espaço/Pequena empresa ou coletivo completo</summary>
+        <div class="box">
+            <h1>Cadastro</h1>
+            <p>Olá, <?php echo $app->user->profile->name ?>!</p>
+            <div class="">
+            <p class="lab-form-question">O que você deseja fazer?<a class="icon icon-help" href="#" title=""></a></p>           
+                <ul class="lab-form-filter">
+                    <?php $this->part('aldirblanc/cadastro/application-status') ?>
+                    <li>
+                        <a id="option1" class="lab-form-option" href="#">
+                            <h3>Cadastrar Trabalhador da Cultura</h3>
+                            <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div><!-- End .box -->
+    </details>
+    <details open>
+        <summary>Cadastro Trabalhador / Espaço/Pequena empresa ou coletivo completos</summary>
+        <div class="box">
+            <h1>Cadastro</h1>
+            <p>Olá, <?php echo $app->user->profile->name ?>!</p>
+            <div class="">
+            <p class="lab-form-question">O que você deseja fazer?<a class="icon icon-help" href="#" title=""></a></p>           
+                <ul class="lab-form-filter">
+                    <li class="lab-form-approved">
+                        <a id="option2" class="lab-form-option" href="#">
+                            <h3>Status do cadastro para [NOME DO TRABALHADOR]</h3>
+                            <h2>Aprovado</h2>
+                            <p class="lab-form-detail">
+                                    <span class="label">Número:</span> on-321123123123</br>
+                                
+                                    <span class="label">Data do envio:</span> 00/00/00</br>
+                                
+                                    <span class="label">Responsável:</span> Nome Sobrenome</br>
+                                
+                                    <span class="label">CPF:</span> 000.000.000-00
+                            </p>
+                        </a>
+                    </li>
+                    <li class="lab-form-disapproved">
+                        <a id="option2" class="lab-form-option" href="#">
+                            <h3>Status do cadastro para [NOME DO ESPAÇO]</h3>
+                            <h2>Negado</h2>
+                            <p class="lab-form-detail">
+                                    <span class="label">Número:</span> on-321123123123</br>
+                                
+                                    <span class="label">Data do envio:</span> 00/00/00</br>
+                                
+                                    <span class="label">Responsável:</span> Nome Sobrenome</br>
+                                
+                                    <span class="label">CPF:</span> 000.000.000-00
+                            </p>
                         </a>
                     </li>
                 </ul>
