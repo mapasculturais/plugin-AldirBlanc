@@ -1,9 +1,46 @@
 <?php 
 use MapasCulturais\i; 
 
+$this->jsObject['category'] = $category;
+$this->jsObject['agentOpportunityId'] = $agentOpportunityId;
+$this->jsObject['spaceOpportunityId'] = $spaceOpportunityId;
+$this->jsObject['agentOwnerId'] = $agentOwnerId;
+$this->jsObject['spaceOwnerId'] = $spaceOwnerId;
+
 ?>
 <script>
     $(document).ready(function(){
+
+        //inciso1
+        $('#option3').click(function(){
+            $.ajax({
+                type: "POST",
+                url: `${MapasCulturais.baseURL}inscricoes`,
+                data: {
+                    category: MapasCulturais.category,
+                    opportunityId: MapasCulturais.agentOpportunityId,
+                    ownerId: MapasCulturais.agentOwnerId,
+                },
+                success: function(msg){
+                        if(msg.error) {
+                            alert("ja tem inscricao")
+                            console.log(msg)
+                            return false;
+                        }
+                        // console.log(msg)
+                        document.location = `${MapasCulturais.baseURL}aldirblanc/individual/${msg.id}`;
+                        // window.location.href = `${MapasCulturais.baseURL}aldirblanc/individual/${msg.id}`;
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    console.log("some error***");
+                }
+            });
+        });
+        
+        
+
+
+
         $('.lab-form-option').addClass('inactive');
         $('.lab-form-item').hide();
         $('.lab-form-item:first').show();
@@ -57,7 +94,8 @@ use MapasCulturais\i;
                         </a>
                     </li>
                     <li>
-                        <a id="option3" class="lab-form-option" href="<?= $this->controller->createUrl( 'individual') ?>">
+                        <!-- <a id="option3" class="lab-form-option" href="<?php //echo $this->controller->createUrl( 'individual') ?>"> -->
+                        <a id="option3" class="lab-form-option">
                             <h3><?php i::_e('Trabalhador da Cultura') ?></h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
                         </a>
