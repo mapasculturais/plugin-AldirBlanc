@@ -29,6 +29,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         // enqueue scripts and styles
         $app->view->enqueueStyle('aldirblanc', 'app', 'aldirblanc/app.css');
+        $app->view->enqueueScript('app', 'entity.module.opportunity.aldirblanc', 'aldirblanc/ng.entity.module.opportunity.aldirblanc.js', array('ng-mapasculturais'));
 
         // add hooks
         $app->hook('mapasculturais.styles', function () use ($app) {

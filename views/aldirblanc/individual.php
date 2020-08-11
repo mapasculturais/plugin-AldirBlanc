@@ -1,4 +1,49 @@
 
+
+
+
+
+
+IGNORE ESSE ( verificar se tem que ignorar mesmo )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <?php 
     use MapasCulturais\App;
     

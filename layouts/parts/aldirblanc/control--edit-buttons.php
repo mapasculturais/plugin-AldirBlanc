@@ -1,6 +1,6 @@
 
 
-<a class="btn btn-primary js-submit-button"><?php \MapasCulturais\i::_e("Salvar sobrescrevido");?></a>
+<a class="btn btn-primary js-submit-button"><?php \MapasCulturais\i::_e("Salvar_");?></a>
 
 
 <script type="text/javascript">

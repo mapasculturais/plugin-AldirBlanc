@@ -23,8 +23,12 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
                 },
                 success: function(msg){
                         if(msg.error) {
-                            alert("ja tem inscricao")
-                            console.log(msg)
+                            //redireciona para aldirblanc/individual/NADA_AQUI
+                            //quando chegar la, verifica qual inscrição a pessoa já esta em andamento
+                            document.location = `${MapasCulturais.baseURL}aldirblanc/individual/`;
+
+                            // alert("Já existe uma inscrição em andamento, não é possivel criar mais de uma inscrição.")
+                            // console.log(msg)
                             return false;
                         }
                         // console.log(msg)
@@ -40,34 +44,34 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
         
 
 
-
-        $('.lab-form-option').addClass('inactive');
-        $('.lab-form-item').hide();
-        $('.lab-form-item:first').show();
+        // Esse trecho de codigo "esconde" a sessão "Primeiro acesso ao plugin" ao escolher algumas das opções
+        // $('.lab-form-option').addClass('inactive');
+        // $('.lab-form-item').hide();
+        // $('.lab-form-item:first').show();
                 
-        $('.lab-form-option').click(function(){
-            var t = $(this).attr('id');
-            if($(this).hasClass('inactive')){
-                $('.lab-form-option').addClass('inactive');           
-                $(this).removeClass('inactive');
-                $('.lab-form-item').hide();
-                $('#'+ t + 'C').fadeIn('slow');
-            }
-        });
-        $('.lab-form-option').change(function(){
-            var t = $(this).attr('id');
-            if($(this).hasClass('inactive')){
-                $('.lab-form-option').addClass('inactive');           
-                $(this).removeClass('inactive');
-                $('.lab-form-item').hide();
-                $('#'+ t + 'C').fadeIn('slow');
-            }
-        });
-        $('.back').click(function(){
-            $('.lab-form-option').addClass('inactive');
-            $('.lab-form-item').hide();
-            $('.lab-form-item:first').show();
-        });
+        // $('.lab-form-option').click(function(){
+        //     var t = $(this).attr('id');
+        //     if($(this).hasClass('inactive')){
+        //         $('.lab-form-option').addClass('inactive');           
+        //         $(this).removeClass('inactive');
+        //         $('.lab-form-item').hide();
+        //         $('#'+ t + 'C').fadeIn('slow');
+        //     }
+        // });
+        // $('.lab-form-option').change(function(){
+        //     var t = $(this).attr('id');
+        //     if($(this).hasClass('inactive')){
+        //         $('.lab-form-option').addClass('inactive');           
+        //         $(this).removeClass('inactive');
+        //         $('.lab-form-item').hide();
+        //         $('#'+ t + 'C').fadeIn('slow');
+        //     }
+        // });
+        // $('.back').click(function(){
+        //     $('.lab-form-option').addClass('inactive');
+        //     $('.lab-form-item').hide();
+        //     $('.lab-form-item:first').show();
+        // });
     });
 </script>
 <section class="lab-form-intro">

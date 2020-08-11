@@ -4,7 +4,7 @@ $action = preg_replace("#^(\w+/)#", "", $this->template);
 $this->bodyProperties['ng-app'] = "entity.app";
 $this->bodyProperties['ng-controller'] = "EntityController";
 
-$this->jsObject['angularAppDependencies'][] = 'entity.module.opportunity';
+$this->jsObject['angularAppDependencies'][] = 'entity.module.opportunity.aldirblanc';
 
 $this->addEntityToJs($entity);
 
@@ -46,10 +46,10 @@ $_params = [
         <?php // Desabilitando este template por enquanto, pois não é a melhor forma de apresentar para o usuário que está se inscrevendo ?>
         <?php //$this->part('singles/registration-edit--seals', $_params) ?>
         
-        <?php $this->part('singles/registration-edit--fields', $_params) ?>
+        <?php $this->part('aldirblanc/registration-edit--fields', $_params) ?>
 
         <?php if(!$entity->preview): ?>
-            <?php $this->part('singles/registration-edit--send-button', $_params) ?>
+            <?php //$this->part('singles/registration-edit--send-button', $_params) ?>
         <?php endif; ?>
 
         <?php $this->applyTemplateHook('form','end'); ?>

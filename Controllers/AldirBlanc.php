@@ -5,6 +5,7 @@ namespace AldirBlanc\Controllers;
 use \MapasCulturais\Entities\Registration;
 use \MapasCulturais\Controllers;
 use \MapasCulturais\App;
+use MapasCulturais\Controllers\Auth;
 use \MapasCulturais\Traits;
 use \MapasCulturais\Definitions;
 use \MapasCulturais\Entities;
@@ -182,7 +183,17 @@ class AldirBlanc extends \MapasCulturais\Controllers\EntityController {
 
         if($urlId == null || empty($urlId)) {
             
-            $app->redirect('http://localhost:8080/aldirblanc/cadastro');
+            //se nao tem URL verifica se o cara já tem ALGUMA incrição em andamento, se tiver, redireciona para EU MESMO(aldirblanc/individual/ID_AQUI)
+            //se nao tiver nenhuma inscrição em andamento, leva o cara de volta para cadastro
+
+            // $app->user->profile->id
+            // 37419 << OWNER_ID
+
+            $opportunity = App::i()->repo('Opportunity')->find(1647);
+
+            $entity = App::i()->repo('Registration')->findByOpportunityAndUser($opportunity,$app->user);
+
+            $app->redirect('http://localhost:8080/aldirblanc/individual/'.$entity[0]->id);
             
         } else {
             $app = App::i();
