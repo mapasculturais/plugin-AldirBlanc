@@ -14,7 +14,7 @@
     }]);
 
     function getOpportunityId(){
-        if(MapasCulturais.request.controller == 'registration'){
+        if(MapasCulturais.request.controller == 'aldirblanc'){
             return MapasCulturais.entity.object.opportunity.id;
         } else {
             return MapasCulturais.entity.id;
@@ -136,7 +136,11 @@
                         return 0;
                     }
                 });
+                return fields; 
+            },
 
+            getGroupFieldsBySection: function () {
+                let fields = this.getFields();
                 //groupFieldList é utilizada para criar grupos de array APOS o fieldType('section')
                 //ex: [{fieldType:'section'},{name},{fieldType:'section'},{email}] TRANSFORMA-SE EM 
                 // [[name],[email]]
@@ -788,6 +792,7 @@ module.controller('RegistrationFieldsController', ['$scope', '$rootScope', '$int
 
 
     $scope.data.fields = RegistrationService.getFields();
+    $scope.data.groupFields = RegistrationService.getGroupFieldsBySection();
     $scope.data.fieldsRequiredLabel = labels['requiredLabel'];
     $scope.data.fieldsOptionalLabel = labels['optionalLabel'];
 
@@ -854,9 +859,24 @@ module.controller('RegistrationFieldsController', ['$scope', '$rootScope', '$int
     };
 
     $scope.removeFile = function (id, $index) {
+        
+        
+        // let url = $scope.data.fields.find(function(x) {return x.id === id}).file.deleteUrl;
+
+        let url = "";
+        let fileIndex = "";
+        $scope.data.fields.forEach(function(element,index) {
+            if(element.id == id) {
+                url = element.file.deleteUrl;
+                fileIndex = index;
+            }
+        });
+
         if(confirm(labels['confirmRemoveAttachment'])){
-            $http.get($scope.data.fields[$index].file.deleteUrl).success(function(response){
-                delete $scope.data.fields[$index].file;
+            // $http.get($scope.data.fields[$index].file.deleteUrl).success(function(response){
+            $http.get(url).success(function(response){
+                // delete $scope.data.fields[$index].file;
+                delete $scope.data.fields[fileIndex].file;
             });
         }
     };
@@ -874,7 +894,21 @@ module.controller('RegistrationFieldsController', ['$scope', '$rootScope', '$int
         });
 
         $form.on('ajaxForm.success', function(evt, response){
-            $scope.data.fields[index].file = response[$scope.data.fields[index].groupName];
+            debugger;
+
+            let fieldId = response.rfc_2222.group.replace("rfc_", "");
+
+            let fileIndex = "";
+            $scope.data.fields.forEach(function(element,indx) {
+                if(element.id == fieldId) {
+                    fileIndex = indx;
+                }
+            });
+
+            // $scope.data.groupFields[fileIndex].file = response[$scope.data.fields[index].groupName];
+            // $scope.data.fields[index].file = response[$scope.data.fields[index].groupName];
+            $scope.data.fields[fileIndex].file = response[$scope.data.fields[fileIndex].groupName];
+            
             $scope.$apply();
             setTimeout(function(){
                 $('.carregando-arquivo').hide();
@@ -1238,6 +1272,7 @@ module.controller('RegistrationFieldsController', ['$scope', '$rootScope', '$int
                 page++;
                 
                 return $http.get(url, {params: params, cache:true}).success(function(response, status, headers){
+                    
                     for (var i in response){
                         response[i]['files'] = {};
                         for(var prop in response[i]){
@@ -1272,7 +1307,7 @@ module.controller('OpportunityController', ['$scope', '$rootScope', '$timeout', 
     var select_fields = MapasCulturais.opportunitySelectFields.map(function(e){ return e.fieldName; });
     var registrationsApi;
     var evaluationsApi;
-
+    
     var committeeApi = new OpportunityApiService($scope, 'evaluationCommittee', 'evaluationCommittee', {'@opportunity': getOpportunityId()});
 
     $scope.registrationsFilters = {};
@@ -1496,6 +1531,7 @@ module.controller('OpportunityController', ['$scope', '$rootScope', '$timeout', 
         confirmEvaluationLabel: labels['confirmEvaluationLabel'],
 
         fields: RegistrationService.getFields(),
+        groupFields: RegistrationService.getGroupFieldsBySection(),
 
         relationApiQuery: {'@keywowrd': '*'},
 
@@ -1825,6 +1861,7 @@ module.controller('OpportunityController', ['$scope', '$rootScope', '$timeout', 
             };
 
             $scope.removeRegistrationRulesFile = function (id, $index) {
+                debugger;
                 if(confirm('Deseja remover este anexo?')){
                     $http.get($scope.data.entity.registrationRulesFile.deleteUrl).success(function(response){
                         $scope.data.entity.registrationRulesFile = null;
@@ -1848,6 +1885,7 @@ module.controller('OpportunityController', ['$scope', '$rootScope', '$timeout', 
 
                 $form.on('ajaxForm.success', function(evt, response){
                     $scope.data.entity.registrationRulesFile = response['rules'];
+                    
                     $scope.$apply();
                     setTimeout(function(){
                         EditBox.close(id);

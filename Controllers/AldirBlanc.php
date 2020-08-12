@@ -193,8 +193,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\EntityController {
 
             $entity = App::i()->repo('Registration')->findByOpportunityAndUser($opportunity,$app->user);
 
-            $app->redirect('http://localhost:8080/aldirblanc/individual/'.$entity[0]->id);
+            $app->redirect($app->createUrl('aldirblanc', 'individual').$entity[0]->id);
             
+    
         } else {
             $app = App::i();
 
