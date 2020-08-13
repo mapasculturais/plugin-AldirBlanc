@@ -14,7 +14,7 @@
     }]);
 
     function getOpportunityId(){
-        if(MapasCulturais.request.controller == 'aldirblanc'){
+        if(MapasCulturais.request.controller == 'aldirblanc' && MapasCulturais.request.action == 'individual'){
             return MapasCulturais.entity.object.opportunity.id;
         } else {
             return MapasCulturais.entity.id;
@@ -894,8 +894,6 @@ module.controller('RegistrationFieldsController', ['$scope', '$rootScope', '$int
         });
 
         $form.on('ajaxForm.success', function(evt, response){
-            debugger;
-
             let fieldId = response.rfc_2222.group.replace("rfc_", "");
 
             let fileIndex = "";
@@ -1841,7 +1839,7 @@ module.controller('OpportunityController', ['$scope', '$rootScope', '$timeout', 
                     MapasCulturais.Messages.error(labels['VacanciesOver']);
                 }else if(registration.owner && (MapasCulturais.entity.object.registrationLimit == 0 || $scope.data.registrations.length <= MapasCulturais.entity.object.registrationLimit)){
                     RegistrationService.register(registration).success(function(rs){
-                        document.location = rs.editUrl;
+                        document.location = MapasCulturais.baseURL+'aldirblanc/individual/'+rs.id;
                     });
                 }else {
                     setTimeout(function(){
@@ -1861,7 +1859,6 @@ module.controller('OpportunityController', ['$scope', '$rootScope', '$timeout', 
             };
 
             $scope.removeRegistrationRulesFile = function (id, $index) {
-                debugger;
                 if(confirm('Deseja remover este anexo?')){
                     $http.get($scope.data.entity.registrationRulesFile.deleteUrl).success(function(response){
                         $scope.data.entity.registrationRulesFile = null;

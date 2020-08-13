@@ -13,6 +13,8 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
 
         //inciso1
         $('#option3').click(function(){
+            document.location = `${MapasCulturais.baseURL}aldirblanc/termosecondicoes`;
+            return false;
             $.ajax({
                 type: "POST",
                 url: `${MapasCulturais.baseURL}inscricoes`,

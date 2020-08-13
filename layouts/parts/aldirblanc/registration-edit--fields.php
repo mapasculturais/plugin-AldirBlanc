@@ -1,3 +1,4 @@
+<!-- referencia para esse css: https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_form_steps -->
 <style>
     * {
         box-sizing: border-box;
@@ -79,16 +80,6 @@
 </style>
 
 <div ng-if="data.fields.length > 0" id="registration-attachments" class="registration-fieldset registration-edit-mode">
-
-
-
-    <!-- <div class="attachment-list" ng-controller="RegistrationFieldsController">
-        <div class="SESSAO" ng-repeat="groupFields in data.fields">
-            <div ng-repeat="field in groupFields">
-                {{ field.title }}
-            </div>
-        </div>
-    </div> -->
 
     <div id="regForm" action="#" ng-controller="RegistrationFieldsController">
         <h1>Registro:</h1>
@@ -182,11 +173,8 @@
                     </li>
                 </ul>
 
-                <!-- {{ field.title }}
-                <p><input placeholder="{{ field.title }}" oninput="this.className = ''" name="{{ field.title }}"></p> -->
             </div>
-            <!-- <p><input placeholder="First name..." oninput="this.className = ''" name="fname"></p>
-            <p><input placeholder="Last name..." oninput="this.className = ''" name="lname"></p> -->
+            
         </div>
 
         <div style="overflow:auto;">
@@ -205,14 +193,11 @@
             <span class="step" ng-repeat="groupFields in data.groupFields"></span>
         </div>
     </div>
-
-
-    <!-- DELETEI O RG-REPEAT 'ORIGINAL' das ul e li -->
     
 </div>
 
 
-
+<!-- referencia para esse JS : https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_form_steps -->
 <script>
     $(document).ready(function() {
         showTab(currentTab); // Display the current tab
