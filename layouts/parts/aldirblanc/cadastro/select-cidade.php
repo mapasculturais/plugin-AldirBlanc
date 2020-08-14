@@ -1,4 +1,3 @@
-
 <p class="lab-form-question">Em qual cidade?</p>
 <div class="lab-form-answer">
     <form>

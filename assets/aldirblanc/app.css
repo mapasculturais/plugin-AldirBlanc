@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 @media screen and (max-width: 767px) {
   #main-section {
     margin-top: 38px;
@@ -10,6 +12,9 @@
 
 .box {
   text-align: center;
+  background-image: url(/assets/aldirblanc/img/homepage_header_background.svg);
+  background-repeat: no-repeat;
+  background-position: top center;
 }
 
 .lab-form-intro {
@@ -32,6 +37,28 @@
 .lab-form-question {
   font-size: 1.8rem;
   border-bottom: 2px solid #f8f8f8;
+}
+
+.lab-form-question .icon-help {
+  font-size: 1rem;
+  line-height: 1;
+  vertical-align: super;
+  text-align: center;
+  height: 1rem;
+  width: 1rem;
+  border-radius: 0.5rem;
+  color: #ccc;
+  background: white;
+}
+
+.lab-form-question .icon-help:focus {
+  color: #3a72bc;
+}
+
+@media screen and (min-width: 768px) {
+  .lab-form-question .icon-help {
+    display: none;
+  }
 }
 
 .lab-form-answer {
@@ -91,27 +118,25 @@
   color: #3a72bc;
   font-weight: normal;
   display: flex;
+  flex-wrap: wrap;
   height: 100%;
+  text-decoration: none;
 }
 
 @media screen and (min-width: 768px) {
   .lab-form-filter li a {
-    flex-flow: column;
+    flex-flow: column nowrap;
     justify-content: space-between;
-  }
-
-  .lab-form-filter li a:hover {
-    text-decoration: none;
   }
 }
 
-.lab-form-filter li a:after {
+.lab-form-filter li a:before {
   display: block;
   content: "N";
   width: 36px;
   height: 36px;
   flex: 36px 0 0;
-  margin: 0 auto;
+  margin: 0 10px 0 0;
   font-family: "ElegantIcons";
   line-height: 36px;
   text-align: center;
@@ -120,38 +145,108 @@
   background-color: #e2e2e2;
 }
 
-.lab-form-filter li a:hover:after,
-.lab-form-filter li a:active:after {
+@media screen and (min-width: 768px) {
+  .lab-form-filter li a:before {
+    order: 3;
+    margin: 0 auto;
+  }
+}
+
+.lab-form-filter li a:hover:before,
+.lab-form-filter li a:active:before {
   color: #fff;
   background-color: #3a72bc;
 }
 
+.lab-form-filter li h2 {
+  font-size: 1.2rem;
+}
+
+.lab-form-filter li h3 {
+  font-size: 1rem;
+}
+
+.lab-form-filter li h2,
 .lab-form-filter li h3 {
   font-family: "Open Sans", Helvetica, Arial, sans-serif;
-  font-size: 1.2rem;
+  line-height: 1.5;
   text-align: left;
-  flex: auto;
+  max-width: calc(100% - 46px);
 }
 
 @media screen and (min-width: 768px) {
+  .lab-form-filter li h2,
   .lab-form-filter li h3 {
     text-align: center;
-  }
-}
-
-.lab-form-filter li .lab-form-detail {
-  display: none;
-  font-size: 0.85rem;
-}
-
-@media screen and (min-width: 768px) {
-  .lab-form-filter li .lab-form-detail {
-    display: block;
+    max-width: unset;
   }
 }
 
 .lab-form-filter li:hover {
   background-color: #fff;
+}
+
+.lab-form-filter li.lab-form-approved {
+  background-color: #b3e6b3;
+}
+
+.lab-form-filter li.lab-form-approved a {
+  color: inherit;
+}
+
+.lab-form-filter li.lab-form-approved a:before {
+  content: "\E0DD";
+  color: #fff;
+  background-color: #66cc66;
+}
+
+.lab-form-filter li.lab-form-approved h2 {
+  color: #fff;
+  background-color: #66cc66;
+  padding: 6px;
+  border-radius: 2px;
+}
+
+.lab-form-filter li.lab-form-disapproved {
+  background-color: #e69999;
+}
+
+.lab-form-filter li.lab-form-disapproved a {
+  color: inherit;
+}
+
+.lab-form-filter li.lab-form-disapproved a:before {
+  content: "\E0F1";
+  color: #fff;
+  background-color: #cc3333;
+}
+
+.lab-form-filter li.lab-form-disapproved h2 {
+  color: #fff;
+  background-color: #cc3333;
+  padding: 6px;
+  border-radius: 2px;
+}
+
+.lab-form-filter li.lab-form-waiting {
+  background-color: #e6cc99;
+}
+
+.lab-form-filter li.lab-form-waiting a {
+  color: inherit;
+}
+
+.lab-form-filter li.lab-form-waiting a:before {
+  content: "\E02D";
+  color: #fff;
+  background-color: #cc9933;
+}
+
+.lab-form-filter li.lab-form-waiting h2 {
+  color: #fff;
+  background-color: #cc9933;
+  padding: 6px;
+  border-radius: 2px;
 }
 
 @media screen and (min-width: 768px) {
@@ -368,5 +463,25 @@
   color: black;
   text-decoration: none;
   cursor: pointer;
+=======
+.lab-form-detail {
+  display: none;
+  font-size: 0.85rem;
+  text-align: left;
+  padding-left: 46px;
+}
+
+@media screen and (min-width: 768px) {
+  .lab-form-detail {
+    display: block;
+    text-align: center;
+    padding-left: 0;
+  }
+}
+
+.lab-form-detail .label {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
 }
 
