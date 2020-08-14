@@ -263,6 +263,207 @@
   }
 }
 
+#termos {
+  padding: 5%;
+  width: 90%;
+  margin: 0 auto;
+}
+
+#termos * {
+  box-sizing: border-box;
+}
+
+#termos .title {
+  text-align: center;
+}
+
+#termos .description {
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+#termos .termos-warning {
+  font-size: 0.9rem;
+  text-align: center;
+  color: #db872c;
+}
+
+#termos .buttons {
+  display: flex;
+  justify-content: center;
+  margin: 2%;
+}
+
+@media screen and (max-width: 768px) {
+  #termos .buttons {
+    margin: 5%;
+  }
+}
+
+#termos .btn-prosseguir {
+  width: 40%;
+  height: 60px;
+  color: white;
+  border-radius: 10px;
+  transition: 0.5s;
+  background-color: #3a72bc;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  font-size: 1.2rem;
+}
+
+@media screen and (max-width: 768px) {
+  #termos .btn-prosseguir {
+    width: 95%;
+  }
+}
+
+#termos .btn-prosseguir:hover {
+  background-color: white;
+  color: #3a72bc;
+  cursor: pointer;
+  box-shadow: 0 0.5rem 1rem #3a72bc;
+}
+
+#termos .list {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  justify-content: center;
+  padding: 0;
+  width: 95%;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  list-style: none;
+  overflow: hidden;
+}
+
+#termos .list .list-item {
+  margin: 0;
+  padding: 0;
+  border-bottom: 4px solid #ecf0f1;
+  position: relative;
+}
+
+#termos .list .list-item:last-child {
+  border: 0;
+}
+
+#termos .hidden-box {
+  position: absolute;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  opacity: 0;
+}
+
+#termos .check-label {
+  font-size: 1rem;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+#termos .check-label-box {
+  display: flex;
+  align-self: center;
+  position: relative;
+  height: 20px;
+  width: 20px;
+  margin: 0 20px;
+  border: 2px solid #3a72bc;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+#termos .check-label-text {
+  display: flex;
+  align-self: center;
+  position: relative;
+  cursor: pointer;
+  padding: 20px;
+  width: 90%;
+  border-left: 2px solid #ecf0f1;
+}
+
+#termos .check-label-text:after {
+  content: "";
+  display: block;
+  width: 0%;
+  height: 2px;
+  background-color: #000;
+  position: absolute;
+  top: 70%;
+  left: 7.5%;
+  transform: translateY(-50%);
+  transition: width 100ms ease-in-out;
+}
+
+#termos .hidden-box:checked + .check-label {
+  background-color: #3a72bc52;
+}
+
+#termos .hidden-box:checked + .check-label .check-label-box {
+  background-color: #3a72bc;
+}
+
+#termos .hidden-box:checked + .check-label .check-label-box:after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -1px;
+  left: 4px;
+  width: 5px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+#termos .modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  background-color: transparent;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+@media screen and (max-width: 768px) {
+  #termos .modal {
+    top: 10%;
+  }
+}
+
+#termos .modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  text-align: center;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  border: none;
+  border-radius: 10px;
+  border-top: 4px solid #3a72bc;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+#termos .close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+#termos .close:hover,
+#termos .close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+=======
 .lab-form-detail {
   display: none;
   font-size: 0.85rem;

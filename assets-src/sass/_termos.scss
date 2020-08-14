@@ -1,0 +1,188 @@
+#termos{
+  padding: 5%;
+  width: 90%;
+  margin: 0 auto;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .title{
+    text-align: center;
+  }
+
+  .description{
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .termos-warning{
+    font-size: 0.9rem;
+    text-align: center;
+    color: #db872c;
+  }
+  .buttons{
+    display: flex;
+    justify-content: center;
+    margin: 2%;
+    @media screen and (max-width: 768px) {
+      margin: 5%;
+    }
+  }
+
+  .btn-prosseguir{
+    width: 40%;
+    height: 60px;
+    color: white;
+    border-radius: 10px;
+    transition: 0.5s;
+    //border: 2px solid  #db872c;
+    background-color: #3a72bc;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    font-size: 1.2rem;
+    @media screen and (max-width: 768px) {
+      width: 95%;
+    }
+  }
+  .btn-prosseguir:hover{
+    background-color: white;
+    color: #3a72bc;
+    cursor: pointer;
+    box-shadow: 0 .5rem 1rem #3a72bc;
+  }
+
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    justify-content: center;
+    padding: 0;
+    width: 95%;
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    list-style: none;
+    overflow: hidden;
+
+    .list-item {
+      margin: 0;
+      padding: 0;
+      border-bottom: 4px solid #ecf0f1;
+      position: relative;
+
+      &:last-child {
+        border: 0;
+      }
+    }
+  }
+
+  // hide the checkbox
+  .hidden-box {
+    position: absolute;
+    appearance: none;
+    opacity: 0;
+  }
+
+  .check-label {
+    font-size: 1rem;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .check-label-box {
+    display: flex;
+    align-self: center;
+    position: relative;
+    height: 20px;
+    width: 20px;
+    margin: 0 20px;
+    border: 2px solid #3a72bc;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .check-label-text {
+    display: flex;
+    align-self: center;
+    position: relative;
+    cursor: pointer;
+    padding: 20px;
+    width: 90%;
+    border-left: 2px solid #ecf0f1;
+
+    &:after {
+      content: '';
+      display: block;
+      width: 0%;
+      height: 2px;
+      background-color: #000;
+      position: absolute;
+      top: 70%;
+      left: 7.5%;
+      transform: translateY(-50%);
+      transition: width 100ms ease-in-out;
+    }
+  }
+
+  .hidden-box:checked + .check-label {
+    background-color: #3a72bc52;
+    .check-label-box {
+      background-color: #3a72bc;
+      &:after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: -1px;
+        left: 4px;
+        width: 5px;
+        height: 12px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+    }
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    background-color: transparent;
+    border: none !important;
+    box-shadow: none !important;
+    @media screen and (max-width: 768px) {
+      top: 10%;
+    }
+
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    text-align: center;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    border: none;
+    border-radius: 10px;
+    border-top: 4px solid #3a72bc;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+  }
+
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close:hover, .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+}
