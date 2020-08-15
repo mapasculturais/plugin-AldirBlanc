@@ -137,7 +137,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
             if ($num_agents > 1) {
                 // redireciona para a página de escolha de agente
-                $app->redirect($this->createUrl('selecionaragente'));
+                $app->redirect($this->createUrl('selecionar_agente'));
             } else {
 
                 // redireciona para a rota de criação de nova inscrição
@@ -208,7 +208,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $registration->checkPermission('modify');
 
         if (!$registration->termos_aceitos) {
-            $app->redirect($this->createUrl('termosecondicoes', [$registration->id]));
+            $app->redirect($this->createUrl('termos_e_condicoes', [$registration->id]));
         }
 
         $this->registerRegistrationMetadata($registration->opportunity);
@@ -252,7 +252,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->render('cadastro');
     }
 
-    function GET_termosecondicoes()
+    function GET_termos_e_condicoes()
     {
         $this->requireAuthentication();
         if (!isset($this->data['id'])) {
@@ -281,7 +281,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $app->redirect($this->createUrl('formulario', [$registration->id]));
     }
 
-    function GET_selecionaragente()
+    function GET_selecionar_agente()
     {
         $opportunity = App::i()->repo('Opportunity')->find(1647);
 
