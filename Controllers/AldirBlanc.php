@@ -159,7 +159,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     {
         $this->requireAuthentication();
 
-        if (!isset($this->data['agent']) || !in_array(intval(@$this->data['inciso']), [1,2])) {
+        if (!isset($this->data['agent']) || !in_array(intval(@$this->data['inciso']), [1, 2])) {
             // @todo tratar esse erro
             throw new \Exception();
         }
@@ -175,7 +175,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if ($this->data['inciso'] == 1) {
             $registration->opportunity = $this->getOpportunityInciso1();
         } else {
-            if(!isset($this->data['cidade']) || !isset($this->data['category'])){
+            if (!isset($this->data['cidade']) || !isset($this->data['category'])) {
                 // @todo tratar esse erro
                 throw new \Exception();
             }
@@ -254,7 +254,31 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     function GET_termosecondicoes()
     {
-        $this->render('termos-e-condicoes');
+        $this->requireAuthentication();
+        if (!isset($this->data['id'])) {
+            // @todo tratar esse erro
+            throw new \Exception();
+        }
+        $this->render('termos-e-condicoes', ['registration_id' => $this->data['id']]);
+    }
+
+    /**
+     * Aceitar os termos e condiçoes
+     * 
+     * rota: /aldirblanc/aceitar_termos/{id_inscricao}
+     * 
+     * @return void
+     */
+    function GET_aceitar_termos()
+    {
+
+        $this->requireAuthentication();
+        $registration = $this->requestedEntity;
+        $registration->checkPermission('modify');
+        $registration->termos_aceitos = true;
+        $registration->save(true);
+        $app = App::i();
+        $app->redirect($this->createUrl('formulario', [$registration->id]));
     }
 
     function GET_selecionaragente()
@@ -263,5 +287,4 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $this->render('selecionar-agente', ['entity' => $opportunity]);
     }
-
 }
