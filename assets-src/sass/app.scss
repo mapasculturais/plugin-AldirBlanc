@@ -47,23 +47,24 @@ $unicode-waiting: "\e02d" !default;
     display: inline-block;
 }
 
-.box {
-    text-align: center;
-    background-image: url(/assets/aldirblanc/img/homepage_header_background.svg);
-    background-repeat: no-repeat;
-    background-position: top center;
-}
 .lab-form-intro {
     display: flex;
     box-sizing: border-box;
     flex-flow: column wrap;
     min-height: calc(100vh - 4.875rem);
     line-height: 1.5;
-    padding: 1.5rem;
+    padding: 0 1.5rem;
     @media screen and (min-width: 768px) {
+        background-image: url(/assets/aldirblanc/img/homepage_header_background.svg);
+        background-repeat: no-repeat;
+        background-position: top center;
+        background-size: contain;
         width: 75%;
         max-width: 960px;
         margin: 0 auto;
+    }
+    .box {
+        text-align: center;
     }
 }
 
