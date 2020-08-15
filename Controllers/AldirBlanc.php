@@ -48,6 +48,17 @@ class AldirBlanc extends \MapasCulturais\Controller
 
         $this->render('cadastro');
     }
+    /**
+     * Tela onde o usuário escolhe o inciso I ou II
+     *
+     * @return void
+     */
+    function GET_status()
+    {
+        $this->requireAuthentication();
+
+        $this->render('status');
+    }
 
     /**
      * Painel de controle do assistente social, onde o usuário pode gerenciar as inscições realizadas:
