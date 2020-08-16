@@ -1,51 +1,8 @@
 <?php 
-use MapasCulturais\i; 
-
-$this->jsObject['category'] = $category;
-$this->jsObject['agentOpportunityId'] = $agentOpportunityId;
-$this->jsObject['spaceOpportunityId'] = $spaceOpportunityId;
-$this->jsObject['agentOwnerId'] = $agentOwnerId;
-$this->jsObject['spaceOwnerId'] = $spaceOwnerId;
-
+use MapasCulturais\i;
 ?>
 <script>
     $(document).ready(function(){
-
-        //inciso1
-        $('#option3').click(function(){
-            document.location = `${MapasCulturais.baseURL}aldirblanc/termosecondicoes`;
-            return false;
-            $.ajax({
-                type: "POST",
-                url: `${MapasCulturais.baseURL}inscricoes`,
-                data: {
-                    category: MapasCulturais.category,
-                    opportunityId: MapasCulturais.agentOpportunityId,
-                    ownerId: MapasCulturais.agentOwnerId,
-                },
-                success: function(msg){
-                        if(msg.error) {
-                            //redireciona para aldirblanc/individual/NADA_AQUI
-                            //quando chegar la, verifica qual inscrição a pessoa já esta em andamento
-                            document.location = `${MapasCulturais.baseURL}aldirblanc/individual/`;
-
-                            // alert("Já existe uma inscrição em andamento, não é possivel criar mais de uma inscrição.")
-                            // console.log(msg)
-                            return false;
-                        }
-                        // console.log(msg)
-                        document.location = `${MapasCulturais.baseURL}aldirblanc/individual/${msg.id}`;
-                        // window.location.href = `${MapasCulturais.baseURL}aldirblanc/individual/${msg.id}`;
-                },
-                error: function(XMLHttpRequest, textStatus, errorThrown) {
-                    console.log("some error***");
-                }
-            });
-        });
-
-        
-        
-
 
         // Esse trecho de codigo "esconde" a sessão "Primeiro acesso ao plugin" ao escolher algumas das opções
          $('.js-lab-option').addClass('inactive');

@@ -1,3 +1,6 @@
+<?php
+    $this->jsObject['registrationId'] = $registration_id;
+?>
 <section id="termos">
 
     <h2 class="title">Renda Emergencial Cultural</h2>
@@ -154,7 +157,7 @@
 
         if(checkboxes.length === checkboxesChecked.length){
             //redirect to next page
-            document.location = `${MapasCulturais.baseURL}aldirblanc/selecionaragente`;
+            document.location = MapasCulturais.createUrl('aldirblanc', 'aceitar_termos', [MapasCulturais.registrationId])
         }else{
             modal.style.display = "block";
 
