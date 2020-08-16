@@ -48,74 +48,70 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
 
 
         // Esse trecho de codigo "esconde" a sessão "Primeiro acesso ao plugin" ao escolher algumas das opções
-         $('.lab-form-option').addClass('inactive');
-         $('.lab-form-item').hide();
-         $('.lab-form-item:first').show();
+         $('.js-lab-option').addClass('inactive');
+         $('.js-lab-item').hide();
+         $('.js-lab-item:first').show();
                 
-         $('.lab-form-option').click(function(){
+         $('.js-lab-option').click(function(){
              var t = $(this).attr('id');
              if($(this).hasClass('inactive')){
-                 $('.lab-form-option').addClass('inactive');           
+                 $('.js-lab-option').addClass('inactive');           
                  $(this).removeClass('inactive');
-                 $('.lab-form-item').hide();
+                 $('.js-lab-item').hide();
                  $('#'+ t + 'C').fadeIn('slow');
              }
          });
-         $('.lab-form-option').change(function(){
+         $('.js-lab-option').change(function(){
              var t = $(this).attr('id');
              if($(this).hasClass('inactive')){
-                 $('.lab-form-option').addClass('inactive');           
+                 $('.js-lab-option').addClass('inactive');           
                  $(this).removeClass('inactive');
-                 $('.lab-form-item').hide();
+                 $('.js-lab-item').hide();
                  $('#'+ t + 'C').fadeIn('slow');
              }
          });
          $('.back').click(function(){
-             $('.lab-form-option').addClass('inactive');
-             $('.lab-form-item').hide();
-             $('.lab-form-item:first').show();
+             $('.js-lab-option').addClass('inactive');
+             $('.js-lab-item').hide();
+             $('.js-lab-item:first').show();
          });
         $('.icon-help').click(function(){
             $('.lab-form-detail').toggle('1000');
         });
     });
 </script>
-<section class="lab-form-intro">
-    <details open>
-        <summary>Primeiro acesso ao plugin</summary>
+<section class="lab-main-content">
+    <!--Primeiro acesso ao plugin-->
         <div class="box">
-                <h1>Cadastro</h1>
-                <p>Olá, <?php echo $app->user->profile->name ?>!</p>
-                <p>Por favor, responda às perguntas abaixo para iniciar seu cadastro.</p>
+            <h1>Cadastro</h1>
+            <p>Olá, [nome]!</p>
+            <p>Por favor, responda às perguntas abaixo para iniciar seu cadastro.</p>
 
-            <div class="lab-form-item">
-                <p class="lab-form-question">Para quem você está solicitando o auxílio? <a class="icon icon-help" href="#" title=""></a></p>           
-                <ul class="lab-form-filter">
-                    <li>
-                        <a id="option1" class="lab-form-option" href="#">
+            <div class="js-lab-item lab-item">
+                <p class="lab-form-question">Para quem você está solicitando o auxílio? <a class="icon icon-help" href="#" title=""></a></p>
+
+                <div class="lab-form-filter">
+                    <div id="option1" class="js-lab-option lab-form-option">
                             <h3>Espaço Cultural</h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a id="option2" class="lab-form-option" href="#">
+                        
+                    </div><!-- End #option1 -->
+                    <div id="option2" class="js-lab-option lab-form-option">
                             <h3>Pequena empresa ou coletivo</h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a id="option3" class="lab-form-option">
+                    </div><!-- End #option2 -->
+                    <div id="option3" class="lab-form-option">
                             <h3><?php i::_e('Trabalhador da Cultura') ?></h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </li>
-                </ul>
-            </div><!-- End .lab-form-item -->
+                    </div><!-- End #option3 -->
+                </div>
+            </div><!-- End .lab-item -->
             
-            <div id="option1C" class="lab-form-item">
+            <div id="option1C" class="js-lab-item lab-item">
                 <?php $this->part('aldirblanc/cadastro/select-cidade') ?>
-            </div><!-- End .lab-form-item -->
-            <div id="option4C" class="lab-form-item">
+            </div><!-- End .lab-item -->
+
+            <div id="option4C" class="js-lab-item lab-item">
                 <p class="lab-form-question">Seu espaço é formalizado?</p>
                 <div class="lab-form-answer">
                     <span>
@@ -124,12 +120,12 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
                     </span>
                     <a class="back" href="#"><span class="icon icon-go-back"></span><span class="screen-reader-text">Voltar</span></a>
                 </div><!-- End .lab-form-answer -->
-            </div><!-- End .lab-form-item -->
+            </div><!-- End .lab-item -->
 
-            <div id="option2C" class="lab-form-item">
+            <div id="option2C" class="js-lab-item lab-item">
                 <?php $this->part('aldirblanc/cadastro/select-cidade') ?>
-            </div><!-- End .lab-form-item -->
-            <div id="option5C" class="lab-form-item">
+            </div><!-- End .lab-item -->
+            <div id="option5C" class="js-lab-item lab-item">
                 <p class="lab-form-question">Sua pequena empresa ou coletivo é formalizado?</p>
                 <div class="lab-form-answer">
                     <span>
@@ -138,36 +134,30 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
                     </span>
                     <a class="back" href="#"><span class="icon icon-go-back"></span><span class="screen-reader-text">Voltar</span></a>
                 </div><!-- End .lab-form-answer -->
-            </div><!-- End .lab-form-item -->
+            </div><!-- End .lab-item -->
         </div><!-- End .box -->
     </details>
     <details>
         <summary>Cadastro trabalhador incompleto</summary>
         <div class="box">
             <h1>Cadastro</h1>
-            <p>Olá, <?php echo $app->user->profile->name ?>!</p>
-            <div class="">
-                <p class="lab-form-question">O que você deseja fazer?<a class="icon icon-help" href="#" title=""></a></p>           
-                <ul class="lab-form-filter">
-                    <li>
-                        <a id="option2" class="lab-form-option" href="#">
+            <p>Olá, [nome]!</p>
+            <div class="lab-item">
+                <p class="lab-form-question">O que você deseja fazer? <a class="icon icon-help" href="#" title=""></a></p>           
+                <div class="lab-form-filter">
+                    <div id="option2" class="js-lab-option lab-form-option">
                             <h3>Cadastrar Espaço Cultural</h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a id="option2" class="lab-form-option" href="#">
+                    </div>
+                    <div id="option2" class="js-lab-option lab-form-option">
                             <h3>Cadastrar Pequena empresa ou coletivo</h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a id="option1" class="lab-form-option" href="#">
-                            <h3>Continuar cadastro iniciado para <?php echo $app->user->profile->name ?></h3>
+                    </div>
+                    <div id="option1" class="lab-form-option">
+                            <h3>Continuar cadastro iniciado para [nome]</h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </li>
-                </ul>
+                    </div>
+                </div>
             </div>
 
         </div><!-- End .box -->
@@ -176,24 +166,22 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
         <summary>Cadastro trabalhador completo</summary>
         <div class="box">
             <h1>Cadastro</h1>
-            <p>Olá, <?php echo $app->user->profile->name ?>!</p>
-            <div class="">
-            <p class="lab-form-question">O que você deseja fazer?<a class="icon icon-help" href="#" title=""></a></p>           
-                <ul class="lab-form-filter">
-                    <li>
-                        <a id="option2" class="lab-form-option" href="#">
+            <p>Olá, [nome]!</p>
+            <div class="lab-item">
+            <p class="lab-form-question">O que você deseja fazer? <a class="icon icon-help" href="#" title=""></a></p>           
+                <div class="lab-form-filter">
+                    <div id="option2" class="js-lab-option lab-form-option">
                             <h3>Cadastrar Espaço Cultural</h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a id="option2" class="lab-form-option" href="#">
+                    </div>
+                    <div id="option2" class="js-lab-option lab-form-option">
                             <h3>Cadastrar Pequena empresa ou coletivo</h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </li>
-                    <?php $this->part('aldirblanc/cadastro/application-status') ?>
-                </ul>
+                    </div>
+                    <div class="lab-form-option lab-form-waiting">
+                        <?php $this->part('aldirblanc/cadastro/application-status') ?>
+                    </div>
+                </div>
             </div>
 
         </div><!-- End .box -->
@@ -202,23 +190,19 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
         <summary>Cadastro Espaço/Pequena empresa ou coletivo incompleto</summary>
         <div class="box">
             <h1>Cadastro</h1>
-            <p>Olá, <?php echo $app->user->profile->name ?>!</p>
-            <div class="">
-            <p class="lab-form-question">O que você deseja fazer?<a class="icon icon-help" href="#" title=""></a></p>           
-                <ul class="lab-form-filter">
-                    <li>
-                        <a id="option2" class="lab-form-option" href="#">
+            <p>Olá, [nome]!</p>
+            <div class="lab-item">
+            <p class="lab-form-question">O que você deseja fazer? <a class="icon icon-help" href="#" title=""></a></p>           
+                <div class="lab-form-filter">
+                    <div id="option2" class="lab-form-option">
                             <h3>Continuar cadastro iniciado para [NOME DO ESPAÇO]</h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a id="option1" class="lab-form-option" href="#">
+                    </div>
+                    <div id="option1" class="lab-form-option">
                             <h3>Cadastrar Trabalhador da Cultura</h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </li>
-                </ul>
+                    </div>
+                </div>
             </div>
 
         </div><!-- End .box -->
@@ -227,18 +211,18 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
         <summary>Cadastro Espaço/Pequena empresa ou coletivo completo</summary>
         <div class="box">
             <h1>Cadastro</h1>
-            <p>Olá, <?php echo $app->user->profile->name ?>!</p>
-            <div class="">
-            <p class="lab-form-question">O que você deseja fazer?<a class="icon icon-help" href="#" title=""></a></p>           
-                <ul class="lab-form-filter">
-                    <?php $this->part('aldirblanc/cadastro/application-status') ?>
-                    <li>
-                        <a id="option1" class="lab-form-option" href="#">
+            <p>Olá, [nome]!</p>
+            <div class="lab-item">
+            <p class="lab-form-question">O que você deseja fazer? <a class="icon icon-help" href="#" title=""></a></p>           
+                <div class="lab-form-filter">
+                    <div class="lab-form-option lab-form-waiting">
+                        <?php $this->part('aldirblanc/cadastro/application-status') ?>
+                    </div>
+                    <div id="option1" class="lab-form-option">
                             <h3>Cadastrar Trabalhador da Cultura</h3>
                             <p class="lab-form-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </li>
-                </ul>
+                    </div>
+                </div>
             </div>
 
         </div><!-- End .box -->
@@ -247,12 +231,11 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
         <summary>Cadastro Trabalhador / Espaço/Pequena empresa ou coletivo completos</summary>
         <div class="box">
             <h1>Cadastro</h1>
-            <p>Olá, <?php echo $app->user->profile->name ?>!</p>
-            <div class="">
-            <p class="lab-form-question">O que você deseja fazer?<a class="icon icon-help" href="#" title=""></a></p>           
-                <ul class="lab-form-filter">
-                    <li class="lab-form-approved">
-                        <a id="option2" class="lab-form-option" href="#">
+            <p>Olá, [nome]!</p>
+            <div class="lab-item">
+                <p class="lab-form-question">O que você deseja fazer? <a class="icon icon-help" href="#" title=""></a></p>           
+                <div class="lab-form-filter">
+                    <div id="option2" class="lab-form-approved lab-form-option">
                             <h3>Status do cadastro para [NOME DO TRABALHADOR]</h3>
                             <h2>Aprovado</h2>
                             <p class="lab-form-detail">
@@ -264,10 +247,8 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
                                 
                                     <span class="label">CPF:</span> 000.000.000-00
                             </p>
-                        </a>
-                    </li>
-                    <li class="lab-form-disapproved">
-                        <a id="option2" class="lab-form-option" href="#">
+                    </div>
+                    <div id="option2" class="lab-form-disapproved lab-form-option">
                             <h3>Status do cadastro para [NOME DO ESPAÇO]</h3>
                             <h2>Negado</h2>
                             <p class="lab-form-detail">
@@ -279,9 +260,8 @@ $this->jsObject['spaceOwnerId'] = $spaceOwnerId;
                                 
                                     <span class="label">CPF:</span> 000.000.000-00
                             </p>
-                        </a>
-                    </li>
-                </ul>
+                    </div>
+                </div>
             </div>
 
         </div><!-- End .box -->

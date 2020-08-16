@@ -1,5 +1,15 @@
+//
+// Variables
+// --------------------------------------------------
+
+
+//== Colors
+//
+//use sass default color module
 @use 'sass:color';
 
+//## Copy default theme variables
+//## Gray and brand colors for use across application.
 $gray-darker: #333 !default;
 $gray-dark: #666 !default;
 $gray: #ccc !default;
@@ -32,10 +42,11 @@ $brand-default: $gray-light !default;
 $green-dark: #003c46;
 
 
-
+//== Icons
 $unicode-approved: "\e0dd" !default;
 $unicode-disapproved: "\e0f1" !default;
 $unicode-waiting: "\e02d" !default;
+
 
 #main-section {
     @media screen and (max-width: 767px) {
@@ -47,7 +58,7 @@ $unicode-waiting: "\e02d" !default;
     display: inline-block;
 }
 
-.lab-form-intro {
+.lab-main-content {
     display: flex;
     box-sizing: border-box;
     flex-flow: column wrap;
@@ -62,9 +73,16 @@ $unicode-waiting: "\e02d" !default;
         width: 75%;
         max-width: 960px;
         margin: 0 auto;
+        padding-top: 6rem;
     }
     .box {
         text-align: center;
+    }
+}
+#lab-status {
+    .box {
+        background-color: #fff;
+        border-radius: 2px;
     }
 }
 
@@ -122,133 +140,123 @@ $unicode-waiting: "\e02d" !default;
     }    
 }
 
-.lab-form-filter {
-    list-style: none;
-    margin: 0;
-    li {
-        padding: .75rem;
-        margin: 0 0 2px;
-        background-color: #f8f8f8;
-        border-radius: 2px;
-        transition: all .3s;
-        a {
-            color: $brand-primary;
-            font-weight: normal;
-            display: flex;
-            flex-wrap: wrap;
-            height: 100%;
-            text-decoration: none;
-            @media screen and (min-width: 768px) {
-                flex-flow: column nowrap;
-                justify-content: space-between;
-            }
-            &:before {
-                display: block;
-                content: "N";
-                width: 36px;
-                height: 36px;
-                flex: 36px 0 0;
-                margin: 0 10px 0 0;
-                font-family: "ElegantIcons";
-                line-height: 36px;
-                text-align: center;
-                border-radius: 18px;
-                color: #fff;
-                background-color: #e2e2e2;
-                @media screen and (min-width: 768px) {
-                    order: 3;
-                    margin: 0 auto;
-                }
-            }
-            &:hover:before, &:active:before {
-                color: #fff;
-                background-color: $brand-primary;
-            }
-
-        }
-        h2 {
-            font-size: 1.2rem;
-        }
-        h3 {
-            font-size: 1rem;
-        }
-        h2, h3 {
-            font-family: 'Open Sans', Helvetica, Arial, sans-serif;
-            line-height: 1.5;
-            text-align: left;
-            max-width: calc(100% - 46px);
-            @media screen and (min-width: 768px) {
-                text-align: center;
-                max-width: unset;
-            }
-        }
-        &:hover {
-            background-color: #fff;
-        }
-        &.lab-form-approved {
-            background-color: $brand-success-light;
-            a {
-                color: inherit;
-                &:before {
-                    content: $unicode-approved;
-                    color: #fff;
-                    background-color: $brand-success;
-                }
-            }
-            h2 {
-                color: #fff;
-                background-color: $brand-success;
-                padding: 6px;
-                border-radius: 2px;
-            }
-        }
-        &.lab-form-disapproved {
-            background-color: $brand-danger-light;
-            a {
-                color: inherit;
-                &:before {
-                    content: $unicode-disapproved;
-                    color: #fff;
-                    background-color: $brand-danger;
-                }
-            }
-            h2 {
-                color: #fff;
-                background-color: $brand-danger;
-                padding: 6px;
-                border-radius: 2px;
-            }
-        }
-        &.lab-form-waiting {
-            background-color: $brand-warning-light;
-            a {
-                color: inherit;
-                &:before {
-                    content: $unicode-waiting;
-                    color: #fff;
-                    background-color: $brand-warning;
-                }
-            }
-            h2 {
-                color: #fff;
-                background-color: $brand-warning;
-                padding: 6px;
-                border-radius: 2px;
-            }
-        }
-
-    }   
+.lab-form-filter {  
     @media screen and (min-width: 768px) {
         display: flex;
         flex-flow: row nowrap;
         justify-content: space-around;
-        li {
-            flex: 1 1 0;
-            margin: 0 2px;
-            padding: 1.5rem;
+    }
+}
+
+.lab-form-option {
+    display: flex;
+    flex-wrap: wrap;
+    padding: .75rem;
+    margin: 0 0 2px;
+    background-color: #f8f8f8;
+    border-radius: 2px;
+    transition: all .3s;
+    color: $brand-primary;
+    font-weight: normal;
+    @media screen and (min-width: 768px) {
+        flex-flow: column nowrap;
+        justify-content: space-between;
+        flex: 1 1 0;
+        margin: 0 2px;
+        padding: 1.5rem;
+    }
+    &:before {
+        display: block;
+        content: "N";
+        width: 36px;
+        height: 36px;
+        flex: 36px 0 0;
+        margin: 0 10px 0 0;
+        font-family: "ElegantIcons";
+        line-height: 36px;
+        text-align: center;
+        border-radius: 18px;
+        color: #fff;
+        background-color: #e2e2e2;
+        @media screen and (min-width: 768px) {
+            order: 3;
+            margin: 0 auto;
         }
     }
-
+    &:hover {
+        background-color: #fff;
+        cursor: pointer;
+    }
+    &:hover:before, &:active:before {
+        color: #fff;
+        background-color: $brand-primary;
+    }
+    h2 {
+        font-size: 1.2rem;
+    }
+    h3 {
+        font-size: 1rem;
+    }
+    h2, h3 {
+        font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        text-align: left;
+        max-width: calc(100% - 46px);
+        @media screen and (min-width: 768px) {
+            text-align: center;
+            max-width: unset;
+        }
+    }
+} 
+.lab-form-status {
+    color: inherit;
+    &:before {
+        color: #fff;
+    }
+    h2 {
+        color: #fff;
+        padding: 6px;
+        border-radius: 2px;
+    }
+}
+.lab-form-approved {
+    @extend .lab-form-status;
+    &:hover {
+        background-color: $brand-success-light;
+    }
+    &:before, &:hover:before {
+        content: $unicode-approved;
+        background-color: $brand-success;
+    }
+    h2 {
+        background-color: $brand-success;
+    }
+}
+.lab-form-disapproved {
+    @extend .lab-form-status;
+    &:hover {
+        background-color: $brand-danger-light;
+    }
+    &:before, &:hover:before {
+        content: $unicode-disapproved;
+        background-color: $brand-danger;
+    }
+    h2 {
+        background-color: $brand-danger;
+    }
+}
+.lab-form-waiting {
+    @extend .lab-form-status;
+    &:hover {
+        background-color: $brand-warning-light;
+    }
+    &:before, &:hover:before {
+        content: $unicode-waiting;
+        background-color: $brand-warning;
+    }
+    h2 {
+        background-color: $brand-warning;
+    }
 }
 
 .lab-form-detail {
