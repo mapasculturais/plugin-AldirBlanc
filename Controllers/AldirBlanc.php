@@ -2,16 +2,7 @@
 
 namespace AldirBlanc\Controllers;
 
-use \MapasCulturais\Entities\Registration;
-use \MapasCulturais\Controllers;
 use \MapasCulturais\App;
-use MapasCulturais\Controllers\Auth;
-use \MapasCulturais\Traits;
-use \MapasCulturais\Definitions;
-use \MapasCulturais\Entities;
-
-use \MapasCulturais\Themes\BaseV1\Theme;
-use stdClass;
 
 /**
  * Registration Controller
@@ -23,10 +14,6 @@ use stdClass;
 // class AldirBlanc extends \MapasCulturais\Controllers\EntityController {
 class AldirBlanc extends \MapasCulturais\Controllers\Registration
 {
-    use Traits\ControllerUploads,
-        Traits\ControllerAgentRelation,
-        Traits\ControllerSealRelation;
-
     protected $config = [];
 
     function __construct()
