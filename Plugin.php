@@ -45,6 +45,10 @@ class Plugin extends \MapasCulturais\Plugin
             $this->part('aldirblanc/subsite-tab-content');
         });
 
+        $app->hook('template(site.index.home-search):end', function () {
+            $this->part('aldirblanc/home-search');
+        });
+
         /**
          * modifica o template do autenticador quando o redirect url for para o plugin aldir blanc
          */
