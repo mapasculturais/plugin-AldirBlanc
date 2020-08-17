@@ -1,4 +1,7 @@
 #termos{
+
+  $warning: #856404 !default;
+
   padding: 5%;
   width: 90%;
   margin: 0 auto;
@@ -19,7 +22,7 @@
   .termos-warning{
     font-size: 0.9rem;
     text-align: center;
-    color: #db872c;
+    color: $warning;
   }
   .buttons{
     display: flex;
@@ -161,7 +164,8 @@
   }
 
   .modal-content {
-    background-color: #fefefe;
+    background-color: #fff3cd !important;
+    color: $warning !important;
     margin: 15% auto;
     text-align: center;
     padding: 20px;
