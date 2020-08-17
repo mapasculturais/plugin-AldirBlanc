@@ -79,6 +79,11 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
     }
 
+    function getCidades()
+    {
+        return $this->config['inciso2_opportunity_id'];
+    }
+
     function finish($data, $status = 200, $isAjax = false)
     {
         if (is_array($data)) {
@@ -236,7 +241,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     {
         $this->requireAuthentication();
 
-        $this->render('cadastro');
+        $this->render('cadastro', ['cidades' => $this->getCidades()]);
     }
 
     function GET_termos_e_condicoes()
