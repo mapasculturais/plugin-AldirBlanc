@@ -175,6 +175,17 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $app->redirect($this->createUrl('formulario', [$registration->id]));
     }
+    /**
+     * Tela onde o usuário escolhe o inciso I ou II
+     *
+     * @return void
+     */
+    function GET_status()
+    {
+        $this->requireAuthentication();
+
+        $this->render('status');
+    }
 
     /**
      * Renderiza o formulário da solicitação
