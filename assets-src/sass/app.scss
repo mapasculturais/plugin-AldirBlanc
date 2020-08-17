@@ -118,7 +118,7 @@ $unicode-waiting: "\e02d" !default;
     }
 }
 
-.back {
+.lab-back {
     position: absolute;
     left: .75rem;
     bottom: .75rem;
@@ -148,7 +148,7 @@ $unicode-waiting: "\e02d" !default;
     }
 }
 
-.lab-form-option {
+.lab-option {
     display: flex;
     flex-wrap: wrap;
     padding: .75rem;
@@ -164,6 +164,13 @@ $unicode-waiting: "\e02d" !default;
         flex: 1 1 0;
         margin: 0 2px;
         padding: 1.5rem;
+    }
+    a {
+        color: $brand-primary;
+        font-weight: normal;
+        &:hover {
+            text-decoration: none;
+        }
     }
     &:before {
         display: block;
@@ -208,7 +215,7 @@ $unicode-waiting: "\e02d" !default;
         }
     }
 } 
-.lab-form-status {
+.lab-status {
     color: inherit;
     &:before {
         color: #fff;
@@ -219,8 +226,8 @@ $unicode-waiting: "\e02d" !default;
         border-radius: 2px;
     }
 }
-.lab-form-approved {
-    @extend .lab-form-status;
+.lab-status-approved {
+    @extend .lab-status;
     &:hover {
         background-color: $brand-success-light;
     }
@@ -232,8 +239,8 @@ $unicode-waiting: "\e02d" !default;
         background-color: $brand-success;
     }
 }
-.lab-form-disapproved {
-    @extend .lab-form-status;
+.lab-status-denied {
+    @extend .lab-status;
     &:hover {
         background-color: $brand-danger-light;
     }
@@ -245,8 +252,8 @@ $unicode-waiting: "\e02d" !default;
         background-color: $brand-danger;
     }
 }
-.lab-form-waiting {
-    @extend .lab-form-status;
+.lab-status-waiting {
+    @extend .lab-status;
     &:hover {
         background-color: $brand-warning-light;
     }
@@ -259,7 +266,7 @@ $unicode-waiting: "\e02d" !default;
     }
 }
 
-.lab-form-detail {
+.lab-option-detail {
     display: none;
     font-size: .85rem;
     text-align: left;

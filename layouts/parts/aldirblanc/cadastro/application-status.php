@@ -1,12 +1,13 @@
+<?php
+/**
+ * Carregada na tela inicial
+ * Contém as informações resumidas do cadastro e link para tela de status (acompanhamento)
+ * Classe .lab-status-waiting deve ser trocada por .lab-status-approved ou .lab-status-denied de acordo com o status do cadastro
+ */
+?>
 
-<h3>Status do cadastro para [NOME DO Trabalhador]:</h3>
-<h2>Em análise</h2>
-<p class="lab-form-detail">
-        <span class="label">Número:</span> on-321123123123</br>
-    
-        <span class="label">Data do envio:</span> 00/00/00</br>
-    
-        <span class="label">Responsável:</span> Nome Sobrenome</br>
-    
-        <span class="label">CPF:</span> 000.000.000-00
-</p>
+<div class="lab-option lab-status-waiting">
+    <a href="<?= $this->controller->createUrl( 'status') ?>">
+        <?php $this->part('aldirblanc/cadastro/application-summary') ?>
+    </a>
+</div>
