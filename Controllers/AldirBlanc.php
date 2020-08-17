@@ -191,19 +191,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
         $app = App::i();
 
-        $registrationId = $this->urlData['id'];
-
-        if(!$registrationId) {
-            var_dump("é necessario passar o numero de inscrição");
-            die();
-        }
-
-        $registration = $app->repo('Registration')->find($registrationId);
+        $registration = $this->requestedEntity;
 
         if(!$registration) {
-            var_dump("Inscrição invalida");
-            die();
+            $app->pass();
         }
+
+        $registration->checkPermission('view');
 
         $summaryStatusName = [
             0 => i::__('Rascunho', 'aldirblanc'),
