@@ -3,6 +3,7 @@
 namespace AldirBlanc\Controllers;
 
 use \MapasCulturais\App;
+use MapasCulturais\i;
 
 /**
  * Registration Controller
@@ -183,8 +184,39 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function GET_status()
     {
         $this->requireAuthentication();
+        $app = App::i();
 
-        $this->render('status');
+        $registrationId = $this->urlData['id'];
+
+        if(!$registrationId) {
+            var_dump("é necessario passar o numero de inscrição");
+            die();
+        }
+
+        $registration = $app->repo('Registration')->find($registrationId);
+
+        if(!$registration) {
+            var_dump("Inscrição invalida");
+            die();
+        }
+
+        $summaryStatusName = [
+            0 => i::__('Rascunho', 'aldirblanc'),
+            1 => i::__('Em análise', 'aldirblanc'),
+            10 => i::__('Aprovado', 'aldirblanc'),
+            3 => i::__('Reprovado', 'aldirblanc'),
+            8 => i::__('Recurso Exaurido', 'aldirblanc'),
+        ];
+
+        $registrationStatusName = "";
+        foreach($summaryStatusName as $key => $value) {
+            if($key == $registration->status) {
+                $registrationStatusName = $value;
+                break;
+            }
+        }
+
+        $this->render('status', ['registration' => $registration, 'registrationStatusName'=> $registrationStatusName]);
     }
 
     /**
