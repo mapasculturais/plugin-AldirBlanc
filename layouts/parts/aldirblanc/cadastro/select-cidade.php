@@ -7,5 +7,5 @@
         <option value="Santarém">Santarém</option>
     </select>
     </form>
-    <a class="back" href="#"><span class="icon icon-go-back"></span><span class="screen-reader-text">Voltar</span></a>
+    <a class="js-back lab-back" href="#"><span class="icon icon-go-back"></span><span class="screen-reader-text">Voltar</span></a>
 </div>

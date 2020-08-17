@@ -1,13 +1,13 @@
+<?php
+/**
+ * Carregada na tela inicial
+ * Contém as informações resumidas do cadastro e link para tela de status (acompanhamento)
+ * Classe .lab-status-waiting deve ser trocada por .lab-status-approved ou .lab-status-denied de acordo com o status do cadastro
+ */
+?>
 
-<h3>Status do cadastro para <?php echo $registration->owner->name; ?>:</h3>
-<h2> <?php echo $registrationStatusName; ?> </h2>
-<p class="lab-form-detail">
-        <span class="label">Número:</span> <?php echo $registration->number; ?> </br>
-    
-        <span class="label">Data do envio:</span> <?php \MapasCulturais\i::_e("Enviada em");?> <?php echo $registration->sentTimestamp ? $registration->sentTimestamp->format(\MapasCulturais\i::__('d/m/Y à\s H:i')): ''; ?>.  </br>
-    
-        <span class="label">Responsável:</span>  <?php echo $registration->owner->name; ?> </br>
-    
-        <span class="label">CPF:</span> <?php echo $registration->owner->documento; ?>
-</p>
-
+<div class="lab-option lab-status-waiting">
+    <a href="<?= $this->controller->createUrl( 'status') ?>">
+        <?php $this->part('aldirblanc/cadastro/application-summary', ['registration' => $registration,'registrationStatusName' => $registrationStatusName]) ?>
+    </a>
+</div>

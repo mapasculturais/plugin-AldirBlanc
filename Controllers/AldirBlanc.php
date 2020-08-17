@@ -68,16 +68,21 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
      */
     function getOpportunityInciso2(string $cidade)
     {
-        if (isset($this->config['inciso2_opportunity_id']['cidade'])) {
+        if (isset($this->config['inciso2_opportunity_ids']['cidade'])) {
             $app = App::i();
 
-            $opportunity_id = $this->config['inciso2_opportunity_id'][$cidade];
+            $opportunity_id = $this->config['inciso2_opportunity_ids'][$cidade];
             $opportunity = $app->repo('Opportunity')->find($opportunity_id);
 
             return $opportunity;
         } else {
             throw \Exception('Cidade não disponível para cadastro');
         }
+    }
+
+    function getCidades()
+    {
+        return $this->config['inciso2_opportunity_ids'];
     }
 
     function finish($data, $status = 200, $isAjax = false)
@@ -279,7 +284,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     {
         $this->requireAuthentication();
 
-        $this->render('cadastro');
+        $this->render('cadastro', ['cidades' => $this->getCidades()]);
     }
 
     function GET_termos_e_condicoes()
