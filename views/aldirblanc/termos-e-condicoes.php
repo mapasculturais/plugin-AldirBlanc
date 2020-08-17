@@ -120,7 +120,7 @@
 
 
     <div class="buttons">
-        <button class="btn-prosseguir" onclick="goToNextPage()">Prosseguir para inscrição</button>
+        <button class="btn-prosseguir">Prosseguir para inscrição</button>
     </div>
 
     <div id="modalAlert" class="modal">
@@ -136,13 +136,16 @@
 <script>
     var span  = document.getElementsByClassName("close")[0];
     var modal = document.getElementById("modalAlert");
+    var btnProsseguir = document.querySelector(".btn-prosseguir");
 
     // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
-        console.log(event.target,  modal)
-        if (event.target == modal) {
-            modal.style.display = "none";
-
+        if(event.target == btnProsseguir){
+            goToNextPage();
+        }else{
+            if(modal.style.display == 'block'){
+                modal.style.display = "none";
+            }
         }
     }
 
@@ -160,7 +163,6 @@
             document.location = MapasCulturais.createUrl('aldirblanc', 'aceitar_termos', [MapasCulturais.registrationId])
         }else{
             modal.style.display = "block";
-
         }
     }
 
