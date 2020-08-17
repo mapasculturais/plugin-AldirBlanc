@@ -180,6 +180,17 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $app->redirect($this->createUrl('formulario', [$registration->id]));
     }
+    /**
+     * Tela onde o usuário escolhe o inciso I ou II
+     *
+     * @return void
+     */
+    function GET_status()
+    {
+        $this->requireAuthentication();
+
+        $this->render('status');
+    }
 
     /**
      * Renderiza o formulário da solicitação
@@ -275,8 +286,25 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     function GET_selecionar_agente()
     {
-        $opportunity = App::i()->repo('Opportunity')->find(1647);
+        $user = $this->_getUser();
 
-        $this->render('selecionar-agente', ['entity' => $opportunity]);
+        $this->render('selecionar-agente', ['user' => $user]);
+    }
+
+    protected function _getUser(){
+        $app = App::i();
+        $user = null;
+        if($app->user->is('admin') && key_exists('userId', $this->data)){
+            $user = $app->repo('User')->find($this->data['userId']);
+
+
+        }elseif($app->user->is('admin') && key_exists('agentId', $this->data)){
+            $agent = $app->repo('Agent')->find($this->data['agentId']);
+            $user = $agent->user;
+        }
+        if(!$user)
+            $user = $app->user;
+
+        return $user;
     }
 }
