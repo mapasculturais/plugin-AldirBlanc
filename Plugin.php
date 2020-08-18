@@ -19,6 +19,7 @@ class Plugin extends \MapasCulturais\Plugin
             'inciso2_opportunity_ids' => [
             ], 
             'inciso1_limite' => 1,
+            'inciso2_limite' => 1,
             'inciso2_categories' => [
                 'Espaço formalizado',
                 'Espaço não formalizados',
