@@ -80,7 +80,21 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             throw \Exception('Cidade não disponível para cadastro');
         }
     }
-
+    /**
+     * Retorna o array associativo com os numeros e nomes de status
+     *
+     * @return array
+     */
+    function getStatusNames(){
+        $summaryStatusName = [
+            Registration::STATUS_DRAFT => i::__('Rascunho', 'aldirblanc'),
+            Registration::STATUS_SENT => i::__('Em análise', 'aldirblanc'),
+            Registration::STATUS_APPROVED => i::__('Aprovado', 'aldirblanc'),
+            Registration::STATUS_NOTAPPROVED => i::__('Reprovado', 'aldirblanc'),
+            Registration::STATUS_WAITLIST => i::__('Recursos Exauridos', 'aldirblanc'),
+        ];
+        return $summaryStatusName;
+    }
     function getCidades()
     {
         return $this->config['inciso2_opportunity_ids'];
@@ -182,6 +196,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $app->redirect($this->createUrl('formulario', [$registration->id]));
     }
+
+
     /**
      * Tela onde o usuário escolhe o inciso I ou II
      *
@@ -199,14 +215,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
 
         $registration->checkPermission('view');
-        $summaryStatusName = [
-            Registration::STATUS_DRAFT => i::__('Rascunho', 'aldirblanc'),
-            Registration::STATUS_SENT => i::__('Em análise', 'aldirblanc'),
-            Registration::STATUS_APPROVED => i::__('Aprovado', 'aldirblanc'),
-            Registration::STATUS_NOTAPPROVED => i::__('Reprovado', 'aldirblanc'),
-            Registration::STATUS_WAITLIST => i::__('Recursos Exauridos', 'aldirblanc'),
-        ];
-
+        $summaryStatusName = $this->getStatusNames();
         $registrationStatusName = "";
         foreach($summaryStatusName as $key => $value) {
             if($key == $registration->status) {
