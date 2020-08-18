@@ -47,6 +47,18 @@ $unicode-approved: "\e0dd" !default;
 $unicode-disapproved: "\e0f1" !default;
 $unicode-waiting: "\e02d" !default;
 
+//== Placeholders
+%tick-round-icon {
+    content: "N";
+    width: 36px;
+    height: 36px;
+    font-family: "ElegantIcons";
+    line-height: 36px;
+    text-align: center;
+    border-radius: 18px;
+    color: #fff;
+    background-color: $gray-light;
+}
 
 #main-section {
     @media screen and (max-width: 767px) {
@@ -56,6 +68,8 @@ $unicode-waiting: "\e02d" !default;
 
 .screen-reader-text {
     display: inline-block;
+    width: 0;
+    height: 0;
 }
 
 .lab-main-content {
@@ -174,17 +188,9 @@ $unicode-waiting: "\e02d" !default;
     }
     &:before {
         display: block;
-        content: "N";
-        width: 36px;
-        height: 36px;
         flex: 36px 0 0;
         margin: 0 10px 0 0;
-        font-family: "ElegantIcons";
-        line-height: 36px;
-        text-align: center;
-        border-radius: 18px;
-        color: #fff;
-        background-color: #e2e2e2;
+        @extend %tick-round-icon;
         @media screen and (min-width: 768px) {
             order: 3;
             margin: 0 auto;
@@ -282,6 +288,65 @@ $unicode-waiting: "\e02d" !default;
         font-size: .70rem;
     }
 }
+
+.lab-form-tabs {
+    position: relative;
+    &:before {
+        content:"";
+        display: block;
+        width: 100%;
+        height: 4px;
+        background-color: $gray-light;
+        position: absolute;
+        top: 50%;
+        margin-top: -2px;
+    }
+    ul {
+        position: relative;
+        list-style: none;
+        margin: 0;
+        height: 38px;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+}
+
+.lab-form-tab {
+    text-align: center;
+    cursor: pointer;
+    &:before {
+        @extend %tick-round-icon;
+        display: block;
+    }
+    &:hover{
+        &:before {
+            background-color: $gray;
+        }
+    }
+}
+.lab-form-tab-active {
+    &:before {
+        background-color: $gray;
+    }
+}
+.lab-form-tab-complete {
+    &:before {
+        background-color: $brand-success;
+    }
+    &:hover:before {
+        background-color: $brand-success;
+    }
+}
+.lab-form-tab-error {
+    &:before {
+        background-color: $brand-danger;
+    }
+    &:hover:before {
+        background-color: $brand-danger;
+    }
+}
+
 
 @import "termos";
 @import "agente";
