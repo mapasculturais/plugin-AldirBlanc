@@ -60,9 +60,10 @@ $unicode-waiting: "\e02d" !default;
     background-color: $gray-light;
 }
 
-#main-section {
-    @media screen and (max-width: 767px) {
-        margin-top: 38px;
+.controller-aldirblanc #main-section {
+    margin-top: 38px;
+    @media screen and (min-width: 768px) {
+        margin-top: 78px !important;
     }
 }
 
@@ -291,6 +292,7 @@ $unicode-waiting: "\e02d" !default;
 
 .lab-form-tabs {
     position: relative;
+    margin-bottom: 1.5rem;
     &:before {
         content:"";
         display: block;
@@ -321,13 +323,13 @@ $unicode-waiting: "\e02d" !default;
     }
     &:hover{
         &:before {
-            background-color: $gray;
+            background-color: $brand-primary;
         }
     }
 }
 .lab-form-tab-active {
     &:before {
-        background-color: $gray;
+        background-color: $brand-primary;
     }
 }
 .lab-form-tab-complete {
@@ -346,7 +348,17 @@ $unicode-waiting: "\e02d" !default;
         background-color: $brand-danger;
     }
 }
-
+.lab-form-step-count {
+    color: $brand-primary;
+    font-size: .875rem;
+    font-weight: bold;
+}
+.lab-form-nav {
+    text-align: center;
+}
+#editable-entity {
+    display: none;
+}
 
 @import "termos";
 @import "agente";

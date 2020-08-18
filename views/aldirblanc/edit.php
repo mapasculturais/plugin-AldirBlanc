@@ -46,8 +46,10 @@ $_params = [
                 <li class="lab-form-tab"><span class="screen-reader-text">Passo 5</span></li>
             </ul>
         </nav>
-        
 
+        <div>
+            <p class="lab-form-step-count">Passo 1 de 5</p>
+        </div>
         <?php // Desabilitando este template por enquanto, pois não é a melhor forma de apresentar para o usuário que está se inscrevendo ?>
         <?php //$this->part('singles/registration-edit--seals', $_params) ?>
         
@@ -58,7 +60,13 @@ $_params = [
         <?php endif; ?>
 
         <?php $this->applyTemplateHook('form','end'); ?>
-
+        
+        <nav class="lab-form-nav">
+            <span>
+                <a class="btn btn-boolean btn-large" href="#">Anterior</a>
+                <a class="btn btn-boolean btn-large" href="#">Próximo</a>
+            </span>
+        </nav>
 </section>
 <?php $this->part('singles/registration--sidebar--left', $_params) ?>
 <?php $this->part('singles/registration--sidebar--right', $_params) ?>
