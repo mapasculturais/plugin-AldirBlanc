@@ -45,7 +45,7 @@ use MapasCulturais\i;
     <!--Primeiro acesso ao plugin (não pediu nenhum auxílio ainda)-->
         <div class="box">
             <h1>Cadastro</h1>
-            <p>Olá, [nome]!</p>
+            <p>Olá, <?=$niceName?>!</p>
             <p>Por favor, responda às perguntas abaixo para iniciar seu cadastro.</p>
 
             <div class="js-lab-item lab-item">
@@ -101,7 +101,7 @@ use MapasCulturais\i;
     <!-- Cadastro somente para inciso 1 incompleto) -->
         <div class="box">
             <h1>Cadastro</h1>
-            <p>Olá, [nome]!</p>
+            <p>Olá, <?=$niceName?>!</p>
             <div class="lab-item">
                 <p class="lab-form-question">O que você deseja fazer? <a class="js-help icon icon-help" href="#" title=""></a></p>           
                 <div class="lab-form-filter">
@@ -126,7 +126,7 @@ use MapasCulturais\i;
     <!-- Cadastro somente para inciso 1 completo, exibe status -->
         <div class="box">
             <h1>Cadastro</h1>
-            <p>Olá, [nome]!</p>
+            <p>Olá, <?=$niceName?>!</p>
             <div class="lab-item">
             <p class="lab-form-question">O que você deseja fazer? <a class="js-help icon icon-help" href="#" title=""></a></p>           
                 <div class="lab-form-filter">
@@ -146,7 +146,7 @@ use MapasCulturais\i;
     <!-- Cadastro somente para inciso 2 incompleto -->
         <div class="box">
             <h1>Cadastro</h1>
-            <p>Olá, [nome]!</p>
+            <p>Olá, <?=$niceName?>!</p>
             <div class="lab-item">
             <p class="lab-form-question">O que você deseja fazer? <a class="js-help icon icon-help" href="#" title=""></a></p>           
                 <div class="lab-form-filter">
@@ -169,7 +169,7 @@ use MapasCulturais\i;
     <!-- Cadastro somente para inciso 2 completo, exibe status  -->
         <div class="box">
             <h1>Cadastro</h1>
-            <p>Olá, [nome]!</p>
+            <p>Olá, <?=$niceName?>!</p>
             <div class="lab-item">
             <p class="lab-form-question">O que você deseja fazer? <a class="js-help icon icon-help" href="#" title=""></a></p>           
                 <div class="lab-form-filter">
@@ -186,7 +186,7 @@ use MapasCulturais\i;
     <!-- Cadastro para inciso 2 e inciso 1 completos, exibe status -->
         <div class="box">
             <h1>Cadastro</h1>
-            <p>Olá, [nome]!</p>
+            <p>Olá, <?=$niceName?>!</p>
             <div class="lab-item">
                 <p class="lab-form-question">O que você deseja fazer? <a class="js-help icon icon-help" href="#" title=""></a></p>           
                 <div class="lab-form-filter">
