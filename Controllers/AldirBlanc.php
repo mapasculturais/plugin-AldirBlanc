@@ -2,8 +2,9 @@
 
 namespace AldirBlanc\Controllers;
 
-use \MapasCulturais\App;
+use MapasCulturais\App;
 use MapasCulturais\i;
+use MapasCulturais\Entities\Registration;
 
 /**
  * Registration Controller
@@ -125,9 +126,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $num_agents = $agent_controller->apiQuery([
                 '@select' => 'id',
                 '@permissions' => '@control',
+                'type'=>'EQ(1)',
                 '@count' => 1
-            ]);
-
+            ]);                    
             if ($num_agents > 1) {
                 // redireciona para a página de escolha de agente
                 $app->redirect($this->createUrl('selecionar_agente'));
@@ -198,13 +199,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
 
         $registration->checkPermission('view');
-
         $summaryStatusName = [
-            0 => i::__('Rascunho', 'aldirblanc'),
-            1 => i::__('Em análise', 'aldirblanc'),
-            10 => i::__('Aprovado', 'aldirblanc'),
-            3 => i::__('Reprovado', 'aldirblanc'),
-            8 => i::__('Recurso Exaurido', 'aldirblanc'),
+            Registration::STATUS_DRAFT => i::__('Rascunho', 'aldirblanc'),
+            Registration::STATUS_SENT => i::__('Em análise', 'aldirblanc'),
+            Registration::STATUS_APPROVED => i::__('Aprovado', 'aldirblanc'),
+            Registration::STATUS_NOTAPPROVED => i::__('Reprovado', 'aldirblanc'),
+            Registration::STATUS_WAITLIST => i::__('Recursos Exauridos', 'aldirblanc'),
         ];
 
         $registrationStatusName = "";
