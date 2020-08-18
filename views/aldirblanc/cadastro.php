@@ -62,17 +62,29 @@ $limiteInciso1 = $this->controller->config['inciso_1_limite'];
                                 foreach ($registrationsInciso1 as $registration){
                                     $registrationUrl = $this->controller->createUrl('formulario',[$registration->id]);
                                     //caso seja do Inciso 1 e nao enviada (Rascunho)
-                                    if($registration->status == $statusCodes[0]){
-                                        ?>
-                                        <a href="<?=$registrationUrl;?>">
+                                    switch ($registration->status) {
+                                        case $statusCodes[0]:
+                                            ?>
+                                            <a href="<?=$registrationUrl;?>">
 
-                                            <div id="option1" class="lab-option">
-                                                <h3>Continuar inscrição iniciada para  <?=$niceName;?></h3>
-                                                <p class="js-detail lab-option-detail">Sua solicitação do benefício da Renda Emergencial está incompleta. Continue o preenchimento dos campos para finalizá-la.</p>
-                                            </div>
-                                        <a href="<?=$registrationUrl;?>">
+                                                <div id="option1" class="lab-option">
+                                                    <h3>Continuar inscrição iniciada para  <?=$niceName;?></h3>
+                                                    <p class="js-detail lab-option-detail">Sua solicitação do benefício da Renda Emergencial está incompleta. Continue o preenchimento dos campos para finalizá-la.</p>
+                                                </div>
+                                            <a href="<?=$registrationUrl;?>">
 
-                                        <?php
+                                            <?php
+                                            break;
+                                        
+                                        case $statusCodes[1]:
+                                            $registrationStatusName = $summaryStatusName[$registration->status];
+                                            $this->part('aldirblanc/cadastro/application-status',  ['registration' => $registration,'registrationStatusName' => $registrationStatusName]);
+
+                                            break;
+                                        
+                                        default:
+                                            # code...
+                                            break;
                                     }
                                 }
                                 foreach ($registrationsInciso2 as $registration){
@@ -162,102 +174,5 @@ $limiteInciso1 = $this->controller->config['inciso_1_limite'];
                 </div><!-- End .lab-form-answer -->
             </div><!-- End .lab-item -->
         </div><!-- End .box -->
-    <!-- Cadastro somente para inciso 1 incompleto) -->
-        <div class="box">
-            <h1>Cadastro</h1>
-            <p>Olá, <?=$niceName?>!</p>
-            <div class="lab-item">
-                <p class="lab-form-question">O que você deseja fazer? <a class="js-help icon icon-help" href="#" title=""></a></p>           
-                <div class="lab-form-filter">
-                    <div id="option2" class="js-lab-option lab-option">
-                            <h3>Cadastrar Espaço Cultural</h3>
-                            <p class="js-detail lab-option-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                    </div>
-                    <div id="option2" class="js-lab-option lab-option">
-                            <h3>Cadastrar Pequena empresa ou coletivo</h3>
-                            <p class="js-detail lab-option-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                    </div>
-                    <div id="option1" class="lab-option">
-                        <a href="#">
-                            <h3>Continuar cadastro iniciado para [nome]</h3>
-                            <p class="js-detail lab-option-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-        </div><!-- End .box -->
-    <!-- Cadastro somente para inciso 1 completo, exibe status -->
-        <div class="box">
-            <h1>Cadastro</h1>
-            <p>Olá, <?=$niceName?>!</p>
-            <div class="lab-item">
-            <p class="lab-form-question">O que você deseja fazer? <a class="js-help icon icon-help" href="#" title=""></a></p>           
-                <div class="lab-form-filter">
-                    <div id="option2" class="js-lab-option lab-option">
-                            <h3>Cadastrar Espaço Cultural</h3>
-                            <p class="js-detail lab-option-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                    </div>
-                    <div id="option2" class="js-lab-option lab-option">
-                            <h3>Cadastrar Pequena empresa ou coletivo</h3>
-                            <p class="js-detail lab-option-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                    </div>
-                    <?php $this->part('aldirblanc/cadastro/application-status') ?>
-                </div>
-            </div>
-
-        </div><!-- End .box -->
-    <!-- Cadastro somente para inciso 2 incompleto -->
-        <div class="box">
-            <h1>Cadastro</h1>
-            <p>Olá, <?=$niceName?>!</p>
-            <div class="lab-item">
-            <p class="lab-form-question">O que você deseja fazer? <a class="js-help icon icon-help" href="#" title=""></a></p>           
-                <div class="lab-form-filter">
-                    <div id="option2" class="lab-option">
-                        <a href="#">
-                            <h3>Continuar cadastro iniciado para [NOME DO ESPAÇO]</h3>
-                            <p class="js-detail lab-option-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </div>
-                    <div id="option1" class="lab-option">
-                        <a href="<?= $this->controller->createUrl( 'individual') ?>">
-                            <h3>Cadastrar Trabalhador da Cultura</h3>
-                            <p class="js-detail lab-option-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-        </div><!-- End .box -->
-    <!-- Cadastro somente para inciso 2 completo, exibe status  -->
-        <div class="box">
-            <h1>Cadastro</h1>
-            <p>Olá, <?=$niceName?>!</p>
-            <div class="lab-item">
-            <p class="lab-form-question">O que você deseja fazer? <a class="js-help icon icon-help" href="#" title=""></a></p>           
-                <div class="lab-form-filter">
-                    <?php $this->part('aldirblanc/cadastro/application-status') ?>
-                    <div id="option1" class="lab-option">
-                        <a href="<?= $this->controller->createUrl( 'individual') ?>">
-                            <h3>Cadastrar Trabalhador da Cultura</h3>
-                            <p class="js-detail lab-option-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div><!-- End .box -->
-    <!-- Cadastro para inciso 2 e inciso 1 completos, exibe status -->
-        <div class="box">
-            <h1>Cadastro</h1>
-            <p>Olá, <?=$niceName?>!</p>
-            <div class="lab-item">
-                <p class="lab-form-question">O que você deseja fazer? <a class="js-help icon icon-help" href="#" title=""></a></p>           
-                <div class="lab-form-filter">
-                    <?php $this->part('aldirblanc/cadastro/application-status') ?>
-                    <?php $this->part('aldirblanc/cadastro/application-status') ?>
-                </div>
-            </div>
-
-        </div><!-- End .box -->
+    
 </section>

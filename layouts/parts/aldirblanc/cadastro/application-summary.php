@@ -7,7 +7,7 @@
  */
 ?>
 
-<h3>Status do cadastro para <?php echo $registration->owner->name; ?>:</h3>
+<h3>Situação da inscrição para <?php echo $registration->owner->name; ?>:</h3>
 <h2> <?php echo $registrationStatusName; ?> </h2>
 <p class="lab-form-detail">
         <span class="label">Número:</span> <?php echo $registration->number; ?> </br>
