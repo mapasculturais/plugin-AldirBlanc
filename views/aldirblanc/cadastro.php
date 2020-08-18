@@ -44,7 +44,7 @@ use MapasCulturais\i;
 <section class="lab-main-content">
     <!--Primeiro acesso ao plugin (não pediu nenhum auxílio ainda)-->
         <div class="box">
-            <h1>Cadastro</h1>
+            <h1><?php \MapasCulturais\i::_e("Cadastro Lei Aldir Blanc");?></h1>
             <p>Olá, [nome]!</p>
             <p>Por favor, responda às perguntas abaixo para iniciar seu cadastro.</p>
 
