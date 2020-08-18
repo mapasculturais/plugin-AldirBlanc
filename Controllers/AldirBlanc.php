@@ -277,8 +277,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function GET_cadastro()
     {
         $this->requireAuthentication();
+        $app = App::i();
+        $inciso1 = $this->getOpportunityInciso1();
+        //$inciso2 = $this->getOpportunityInciso2();
 
-        $this->render('cadastro', ['cidades' => $this->getCidades()]);
+        $registrations = $app->repo('Registration')->findByOpportunityAndUser($inciso1, $app->user);
+        $this->render('cadastro', ['cidades' => $this->getCidades(), 'registrations' => $registrations]);
     }
 
     function GET_termos_e_condicoes()
