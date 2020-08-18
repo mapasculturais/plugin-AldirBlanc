@@ -65,10 +65,6 @@ $inciso1_enabled = $this->controller->config['inciso1_enabled'];
                             <h3>Espaços e organizações culturais</h3>
                                 <p class="js-detail lab-option-detail">Farão jus ao benefício espaços, organizações da sociedade civil, empresas, cooperativas e instituições com finalidade cultural, como previsto nos Arts. 7º e 8º - Lei 14.017/2020. Prevê subsídio de R$3.000,00 (três mil reais) a R$10.000,00 (dez mil reais), prescrito pela gestão local.</p>
                         </div><!-- End #option1 -->
-                        <div id="option2" class="js-lab-option lab-option">
-                                <h3>Pequena empresa ou coletivo</h3>
-                                <p class="js-detail lab-option-detail">Mussum Ipsum, cacilds vidis litro abertis. Admodum accumsan disputationi eu sit. Vide electram sadipscing et per. Per aumento de cachacis, eu reclamis. Paisis, filhis, espiritis santis. Cevadis im ampola pa arma uma pindureta.</p>
-                        </div><!-- End #option2 -->
                         <?php
                     }
                     foreach ($registrationsInciso2 as $registration){
