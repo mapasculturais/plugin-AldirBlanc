@@ -17,7 +17,15 @@ class Plugin extends \MapasCulturais\Plugin
             'inciso2_enabled' => true,
             'inciso1_opportunity_id' => null,
             'inciso2_opportunity_ids' => [
-            ],
+            ], 
+            'inciso1_limite' => 1,
+            'inciso2_limite' => 1,
+            'inciso2_categories' => [
+                'Espaço formalizado',
+                'Espaço não formalizados',
+                'Coletivo formalizado',
+                'Coletivo não formalizado'
+            ]
         ];
        
         parent::__construct($config);
