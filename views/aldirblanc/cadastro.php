@@ -61,46 +61,30 @@ $limiteInciso1 = $this->controller->config['inciso_1_limite'];
                                 $statusCodes = array_keys($summaryStatusName);
                                 foreach ($registrationsInciso1 as $registration){
                                     $registrationUrl = $this->controller->createUrl('formulario',[$registration->id]);
-                                    //caso seja do Inciso 1 e nao enviada (Rascunho)
                                     switch ($registration->status) {
+                                        //caso seja do Inciso 1 e nao enviada (Rascunho)
                                         case $statusCodes[0]:
-                                            ?>
-                                            <a href="<?=$registrationUrl;?>">
-
-                                                <div id="option1" class="lab-option">
-                                                    <h3>Continuar inscrição iniciada para  <?=$niceName;?></h3>
-                                                    <p class="js-detail lab-option-detail">Sua solicitação do benefício da Renda Emergencial está incompleta. Continue o preenchimento dos campos para finalizá-la.</p>
-                                                </div>
-                                            <a href="<?=$registrationUrl;?>">
-
-                                            <?php
+                                            $this->part('aldirblanc/cadastro/application-inciso1-draft',  ['registrationUrl' => $registrationUrl,'niceName' => $niceName]);
                                             break;
-                                        
-                                        case $statusCodes[1]:
+                                        //caso seja do Inciso 1 e tenha sido enviada
+                                        default:
                                             $registrationStatusName = $summaryStatusName[$registration->status];
                                             $this->part('aldirblanc/cadastro/application-status',  ['registration' => $registration,'registrationStatusName' => $registrationStatusName]);
-
-                                            break;
-                                        
-                                        default:
-                                            # code...
                                             break;
                                     }
                                 }
                                 foreach ($registrationsInciso2 as $registration){
                                     $registrationUrl = $this->controller->createUrl('formulario',[$registration->id]);
-                                    //caso seja do Inciso 2 e nao enviada (Rascunho)
-                                    if($registration->status == $statusCodes[0]){
-                                        ?>
-                                        <a href="<?=$registrationUrl;?>">
-
-                                            <div id="option1" class="lab-option">
-                                                <h3>Continuar inscrição iniciada para {nome do coetivo ou espaço}</h3>
-                                                <p class="js-detail lab-option-detail">Sua solicitação do benefício do Subsídio Mensal está incompleta. Continue o preenchimento dos campos para finalizá-la.</p>
-                                            </div>
-                                        <a href="<?=$registrationUrl;?>">
-
-                                        <?php
+                                    switch ($registration->status) {
+                                        //caso seja do Inciso 2 e nao enviada (Rascunho)
+                                        case $statusCodes[0]:
+                                            $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registrationUrl' => $registrationUrl,'niceName' => $niceName]);
+                                            break;
+                                        //caso seja do Inciso 2 e tenha sido enviada
+                                        default:
+                                        $registrationStatusName = $summaryStatusName[$registration->status];
+                                        $this->part('aldirblanc/cadastro/application-status',  ['registration' => $registration,'registrationStatusName' => $registrationStatusName]);
+                                            break;
                                     }
                                 }
                                 ?>
