@@ -1,5 +1,6 @@
 <?php 
 use MapasCulturais\i;
+
 ?>
 <script>
     $(document).ready(function(){
@@ -42,10 +43,65 @@ use MapasCulturais\i;
     });
 </script>
 <section class="lab-main-content">
-    <!--Primeiro acesso ao plugin (não pediu nenhum auxílio ainda)-->
         <div class="box">
             <h1>Cadastro</h1>
             <p>Olá, <?=$niceName?>!</p>
+            <?php
+            //se já possui uma inscrição relacionada ao usuário faz o loop entre todas inscrições mostrando os status
+                if($registrationsInciso1 != [] || $registrationsInciso2 ){
+                    ?>
+                    <div class="box">
+                        <h1>Cadastros iniciados</h1>
+                        <div class="lab-item">
+                        <p class="lab-form-question">
+                            Você possue as seguintes inscrições em andamento:
+                            <div class="lab-form-filter">
+                                <?php 
+                                $statusCodes = array_keys($summaryStatusName);
+                                foreach ($registrationsInciso1 as $registration){
+                                    $registrationUrl = $this->controller->createUrl('formulario',[$registration->id]);
+                                    //caso seja do Inciso 1 e nao enviada (Rascunho)
+                                    if($registration->status == $statusCodes[0]){
+                                        ?>
+                                        <a href="<?=$registrationUrl;?>">
+
+                                            <div id="option1" class="lab-option">
+                                                <h3>Continuar inscrição iniciada para  <?=$niceName;?></h3>
+                                                <p class="js-detail lab-option-detail">Sua solicitação do benefício da Renda Emergencial está incompleta. Continue o preenchimento dos campos para finalizá-la.</p>
+                                            </div>
+                                        <a href="<?=$registrationUrl;?>">
+
+                                        <?php
+                                    }
+                                }
+                                foreach ($registrationsInciso2 as $registration){
+                                    $registrationUrl = $this->controller->createUrl('formulario',[$registration->id]);
+                                    //caso seja do Inciso 2 e nao enviada (Rascunho)
+                                    if($registration->status == $statusCodes[0]){
+                                        ?>
+                                        <a href="<?=$registrationUrl;?>">
+
+                                            <div id="option1" class="lab-option">
+                                                <h3>Continuar inscrição iniciada para {nome do coetivo ou espaço}</h3>
+                                                <p class="js-detail lab-option-detail">Sua solicitação do benefício do Subsídio Mensal está incompleta. Continue o preenchimento dos campos para finalizá-la.</p>
+                                            </div>
+                                        <a href="<?=$registrationUrl;?>">
+
+                                        <?php
+                                    }
+                                }
+                                ?>
+                                
+                            </div>
+                        </div>
+
+                    </div><!-- End .box -->
+                    <?php
+                }
+            ?>
+
+
+            <h1>Cadastrar</h1>
             <p>Por favor, responda às perguntas abaixo para iniciar seu cadastro.</p>
 
             <div class="js-lab-item lab-item">

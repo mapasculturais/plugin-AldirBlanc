@@ -61,7 +61,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         return $opportunity;
     }
-
+    
     /**
      * Retorna a oportunidade do inciso II
      *
@@ -288,10 +288,15 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
         $app = App::i();
         $inciso1 = $this->getOpportunityInciso1();
+        
+        $summaryStatusName = $this->getStatusNames();
+        $registrationsInciso1 = $app->repo('Registration')->findByOpportunityAndUser($inciso1, $app->user);
+        //Para o inciso 2 devemos usar as duas linhas abaixo fazendo as modificaçoes necessarias
         //$inciso2 = $this->getOpportunityInciso2();
-
-        $registrations = $app->repo('Registration')->findByOpportunityAndUser($inciso1, $app->user);
-        $this->render('cadastro', ['cidades' => $this->getCidades(), 'registrations' => $registrations]);
+        //$registrationsInciso2 = $app->repo('Registration')->findByOpportunityAndUser($inciso2, $app->user);
+        $registrationsInciso2 = [];
+        $name = $app->user->profile->name;
+        $this->render('cadastro', ['cidades' => $this->getCidades(), 'registrationsInciso1' => $registrationsInciso1, 'registrationsInciso2' => $registrationsInciso2, 'summaryStatusName'=>$summaryStatusName, 'niceName' => $name]);
     }
 
     function GET_termos_e_condicoes()
