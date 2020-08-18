@@ -1,8 +1,4 @@
 <?php
-if (!true && !$entity->canUser('modify')){
-    ?><div id="editable-entity" class="clearfix sombra js-not-editable" style='display:none; min-height:0; height:42px;'></div><?php
-    return;
-}
 
 $can_edit_roles = $this->controller->id == 'agent' && $entity->user->id != $app->user->id && $entity->id == $entity->user->profile->id && $entity->user->canUser('addRole');
 if(true){
