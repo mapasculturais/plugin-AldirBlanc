@@ -16,6 +16,10 @@ use MapasCulturais\Entities\Registration;
 // class AldirBlanc extends \MapasCulturais\Controllers\EntityController {
 class AldirBlanc extends \MapasCulturais\Controllers\Registration
 {
+    const CATEGORY_ESPACO_FORMALIZADO = 0;
+    const CATEGORY_ESPACO_NAO_FORMALIZADO = 1;
+    const CATEGORY_COLETIVO_FORMALIZADO = 2;
+    const CATEGORY_COLETIVO_NAO_FORMALIZADO = 3;
     protected $config = [];
 
     function __construct()
@@ -109,7 +113,19 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         parent::finish($data, $status, $isAjax);
     }
+    /**
+    * Redireciona o usuário para o formulário do inciso II
+    * 
+    * rota: /aldirblanc/coletivo/[?opportunity={opportunity}&category=category]
+    * 
+    * @return void
+    */
+   function GET_coletivo()
+   {
+    $this->requireAuthentication();
+    $app = App::i();
 
+   }
     /**
      * Redireciona o usuário para o formulário do inciso I
      * 
