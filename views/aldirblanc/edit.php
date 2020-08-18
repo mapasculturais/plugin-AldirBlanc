@@ -26,23 +26,28 @@ $_params = [
 
 ?>
 
-<?php //$this->part('editable-entity', array('entity'=>$entity, 'action'=>$action));  ?>
+
 <?php $this->part('aldirblanc/editable-entity', array('entity'=>$entity, 'action'=>$action));  ?>
 
 
-<article class="main-content registration" ng-controller="OpportunityController">
+<section class="lab-main-content" ng-controller="OpportunityController">
 
-    <?php $this->part('singles/registration--header', $_params); ?>
+    <?php // $this->part('singles/registration--header', $_params); ?>
     
-    <article>
         <?php $this->applyTemplateHook('form','begin'); ?>
         
-        <?php $this->part('singles/registration-edit--header', $_params) ?>
+        <?php $this->part('aldirblanc/registration-edit--header', $_params) ?>
+        <nav class="lab-form-tabs">
+            <ul>
+                <li class="lab-form-tab lab-form-tab-active"><span class="screen-reader-text">Passo 1</span></li>
+                <li class="lab-form-tab lab-form-tab-complete"><span class="screen-reader-text">Passo 2</span></li>
+                <li class="lab-form-tab"><span class="screen-reader-text">Passo 3</span></li>
+                <li class="lab-form-tab"><span class="screen-reader-text">Passo 4</span></li>
+                <li class="lab-form-tab"><span class="screen-reader-text">Passo 5</span></li>
+            </ul>
+        </nav>
         
-        <?php $this->part('singles/registration-edit--categories', $_params) ?>
-        
-        <?php $this->part('aldirblanc/registration-edit--agents', $_params) ?>
-        
+
         <?php // Desabilitando este template por enquanto, pois não é a melhor forma de apresentar para o usuário que está se inscrevendo ?>
         <?php //$this->part('singles/registration-edit--seals', $_params) ?>
         
@@ -53,8 +58,7 @@ $_params = [
         <?php endif; ?>
 
         <?php $this->applyTemplateHook('form','end'); ?>
-    </article>
 
-</article>
+</section>
 <?php $this->part('singles/registration--sidebar--left', $_params) ?>
 <?php $this->part('singles/registration--sidebar--right', $_params) ?>
