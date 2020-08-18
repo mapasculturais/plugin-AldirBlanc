@@ -76,7 +76,7 @@ $inciso1_enabled = $this->controller->config['inciso1_enabled'];
                         switch ($registration->status) {
                             //caso seja do Inciso 2 e nao enviada (Rascunho)
                             case $statusCodes[0]:
-                                $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registrationUrl' => $registrationUrl,'niceName' => $niceName]);
+                                $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registration' => $registration,'registrationUrl' => $registrationUrl,'niceName' => $niceName]);
                                 break;
                             //caso seja do Inciso 2 e tenha sido enviada
                             default:
@@ -101,7 +101,7 @@ $inciso1_enabled = $this->controller->config['inciso1_enabled'];
                         switch ($registration->status) {
                             //caso seja do Inciso 1 e nao enviada (Rascunho)
                             case Registration::STATUS_DRAFT:
-                                $this->part('aldirblanc/cadastro/application-inciso1-draft',  ['registrationUrl' => $registrationUrl,'niceName' => $niceName]);
+                                $this->part('aldirblanc/cadastro/application-inciso1-draft',  ['registration' => $registration,'registrationUrl' => $registrationUrl,'niceName' => $niceName]);
                                 break;
                             //caso seja do Inciso 1 e tenha sido enviada
                             default:
