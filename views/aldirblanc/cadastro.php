@@ -21,7 +21,6 @@ if(count($cidades) <= 1){
         let params      = {opportunity: null, category:null};
         let formalizado = null;
         let coletivo    = null;
-
         /**
          * Se houver cidade/oportunidade defualt definida na configuração do plugin para o Inciso II, o id é setado no paramentro.
          */
@@ -50,7 +49,7 @@ if(count($cidades) <= 1){
          * Ao clicar em uma das opções de personalidade jurídica do beneficiário, o usuário é encaminhado para tela de seleção da local de atividade do beneficiário.
          */
         $('.coletivo').click(function(){
-            formalizado = this.value;
+            coletivo = this.value;
             $('.js-questions-tab').hide();
             $('#personalidade-juridica').fadeIn(1100);
         });
@@ -60,7 +59,7 @@ if(count($cidades) <= 1){
          * senão é redirecionado conforme os parametros selecionados.
          */
         $('.formalizado').click(function(){
-            coletivo = this.value;
+            formalizado = this.value;
             $('.js-questions-tab').hide();
 
             let hasCities = $('.js-questions').find('#select-cidade');
@@ -82,11 +81,7 @@ if(count($cidades) <= 1){
          */
         $('.js-select-cidade').change(function(){
             params.opportunity = this.value;
-            $('.js-questions-tab').hide();
-            $('.js-questions').html('<h4>Enviando informações ...</h4>');
-            goToNextPage();
         });
-
 
         $('.coletivo').click(function() {
             $('.coletivo').parent().removeClass('selected')
@@ -99,24 +94,44 @@ if(count($cidades) <= 1){
         });
 
         $('.js-back').click(function(){
-           let parentId = $(this).parent().attr('id');
-           switch (parentId) {
+            let parentId = $(this).parent().attr('id');
+            switch (parentId) {
                 case 'personalidade-juridica':
                     $('#personalidade-juridica').hide();
                     $('#local-atividade').fadeIn(1100);
                     break;
-               case 'local-atividade':
-                   $('.js-questions').hide();
-                   $('#personalidade-juridica').hide();
-                   $('.js-lab-item').fadeIn(1100);
-                   break;
-               case 'select-cidade':
-                   $('#select-cidade').hide();
-                   $('#personalidade-juridica').fadeIn(1100);
-                   break;
-           }
+                case 'local-atividade':
+                    $('.js-questions').hide();
+                    $('#personalidade-juridica').hide();
+                    $('.js-lab-item').fadeIn(1100);
+                    break;
+                case 'select-cidade':
+                    $('#select-cidade').hide();
+                    $('#personalidade-juridica').fadeIn(1100);
+                    break;
+            }
         });
 
+        $('.js-next').click(function(){
+            let modal      = $('#modalAlert');
+            let nomeCidade = $('.js-select-cidade option:selected').text();
+
+            modal.fadeIn(1200);
+
+            let msg = `<?php \MapasCulturais\i::_e("Confirmar inscrição do Auxílio Emergencial da Cultura no município de <strong>_cidade_</strong>.");?>`;
+            msg = msg.replace(/_cidade_/g, nomeCidade);
+            $('.modal-content').find('.text').html(msg);
+
+            $('.close').on('click', function () {
+                modal.fadeOut('slow');
+            });
+
+            $('.js-confirmar').click(function(){
+                $('.js-questions-tab').hide();
+                $('.js-questions').html('<h4>Enviando informações ...</h4>');
+                goToNextPage();
+            });
+        });
         // Exibe/esconde texto explicativo das opções de cadastro em celulares
         $('.js-help').click(function(){
             $('.js-detail').toggle('1000');
@@ -191,8 +206,8 @@ if(count($cidades) <= 1){
         <div class="js-questions questions inactive">
 
             <div id="local-atividade" class="js-questions-tab questions-tab inactive">
-                <h4 class="questions-tab-title"><?php i::_e('Local onde o beneficiário desenvolve sua atividade cultural') ?></h4>
-                <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica a situação do local onde o beneficiário do subsídio desenvolve a atividade cultural (seleção única)') ?></p>
+                <h4 class="questions-tab-title"><?php i::_e('Onde o beneficiário desenvolve suas atividades?') ?></h4>
+                <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica a situação do local onde o beneficiário do subsídio desenvolve a atividade cultural.') ?></p>
                 <div class="options-questions">
                     <label>
                         <input type="radio" class="coletivo" name="coletivo" value="espaco"/><?php i::_e('Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado;') ?>
@@ -205,8 +220,8 @@ if(count($cidades) <= 1){
             </div>
 
             <div id="personalidade-juridica" class="js-questions-tab questions-tab inactive">
-                <h4 class="questions-tab-title"><?php i::_e('Personalidade jurídica do beneficiário') ?></h4>
-                <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica o beneficiário do subsídio previsto no inciso II do art. 2º da lei federal nº 14.017/2020 (seleção única)') ?></p>
+                <h4 class="questions-tab-title"><?php i::_e('Qual a personalidade jurídica do beneficiário?') ?></h4>
+                <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica o beneficiário do subsídio previsto no inciso II do art. 2º da lei federal nº 14.017/2020.') ?></p>
                 <div class="options-questions">
                     <label>
                         <input type="radio" class="formalizado" name="formalizado" value="formalizado" /><?php i::_e('Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.') ?>
@@ -219,14 +234,25 @@ if(count($cidades) <= 1){
             </div>
 
             <?php if(count($cidades) > 1): ?>
-                <div id="select-cidade" class="js-questions-tab questions-tab inactive">
-                    <?php $this->part('aldirblanc/cadastro/select-cidade', ['cidades' => $cidades]) ?>
-                    <button class="btn js-back">Voltar</button>
+                <div id="select-cidade" class="js-questions-tab questions-tab lab-form-answer inactive">
+                    <p class="lab-form-question"><?php \MapasCulturais\i::_e("Em qual cidade?");?></p>
+                        <?php $this->part('aldirblanc/cadastro/select-cidade', ['cidades' => $cidades]) ?>
+                    <button class="btn btn-back js-back"><?php i::_e('Voltar') ?></button>
+                    <button class="btn btn-next js-next"><?php i::_e("Avançar");?></button>
                 </div>
             <?php endif;?>
         </div>
         <!-- End .js-questions -->
 
     </div><!-- End .box -->
+
+    <div id="modalAlert" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p class="text"></p>
+            <button class="btn js-confirmar" ><?php \MapasCulturais\i::_e("Confirmar");?></button>
+        </div>
+    </div>
 
 </section>

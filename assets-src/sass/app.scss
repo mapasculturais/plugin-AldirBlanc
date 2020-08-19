@@ -85,6 +85,9 @@ $unicode-waiting: "\e02d" !default;
         border-radius: 2px;
     }
 }
+.lab-form-detail{
+    text-align: left;
+}
 
 .lab-form-question {
     font-size: 1.8rem;
@@ -126,6 +129,7 @@ $unicode-waiting: "\e02d" !default;
         left: 1.5rem;
         bottom: 1.5rem;
     }
+    text-align: left!important;
 }
 
 .btn-boolean {

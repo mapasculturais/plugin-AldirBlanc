@@ -61,13 +61,17 @@
   input[type=radio]{
     visibility: hidden;
   }
+  .btn-back{
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
 }
 
 .inactive{
   display: none;
 }
 .selected{
-  background-color: #fff !important;
+  background-color: #c5c0c0 !important;
   &:before, &:before {
     color: #fff !important;
     background-color: #3a72bc !important;
