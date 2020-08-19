@@ -7,14 +7,14 @@
  */
 ?>
 
-<h3>Status do cadastro para [NOME DO Trabalhador]:</h3>
-<h2>Em análise</h2>
-<p class="lab-option-detail">
-        <span class="label">Número:</span> on-321123123123</br>
+<h3>Situação da inscrição para <?php echo $registration->owner->name; ?>:</h3>
+<h2> <?php echo $registrationStatusName; ?> </h2>
+<p class="lab-form-detail">
+        <span class="label">Número:</span> <?php echo $registration->number; ?> </br>
     
-        <span class="label">Data do envio:</span> 00/00/00</br>
+        <span class="label">Data do envio:</span> <?php \MapasCulturais\i::_e("Enviada em");?> <?php echo $registration->sentTimestamp ? $registration->sentTimestamp->format(\MapasCulturais\i::__('d/m/Y à\s H:i')): ''; ?>.  </br>
     
-        <span class="label">Responsável:</span> Nome Sobrenome</br>
+        <span class="label">Responsável:</span>  <?php echo $registration->owner->name; ?> </br>
     
-        <span class="label">CPF:</span> 000.000.000-00
+        <span class="label">CPF:</span> <?php echo $registration->owner->documento; ?>
 </p>

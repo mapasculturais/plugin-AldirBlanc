@@ -2,7 +2,9 @@
 
 namespace AldirBlanc\Controllers;
 
-use \MapasCulturais\App;
+use MapasCulturais\App;
+use MapasCulturais\i;
+use MapasCulturais\Entities\Registration;
 
 /**
  * Registration Controller
@@ -59,7 +61,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         return $opportunity;
     }
-
+    
     /**
      * Retorna a oportunidade do inciso II
      *
@@ -67,16 +69,35 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
      */
     function getOpportunityInciso2(string $cidade)
     {
-        if (isset($this->config['inciso2_opportunity_id']['cidade'])) {
+        if (isset($this->config['inciso2_opportunity_ids']['cidade'])) {
             $app = App::i();
 
-            $opportunity_id = $this->config['inciso2_opportunity_id'][$cidade];
+            $opportunity_id = $this->config['inciso2_opportunity_ids'][$cidade];
             $opportunity = $app->repo('Opportunity')->find($opportunity_id);
 
             return $opportunity;
         } else {
             throw \Exception('Cidade não disponível para cadastro');
         }
+    }
+    /**
+     * Retorna o array associativo com os numeros e nomes de status
+     *
+     * @return array
+     */
+    function getStatusNames(){
+        $summaryStatusName = [
+            Registration::STATUS_DRAFT => i::__('Rascunho', 'aldirblanc'),
+            Registration::STATUS_SENT => i::__('Em análise', 'aldirblanc'),
+            Registration::STATUS_APPROVED => i::__('Aprovado', 'aldirblanc'),
+            Registration::STATUS_NOTAPPROVED => i::__('Reprovado', 'aldirblanc'),
+            Registration::STATUS_WAITLIST => i::__('Recursos Exauridos', 'aldirblanc'),
+        ];
+        return $summaryStatusName;
+    }
+    function getCidades()
+    {
+        return $this->config['inciso2_opportunity_ids'];
     }
 
     function finish($data, $status = 200, $isAjax = false)
@@ -119,9 +140,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $num_agents = $agent_controller->apiQuery([
                 '@select' => 'id',
                 '@permissions' => '@control',
+                'type'=>'EQ(1)',
                 '@count' => 1
-            ]);
-
+            ]);                    
             if ($num_agents > 1) {
                 // redireciona para a página de escolha de agente
                 $app->redirect($this->createUrl('selecionar_agente'));
@@ -175,6 +196,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $app->redirect($this->createUrl('formulario', [$registration->id]));
     }
+
+
     /**
      * Tela onde o usuário escolhe o inciso I ou II
      *
@@ -183,8 +206,25 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function GET_status()
     {
         $this->requireAuthentication();
+        $app = App::i();
 
-        $this->render('status');
+        $registration = $this->requestedEntity;
+
+        if(!$registration) {
+            $app->pass();
+        }
+
+        $registration->checkPermission('view');
+        $summaryStatusName = $this->getStatusNames();
+        $registrationStatusName = "";
+        foreach($summaryStatusName as $key => $value) {
+            if($key == $registration->status) {
+                $registrationStatusName = $value;
+                break;
+            }
+        }
+
+        $this->render('status', ['registration' => $registration, 'registrationStatusName'=> $registrationStatusName]);
     }
 
     /**
@@ -246,8 +286,17 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function GET_cadastro()
     {
         $this->requireAuthentication();
-
-        $this->render('cadastro');
+        $app = App::i();
+        $inciso1 = $this->getOpportunityInciso1();
+        
+        $summaryStatusName = $this->getStatusNames();
+        $registrationsInciso1 = $app->repo('Registration')->findByOpportunityAndUser($inciso1, $app->user);
+        //Para o inciso 2 devemos usar as duas linhas abaixo fazendo as modificaçoes necessarias
+        //$inciso2 = $this->getOpportunityInciso2();
+        //$registrationsInciso2 = $app->repo('Registration')->findByOpportunityAndUser($inciso2, $app->user);
+        $registrationsInciso2 = [];
+        $name = $app->user->profile->name;
+        $this->render('cadastro', ['cidades' => $this->getCidades(), 'registrationsInciso1' => $registrationsInciso1, 'registrationsInciso2' => $registrationsInciso2, 'summaryStatusName'=>$summaryStatusName, 'niceName' => $name]);
     }
 
     function GET_termos_e_condicoes()

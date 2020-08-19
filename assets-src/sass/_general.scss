@@ -1,0 +1,88 @@
+//
+// General
+// --------------------------------------------------
+
+.controller-aldirblanc {
+    h1, h2, h3, h4, h5, h6 {
+        text-align: center;
+    }
+    h2,h3,h4,h5, h6 {
+        font-family: $font-stack-base;
+    }
+}
+
+
+#main-section {
+    @media screen and (max-width: 767px) {
+        margin-top: 38px;
+    }
+}
+
+.lab-main-content {
+    display: flex;
+    box-sizing: border-box;
+    flex-flow: column wrap;
+    min-height: calc(100vh - 4.875rem);
+    line-height: 1.5;
+    padding: 0 1.5rem;
+    header {
+        text-align: center;
+        margin-bottom: $line-height-base;
+    }
+    @media screen and (min-width: 768px) {
+        background-image: url(/assets/aldirblanc/img/homepage_header_background.svg);
+        background-repeat: no-repeat;
+        background-position: top center;
+        background-size: contain;
+        width: 75%;
+        max-width: 960px;
+        margin: 0 auto;
+        header {
+            padding-top: 23%;
+            height: 0;
+            position: relative;
+            div {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+            }
+        }
+    }
+}
+
+
+.btn-lab {
+    min-width: 80px;
+    color: $brand-primary;
+    background-color: #e2e2e2;
+    border: 1px solid #e2e2e2;
+    &:hover, &:active {
+        color: #fff;
+        background-color: $brand-primary;
+        border: 1px solid $brand-primary;
+    }    
+}
+.intro-message {
+    text-align: center;
+}
+
+//== Utilities
+//
+.screen-reader-text {
+    display: inline-block;
+}
+
+//== Placeholders
+//
+%tick-icon {
+    display: block;
+    content: "N";
+    width: 36px;
+    height: 36px;
+    font-family: "ElegantIcons";
+    line-height: 36px;
+    text-align: center;
+    border-radius: 18px;
+    color: #fff;
+    background-color: $gray-light;
+}
