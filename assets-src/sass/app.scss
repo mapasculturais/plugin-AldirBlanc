@@ -262,6 +262,7 @@ $unicode-waiting: "\e02d" !default;
         background-color: $brand-warning;
     }
     h2 {
+        text-align: center;
         background-color: $brand-warning;
     }
 }
@@ -285,4 +286,4 @@ $unicode-waiting: "\e02d" !default;
 
 @import "termos";
 @import "agente";
-
+@import "cadastro";
