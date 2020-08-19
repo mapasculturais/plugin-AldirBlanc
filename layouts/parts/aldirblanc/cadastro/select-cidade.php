@@ -1,11 +1,30 @@
-<p class="lab-form-question">Em qual cidade?</p>
+<?php
+/**
+ * Carrega as cidades para cadastro no Inciso II
+ * Contém o nome da cidade e o ID da oportunidade vinculada.
+ */
+
+ksort($cidades)
+
+?>
+<p class="lab-form-question"><?php \MapasCulturais\i::_e("Em qual cidade?");?></p>
 <div class="lab-form-answer">
     <form>
-    <select id="option4" class="js-lab-option">
-        <option>Selecione sua cidade:</option>
-        <option value="Belém">Belém</option>
-        <option value="Santarém">Santarém</option>
-    </select>
+        <select id="option4" class="js-select-cidade">
+            <option value="-1"><?php \MapasCulturais\i::_e("Selecione sua cidade");?></option>
+            <?php foreach($cidades as $nome => $oportunidade): ?>
+                <option value="<?=$oportunidade?>"><?=$nome?></option>
+            <?php endforeach; ?>
+        </select>
     </form>
-    <a class="js-back lab-back" href="#"><span class="icon icon-go-back"></span><span class="screen-reader-text">Voltar</span></a>
+<!--    <a class="js-back lab-back" href="#"><span class="icon icon-go-back"></span><span class="screen-reader-text">--><?php //\MapasCulturais\i::_e("Voltar");?><!--</span></a>-->
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('select.js-select-cidade').select2({
+            placeholder: `<?php \MapasCulturais\i::_e("Selecione sua cidade");?>`,
+            allowClear: true
+        });
+    });
+</script>

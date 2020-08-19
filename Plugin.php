@@ -12,12 +12,16 @@ class Plugin extends \MapasCulturais\Plugin
 {
     function __construct(array $config = [])
     {
+        // se for multisite pega do subsite_meta
+        if (App::i()->view->subsite){
+            $config = App::i()->view->subsite->aldir_blanc_config;
+        }
+
         $config += [
             'inciso1_enabled' => true,
             'inciso2_enabled' => true,
             'inciso1_opportunity_id' => null,
-            'inciso2_opportunity_ids' => [
-            ], 
+            'inciso2_opportunity_ids' => [],
             'inciso1_limite' => 1,
             'inciso2_limite' => 1,
             'inciso2_categories' => [
@@ -37,7 +41,6 @@ class Plugin extends \MapasCulturais\Plugin
 
         // enqueue scripts and styles
         $app->view->enqueueStyle('aldirblanc', 'app', 'aldirblanc/app.css');
-        $app->view->enqueueScript('app', 'entity.module.opportunity.aldirblanc', 'aldirblanc/ng.entity.module.opportunity.aldirblanc.js', array('ng-mapasculturais'));
         $app->view->assetManager->publishFolder('aldirblanc/img', 'aldirblanc/img');
 
         // add hooks
