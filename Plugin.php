@@ -21,10 +21,10 @@ class Plugin extends \MapasCulturais\Plugin
             'inciso1_limite' => 1,
             'inciso2_limite' => 1,
             'inciso2_categories' => [
-                'Espaço formalizado',
-                'Espaço não formalizados',
-                'Coletivo formalizado',
-                'Coletivo não formalizado'
+                'espaco-formalizado' => 'Espaço formalizado',
+                'espaco-nao-formalizado' => 'Espaço não formalizado',
+                'coletivo-formalizado' => 'Coletivo formalizado',
+                'coletivo-nao-formalizado' => 'Coletivo não formalizado'
             ]
         ];
        
