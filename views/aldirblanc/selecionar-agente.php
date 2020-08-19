@@ -87,23 +87,6 @@
 
             $('#confirmar').on('click', function () {
                 document.location =  MapasCulturais.createUrl('aldirblanc', 'nova_inscricao', {agent: agentId, inciso: inciso})
-                // $.ajax({
-                //     type: "GET",
-                //     url: MapasCulturais.createUrl('aldirblanc', 'nova_inscricao', {agent: agentId, inciso: inciso}),
-                //     success: function(msg){
-                //         if(msg.error) {
-                //             alert("você so pode ter uma inscrição")
-                //             return false;
-                //             //quando chegar la, verifica qual inscrição a pessoa já esta em andamento
-                //             // document.location = `${MapasCulturais.baseURL}aldirblanc/individual/`;
-                //             // return false;
-                //         }
-                //         document.location = `${MapasCulturais.baseURL}aldirblanc/individual/${msg.id}`;
-                //     },
-                //     error: function(XMLHttpRequest, textStatus, errorThrown) {
-                //         console.log("some error***");
-                //     }
-                // });
             });
         });
 
