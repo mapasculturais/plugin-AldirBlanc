@@ -3,8 +3,8 @@ $action = preg_replace("#^(\w+/)#", "", $this->template);
 
 $this->bodyProperties['ng-app'] = "entity.app";
 $this->bodyProperties['ng-controller'] = "EntityController";
-
-$this->jsObject['angularAppDependencies'][] = 'entity.module.opportunity.aldirblanc';
+$this->jsObject['request']['controller'] = 'registration';
+$this->jsObject['angularAppDependencies'][] = 'entity.module.opportunity';
 
 $this->addEntityToJs($entity);
 
@@ -23,12 +23,18 @@ $_params = [
     'opportunity' => $entity->opportunity
 ];
 
-
 ?>
 
 <?php //$this->part('editable-entity', array('entity'=>$entity, 'action'=>$action));  ?>
 <?php $this->part('aldirblanc/editable-entity', array('entity'=>$entity, 'action'=>$action));  ?>
 
+<style>
+.editable.editable-click {
+    font-size: 18px;
+    color: blue;
+    cursor: pointer;
+}
+</style>
 
 <article class="main-content registration" ng-controller="OpportunityController">
 
@@ -46,7 +52,7 @@ $_params = [
         <?php // Desabilitando este template por enquanto, pois não é a melhor forma de apresentar para o usuário que está se inscrevendo ?>
         <?php //$this->part('singles/registration-edit--seals', $_params) ?>
         
-        <?php $this->part('aldirblanc/registration-edit--fields', $_params) ?>
+        <?php $this->part('singles/registration-edit--fields', $_params) ?>
 
         <?php if(!$entity->preview): ?>
             <?php //$this->part('singles/registration-edit--send-button', $_params) ?>
