@@ -1,3 +1,68 @@
+.lab-form-tab {
+  text-align: center;
+  cursor: pointer;
+  &:before {
+      @extend %tick-icon;
+      display: block;
+  }
+  &:hover{
+      &:before {
+          background-color: $brand-primary;
+      }
+  }
+}
+.lab-form-tab-active {
+  &:before {
+      background-color: $brand-primary;
+  }
+}
+.lab-form-tab-complete {
+  &:before {
+      background-color: $brand-success;
+  }
+  &:hover:before {
+      background-color: $brand-success;
+  }
+}
+.lab-form-tab-error {
+  &:before {
+      background-color: $brand-danger;
+  }
+  &:hover:before {
+      background-color: $brand-danger;
+  }
+}
+.lab-form-step-count {
+  color: $brand-primary;
+  font-size: .875rem;
+  font-weight: bold;
+}
+.lab-form-nav {
+  text-align: center;
+}
+
+.lab-application-number {
+  text-align: center;
+  background-color: $gray-light;
+  color: $brand-primary;
+  font-weight: bold;
+  border-radius: 2px;
+  float: left;
+  margin: 1.5rem auto;
+  padding: $padding-base;
+  &:after{
+      content: '.';
+      display: block;
+      height: 0;
+      clear: both;
+      visibility: hidden;
+  }
+}
+
+#editable-entity {
+  display: none;
+}
+
 .questions{
 
   h1, h2, h3, h4, h5{
