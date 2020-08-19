@@ -18,7 +18,7 @@ if(count($cidades) <= 1){
 <script>
     $(document).ready(function(){
 
-        let params      = { opportunity: null, category:null};
+        let params      = {opportunity: null, category:null};
         let formalizado = null;
         let coletivo    = null;
 
@@ -33,9 +33,9 @@ if(count($cidades) <= 1){
          * Redireciona o usuário para próxima tela conforme paramentros selecionados.
          */
         function goToNextPage(){
+            params.category = formalizado +'-'+ coletivo;
             document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params)
         }
-
 
         /**
          * Ao clicar nos cards do Inciso II, o usuário é encaminhado para tela de opções de personalidade jurídica do beneficiário.
@@ -117,43 +117,6 @@ if(count($cidades) <= 1){
            }
         });
 
-
-        // Esconde os filtros de cidade e categorias para espaços ou coletivos no início
-        // $('.js-lab-option').addClass('inactive');
-        // $('.js-lab-item').hide();
-
-        // Exibe as opções de cadastro no início
-        // $('.js-lab-item:first').show();
-
-        // Exibe os filtros de cidade    
-        // $('.js-lab-option').click(function(){
-        //     var t = $(this).attr('id');
-        //     if($(this).hasClass('inactive')){
-        //         $('.js-lab-option').addClass('inactive');
-        //         $(this).removeClass('inactive');
-        //         $('.js-lab-item').hide();
-        //         $('#'+ t + 'C').fadeIn('slow');
-        //     }
-        // });
-
-        // Exibe os filtros de categorias para espaços ou coletivos
-        // $('.js-lab-option').change(function(){
-        //     var t = $(this).attr('id');
-        //     if($(this).hasClass('inactive')){
-        //         $('.js-lab-option').addClass('inactive');
-        //         $(this).removeClass('inactive');
-        //         $('.js-lab-item').hide();
-        //         $('#'+ t + 'C').fadeIn('slow');
-        //     }
-        // });
-
-        // Botão voltar a pergunta anterior
-        // $('.js-back').click(function(){
-        //     $('.js-lab-option').addClass('inactive');
-        //     $('.js-lab-item').hide();
-        //     $('.js-lab-item:first').show();
-        // });
-
         // Exibe/esconde texto explicativo das opções de cadastro em celulares
         $('.js-help').click(function(){
             $('.js-detail').toggle('1000');
@@ -227,41 +190,6 @@ if(count($cidades) <= 1){
 
         </div><!-- End .lab-item -->
 
-<!--        <div id="option1C" class="js-lab-item lab-item">-->
-<!--            --><?php //$this->part('aldirblanc/cadastro/select-cidade', ['cidades' => $cidades]) ?>
-<!--        </div>-->
-        <!-- End .lab-item -->
-
-<!--        <div id="option4C" class="js-lab-item lab-item">-->
-<!--            <p class="lab-form-question">Seu espaço é formalizado?</p>-->
-<!--            <div class="lab-form-answer">-->
-<!--                <span>-->
-<!--                    <a class="btn btn-boolean btn-large" href="--><?//= $this->controller->createUrl( 'coletivo', ['espaco-formalizado'] ) ?><!--">--><?php //i::_e('Sim') ?><!--</a>-->
-<!--                    <a class="btn btn-boolean btn-large" href="--><?//= $this->controller->createUrl( 'coletivo', ['espaco-nao-formalizado'] ) ?><!--">--><?php //i::_e('Não') ?><!--</a>-->
-<!--                </span>-->
-<!--                <a class="js-back lab-back" href="#"><span class="icon icon-go-back"></span><span class="screen-reader-text">Voltar</span></a>-->
-<!--            </div>-->
-            <!-- End .lab-form-answer -->
-<!--        </div>-->
-        <!-- End .lab-item -->
-
-<!--        <div id="option2C" class="js-lab-item lab-item">-->
-<!--        </div>-->
-    <!-- End .lab-item -->
-
-<!--        <div id="option5C" class="js-lab-item lab-item">-->
-<!--            <p class="lab-form-question">Sua pequena empresa ou coletivo é formalizado?</p>-->
-<!--            <div class="lab-form-answer">-->
-<!--                <span>-->
-<!--                    <a class="btn btn-boolean btn-large" href="--><?//= $this->controller->createUrl( 'coletivo', ['coletivo-formalizado'] ) ?><!--">--><?php //i::_e('Sim') ?><!--</a>-->
-<!--                    <a class="btn btn-boolean btn-large" href="--><?//= $this->controller->createUrl( 'coletivo', ['coletivo-nao-formalizado'] ) ?><!--">--><?php //i::_e('Não') ?><!--</a>-->
-<!--                </span>-->
-<!--                <a class="js-back lab-back" href="#"><span class="icon icon-go-back"></span><span class="screen-reader-text">Voltar</span></a>-->
-<!--            </div>-->
-            <!-- End .lab-form-answer -->
-<!--        </div>-->
-        <!-- End .lab-item -->
-
         <!-- Begin .js-questions -->
         <div class="js-questions questions inactive">
 
@@ -270,10 +198,10 @@ if(count($cidades) <= 1){
                 <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica a situação do local onde o beneficiário do subsídio desenvolve a atividade cultural (seleção única)') ?></p>
                 <div class="options-questions">
                     <label>
-                        <input type="radio" class="coletivo" name="coletivo" value="coletivo-formalizado"/><?php i::_e('Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado;') ?>
+                        <input type="radio" class="coletivo" name="coletivo" value="espaco"/><?php i::_e('Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado;') ?>
                     </label>
                     <label>
-                        <input type="radio" class="coletivo" name="coletivo" value="coletivo-nao-formalizado" /><?php i::_e('Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.') ?>
+                        <input type="radio" class="coletivo" name="coletivo" value="coletivo" /><?php i::_e('Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.') ?>
                     </label>
                 </div>
                 <button class="btn js-back">Voltar</button>
@@ -284,10 +212,10 @@ if(count($cidades) <= 1){
                 <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica o beneficiário do subsídio previsto no inciso II do art. 2º da lei federal nº 14.017/2020 (seleção única)') ?></p>
                 <div class="options-questions">
                     <label>
-                        <input type="radio" class="formalizado" name="formalizado" value="espaco-formalizado" /><?php i::_e('Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.') ?>
+                        <input type="radio" class="formalizado" name="formalizado" value="formalizado" /><?php i::_e('Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.') ?>
                     </label>
                     <label>
-                        <input type="radio" class="formalizado" name="formalizado" value="espaco-nao-formalizado" /><?php i::_e('Espaço artístico e cultural mantido por coletivo ou grupo cultural (sem CNPJ) ou por pessoa física (CPF).') ?>
+                        <input type="radio" class="formalizado" name="formalizado" value="nao-formalizado" /><?php i::_e('Espaço artístico e cultural mantido por coletivo ou grupo cultural (sem CNPJ) ou por pessoa física (CPF).') ?>
                     </label>
                 </div>
                 <button class="btn js-back">Voltar</button>
