@@ -123,9 +123,9 @@
         </li>
     </ul>
 
-    <div class="buttons">
+    <nav class="nav-terms">
         <button class="btn btn-large btn-lab js-btn">  <?php \MapasCulturais\i::_e("Prosseguir para inscrição");?></button>
-    </div>
+    </nav>
 
     <div id="modalAlert" class="modal">
         <!-- Modal content -->
