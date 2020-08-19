@@ -2,7 +2,10 @@
 
 namespace AldirBlanc;
 
+use Exception;
 use MapasCulturais\App;
+use MapasCulturais\Controllers\Opportunity;
+use MapasCulturais\Entities\Project;
 use MapasCulturais\i;
 
 // @todo refatorar autoloader de plugins para resolver classes em pastas
@@ -34,6 +37,7 @@ class Plugin extends \MapasCulturais\Plugin
     public function _init()
     {
         $app = App::i();
+        $plugin = $this;
 
         // enqueue scripts and styles
         $app->view->enqueueStyle('aldirblanc', 'app', 'aldirblanc/app.css');
@@ -69,7 +73,16 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
-        $plugin = $this;
+        $app->hook('mapasculturais.run:after', function() use ($plugin) {
+            /**
+             * Criação automatica da opportunidade do inciso1
+             */
+            
+            $plugin->createOpportunityInciso1();
+        });
+
+
+        
 
         /**
          * Na criação da inscrição, define os metadados inciso2_opportunity_id ou 
@@ -88,7 +101,97 @@ class Plugin extends \MapasCulturais\Plugin
                 $agent->save(true);
             }
         });
+
         
+        
+    }
+
+    public function getOpportunityByInciso(Project $project,int $inciso) {
+
+        $result = [];
+
+        $opportunities = $project->getOpportunities();
+
+        foreach($opportunities as $opportunity) {
+            if((int)$opportunity->getMetadata('aldirblanc_inciso') == $inciso) {
+                $result[] = $opportunity;
+            }
+        }
+
+        return $result;
+    }
+
+    public function createOpportunityInciso1() {
+        $app = App::i();
+
+        if($app->user->is('guest')) {
+            return;
+        }
+
+        $idProjectFromConfig = $this->config['project_id'] ? $this->config['project_id'] : null; 
+
+        if(!$idProjectFromConfig) {
+            throw new Exception('Defina a configuração "project_id" no config.php["AldirBlanc"] ');
+        }
+
+        $project = $app->repo('Project')->find($idProjectFromConfig);
+
+        if(!$project) {
+            throw new Exception('Id do projeto está invalido');
+        }
+
+        $opportunities =  $this->getOpportunityByInciso($project, 1);
+
+        if(empty($opportunities)) {
+
+            $app->disableAccessControl();
+
+            $opportunity = new \MapasCulturais\Entities\ProjectOpportunity();
+            $opportunity->name = "Inciso1";
+            $opportunity->shortDescription = "Uma descricao pequena aqui";
+            $opportunity->registrationFrom = new \DateTime();
+            $opportunity->registrationTo = new \DateTime( '2025-01-31' );
+            $opportunity->owner = $project->owner;
+            $opportunity->ownerEntity = $project;
+
+            $opportunityMeta = new \MapasCulturais\Entities\OpportunityMeta();
+            $opportunityMeta->owner = $opportunity;
+            $opportunityMeta->key = 'aldirblanc_inciso';
+            $opportunityMeta->value = 1;
+            
+            $project->_relatedOpportunities = [$opportunity];
+    
+            $opportunity->save();
+
+            $opportunityMeta->save();
+
+            $project->save();
+
+            $app->enableAccessControl();
+            $app->em->flush();
+
+        } 
+
+    }
+
+    // @todo FAZER INCISO 2
+    public function createOpportunityInciso2() {
+        $app = App::i();
+
+        $idProjectFromConfig = $this->config['project_id'] ? $this->config['project_id'] : null; 
+
+        if(!$idProjectFromConfig) {
+            throw new Exception('Defina a configuração "project_id" no config.php["AldirBlanc"] ');
+        }
+
+        $project = $app->repo('Project')->find($idProjectFromConfig);
+
+        $opportunities =  $this->getOpportunityByInciso($project, 1);
+
+        if(empty($opportunities)) {
+            //cria opprtunidade
+        } 
+
     }
 
     /**
