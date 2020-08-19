@@ -1,29 +1,8 @@
+//
+// Termos
+// --------------------------------------------------
 #termos{
 
-  $warning: #856404 !default;
-
-  padding: 5%;
-  width: 90%;
-  margin: 0 auto;
-
-  * {
-    box-sizing: border-box;
-  }
-
-  .title{
-    text-align: center;
-  }
-
-  .description{
-    font-size: 1.1rem;
-    text-align: center;
-  }
-
-  .termos-warning{
-    font-size: 0.9rem;
-    text-align: center;
-    color: $warning;
-  }
   .buttons{
     display: flex;
     justify-content: center;
@@ -61,7 +40,6 @@
     margin: 0 auto;
     justify-content: center;
     padding: 0;
-    width: 95%;
     background-color: #fff;
     border-radius: 6px;
     box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
@@ -165,7 +143,7 @@
 
   .modal-content {
     background-color: #fff3cd !important;
-    color: $warning !important;
+
     margin: 15% auto;
     text-align: center;
     padding: 20px;
