@@ -1,129 +1,128 @@
 //
 // Termos
 // --------------------------------------------------
-#termos{
+#termos {
+    .list {
+        display: flex;
+        flex-direction: column;
+        margin-left: 0;
+        justify-content: center;
+        padding: 0;
+        border-radius: $border-radius-base;
+        list-style: none;
+        overflow: hidden;
 
-  .list {
-    display: flex;
-    flex-direction: column;
-    margin-left: 0;
-    justify-content: center;
-    padding: 0;
-    border-radius: $border-radius-base;
-    list-style: none;
-    overflow: hidden;
-
-    .list-item {
-      margin: 0 0 2px;
-      position: relative;
-      background-color: #f8f8f8;
-      font-size: $font-size-small;
-      &:hover {
-        background-color: #fff;
-        .check-label-box:after {
-          background-color: $gray;
+        .list-item {
+            margin: 0 0 2px;
+            position: relative;
+            background-color: #f8f8f8;
+            font-size: $font-size-small;
+            &:hover {
+                background-color: #fff;
+                .check-label-box:after {
+                    background-color: $gray;
+                }
+            }
         }
-      }
     }
-  }
 
-  // hide the checkbox
-  .hidden-box {
-    position: absolute;
-    appearance: none;
-    opacity: 0;
-  }
-
-  .check-label {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-  }
-
-  .check-label-box {
-    display: flex;
-    flex: 0 0 36px;
-    align-self: center;
-    height: 36px;
-    width: 36px;
-    margin: 0 $padding-large;
-    cursor: pointer;
-    &:after {
-      @extend %tick-icon;
+    // hide the checkbox
+    .hidden-box {
+        position: absolute;
+        appearance: none;
+        opacity: 0;
     }
-  }
-  .check-label-text {
-    display: flex;
-    align-self: center;
-    position: relative;
-    cursor: pointer;
-    padding: $padding-large;
-    width: 90%;
 
-    &:after {
-      content: '';
-      display: block;
-      width: 0%;
-      height: 2px;
-      background-color: #000;
-      position: absolute;
-      top: 70%;
-      left: 7.5%;
-      transform: translateY(-50%);
-      transition: width 100ms ease-in-out;
+    .check-label {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: center;
     }
-  }
 
-  .hidden-box:checked + .check-label {
-    background-color: $brand-primary-light;
     .check-label-box {
-      &:after {
-        background-color: $brand-primary;
-      }
+        display: flex;
+        flex: 0 0 36px;
+        align-self: center;
+        height: 36px;
+        width: 36px;
+        margin: 0 $padding-large;
+        cursor: pointer;
+        &:after {
+            @extend %tick-icon;
+        }
     }
-  }
-.nav-terms {
-  text-align: right;
-}
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    background-color: transparent;
-    border: none !important;
-    box-shadow: none !important;
-    @media screen and (max-width: 768px) {
-      top: 10%;
+    .check-label-text {
+        display: flex;
+        align-self: center;
+        position: relative;
+        cursor: pointer;
+        padding: $padding-large;
+        width: 90%;
+
+        &:after {
+            content: "";
+            display: block;
+            width: 0%;
+            height: 2px;
+            background-color: #000;
+            position: absolute;
+            top: 70%;
+            left: 7.5%;
+            transform: translateY(-50%);
+            transition: width 100ms ease-in-out;
+        }
     }
 
-  }
+    .hidden-box:checked + .check-label {
+        background-color: $brand-primary-light;
+        .check-label-box {
+            &:after {
+                background-color: $brand-primary;
+            }
+        }
+    }
+    .nav-terms {
+        text-align: right;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        background-color: transparent;
+        border: none !important;
+        box-shadow: none !important;
+        @media screen and (max-width: 768px) {
+            top: 10%;
+        }
+    }
 
-  .modal-content {
-    background-color: #fff3cd !important;
+    .modal-content {
+        background-color: #fff3cd !important;
 
-    margin: 15% auto;
-    text-align: center;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    border: none;
-    border-radius: 10px;
-    border-top: 4px solid #3a72bc;
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
-  }
+        margin: 15% auto;
+        text-align: center;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        border: none;
+        border-radius: 10px;
+        border-top: 4px solid #3a72bc;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
 
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-  }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
 
-  .close:hover, .close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-  }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 }

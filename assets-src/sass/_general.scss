@@ -3,14 +3,22 @@
 // --------------------------------------------------
 
 .controller-aldirblanc {
-    h1, h2, h3, h4, h5, h6 {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
         text-align: center;
     }
-    h2,h3,h4,h5, h6 {
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
         font-family: $font-stack-base;
     }
 }
-
 
 #main-section {
     @media screen and (max-width: 767px) {
@@ -50,17 +58,17 @@
     }
 }
 
-
 .btn-lab {
     min-width: 80px;
     color: $brand-primary;
     background-color: #e2e2e2;
     border: 1px solid #e2e2e2;
-    &:hover, &:active {
+    &:hover,
+    &:active {
         color: #fff;
         background-color: $brand-primary;
         border: 1px solid $brand-primary;
-    }    
+    }
 }
 .intro-message {
     text-align: center;
