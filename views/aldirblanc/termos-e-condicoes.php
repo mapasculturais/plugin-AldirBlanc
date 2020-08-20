@@ -1,11 +1,17 @@
 <?php
     $this->jsObject['registrationId'] = $registration_id;
 ?>
-<section id="termos">
-    <h2 class="title"><?php \MapasCulturais\i::_e("Termos e Condições");?></h2>
+<section id="termos" class="lab-main-content">
+    <header>
+        <div>
+            <h1>Cadastro - Lei Aldir Blanc</h1>
+        </div>
+    </header>
+    <p class="intro-message"><?php \MapasCulturais\i::_e("Leia com atenção as informações abaixo. Você precisa se encaixar em todas elas.");?></p>
 
-    <p class="description"><?php \MapasCulturais\i::_e("De acordo com os critérios da LEI Nº 14.017 com sanção presidencial em 29 DE JUNHO DE 2020. Para ter acesso ao Auxílio Emergencial Cultural, você deve cumprir os seguintes requisitos:");?> </p>
-    <p class="termos-warning"><?php \MapasCulturais\i::_e("Leia com atenção as informações abaixo. Você precisa se encaixar em todas elas.");?></p>
+    <h2><?php \MapasCulturais\i::_e("Termos e Condições");?></h2>
+    
+    <p><?php \MapasCulturais\i::_e("De acordo com os critérios da LEI Nº 14.017 com sanção presidencial em 29 DE JUNHO DE 2020. Para ter acesso ao Auxílio Emergencial Cultural, você deve cumprir os seguintes requisitos:");?> </p>
 
     <ul class="list">
         <li class="list-item">
@@ -117,9 +123,9 @@
         </li>
     </ul>
 
-    <div class="buttons">
-        <button class="btn-prosseguir">  <?php \MapasCulturais\i::_e("Prosseguir para inscrição");?></button>
-    </div>
+    <nav class="nav-terms">
+        <button class="btn btn-large btn-lab js-btn">  <?php \MapasCulturais\i::_e("Prosseguir para inscrição");?></button>
+    </nav>
 
     <div id="modalAlert" class="modal">
         <!-- Modal content -->
@@ -135,7 +141,7 @@
 <script>
     var span          = document.getElementsByClassName("close")[0];
     var modal         = document.getElementById("modalAlert");
-    var btnProsseguir = document.querySelector(".btn-prosseguir");
+    var btnProsseguir = document.querySelector(".js-btn");
 
     // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {

@@ -12,7 +12,7 @@
 <p class="lab-form-detail">
         <span class="label">Número:</span> <?php echo $registration->number; ?> </br>
     
-        <span class="label">Data do envio:</span> <?php \MapasCulturais\i::_e("Enviada em");?> <?php echo $registration->sentTimestamp ? $registration->sentTimestamp->format(\MapasCulturais\i::__('d/m/Y à\s H:i')): ''; ?>.  </br>
+        <span class="label">Data do envio:</span> <?php echo $registration->sentTimestamp ? $registration->sentTimestamp->format(\MapasCulturais\i::__('d/m/Y à\s H:i')): ''; ?>.  </br>
     
         <span class="label">Responsável:</span>  <?php echo $registration->owner->name; ?> </br>
     
