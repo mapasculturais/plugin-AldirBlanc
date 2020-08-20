@@ -21,6 +21,7 @@ if(count($cidades) <= 1){
         let params      = {opportunity: null, category:null};
         let formalizado = null;
         let coletivo    = null;
+        let returning   = false;
         /**
          * Se houver cidade/oportunidade defualt definida na configuração do plugin para o Inciso II, o id é setado no paramentro.
          */
@@ -32,35 +33,43 @@ if(count($cidades) <= 1){
          * Redireciona o usuário para próxima tela conforme paramentros selecionados.
          */
         function goToNextPage(){
-            params.category = formalizado +'-'+ coletivo;
+            params.category =  coletivo +'-'+ formalizado;
             document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params)
         }
 
         /**
-         * Ao clicar nos cards do Inciso II, o usuário é encaminhado para tela de opções de personalidade jurídica do beneficiário.
+         * Ao clicar nos cards do Inciso II, o usuário é encaminhado para tela de opções do local de atividade do beneficiário.
          */
         $('.js-lab-option').click(function(){
             $('.js-lab-item').fadeOut(1);
             $('.js-questions').fadeIn(11);
             $('#local-atividade').fadeIn(1100);
+            returning = false;
         });
 
         /**
-         * Ao clicar em uma das opções de personalidade jurídica do beneficiário, o usuário é encaminhado para tela de seleção da local de atividade do beneficiário.
+         * Ao clicar em uma das opções do local de atividade do beneficiário , o usuário é encaminhado para tela de opções de personalidades jurídica do beneficiário.
          */
         $('.coletivo').click(function(){
             coletivo = this.value;
             $('.js-questions-tab').hide();
             $('#personalidade-juridica').fadeIn(1100);
+            returning = false;
         });
 
         /**
-         * Ao clicar em uma das opções do local de atividade do beneficiário, o usuário é encaminhado para tela de seleção da oportunidade/cidade,
+         * Ao clicar em uma das opções de opções de personalidades jurídica do beneficiário, o usuário é encaminhado para tela de seleção da oportunidade/cidade,
          * senão é redirecionado conforme os parametros selecionados.
          */
         $('.formalizado').click(function(){
             formalizado = this.value;
             $('.js-questions-tab').hide();
+
+            if(returning){
+                $('.js-questions-tab').hide();
+                $('#select-cidade').fadeIn(1100);
+                return;
+            }
 
             let hasCities = $('.js-questions').find('#select-cidade');
             /**
@@ -70,6 +79,7 @@ if(count($cidades) <= 1){
             if(params.opportunity == null && hasCities.length > 0){
                 $('.js-questions-tab').hide();
                 $('#select-cidade').fadeIn(1100);
+                returning = false;
             }else{
                 $('.js-questions-tab').hide();
                 goToNextPage();
@@ -95,6 +105,7 @@ if(count($cidades) <= 1){
 
         $('.js-back').click(function(){
             let parentId = $(this).parent().attr('id');
+            returning = true;
             switch (parentId) {
                 case 'personalidade-juridica':
                     $('#personalidade-juridica').hide();
@@ -208,8 +219,8 @@ if(count($cidades) <= 1){
     <div class="js-questions questions inactive">
 
         <div id="local-atividade" class="js-questions-tab questions-tab inactive">
-            <h4 class="questions-tab-title"><?php i::_e('Local onde o beneficiário desenvolve sua atividade cultural') ?></h4>
-            <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica a situação do local onde o beneficiário do subsídio desenvolve a atividade cultural (seleção única)') ?></p>
+            <h4 class="questions-tab-title"><?php i::_e('Onde o beneficiário desenvolve suas atividades?') ?></h4>
+            <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica a situação do local onde o beneficiário do subsídio desenvolve a atividade cultural.') ?></p>
             <div class="options-questions">
                 <label>
                     <input type="radio" class="coletivo" name="coletivo" value="espaco"/><?php i::_e('Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado;') ?>
@@ -222,8 +233,8 @@ if(count($cidades) <= 1){
         </div>
 
         <div id="personalidade-juridica" class="js-questions-tab questions-tab inactive">
-            <h4 class="questions-tab-title"><?php i::_e('Personalidade jurídica do beneficiário') ?></h4>
-            <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica o beneficiário do subsídio previsto no inciso II do art. 2º da lei federal nº 14.017/2020 (seleção única)') ?></p>
+            <h4 class="questions-tab-title"><?php i::_e('Qual a personalidade jurídica do beneficiário?') ?></h4>
+            <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica o beneficiário do subsídio previsto no inciso II do art. 2º da lei federal nº 14.017/2020.') ?></p>
             <div class="options-questions">
                 <label>
                     <input type="radio" class="formalizado" name="formalizado" value="formalizado" /><?php i::_e('Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.') ?>
