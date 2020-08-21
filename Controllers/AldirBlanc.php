@@ -286,9 +286,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function GET_cadastro()
     {
         $app = App::i();
-        $currentOpportunity = $app->repo('Opportunity')->findOneBy(['name'=>'Inciso1']);
-        var_dump($currentOpportunity);
-        die();
+        
         $this->requireAuthentication();
         
         $inciso1 = $this->getOpportunityInciso1();
@@ -355,4 +353,5 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         return $user;
     }
+
 }
