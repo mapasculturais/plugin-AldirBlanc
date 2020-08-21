@@ -73,12 +73,13 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
-        $app->hook('mapasculturais.run:after', function() use ($plugin) {
+        $app->hook('mapasculturais.run:before', function() use ($plugin) {
             /**
              * Criação automatica da opportunidade do inciso1
              */
             
-            $plugin->createOpportunityInciso1();
+            // $plugin->createOpportunityInciso1();
+            $plugin->createOpportunityInciso2();
         });
 
 
@@ -101,9 +102,18 @@ class Plugin extends \MapasCulturais\Plugin
                 $agent->save(true);
             }
         });
+  
+    }
 
-        
-        
+    /**
+     * @return bool
+     */
+    public function checkIfIsValidDateString(string $dateString) {
+        if (\DateTime::createFromFormat('Y-m-d', $dateString) !== FALSE) {
+            return true;
+        } 
+
+        return false;
     }
 
     public function getOpportunityByInciso(Project $project,int $inciso) {
@@ -121,6 +131,51 @@ class Plugin extends \MapasCulturais\Plugin
         return $result;
     }
 
+    public function createOpportunity($params, $inciso, $project) {
+        $app = App::i();
+
+        $app->disableAccessControl();
+
+        $opportunity = new \MapasCulturais\Entities\ProjectOpportunity();
+        $opportunity->name = $params['name'];
+        $opportunity->shortDescription = $params['shortDescription'];
+        $opportunity->registrationFrom = new \Datetime($params['registrationFrom']);
+        $opportunity->registrationTo = new \DateTime( $params['registrationTo'] );
+        $opportunity->owner = $params['owner'];
+        $opportunity->ownerEntity = $project;
+        $opportunity->type = 9;
+        
+        $evaluationMethodConfiguration = new \MapasCulturais\Entities\EvaluationMethodConfiguration();
+        $evaluationMethodConfiguration->type = "simple";
+        $evaluationMethodConfiguration->opportunity = $opportunity;
+
+        $opportunityMeta = new \MapasCulturais\Entities\OpportunityMeta();
+        $opportunityMeta->owner = $opportunity;
+        $opportunityMeta->key = 'aldirblanc_inciso';
+        $opportunityMeta->value = $inciso;
+
+        $project->_relatedOpportunities = [$opportunity];
+
+        $opportunity->save();
+
+        $evaluationMethodConfiguration->save();
+
+        $opportunityMeta->save();
+
+        if($inciso == 2) {
+            $opportunityMetaCity = new \MapasCulturais\Entities\OpportunityMeta();
+            $opportunityMetaCity->owner = $opportunity;
+            $opportunityMetaCity->key = 'aldirblanc_city';
+            $opportunityMetaCity->value = $params['city'];
+            $opportunityMetaCity->save();
+        }
+
+        $project->save();
+
+        $app->enableAccessControl();
+        $app->em->flush();
+    }
+
     public function createOpportunityInciso1() {
         $app = App::i();
 
@@ -134,49 +189,72 @@ class Plugin extends \MapasCulturais\Plugin
             throw new Exception('Defina a configuração "project_id" no config.php["AldirBlanc"] ');
         }
 
+        //VALIDAÇÕES PARA VER SE AS CONFIG TÃO SETADAS
+        $aldirblancSettings = $this->config['inciso1'] ? $this->config['inciso1'] : [];
+
+        if(empty($aldirblancSettings)) {
+            throw new Exception(
+                'Defina as configurações "registrationFrom","registrationTo","shortDescription","name","owner","avatar","seal" no config.php["AldirBlanc"]["inciso1"]'
+            );
+        }
+
         $project = $app->repo('Project')->find($idProjectFromConfig);
 
         if(!$project) {
             throw new Exception('Id do projeto está invalido');
         }
 
+
+        if(!isset($aldirblancSettings['registrationFrom'])) {
+            throw new Exception('É necessario preencher "registrationFrom" nas config.php[Aldirblanc]');
+        }
+
+        if(!isset($aldirblancSettings['registrationTo'])) {
+            throw new Exception('É necessario preencher "registrationTo" nas config.php[Aldirblanc]');
+        }
+
+
+        $aldirblancSettings['registrationFrom'] = $this->checkIfIsValidDateString($aldirblancSettings['registrationFrom']) ? $aldirblancSettings['registrationFrom'] : '2020-08-20';
+        $aldirblancSettings['registrationTo'] = $this->checkIfIsValidDateString($aldirblancSettings['registrationTo']) ? $aldirblancSettings['registrationTo'] : '2050-01-01';
+        $aldirblancSettings['shortDescription'] = isset($aldirblancSettings['shortDescription']) ? $aldirblancSettings['shortDescription'] : 'DESCRIÇÃO PADRÃO';
+        $aldirblancSettings['name'] = isset($aldirblancSettings['name']) ? $aldirblancSettings['name'] : 'NOME PADRÃO';
+        // @todo ARRUME AQUI, isset
+        $aldirblancSettings['owner'] = is_int($aldirblancSettings['owner']) ? $aldirblancSettings['owner'] : $project->owner;
+        $aldirblancSettings['avatar'] = isset($aldirblancSettings['avatar']) ? $aldirblancSettings['avatar'] : 'https://static.wixstatic.com/media/09a3d5_55fd1b81f9094845ae7e43ec23c869b6~mv2_d_3072_2048_s_2.jpg';
+        $aldirblancSettings['seal'] = isset($aldirblancSettings['seal']) ? $aldirblancSettings['seal'] : 1;
+
+        $owner = $app->repo("Agent")->find($aldirblancSettings['owner']);
+
+        if(!$owner) {
+            throw new Exception('Owner invalido');
+        }
+
         $opportunities =  $this->getOpportunityByInciso($project, 1);
 
         if(empty($opportunities)) {
 
-            $app->disableAccessControl();
+            $params = [
+                'registrationFrom' => $aldirblancSettings['registrationFrom'],
+                'registrationTo' => $aldirblancSettings['registrationTo'],
+                'shortDescription' => $aldirblancSettings['shortDescription'],
+                'name' => $aldirblancSettings['name'],
+                'owner' => $owner,
+                'avatar' => $aldirblancSettings['avatar'],
+                'seal' => $aldirblancSettings['seal'],
+            ];
 
-            $opportunity = new \MapasCulturais\Entities\ProjectOpportunity();
-            $opportunity->name = "Inciso1";
-            $opportunity->shortDescription = "Uma descricao pequena aqui";
-            $opportunity->registrationFrom = new \DateTime();
-            $opportunity->registrationTo = new \DateTime( '2025-01-31' );
-            $opportunity->owner = $project->owner;
-            $opportunity->ownerEntity = $project;
-
-            $opportunityMeta = new \MapasCulturais\Entities\OpportunityMeta();
-            $opportunityMeta->owner = $opportunity;
-            $opportunityMeta->key = 'aldirblanc_inciso';
-            $opportunityMeta->value = 1;
-            
-            $project->_relatedOpportunities = [$opportunity];
-    
-            $opportunity->save();
-
-            $opportunityMeta->save();
-
-            $project->save();
-
-            $app->enableAccessControl();
-            $app->em->flush();
+            $this->createOpportunity($params,1,$project);
 
         } 
 
     }
 
-    // @todo FAZER INCISO 2
     public function createOpportunityInciso2() {
-        $app = App::i();
+         $app = App::i();
+
+        if($app->user->is('guest')) {
+            return;
+        }
 
         $idProjectFromConfig = $this->config['project_id'] ? $this->config['project_id'] : null; 
 
@@ -184,14 +262,60 @@ class Plugin extends \MapasCulturais\Plugin
             throw new Exception('Defina a configuração "project_id" no config.php["AldirBlanc"] ');
         }
 
+        $inciso2Cities = $this->config['inciso2'] ? $this->config['inciso2'] : [];
+
+        if(empty($inciso2Cities)) {
+            throw new Exception('Defina a configuração "inciso2" no config.php["AldirBlanc"] ');
+        }
+
         $project = $app->repo('Project')->find($idProjectFromConfig);
 
-        $opportunities =  $this->getOpportunityByInciso($project, 1);
+        if(!$project) {
+            throw new Exception('Id do projeto está invalido');
+        }
 
-        if(empty($opportunities)) {
-            //cria opprtunidade
-        } 
+        //Faz um loop em todas as cidades
+        foreach ($inciso2Cities as $city) {
 
+            $city['registrationFrom'] = $this->checkIfIsValidDateString($city['registrationFrom']) ? $city['registrationFrom'] : '2020-08-20';
+            $city['registrationTo'] = $this->checkIfIsValidDateString($city['registrationTo']) ? $city['registrationTo'] : '2050-01-01';
+            $city['shortDescription'] = $city['shortDescription'] ? $city['shortDescription'] : 'DESCRIÇÃO PADRÃO';
+            $city['owner'] = is_int($city['owner']) ? $city['owner'] : $project->owner;
+            $city['city'] = $city['city'] ? $city['city'] : 'NOME PADRÃO';
+            $city['avatar'] = $city['avatar'] ? $city['avatar'] : 'https://static.wixstatic.com/media/09a3d5_55fd1b81f9094845ae7e43ec23c869b6~mv2_d_3072_2048_s_2.jpg';
+            $city['seal'] = $city['seal'] ? $city['seal'] : 1;
+
+
+            $owner = $app->repo("Agent")->find($city['owner']);
+
+            if(!$owner) {
+                throw new Exception('Owner invalido');
+            }
+
+            $opportunityMeta = $app->repo("OpportunityMeta")->findOneBy(array('key' => 'aldirblanc_city', 'value' => $city['city']));
+
+            //cria opportunidade SOMENTE se ainda NÃO tiver sido criada para a cidade "[i]"
+            if(!$opportunityMeta) {
+
+                $params = [
+                    'registrationFrom' => $city['registrationFrom'],
+                    'registrationTo' => $city['registrationTo'],
+                    'shortDescription' => $city['shortDescription'],
+                    'name' => $city['name'],
+                    'owner' => $owner,
+                    'avatar' => $city['avatar'],
+                    'seal' => $city['seal'],
+                    'city' => $city['city'],
+                ];
+
+                $this->createOpportunity(
+                    $params,
+                    2,
+                    $project
+                );
+
+            }
+        }
     }
 
     /**
