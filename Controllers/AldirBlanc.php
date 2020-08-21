@@ -100,16 +100,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return $this->config['inciso2_opportunity_ids'];
     }
 
-    function finish($data, $status = 200, $isAjax = false)
-    {
-        if (is_array($data)) {
-            $data['redirect'] = 'false';
-        } else if (is_object($data)) {
-            $data->redirect = 'false';
-        }
-        parent::finish($data, $status, $isAjax);
-    }
-
     /**
      * Redireciona o usuário para o formulário do inciso I
      * 
