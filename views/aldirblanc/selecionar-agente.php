@@ -1,27 +1,5 @@
 <?php
-    $agents = [];
-
-    foreach($user->enabledAgents as $agent){
-        $enabledAgent         = new stdClass();
-        $enabledAgent->id     = $agent->id;
-        $enabledAgent->name   = $agent->name;
-        $enabledAgent->avatar = $agent->getAvatar() ? $agent->getAvatar()->transform('avatarSmall')->url : null;
-        $enabledAgent->type   = $agent->getType()->name;
-        $enabledAgent->areas  = $agent->getTerms()['area'];
-        array_push($agents, $enabledAgent);
-    }
-
-    foreach($user->hasControlAgents as $agent){
-        $controlAgent         = new stdClass();
-        $controlAgent->id     = $agent->id;
-        $controlAgent->name   = $agent->name;
-        $controlAgent->avatar = $agent->getAvatar() ? $agent->getAvatar()->transform('avatarSmall')->url : null;
-        $controlAgent->type   = $agent->getType()->name;
-        $controlAgent->areas  = $agent->getTerms()['area'];
-        array_push($agents, $controlAgent);
-    }
-    //Ordena o array de agents pelo name
-    usort($agents, function($a, $b) {return strcmp($a->name, $b->name);});
+    
 ?>
 
 <article class="main-content" >

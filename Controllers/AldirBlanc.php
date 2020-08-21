@@ -205,7 +205,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             ]);                    
             if ($num_agents > 1) {
                 // redireciona para a página de escolha de agente
-                $app->redirect($this->createUrl('selecionar_agente'));
+                $app->redirect($this->createUrl('selecionar_agente',['tipo'=>1]));
             } else {
 
                 // redireciona para a rota de criação de nova inscrição
@@ -259,7 +259,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
             
         }
-        eval(\psy\sh());
 
         $registration->save(true);
 
@@ -399,9 +398,33 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     function GET_selecionar_agente()
     {
+        $tipo = $this->data['tipo'];
+        if($tipo != 1 && $tipo != 2){
+            //exceção
+        }
+        $app = App::i();
         $user = $this->_getUser();
-
-        $this->render('selecionar-agente', ['user' => $user]);
+        $tipo = $this->data['tipo'];
+        $agent_controller = $app->controller('agent');
+        $agentsQuery = $agent_controller->apiQuery([
+            '@select' => 'id,name,type,terms',
+            '@permissions' => '@control',
+            '@files' => '(avatar.avatarMedium):url',
+            'type'=>'EQ(' . $tipo . ')',
+        ]); 
+        $agents= [];
+        foreach($agentsQuery as $agent){
+            $agentItem         = new \stdClass();
+            $agentItem->id     = $agent['id'];
+            $agentItem->name   = $agent['name'];
+            $agentItem->avatar = isset($agent['@files:avatar.avatarMedium']) ? $agent['@files:avatar.avatarMedium']['url']: '';
+            $agentItem->type   = $agent['type']->name;
+            $agentItem->areas  = $agent['terms']['area'];
+            array_push($agents, $agentItem);
+        }
+        //Ordena o array de agents pelo name
+        usort($agents, function($a, $b) {return strcmp($a->name, $b->name);});
+        $this->render('selecionar-agente', ['agents' => $agents]);
     }
 
     protected function _getUser(){
