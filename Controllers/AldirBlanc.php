@@ -51,6 +51,21 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     }
 
     /**
+     * Retorna a Categoria do inciso II
+     *
+     * @return string;
+     */
+    function getCategoryName(string $slug)
+    {
+        if (isset($this->config['inciso2_categories'][$slug])) {
+            $app = App::i();
+            $categoryName = $this->config['inciso2_categories'][$slug];
+            return $categoryName;
+        } else {
+            throw \Exception('Categoria não existe');
+        }
+    }
+    /**
      * Retorna a oportunidade do inciso I
      *
      * @return \MapasCulturais\Entities\Opportunity;
@@ -71,18 +86,15 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
      *
      * @return \MapasCulturais\Entities\Opportunity;
      */
-    function getOpportunityInciso2(string $cidade)
+    function getOpportunityInciso2(string $opportunityId)
     {
-        if (isset($this->config['inciso2_opportunity_ids']['cidade'])) {
-            $app = App::i();
-
-            $opportunity_id = $this->config['inciso2_opportunity_ids'][$cidade];
-            $opportunity = $app->repo('Opportunity')->find($opportunity_id);
-
-            return $opportunity;
-        } else {
-            throw \Exception('Cidade não disponível para cadastro');
+        if (!in_array($opportunityId, $this->config['inciso2_opportunity_ids'])){
+            // @todo tratar esse erro
+            throw new \Exception();
         }
+        $app = App::i();
+        $opportunity = $app->repo('Opportunity')->find($opportunityId);
+        return $opportunity;
     }
     /**
      * Retorna o array associativo com os numeros e nomes de status
@@ -122,9 +134,40 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     */
    function GET_coletivo()
    {
-    $this->requireAuthentication();
-    $app = App::i();
+        $this->requireAuthentication();
 
+        $app = App::i();
+        if (isset($this->data['agent'])) {
+            $agent = $app->repo('Agent')->find($this->data['agent']);
+        } else {
+            $agent = $app->user->profile;
+        }
+
+        // se ainda não tem inscrição
+        if (!isset($agent->aldirblanc_inciso2_registration)) {
+            /** 
+             * verificar se o usuário tem mais de um agente, 
+             * se tiver redireciona para a página de escolha de agente
+             */
+            $agent_controller = $app->controller('agent');
+
+            $num_agents = $agent_controller->apiQuery([
+                '@select' => 'id',
+                '@permissions' => '@control',
+                'type'=>'EQ(1)',
+                '@count' => 1
+            ]);                    
+            if ($num_agents > 1) {
+                // redireciona para a página de escolha de agente
+                $app->redirect($this->createUrl('selecionar_agente'));
+            } else {
+
+                // redireciona para a rota de criação de nova inscrição
+                $data = array_merge( $this->data,['inciso' => 2,'agent' => $app->user->profile->id] );
+                $app->redirect($this->createUrl('nova_inscricao', $data));
+            }
+        }
+        $app->redirect($this->createUrl('formulario', [$agent->aldirblanc_inciso1_registration]));
    }
     /**
      * Redireciona o usuário para o formulário do inciso I
@@ -138,7 +181,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
 
         $app = App::i();
-
+        // @todo
+        //fazer uma verificação se o agente é individual exceção
         if (isset($this->data['agent'])) {
             $agent = $app->repo('Agent')->find($this->data['agent']);
         } else {
@@ -187,26 +231,35 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             // @todo tratar esse erro
             throw new \Exception();
         }
-
+        
         $app = App::i();
-
         $agent = $app->repo('Agent')->find($this->data['agent']);
         $agent->checkPermission('@control');
-
         $registration = new \MapasCulturais\Entities\Registration;
         $registration->owner = $agent;
 
         if ($this->data['inciso'] == 1) {
             $registration->opportunity = $this->getOpportunityInciso1();
         } else {
-            if (!isset($this->data['cidade']) || !isset($this->data['category'])) {
+            // inciso II
+            if (!isset($this->data['opportunity']) || !isset($this->data['category'])) {
                 // @todo tratar esse erro
                 throw new \Exception();
             }
-            $registration->opportunity = $this->getOpportunityInciso2($this->data['cidade']);
-
-            $registration->category = $this->data['category'];
+            
+            $registration->opportunity = $this->getOpportunityInciso1($this->data['opportunity']);
+            //pega o nome da category pela slug
+            $category = $this->getCategoryName($this->data['category']);
+            $registration->category = $category;
+            if (strpos($this->data['category'], 'espaco') !== false) {
+                //é espaço
+            }
+            else{
+                //é coletivo
+            }
+            
         }
+        eval(\psy\sh());
 
         $registration->save(true);
 
