@@ -186,8 +186,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
 
         $app = App::i();
-        // @todo
-        //fazer uma verificação se o agente é individual exceção
         if (isset($this->data['agent'])) {
             $agent = $app->repo('Agent')->find($this->data['agent']);
         } else {
@@ -240,10 +238,15 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $agent = $app->repo('Agent')->find($this->data['agent']);
 
         $agent->checkPermission('@control');
+        //verifica se o agente owner é indiividual
+        if($agent->getType()->id != 1){
+            // @todo tratar esse erro
+            throw new \Exception();
+        }
         $registration = new \MapasCulturais\Entities\Registration;
         $registration->owner = $agent;
 
-        if ($this->data['inciso'] == 1) {
+        if ($this->data['inciso'] == 1) {         
             $registration->opportunity = $this->getOpportunityInciso1();
         } else if($this->data['inciso'] == 2) {
             // inciso II
@@ -267,7 +270,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 $space = isset($num_spaces[0]) ? $app->repo('space')->find($num_spaces[0]['id']) : new \MapasCulturais\Entities\Agent($this->_getUser());
                 if ($num_spaces == []) {
                     $space = new \MapasCulturais\Entities\Space;
-                    //TODO: confirmar nome e tipo do Espaço
+                    //@TODO: confirmar nome e tipo do Espaço
                     $space->owner = $agent;
                     $space->setType(105);
                     $space->name = 'Espaço - ' . $agent->name;
@@ -294,7 +297,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 ]);
                 $agentRelated = isset($agentsQuery[0]) ? $app->repo('agent')->find($agentsQuery[0]['id']) : new \MapasCulturais\Entities\Agent($this->_getUser());
                 if ($agentsQuery == []) {
-                    //TODO: confirmar nome e tipo do Agente coletivo
+                    //@TODO: confirmar nome e tipo do Agente coletivo
                     $agentRelated->name = $agent->name . ' - coletivo';
                     $agentRelated->type = 2;
                     $agentRelated->save(true);
@@ -319,12 +322,14 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $registration->save(true);
         if (isset($space)){
+            $space->checkPermission('@control');
             $relation = new RegistrationSpaceRelationEntity();
             $relation->space = $space;
             $relation->owner = $registration;
             $relation->save(true);   
         }
         if(isset($agentRelated)){
+            $agentRelated->checkPermission('@control');
             $result = $registration->createAgentRelation($agentRelated, 'coletivo');
         }
         $app->redirect($this->createUrl('formulario', [$registration->id]));
