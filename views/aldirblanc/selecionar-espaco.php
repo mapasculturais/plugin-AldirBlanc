@@ -4,27 +4,25 @@
 
 <article class="main-content" >
     <section id="selecionar-agentes">
-        <h3 class="title-section"><?php \MapasCulturais\i::_e("Selecione um agente");?></h3>
+        <h3 class="title-section"><?php \MapasCulturais\i::_e("Selecione um espaço");?></h3>
         <div id="agentes">
-            <?php foreach($agents as $agent): ?>
+            <?php foreach($spaces as $space): ?>
                 <div class="wrapper" >
                     <div class="profile">
-                        <?php if($agent->avatar): ?>
-                            <img src="<?php echo $agent->avatar;?>" class="thumbnail" alt="<?php echo $agent->name ?>">
+                        <?php if(isset($space->avatar)): ?>
+                            <img src="<?php echo $space->avatar;?>" class="thumbnail" alt="<?php echo $space->name ?>">
                         <?php else:?>
-                            <img src="<?php $app->view->asset('img/avatar--agent.png');?>" class="thumbnail" alt="<?php echo $agent->name ?>">
+                            <img src="<?php $app->view->asset('img/avatar--space.png');?>" class="thumbnail" alt="<?php echo $space->name ?>">
                         <?php endif; ?>
 
-                        <h3 class="name"><?php echo $agent->name ?></h3>
-                        <p class="title"><?php \MapasCulturais\i::_e("Tipo");?></p>
-                        <p class="description"><?php echo $agent->type ?></p>
+                        <h3 class="name"><?php echo $space->name ?></h3>
                         <p class="title"><?php \MapasCulturais\i::_e("Áreas de Atuação");?></p>
                         <p class="description" >
-                            <?php foreach($agent->areas as $area): ?>
+                            <?php foreach($space->areas as $area): ?>
                                 <span><?php echo $area ?></span><br>
                             <?php endforeach; ?>
                         </p>
-                        <button type="button" agentOwner="<?php echo isset($agentOwner) ? $agentOwner : ''; ?>" opportunity="<?php echo isset($opportunity) ? $opportunity : ''; ?>" category="<?php echo isset($category) ? $category : ''; ?>" inciso="<?php echo isset($inciso) ? $inciso : ''; ?>" class="btn btn-selecionar" name="<?php echo $agent->name; ?>" value="<?php echo $agent->id; ?>"> <?php \MapasCulturais\i::_e("Selecionar");?></button>
+                        <button inciso='<?= $inciso?>' category="<?= $category?>" opportunity="<?= $opportunity?>" type="button" class="btn btn-selecionar" agent="<?php echo $agent; ?>" name="<?php echo $space->name; ?>" value="<?php echo $space->id; ?>"> <?php \MapasCulturais\i::_e("Selecionar");?></button>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -49,21 +47,17 @@
         });
 
         $('.btn-selecionar').on('click', function (event) {
-            let agentRelated = '';
             let modal       = $('#modalAlert');
-            let agentId     = $(this).attr('value');
-            let agentName   = $(this).attr('name');
+            let space     = this.value;
+            let spaceName   = this.name;
+            let agent       = $(this).attr('agent');
             let inciso      = $(this).attr('inciso');
             let category    = $(this).attr('category');
             let opportunity = $(this).attr('opportunity');
-            let agentOwner  = $(this).attr('agentOwner');
-            if (agentOwner !== '') {
-                agentId = agentOwner;
-                agentRelated = this.value;
-            }
+            opportunity
             modal.fadeIn(1500);
             let msg = `<?php \MapasCulturais\i::_e("Realizar inscrição para <strong>_name_</strong> no Auxílio Emergencial da Cultura.");?>`;
-            msg = msg.replace(/_name_/g, agentName);
+            msg = msg.replace(/_name_/g, spaceName);
             $('.modal-content').find('.text').html(msg);
 
             $('.close').on('click', function () {
@@ -71,7 +65,7 @@
             });
 
             $('#confirmar').on('click', function () {
-                document.location =  MapasCulturais.createUrl('aldirblanc', 'nova_inscricao', {agent: agentId, agentRelated:agentRelated, inciso: inciso, category: category, opportunity: opportunity})
+                document.location =  MapasCulturais.createUrl('aldirblanc', 'nova_inscricao', {category: category, opportunity: opportunity, agent: agent, inciso: inciso, space: space})
             });
         });
 

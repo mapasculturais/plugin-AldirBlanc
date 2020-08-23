@@ -5,6 +5,7 @@ namespace AldirBlanc\Controllers;
 use MapasCulturais\App;
 use MapasCulturais\i;
 use MapasCulturais\Entities\Registration;
+use MapasCulturais\Entities\RegistrationSpaceRelation as RegistrationSpaceRelationEntity;
 
 /**
  * Registration Controller
@@ -134,6 +135,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     */
    function GET_coletivo()
    {
+       
+
         $this->requireAuthentication();
 
         $app = App::i();
@@ -156,10 +159,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 '@permissions' => '@control',
                 'type'=>'EQ(1)',
                 '@count' => 1
-            ]);                    
+            ]);                  
             if ($num_agents > 1) {
                 // redireciona para a página de escolha de agente
-                $app->redirect($this->createUrl('selecionar_agente'));
+                $this->data['tipo']=1;
+                $this->data['inciso']=2;
+                $app->redirect($this->createUrl('selecionar_agente',$this->data));
             } else {
 
                 // redireciona para a rota de criação de nova inscrição
@@ -167,7 +172,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 $app->redirect($this->createUrl('nova_inscricao', $data));
             }
         }
-        $app->redirect($this->createUrl('formulario', [$agent->aldirblanc_inciso1_registration]));
+        $app->redirect($this->createUrl('formulario', [$agent->aldirblanc_inciso2_registration]));
    }
     /**
      * Redireciona o usuário para o formulário do inciso I
@@ -205,7 +210,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             ]);                    
             if ($num_agents > 1) {
                 // redireciona para a página de escolha de agente
-                $app->redirect($this->createUrl('selecionar_agente',['tipo'=>1]));
+                $app->redirect($this->createUrl('selecionar_agente',['tipo'=>1, 'inciso' => 1]));
             } else {
 
                 // redireciona para a rota de criação de nova inscrição
@@ -226,7 +231,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function GET_nova_inscricao()
     {
         $this->requireAuthentication();
-
         if (!isset($this->data['agent']) || !in_array(intval(@$this->data['inciso']), [1, 2])) {
             // @todo tratar esse erro
             throw new \Exception();
@@ -234,34 +238,95 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         $app = App::i();
         $agent = $app->repo('Agent')->find($this->data['agent']);
+
         $agent->checkPermission('@control');
         $registration = new \MapasCulturais\Entities\Registration;
         $registration->owner = $agent;
 
         if ($this->data['inciso'] == 1) {
             $registration->opportunity = $this->getOpportunityInciso1();
-        } else {
+        } else if($this->data['inciso'] == 2) {
             // inciso II
             if (!isset($this->data['opportunity']) || !isset($this->data['category'])) {
                 // @todo tratar esse erro
                 throw new \Exception();
-            }
-            
-            $registration->opportunity = $this->getOpportunityInciso1($this->data['opportunity']);
+            }     
+            $registration->opportunity = $this->getOpportunityInciso2($this->data['opportunity']);
             //pega o nome da category pela slug
             $category = $this->getCategoryName($this->data['category']);
             $registration->category = $category;
-            if (strpos($this->data['category'], 'espaco') !== false) {
-                //é espaço
-            }
-            else{
-                //é coletivo
-            }
             
+            //Espaço
+            if (strpos($this->data['category'], 'espaco') !== false ) {
+                //quantos espaços tem?
+                $space_controller = $app->controller('space');
+                $num_spaces = $space_controller->apiQuery([
+                    '@select' => 'id',
+                    '@permissions' => '@control',
+                ]);
+                $space = isset($num_spaces[0]) ? $app->repo('space')->find($num_spaces[0]['id']) : new \MapasCulturais\Entities\Agent($this->_getUser());
+                if ($num_spaces == []) {
+                    $space = new \MapasCulturais\Entities\Space;
+                    //TODO: confirmar nome e tipo do Espaço
+                    $space->owner = $agent;
+                    $space->setType(105);
+                    $space->name = 'Espaço - ' . $agent->name;
+                    $space->save(true);   
+                }                  
+                else if (count($num_spaces) > 1 && !isset($this->data['space'])) {
+                    // redireciona para a página de escolha de espaço
+                    $app->redirect($this->createUrl('selecionar_espaco', ['agent' => $agent->id, 'inciso' =>2, 'category' => $this->data['category'],'opportunity' => $this->data['opportunity']]) );
+                } 
+                // Pega dados da página de seleção
+                if (isset($this->data['space'])){
+                    $space = $app->repo('space')->find($this->data['space']);  
+                }
+            }
+            //É coletivo:
+            else if (strpos($this->data['category'], 'coletivo') !== false ){
+                $agent_controller = $app->controller('agent');
+                $agentsQuery = $agent_controller->apiQuery([
+                    '@select' => 'id,name,type,terms',
+                    '@permissions' => '@control',
+                    '@files' => '(avatar.avatarMedium):url',
+                    'type'=>'EQ(2)',
+                    
+                ]);
+                $agentRelated = isset($agentsQuery[0]) ? $app->repo('agent')->find($agentsQuery[0]['id']) : new \MapasCulturais\Entities\Agent($this->_getUser());
+                if ($agentsQuery == []) {
+                    //TODO: confirmar nome e tipo do Agente coletivo
+                    $agentRelated->name = $agent->name . ' - coletivo';
+                    $agentRelated->type = 2;
+                    $agentRelated->save(true);
+                }                  
+                else if (count($agentsQuery) > 1 && !isset($this->data['agentRelated'])) {
+                    // redireciona para a página de escolha de agente
+           
+                    $app->redirect($this->createUrl('selecionar_agente',
+                    [
+                        'tipo'        => 2,
+                        'agentOwner'  => $agent->id, 
+                        'inciso'      => 2, 
+                        'category'    => $this->data['category'],
+                        'opportunity' => $this->data['opportunity'], 
+                        ]
+                    ));
+                } 
+                if (isset($this->data['agentRelated'])){
+                    $agentRelated = $app->repo('agent')->find($this->data['agentRelated']);  
+                }
+            }   
         }
-
         $registration->save(true);
-
+        if (isset($space)){
+            $relation = new RegistrationSpaceRelationEntity();
+            $relation->space = $space;
+            $relation->owner = $registration;
+            $relation->save(true);   
+        }
+        if(isset($agentRelated)){
+            $result = $registration->createAgentRelation($agentRelated, 'coletivo');
+        }
         $app->redirect($this->createUrl('formulario', [$registration->id]));
     }
 
@@ -329,6 +394,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
      */
     function GET_index()
     {
+        
         $this->requireAuthentication();
 
         $app = App::i();
@@ -359,10 +425,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         $summaryStatusName = $this->getStatusNames();
         $registrationsInciso1 = $app->repo('Registration')->findByOpportunityAndUser($inciso1, $app->user);
-        //Para o inciso 2 devemos usar as duas linhas abaixo fazendo as modificaçoes necessarias
-        //$inciso2 = $this->getOpportunityInciso2();
-        //$registrationsInciso2 = $app->repo('Registration')->findByOpportunityAndUser($inciso2, $app->user);
-        $registrationsInciso2 = [];
+        $opportunitiesIdsInciso2 = array_values($this->config['inciso2_opportunity_ids']);
+        $agentID = $app->user->profile->id;
+        $registrationsInciso2 = $app->repo('Registration')->findBy(['opportunity' => $opportunitiesIdsInciso2, 'owner' => $agentID]);
         $name = $app->user->profile->name;
         $this->render('cadastro', ['cidades' => $this->getCidades(), 'registrationsInciso1' => $registrationsInciso1, 'registrationsInciso2' => $registrationsInciso2, 'summaryStatusName'=>$summaryStatusName, 'niceName' => $name]);
     }
@@ -398,6 +463,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     function GET_selecionar_agente()
     {
+
         $tipo = $this->data['tipo'];
         if($tipo != 1 && $tipo != 2){
             //exceção
@@ -424,7 +490,32 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         //Ordena o array de agents pelo name
         usort($agents, function($a, $b) {return strcmp($a->name, $b->name);});
-        $this->render('selecionar-agente', ['agents' => $agents]);
+        $this->data['agents'] = $agents;
+        $this->render('selecionar-agente', $this->data);
+    }
+
+    function GET_selecionar_espaco()
+    {
+        $app = App::i();
+        $user = $this->_getUser();
+        $space_controller = $app->controller('space');
+        $spacesQuery = $space_controller->apiQuery([
+            '@select' => 'id,name,terms,agent_id',
+            '@permissions' => '@control',
+        ]); 
+        $spaces= [];
+        foreach($spacesQuery as $space){
+            $spaceItem         = new \stdClass();
+            $spaceItem->id     = $space['id'];
+            $spaceItem->name   = $space['name'];
+            $spaceItem->areas  = $space['terms']['area'];
+            array_push($spaces, $spaceItem);
+        }
+        //Ordena o array de agents pelo name
+        usort($spaces, function($a, $b) {return strcmp($a->name, $b->name);});
+        $this->data['spaces'] = $spaces;
+        $this->render('selecionar-espaco', $this->data);
+        
     }
 
     protected function _getUser(){
