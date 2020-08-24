@@ -174,6 +174,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $app->redirect($this->createUrl('formulario', [$agent->aldirblanc_inciso2_registration]));
    }
+
     /**
      * Redireciona o usuário para o formulário do inciso I
      * 
