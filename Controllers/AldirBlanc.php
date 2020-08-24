@@ -59,7 +59,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function getCategoryName(string $slug)
     {
         if (isset($this->config['inciso2_categories'][$slug])) {
-            $app = App::i();
             $categoryName = $this->config['inciso2_categories'][$slug];
             return $categoryName;
         } else {
@@ -135,17 +134,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     */
    function GET_coletivo()
    {
-       
-
         $this->requireAuthentication();
-
         $app = App::i();
         if (isset($this->data['agent'])) {
             $agent = $app->repo('Agent')->find($this->data['agent']);
         } else {
             $agent = $app->user->profile;
         }
-
         // se ainda não tem inscrição
         if (!isset($agent->aldirblanc_inciso2_registration)) {
             /** 
@@ -236,13 +231,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         $app = App::i();
         $agent = $app->repo('Agent')->find($this->data['agent']);
-
-        $agent->checkPermission('@control');
-        //verifica se o agente owner é indiividual
-        if($agent->getType()->id != 1){
+        //verifica se existe e se o agente owner é individual
+        if(!$agent || $agent->type->id != 1){
             // @todo tratar esse erro
             throw new \Exception();
         }
+        $agent->checkPermission('@control');
+        
         $registration = new \MapasCulturais\Entities\Registration;
         $registration->owner = $agent;
 
@@ -263,24 +258,27 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             if (strpos($this->data['category'], 'espaco') !== false ) {
                 //quantos espaços tem?
                 $space_controller = $app->controller('space');
-                $num_spaces = $space_controller->apiQuery([
+                $spaces_ids = $space_controller->apiQuery([
                     '@select' => 'id',
                     '@permissions' => '@control',
                 ]);
-                $space = isset($num_spaces[0]) ? $app->repo('space')->find($num_spaces[0]['id']) : new \MapasCulturais\Entities\Agent($this->_getUser());
-                if ($num_spaces == []) {
+                
+                if(count($spaces_ids) == 1){
+                    $space = $app->repo('space')->find($spaces_ids[0]['id']);
+                }
+                else if (count($spaces_ids) == 0) {
                     $space = new \MapasCulturais\Entities\Space;
-                    //@TODO: confirmar nome e tipo do Espaço
+                    //@TODO: confirmar tipo do Espaço
                     $space->owner = $agent;
-                    $space->setType(105);
-                    $space->name = 'Espaço - ' . $agent->name;
+                    $space->setType(199); //199 = outros espaços
+                    $space->name = ' ';
                     $space->save(true);   
                 }                  
-                else if (count($num_spaces) > 1 && !isset($this->data['space'])) {
+                else if (count($spaces_ids) > 1 && !isset($this->data['space'])) {
                     // redireciona para a página de escolha de espaço
                     $app->redirect($this->createUrl('selecionar_espaco', ['agent' => $agent->id, 'inciso' =>2, 'category' => $this->data['category'],'opportunity' => $this->data['opportunity']]) );
                 } 
-                // Pega dados da página de seleção
+                // Pega dados da página de seleção de espaço e cria o objeto do espaço
                 if (isset($this->data['space'])){
                     $space = $app->repo('space')->find($this->data['space']);  
                 }
@@ -295,10 +293,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     'type'=>'EQ(2)',
                     
                 ]);
-                $agentRelated = isset($agentsQuery[0]) ? $app->repo('agent')->find($agentsQuery[0]['id']) : new \MapasCulturais\Entities\Agent($this->_getUser());
-                if ($agentsQuery == []) {
+                if(count($agentsQuery) == 1){
+                    $agentRelated = $app->repo('agent')->find($agentsQuery[0]['id']);
+                }
+                else if (count($agentsQuery) == 0) {
+                    $agentRelated = new \MapasCulturais\Entities\Agent($this->_getUser());
                     //@TODO: confirmar nome e tipo do Agente coletivo
-                    $agentRelated->name = $agent->name . ' - coletivo';
+                    $agentRelated->name = ' ';
                     $agentRelated->type = 2;
                     $agentRelated->save(true);
                 }                  
@@ -330,7 +331,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         if(isset($agentRelated)){
             $agentRelated->checkPermission('@control');
-            $result = $registration->createAgentRelation($agentRelated, 'coletivo');
+            $registration->createAgentRelation($agentRelated, 'coletivo');
         }
         $app->redirect($this->createUrl('formulario', [$registration->id]));
     }
@@ -382,9 +383,15 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $registration = $this->getRequestedEntity();
 
         $registration->checkPermission('modify');
-
+        
         if (!$registration->termos_aceitos) {
             $app->redirect($this->createUrl('termos_e_condicoes', [$registration->id]));
+        }
+        //@todo verificar se funciona isso 
+        //se existe espaco relacionado, ele tem nome em branco e tipo 199
+        $registration->getSpaceRelation();
+        if (($relation = $registration->getSpaceRelation()) && ($relation->space->type->id ==199 && $relation->space->name = '')){
+            $registration->getSpaceRelation()->space->type = '';
         }
 
         $this->registerRegistrationMetadata($registration->opportunity);

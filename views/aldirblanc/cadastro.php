@@ -2,7 +2,7 @@
 use MapasCulturais\i;
 use MapasCulturais\Entities\Registration;
 $inciso1Limite = $this->controller->config['inciso1_limite'];
-$inciso2Limite = 16666;
+$inciso2Limite = $this->controller->config['inciso2_limite'];
 $inciso2_enabled = $this->controller->config['inciso2_enabled'];
 $inciso1_enabled = $this->controller->config['inciso1_enabled'];
 
