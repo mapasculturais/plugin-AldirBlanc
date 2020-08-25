@@ -78,6 +78,9 @@ class Plugin extends \MapasCulturais\Plugin
              * Criação automatica da opportunidade do inciso1
              */
             
+            set_time_limit(0);
+            ini_set('memory_limit', '2048M');
+
             $plugin->createOpportunityInciso1();
             $plugin->createOpportunityInciso2();
         });
@@ -116,7 +119,59 @@ class Plugin extends \MapasCulturais\Plugin
         return false;
     }
 
-    //importa de um .txt os campos de cadastro que cada opportunidade deve ter
+    function setAvatarToOpportunity($avatarName, $opportunity) {
+        $app = App::i();
+
+        $configOrginalFilename = $avatarName; // exemplo: olamundo.png
+
+        $filePath = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'importFiles/'.$configOrginalFilename;
+
+        // cria um arquivo auxiliar para ser removido da pasta e deixar o "original" intacto
+        // ex: ola.png gera outro como bakola.png
+        $auxFileName = 'bak'.$configOrginalFilename;
+        $bakFileName = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'importFiles/'.$auxFileName;
+        copy($filePath, $bakFileName);
+
+        $opportunityFile = new \MapasCulturais\Entities\OpportunityFile([
+            "name"=> $auxFileName,
+            "type"=> mime_content_type($bakFileName),
+            "tmp_name"=> $bakFileName,
+            "error"=> 0,
+            "size"=> filesize($bakFileName)
+        ]); 
+
+        $opportunityFile->description = "AldirBlanc";
+        $opportunityFile->group = "avatar";
+        $opportunityFile->owner = $opportunity;
+        $opportunityFile->save();   
+        $app->em->flush();
+    }
+
+
+    // @override
+    // Função copiada de Class EntitySealRelation->createSealRelation()
+    function setSealToOpportunity($sealId, $opportunity) {
+        $app = App::i();
+
+        if(!$sealId) {
+            throw new Exception('É necessario passar o seloId para a função setSealToOpportunity');
+        }
+
+        $seal = $app->repo('Seal')->find($sealId);
+
+        if(!$seal) {
+            throw new Exception('Selo ID: '.$sealId .' Invalido');
+        }
+
+        $relation = new \MapasCulturais\Entities\OpportunitySealRelation();
+        $relation->seal = $seal;
+        $relation->owner = $opportunity;
+        $relation->agent = $opportunity->owner;
+
+        $relation->save(true);
+    }
+
+    //importa de um .txt dos campos de cadastro que cada opportunidade deve ter
     function importFields($opportunityId) {
         $app = App::i();
         $app->disableAccessControl();
@@ -220,21 +275,6 @@ class Plugin extends \MapasCulturais\Plugin
 
     }
 
-    public function getOpportunityByInciso(Project $project,int $inciso) {
-
-        $result = [];
-
-        $opportunities = $project->getOpportunities();
-
-        foreach($opportunities as $opportunity) {
-            if((int)$opportunity->getMetadata('aldirblanc_inciso') == $inciso) {
-                $result[] = $opportunity;
-            }
-        }
-
-        return $result;
-    }
-
     public function createOpportunity($params, $inciso, $project) {
         $app = App::i();
 
@@ -280,6 +320,15 @@ class Plugin extends \MapasCulturais\Plugin
         $app->em->flush();
 
         $this->importFields($opportunity->id);
+
+        if($params['seal']) {
+            $this->setSealToOpportunity( $params['seal'] , $opportunity);
+        }
+        
+
+        if($params['avatar']) {
+            $this->setAvatarToOpportunity($params['avatar'] , $opportunity);
+        }   
     }
 
     public function createOpportunityInciso1() {
@@ -324,10 +373,9 @@ class Plugin extends \MapasCulturais\Plugin
         $aldirblancSettings['registrationTo'] = $this->checkIfIsValidDateString($aldirblancSettings['registrationTo']) ? $aldirblancSettings['registrationTo'] : '2050-01-01';
         $aldirblancSettings['shortDescription'] = isset($aldirblancSettings['shortDescription']) ? $aldirblancSettings['shortDescription'] : 'DESCRIÇÃO PADRÃO';
         $aldirblancSettings['name'] = isset($aldirblancSettings['name']) ? $aldirblancSettings['name'] : 'NOME PADRÃO';
-        // @todo ARRUME AQUI, isset
         $aldirblancSettings['owner'] = is_int($aldirblancSettings['owner']) ? $aldirblancSettings['owner'] : $project->owner;
-        $aldirblancSettings['avatar'] = isset($aldirblancSettings['avatar']) ? $aldirblancSettings['avatar'] : 'https://static.wixstatic.com/media/09a3d5_55fd1b81f9094845ae7e43ec23c869b6~mv2_d_3072_2048_s_2.jpg';
-        $aldirblancSettings['seal'] = isset($aldirblancSettings['seal']) ? $aldirblancSettings['seal'] : 1;
+        $aldirblancSettings['avatar'] = isset($aldirblancSettings['avatar']) ? $aldirblancSettings['avatar'] : null;
+        $aldirblancSettings['seal'] = isset($aldirblancSettings['seal']) ? $aldirblancSettings['seal'] : null;
 
         $owner = $app->repo("Agent")->find($aldirblancSettings['owner']);
 
@@ -335,10 +383,9 @@ class Plugin extends \MapasCulturais\Plugin
             throw new Exception('Owner invalido');
         }
 
-        $opportunities =  $this->getOpportunityByInciso($project, 1);
+        $opportunityMeta = $app->repo("OpportunityMeta")->findOneBy(array('key' => 'aldirblanc_inciso', 'value' => 1));
 
-        // if(empty($opportunities)) {
-        if(true) {
+        if(!$opportunityMeta) {
 
             $params = [
                 'registrationFrom' => $aldirblancSettings['registrationFrom'],
@@ -389,8 +436,8 @@ class Plugin extends \MapasCulturais\Plugin
             $city['shortDescription'] = $city['shortDescription'] ? $city['shortDescription'] : 'DESCRIÇÃO PADRÃO';
             $city['owner'] = is_int($city['owner']) ? $city['owner'] : $project->owner;
             $city['city'] = $city['city'] ? $city['city'] : 'NOME PADRÃO';
-            $city['avatar'] = $city['avatar'] ? $city['avatar'] : 'https://static.wixstatic.com/media/09a3d5_55fd1b81f9094845ae7e43ec23c869b6~mv2_d_3072_2048_s_2.jpg';
-            $city['seal'] = $city['seal'] ? $city['seal'] : 1;
+            $city['avatar'] = $city['avatar'] ? $city['avatar'] : null;
+            $city['seal'] = $city['seal'] ? $city['seal'] : null;
 
 
             $owner = $app->repo("Agent")->find($city['owner']);
