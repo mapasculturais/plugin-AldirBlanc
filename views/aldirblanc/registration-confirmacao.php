@@ -23,21 +23,20 @@ $_params = [
     'opportunity' => $entity->opportunity
 ];
 ?>
-<?php $this->part('editable-entity', array('entity'=>$entity, 'action'=>$action));  ?>
-
 <article class="main-content registration" ng-controller="OpportunityController">
-    <?php eval(\psy\sh()); $this->part('singles/registration--header', $_params); ?>
 
     <article>
         <?php $this->applyTemplateHook('form','begin'); ?>
 
         <?php $this->part('singles/registration-single--header', $_params) ?>
-
-        <?php $this->part('singles/registration-single--spaces', $_params) ?>
         
         <?php $this->part('singles/registration-single--fields', $_params) ?>
 
         <?php $this->applyTemplateHook('form','end'); ?>
+        <p class="registration-help"><?php \MapasCulturais\i::_e("Certifique-se que você preencheu as informações corretamente antes de enviar sua inscrição.");?> <strong><?php \MapasCulturais\i::_e("Depois de enviada, não será mais possível editá-la.");?></strong></p>
+        <a class="btn btn-primary" ng-click="sendRegistration()" rel='noopener noreferrer'><?php \MapasCulturais\i::_e("Enviar inscrição");?></a>
+        <a href="<?= $this->controller->createUrl( 'formulario',[$entity->id]) ?>" class="btn btn-primary "><?php \MapasCulturais\i::_e("Voltar a edição");?></a>
+
     </article>
     <?php $this->part('singles/registration--valuers-list', $_params) ?>
 </article>
