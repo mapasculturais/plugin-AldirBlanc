@@ -518,7 +518,24 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->render('selecionar-espaco', $this->data);
 
     }
+    /**
+     * Confirmação de dados antes do envio do formulário
+     * 
+     * rota: /aldirblanc/confirmacao/{id_inscricao}
+     * 
+     * @return void
+     */
+    function GET_confirmacao()
+    {
+        $app = App::i();
+        $this->requireAuthentication();
+        $registration = $this->getRequestedEntity();
+        $registration->checkPermission('send');
+        $this->data['entity'] = $registration;
+        $this->render('registration-confirmacao', $this->data);
 
+
+    }
     protected function _getUser(){
         $app = App::i();
         $user = null;
