@@ -385,7 +385,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $this->registerRegistrationMetadata($registration->opportunity);
         $app->view->includeEditableEntityAssets();
-        $this->render('edit', ['entity' => $registration]);
+        $this->render('registration-edit', ['entity' => $registration]);
     }
 
     /**
