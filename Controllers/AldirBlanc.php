@@ -442,7 +442,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $this->render('termos-e-condicoes', ['registration_id' => $this->data['id']]);
     }
-
     /**
      * Aceitar os termos e condiçoes
      * 
@@ -464,6 +463,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     function GET_selecionar_agente()
     {
+        $this->requireAuthentication();
 
         $tipo = $this->data['tipo'];
         if($tipo != 1 && $tipo != 2){
@@ -497,6 +497,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     function GET_selecionar_espaco()
     {
+        $this->requireAuthentication();
+
         $app = App::i();
         $user = $this->_getUser();
         $space_controller = $app->controller('space');
