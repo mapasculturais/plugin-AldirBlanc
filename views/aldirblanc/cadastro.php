@@ -119,6 +119,8 @@ if(count($cidades) <= 1){
                 case 'select-cidade':
                     $('#select-cidade').hide();
                     $('#personalidade-juridica').fadeIn(1100);
+                    params.opportunity = null;
+                    $(".js-select-cidade").select2("val", "-1");
                     break;
             }
         });
