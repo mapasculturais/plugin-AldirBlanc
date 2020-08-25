@@ -35,13 +35,19 @@ class Plugin extends \MapasCulturais\Plugin
         parent::__construct($config);
     }
 
-    public function _init()
-    {
+    public function registerAssets(){
         $app = App::i();
 
         // enqueue scripts and styles
         $app->view->enqueueStyle('aldirblanc', 'app', 'aldirblanc/app.css');
         $app->view->assetManager->publishFolder('aldirblanc/img', 'aldirblanc/img');
+    }
+
+    public function _init()
+    {
+        $app = App::i();
+        
+        $plugin = $this;
 
         // add hooks
         $app->hook('mapasculturais.styles', function () use ($app) {
@@ -60,13 +66,19 @@ class Plugin extends \MapasCulturais\Plugin
             $this->part('aldirblanc/home-search');
         });
 
+        $app->hook("GET(aldirblanc.<<*>>):before", function () use($plugin) {
+            $plugin->registerAssets();
+        });
+
         /**
          * modifica o template do autenticador quando o redirect url for para o plugin aldir blanc
          */
-        $app->hook('controller(auth).render(multiple-local)', function() use ($app) {
+        $app->hook('controller(auth).render(multiple-local)', function() use ($app, $plugin) {
             $redirect_url = @$_SESSION['mapasculturais.auth.redirect_path'] ?: '';
             
             if(strpos($redirect_url, '/aldirblanc') === 0){
+                $plugin->registerAssets();
+
                 $req = $app->request;
                 $this->layout = 'aldirblanc';
             }

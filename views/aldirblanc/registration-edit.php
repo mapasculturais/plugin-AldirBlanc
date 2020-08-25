@@ -25,21 +25,10 @@ $_params = [
 
 ?>
 
-<?php //$this->part('editable-entity', array('entity'=>$entity, 'action'=>$action));  ?>
 <?php $this->part('aldirblanc/editable-entity', array('entity'=>$entity, 'action'=>$action));  ?>
-
-<style>
-.editable.editable-click {
-    font-size: 18px;
-    color: blue;
-    cursor: pointer;
-}
-</style>
 
 <article class="main-content registration" ng-controller="OpportunityController">
 
-    <?php $this->part('singles/registration--header', $_params); ?>
-    
     <article>
         <?php $this->applyTemplateHook('form','begin'); ?>
         
@@ -47,17 +36,10 @@ $_params = [
         
         <?php $this->part('singles/registration-edit--categories', $_params) ?>
         
-        <?php $this->part('aldirblanc/registration-edit--agents', $_params) ?>
-        
-        <?php // Desabilitando este template por enquanto, pois não é a melhor forma de apresentar para o usuário que está se inscrevendo ?>
-        <?php //$this->part('singles/registration-edit--seals', $_params) ?>
-        
         <?php $this->part('singles/registration-edit--fields', $_params) ?>
 
-        <?php if(!$entity->preview): ?>
-            <?php //$this->part('singles/registration-edit--send-button', $_params) ?>
-        <?php endif; ?>
-
+        <?php $this->part('singles/registration-edit--send-button', $_params) ?>
+        
         <?php $this->applyTemplateHook('form','end'); ?>
     </article>
 
