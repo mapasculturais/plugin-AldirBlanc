@@ -26,16 +26,12 @@ $_params = [
 <?php $this->part('editable-entity', array('entity'=>$entity, 'action'=>$action));  ?>
 
 <article class="main-content registration" ng-controller="OpportunityController">
-    <?php $this->part('singles/registration--header', $_params); ?>
+    <?php eval(\psy\sh()); $this->part('singles/registration--header', $_params); ?>
 
     <article>
         <?php $this->applyTemplateHook('form','begin'); ?>
 
         <?php $this->part('singles/registration-single--header', $_params) ?>
-
-        <?php $this->part('singles/registration-single--categories', $_params) ?>   
-        
-        <?php $this->part('singles/registration-single--agents', $_params) ?>
 
         <?php $this->part('singles/registration-single--spaces', $_params) ?>
         
