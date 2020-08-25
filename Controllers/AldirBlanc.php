@@ -376,7 +376,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
 
         $registration = $this->getRequestedEntity();
-
+        if($registration->status != Registration::STATUS_DRAFT){
+            $app->redirect($this->createUrl('status', [$registration->id]));
+        }
         $registration->checkPermission('modify');
 
         if (!$registration->termos_aceitos) {
@@ -531,13 +533,19 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     {
         $app = App::i();
         $this->requireAuthentication();
+        //verificar se registration status
         $registration = $this->getRequestedEntity();
+        if($registration->status != Registration::STATUS_DRAFT){
+            $app->redirect($this->createUrl('status', [$registration->id]));
+        }
+        if (!$registration->termos_aceitos) {
+            $app->redirect($this->createUrl('termos_e_condicoes', [$registration->id]));
+        }
         $registration->checkPermission('send');
         $this->data['entity'] = $registration;
         $this->render('registration-confirmacao', $this->data);
-
-
     }
+
     protected function _getUser(){
         $app = App::i();
         $user = null;
