@@ -465,12 +465,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     function GET_selecionar_agente()
     {
-        $this->requireAuthentication();
 
         $tipo = $this->data['tipo'];
         if($tipo != 1 && $tipo != 2){
-            //exceção
+            //@TODO tratar esse erro
+            throw \Exception();
         }
+        $this->requireAuthentication();
         $app = App::i();
         $user = $this->_getUser();
         $tipo = $this->data['tipo'];
