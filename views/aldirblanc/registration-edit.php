@@ -25,8 +25,8 @@ $_params = [
 
 ?>
 
-<?php $this->part('aldirblanc/editable-entity', array('entity'=>$entity, 'action'=>$action));  ?>
-
+<div id="editable-entity" class="clearfix sombra" >
+</div>
 <article class="main-content registration" ng-controller="OpportunityController">
 
     <article>
