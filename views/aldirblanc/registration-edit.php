@@ -38,7 +38,7 @@ $_params = [
         
         <?php $this->part('singles/registration-edit--fields', $_params) ?>
 
-        <?php $this->part('singles/registration-edit--send-button', $_params) ?>
+        <?php $this->part('aldirblanc/registration-edit--validate-button', $_params) ?>
         
         <?php $this->applyTemplateHook('form','end'); ?>
     </article>
