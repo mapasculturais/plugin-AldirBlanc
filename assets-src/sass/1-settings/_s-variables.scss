@@ -15,7 +15,7 @@ $gray: #ccc !default;
 $gray-light: #e2e2e2 !default;
 $gray-lighter: #eee !default;
 
-$brand-primary: #3a72bc !default;
+$brand-primary: #31AAC9 !default;
 $brand-primary-light: color.scale($brand-primary, $lightness: 80%) !default;
 $brand-accent: #000000 !default;
 
@@ -55,9 +55,6 @@ $font-bolditalic-svg-id: 'open_sansbold_italic' !default;
 $font-stack-monospace: 'Courier New', monospace !default;
 $font-stack-base: $font-family-base, Helvetica, Arial, sans-serif !default;
 
-$f_body: $font-family-base, "Arial", sans-serif;
-$f_title: $font-family-base, "Arial", sans-serif;
-
 $font-size-base: 1rem !default; // 16px
 $font-size-small: .875rem !default; // 14px
 $font-size-smaller: .75rem !default; // 12px
@@ -85,5 +82,8 @@ $headings-font-svg-id: 'aleoregular' !default;
 $headings-font-stack: $headings-font-family, serif !default;
 $headings-font-weight: normal !default;
 $headings-color: $brand-accent !default;
+
+$f_body: $font-family-base, "Arial", sans-serif;
+$f_title: $headings-font-stack;
 
 $default-box-shadow: 0 2px 6px 0 rgba(0,0,0,0.3); 
