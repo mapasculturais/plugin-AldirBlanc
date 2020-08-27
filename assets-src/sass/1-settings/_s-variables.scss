@@ -24,6 +24,9 @@ $brand-accent: #000000 !default;
 $brand-secondary: #666666 !default;
 $brand-secondary-light: color.scale($brand-secondary, $lightness: 20%) !default;
 
+$brand-tertiary: #cc0033 !default;
+$brand-tertiary-light: color.scale($brand-tertiary, $lightness: 20%) !default;
+
 $brand-event: #b3b921 !default;
 $brand-agent: #1dabc6 !default;
 $brand-space: #e83f96 !default;

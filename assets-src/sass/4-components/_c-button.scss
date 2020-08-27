@@ -1,6 +1,7 @@
 // Component schema
 // <element class="btn"></element>
 // <element class="btn secondary"></element>
+// <element class="btn tertiary"></element>
 
 .btn {
 
@@ -29,10 +30,14 @@
         background-color: $brand-secondary;
     };
 
+    &.tertiary {
+        background-color: $brand-tertiary;
+    };
+
     &:hover {
         color: $light;
         text-decoration: none;
-        @include opacity(0.9);
+        @include opacity(0.85);
     }    
 
 }
