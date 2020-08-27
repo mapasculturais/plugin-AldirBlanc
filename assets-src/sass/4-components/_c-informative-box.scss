@@ -22,11 +22,26 @@
     background-color: #FFFFFF;
     box-shadow: 0 2px 6px 0 rgba(0,0,0,0.3);
     border-radius: 10px;
-    padding: 14px;
     position: relative;
     margin-left: 23px;
-    padding-left: 40px;
+    padding: 0px;
+    padding-bottom: 24px;
     cursor: pointer;
+
+    &:not(.has-status) {
+        padding-top: 20px;
+    }
+
+    &--status {
+        background-color: $brand-primary; 
+        padding: 9px 32px;
+        text-align: left;
+        color: white;
+        padding: 9px 32px;
+        border-radius: 10px 10px 0 0;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
 
     &--icon {
         position: absolute;
@@ -74,6 +89,8 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 13px;
+        margin-left: 40px;
+        margin-right: 18px;
 
         h2 {
             color: #111111;
@@ -100,6 +117,7 @@
         font-size: 0.75rem;
         font-weight: 600;
         letter-spacing: 0;
+        margin-left: 40px;
         line-height: 17px;
 
         .more {
@@ -121,6 +139,55 @@
             .more {
                 display: none;
             }
+        }
+    }
+
+
+    //STATUS_SENT = self::STATUS_ENABLED;
+    //STATUS_APPROVED = 10;
+    //STATUS_WAITLIST = 8;
+    //STATUS_NOTAPPROVED = 3;
+    //STATUS_INVALID = 2;
+
+    &.status-1 {
+        // Default
+    }
+
+    &.status-10, &.status-8, &.status-3, &.status-2 {
+        .informative-box--status {
+            background: white;
+        }
+    }
+
+    &.status-10 {
+        background-color: $theme-color-secondary;
+
+        .informative-box--status {
+            color: $theme-color-secondary;
+        }
+    }
+
+    &.status-8 {
+        background-color: $theme-color-quaternary;
+
+        .informative-box--status {
+            color: $theme-color-quaternary;
+        }
+    }
+
+    &.status-3 {
+        background-color: $theme-color-tertiary;
+
+        .informative-box--status {
+            color: $theme-color-tertiary;
+        }
+    }
+
+    &.status-2 {
+        background-color: $theme-color-quaternary;
+
+        .informative-box--status {
+            color: $theme-color-quaternary;
         }
     }
 }
