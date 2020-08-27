@@ -211,7 +211,7 @@ if (count($cidades) <= 1) {
                         $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName]);
                         break;
                         //caso seja do Inciso 2 e tenha sido enviada
-                    default:
+                    default:                        
                         $registrationStatusName = $summaryStatusName[$registration->status];
                         $this->part('aldirblanc/cadastro/application-status',  ['registration' => $registration, 'registrationStatusName' => $registrationStatusName]);
                         break;
