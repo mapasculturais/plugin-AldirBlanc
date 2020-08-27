@@ -20,13 +20,13 @@ if (count($cidades) <= 1) {
 <script>
     $(document).ready(function() {
 
-        let params = {
+        var params = {
             opportunity: null,
             category: null
         };
-        let formalizado = null;
-        let coletivo = null;
-        let returning = false;
+        var formalizado = null;
+        var coletivo = null;
+        var returning = false;
         /**
          * Se houver cidade/oportunidade defualt definida na configuração do plugin para o Inciso II, o id é setado no paramentro.
          */
