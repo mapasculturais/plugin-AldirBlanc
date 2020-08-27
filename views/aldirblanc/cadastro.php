@@ -162,12 +162,14 @@ if (count($cidades) <= 1) {
     });
 </script>
 <section class="lab-main-content">
-    <header>
+    <!-- <header>
         <div>
             <h1>Cadastro - Lei Aldir Blanc</h1>
         </div>
-    </header>
-    <p class="intro-message">Olá, <?= $niceName ?>! <br />
+    </header> -->
+
+    <p class="intro-message">
+        <span class="name"> Olá, <?= $niceName ?>! </span>
         Por favor, responda às perguntas abaixo para iniciar seu cadastro.</p>
 
     <div class="js-lab-item lab-item">

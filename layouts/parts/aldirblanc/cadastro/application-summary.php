@@ -7,9 +7,8 @@
  */
 ?>
 
-<!-- <button class="informative-box lab-option has-status status-<?= $registration->status ?>"> -->
 
-<button class="informative-box lab-option has-status status-<?= 10 ?>">
+<button class="informative-box lab-option has-status status-<?= $registration->status ?>">
     <div class="informative-box--status">
         <?php echo $registrationStatusName; ?> 
     </div>

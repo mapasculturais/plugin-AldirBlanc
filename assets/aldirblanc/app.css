@@ -1029,7 +1029,7 @@ i {
   text-align: left;
   color: white;
   padding: 9px 32px;
-  border-radius: 10px 10px 0 0;
+  border-radius: 8px 8px 0 0;
   margin-bottom: 10px;
   font-weight: bold;
 }
@@ -1134,12 +1134,42 @@ i {
   background: white;
 }
 
+.informative-box.status-10 .informative-box--title h2,
+.informative-box.status-8 .informative-box--title h2,
+.informative-box.status-3 .informative-box--title h2,
+.informative-box.status-2 .informative-box--title h2 {
+  color: white;
+  font-weight: bold;
+}
+
+.informative-box.status-10 .informative-box--content,
+.informative-box.status-8 .informative-box--content,
+.informative-box.status-3 .informative-box--content,
+.informative-box.status-2 .informative-box--content {
+  color: white;
+}
+
+.informative-box.status-10 i,
+.informative-box.status-8 i,
+.informative-box.status-3 i,
+.informative-box.status-2 i {
+  color: white;
+}
+
 .informative-box.status-10 {
   background-color: #B4BA00;
 }
 
 .informative-box.status-10 .informative-box--status {
   color: #B4BA00;
+}
+
+.informative-box.status-10 .informative-box--icon:before {
+  background-color: #B4BA00;
+}
+
+.informative-box.status-10 .informative-box--icon:after {
+  background-color: #B4BA00;
 }
 
 .informative-box.status-8 {
@@ -1150,6 +1180,14 @@ i {
   color: #666666;
 }
 
+.informative-box.status-8 .informative-box--icon:before {
+  background-color: #666666;
+}
+
+.informative-box.status-8 .informative-box--icon:after {
+  background-color: #666666;
+}
+
 .informative-box.status-3 {
   background-color: #C60931;
 }
@@ -1158,12 +1196,28 @@ i {
   color: #C60931;
 }
 
+.informative-box.status-3 .informative-box--icon:before {
+  background-color: #C60931;
+}
+
+.informative-box.status-3 .informative-box--icon:after {
+  background-color: #C60931;
+}
+
 .informative-box.status-2 {
   background-color: #666666;
 }
 
 .informative-box.status-2 .informative-box--status {
   color: #666666;
+}
+
+.informative-box.status-2 .informative-box--icon:before {
+  background-color: #666666;
+}
+
+.informative-box.status-2 .informative-box--icon:after {
+  background-color: #666666;
 }
 
 .modal {
