@@ -25,8 +25,8 @@ $_params = [
 
 ?>
 
-<?php $this->part('aldirblanc/editable-entity', array('entity'=>$entity, 'action'=>$action));  ?>
-
+<div id="editable-entity" class="clearfix sombra" >
+</div>
 <article class="main-content registration" ng-controller="OpportunityController">
 
     <article>
@@ -38,7 +38,7 @@ $_params = [
         
         <?php $this->part('singles/registration-edit--fields', $_params) ?>
 
-        <?php $this->part('singles/registration-edit--send-button', $_params) ?>
+        <?php $this->part('aldirblanc/registration-edit--validate-button', $_params) ?>
         
         <?php $this->applyTemplateHook('form','end'); ?>
     </article>
