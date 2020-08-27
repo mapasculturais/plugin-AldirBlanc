@@ -11,6 +11,7 @@
     border: none !important;
     box-shadow: none !important;
     height: 100%;
+    left: 0;
     margin: 0;
     padding: 0;
     top: 0;
@@ -23,7 +24,11 @@
         margin: 30% auto 0;
         position: relative;
         text-align: center;
-        width: calc(100% - 30px);
+        width: 60%;
+
+        @include mobile {
+            width: calc(100% - 30px);
+        }
 
         &--title {
             color: $gray-darker;
