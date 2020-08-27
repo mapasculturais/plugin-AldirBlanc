@@ -40,6 +40,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         // enqueue scripts and styles
         $app->view->enqueueStyle('aldirblanc', 'app', 'aldirblanc/app.css');
+        $app->view->enqueueStyle('aldirblanc', 'fontawesome', 'https://use.fontawesome.com/releases/v5.8.2/css/all.css');
         $app->view->assetManager->publishFolder('aldirblanc/img', 'aldirblanc/img');
     }
 
