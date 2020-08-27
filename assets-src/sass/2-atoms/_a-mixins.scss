@@ -191,3 +191,10 @@ $base-size: 16;
     -webkit-transition: $property $duration $easing;
     -moz-transition: $property $duration $easing;
 }
+
+@mixin opacity($value) {
+    $ievalue: $value*100;
+    opacity: $value;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity="+$ievalue+")";
+    filter: alpha(opacity=$ievalue);
+}
