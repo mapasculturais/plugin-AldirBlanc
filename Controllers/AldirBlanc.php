@@ -542,7 +542,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if (!$registration->termos_aceitos) {
             $app->redirect($this->createUrl('termos_e_condicoes', [$registration->id]));
         }
-        $registration->checkPermission('send');
+        $registration->checkPermission('control');
         $this->data['entity'] = $registration;
         $this->render('registration-confirmacao', $this->data);
     }
