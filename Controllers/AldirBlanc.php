@@ -245,7 +245,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         if ($this->data['inciso'] == 1) {         
             $registration->opportunity = $this->getOpportunityInciso1();
+            $registration->inciso = 1;
         } else if($this->data['inciso'] == 2) {
+            $registration->inciso = 2;
             // inciso II
             if (!isset($this->data['opportunity']) || !isset($this->data['category'])) {
                 // @todo tratar esse erro
