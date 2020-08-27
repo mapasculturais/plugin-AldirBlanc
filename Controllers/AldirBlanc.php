@@ -275,12 +275,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     $space->name = ' ';
                     $space->save(true);   
                 }                  
-                else if (count($spaces_ids) > 1 && !isset($this->data['space'])) {
+                else if (count($spaces_ids) > 1 && (!isset($this->data['space']) || $this->data['space'] =='' )) {
                     // redireciona para a página de escolha de espaço
                     $app->redirect($this->createUrl('selecionar_espaco', ['agent' => $agent->id, 'inciso' =>2, 'category' => $this->data['category'],'opportunity' => $this->data['opportunity']]) );
                 } 
                 // Pega dados da página de seleção de espaço e cria o objeto do espaço
-                if (isset($this->data['space'])){
+                if (isset($this->data['space']) && $this->data['space'] !=""){
                     $space = $app->repo('space')->find($this->data['space']);  
                 }
             }
@@ -294,6 +294,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     'type'=>'EQ(2)',
                     
                 ]);
+
                 if(count($agentsQuery) == 1){
                     $agentRelated = $app->repo('agent')->find($agentsQuery[0]['id']);
                 }
@@ -304,7 +305,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     $agentRelated->type = 2;
                     $agentRelated->save(true);
                 }                  
-                else if (count($agentsQuery) > 1 && !isset($this->data['agentRelated'])) {
+                else if (count($agentsQuery) > 1 && (!isset($this->data['agentRelated']) || $this->data['agentRelated'] == '' )) {
                     // redireciona para a página de escolha de agente
            
                     $app->redirect($this->createUrl('selecionar_agente',
@@ -317,7 +318,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                         ]
                     ));
                 } 
-                if (isset($this->data['agentRelated'])){
+                if (isset($this->data['agentRelated']) && ($this->data['agentRelated'] != '')){
                     $agentRelated = $app->repo('agent')->find($this->data['agentRelated']);  
                 }
             }   
