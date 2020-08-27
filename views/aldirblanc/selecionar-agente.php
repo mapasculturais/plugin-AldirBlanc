@@ -4,7 +4,8 @@
 
 <article class="main-content" >
     <section id="selecionar-agentes">
-        <h3 class="title-section"><?php \MapasCulturais\i::_e("Selecione um agente");?></h3>
+        <?php $typeName = ($tipo == 1 ? 'individual' : 'coletivo');?>
+        <h3 class="title-section"><?php \MapasCulturais\i::_e("Selecione um agente " . $typeName);?></h3>
         <div id="agentes">
             <?php foreach($agents as $agent): ?>
                 <div class="wrapper" >
