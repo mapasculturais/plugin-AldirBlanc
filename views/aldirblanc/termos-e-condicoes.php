@@ -2,13 +2,14 @@
     $this->jsObject['registrationId'] = $registration_id;
 ?>
 <section id="termos" >
+
     <header class="termos--header">
         <p><?php \MapasCulturais\i::_e("De acordo com os critérios da LEI Nº 14.017 com sanção presidencial em 29 DE JUNHO DE 2020. Para ter acesso ao Auxílio Emergencial Cultural, você deve cumprir os seguintes requisitos:");?> </p>
 
         <h2><?php \MapasCulturais\i::_e("Termos e Condições");?></h2>
     </header>
 
-    <div class="list">
+    <div class="termos--list">
         <div class="term">
             <span class="term--box"></span>
             <label for="one" class="term--label">
@@ -108,7 +109,7 @@
         </div>
     </div>
 
-    <nav class="nav-terms">
+    <nav class="termos--nav-terms">
         <button class="btn btn-large btn-lab js-btn">  <?php \MapasCulturais\i::_e("Continuar");?></button>
     </nav>
 
