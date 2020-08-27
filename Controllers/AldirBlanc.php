@@ -247,7 +247,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $registration->opportunity = $this->getOpportunityInciso1();
             $registration->inciso = 1;
         } else if($this->data['inciso'] == 2) {
-            $registration->inciso = 2;
             // inciso II
             if (!isset($this->data['opportunity']) || !isset($this->data['category'])) {
                 // @todo tratar esse erro
@@ -257,6 +256,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             //pega o nome da category pela slug
             $category = $this->getCategoryName($this->data['category']);
             $registration->category = $category;
+            $registration->inciso = 2;
 
             //Espaço
             if (strpos($this->data['category'], 'espaco') !== false ) {
@@ -389,7 +389,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
 
         $registration = $this->getRequestedEntity();
-
+        if($registration->status != Registration::STATUS_DRAFT){
+            $app->redirect($this->createUrl('status', [$registration->id]));
+        }
         $registration->checkPermission('modify');
         
         if (!$registration->termos_aceitos) {
@@ -482,12 +484,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     function GET_selecionar_agente()
     {
-        $this->requireAuthentication();
 
         $tipo = $this->data['tipo'];
         if($tipo != 1 && $tipo != 2){
-            //exceção
+            //@TODO tratar esse erro
+            throw \Exception();
         }
+        $this->requireAuthentication();
         $app = App::i();
         $user = $this->_getUser();
         $tipo = $this->data['tipo'];
@@ -538,6 +541,29 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->data['spaces'] = $spaces;
         $this->render('selecionar-espaco', $this->data);
 
+    }
+    /**
+     * Confirmação de dados antes do envio do formulário
+     * 
+     * rota: /aldirblanc/confirmacao/{id_inscricao}
+     * 
+     * @return void
+     */
+    function GET_confirmacao()
+    {
+        $app = App::i();
+        $this->requireAuthentication();
+        //verificar se registration status
+        $registration = $this->getRequestedEntity();
+        if($registration->status != Registration::STATUS_DRAFT){
+            $app->redirect($this->createUrl('status', [$registration->id]));
+        }
+        if (!$registration->termos_aceitos) {
+            $app->redirect($this->createUrl('termos_e_condicoes', [$registration->id]));
+        }
+        $registration->checkPermission('control');
+        $this->data['entity'] = $registration;
+        $this->render('registration-confirmacao', $this->data);
     }
 
     protected function _getUser(){
