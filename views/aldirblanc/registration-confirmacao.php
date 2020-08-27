@@ -28,8 +28,8 @@ $_params = [
     <article>
         <?php $this->applyTemplateHook('form','begin'); ?>
 
-        <?php $this->part('singles/registration-single--header', $_params) ?>
-        
+        <?php $this->part('aldirblanc/registration-single--header', $_params) ?>
+
         <?php $this->part('singles/registration-single--fields', $_params) ?>
 
         <?php $this->applyTemplateHook('form','end'); ?>
@@ -39,6 +39,16 @@ $_params = [
 
     </article>
     <?php $this->part('singles/registration--valuers-list', $_params) ?>
+    <div ng-if="data.sent" style="display:block" id="modalAlert" class="">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Preenchimento Finalizado</h2>
+        <p class="text">lorem</p>
+        <a href="<?= $this->controller->createUrl('status',[$entity->id]) ?>" class="btn btn-primary js-confirmar"><?php \MapasCulturais\i::_e("Ok"); ?></a>
+    </div>
+</div>
+
 </article>
 <?php $this->part('singles/registration--sidebar--left', $_params) ?>
 <?php $this->part('singles/registration--sidebar--right', $_params) ?>
