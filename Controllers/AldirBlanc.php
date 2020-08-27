@@ -247,7 +247,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $registration->opportunity = $this->getOpportunityInciso1();
             $registration->inciso = 1;
         } else if($this->data['inciso'] == 2) {
-            $registration->inciso = 2;
             // inciso II
             if (!isset($this->data['opportunity']) || !isset($this->data['category'])) {
                 // @todo tratar esse erro
@@ -257,6 +256,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             //pega o nome da category pela slug
             $category = $this->getCategoryName($this->data['category']);
             $registration->category = $category;
+            $registration->inciso = 2;
 
             //Espaço
             if (strpos($this->data['category'], 'espaco') !== false ) {
