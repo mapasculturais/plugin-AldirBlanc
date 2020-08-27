@@ -38,7 +38,7 @@
         text-align: left;
         color: white;
         padding: 9px 32px;
-        border-radius: 10px 10px 0 0;
+        border-radius: 8px 8px 0 0;
         margin-bottom: 10px;
         font-weight: bold;
     }
@@ -112,7 +112,7 @@
 
     &--content {
         text-align: left;
-        color: #666666;
+        color: $brand-secondary;
         font-family: $f_body;
         font-size: 0.75rem;
         font-weight: 600;
@@ -123,17 +123,22 @@
         .more {
             cursor: pointer;
             // remove
-            display: none;
+            // display: none;
         }
 
         .content {
-            // display: none;
+            transform: scale(0);
             display: block;
+            height: 0;
+            margin-right: 18px;
+            transition: all .2s ease-in-out;
         }
 
         &.active {
             .content {
-                display: block;
+                transform: scale(1);
+                height: auto;
+                transition: all .2s ease-in-out;
             }
 
             .more {
@@ -157,6 +162,21 @@
         .informative-box--status {
             background: white;
         }
+
+        .informative-box--title {
+            h2 {
+                color: white;
+                font-weight: bold;
+            }
+        }
+
+        .informative-box--content {
+            color: white;
+        }
+
+        i {
+            color: white;
+        }
     }
 
     &.status-10 {
@@ -164,6 +184,16 @@
 
         .informative-box--status {
             color: $theme-color-secondary;
+        }
+
+        .informative-box--icon {
+            &:before {
+                background-color: $theme-color-secondary;
+            }
+
+            &:after {
+                background-color: $theme-color-secondary;   
+            }
         }
     }
 
@@ -173,6 +203,16 @@
         .informative-box--status {
             color: $theme-color-quaternary;
         }
+
+        .informative-box--icon {
+            &:before {
+                background-color: $theme-color-quaternary;
+            }
+
+            &:after {
+                background-color: $theme-color-quaternary;   
+            }
+        }
     }
 
     &.status-3 {
@@ -181,6 +221,16 @@
         .informative-box--status {
             color: $theme-color-tertiary;
         }
+
+        .informative-box--icon {
+            &:before {
+                background-color: $theme-color-tertiary;
+            }
+
+            &:after {
+                background-color: $theme-color-tertiary;   
+            }
+        }
     }
 
     &.status-2 {
@@ -188,6 +238,16 @@
 
         .informative-box--status {
             color: $theme-color-quaternary;
+        }
+
+        .informative-box--icon {
+            &:before {
+                background-color: $theme-color-quaternary;
+            }
+
+            &:after {
+                background-color: $theme-color-quaternary;   
+            }
         }
     }
 }

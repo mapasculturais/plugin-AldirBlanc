@@ -161,21 +161,34 @@ if (count($cidades) <= 1) {
         })
     });
 </script>
-<section class="lab-main-content">
+<section class="lab-main-content cadastro">
     <!-- <header>
         <div>
             <h1>Cadastro - Lei Aldir Blanc</h1>
         </div>
     </header> -->
 
-    <p class="intro-message">
-        <span class="name"> Olá, <?= $niceName ?>! </span>
-        Por favor, responda às perguntas abaixo para iniciar seu cadastro.</p>
+    <header>
+        <div class="intro-message">
+            <div class="name"> Olá, <?= $niceName ?>! </div>
 
-    <div class="js-lab-item lab-item">
-        <p class="lab-form-question">Para quem você está solicitando o auxílio? <a class="js-help icon icon-help" href="#" title=""></a></p>
+            <!-- <span class="info">
+                Por favor, responda às perguntas abaixo para iniciar seu cadastro.  
+            </span> -->
+        
+        </div>
+    
+    </header>
 
-        <div class="lab-form-filter">
+   
+
+    <div class="js-lab-item lab-item cadastro-options">
+        <!-- <p class="lab-form-question">Para quem você está solicitando o auxílio? <a class="js-help icon icon-help" href="#" title=""></a></p> -->
+        <h2 class="featured-title"> 
+            Selecione abaixo o auxílio desejado
+        </h2>
+
+        <div class="lab-form-filter opcoes-inciso">
             <?php
             $inciso1Title = 'Trabalhadoras e trabalhadores da Cultura';
             $inciso2Title = 'Espaços e organizações culturais';

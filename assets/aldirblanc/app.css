@@ -1112,15 +1112,20 @@ i {
 
 .informative-box--content .more {
   cursor: pointer;
-  display: none;
 }
 
 .informative-box--content .content {
+  transform: scale(0);
   display: block;
+  height: 0;
+  margin-right: 18px;
+  transition: all 0.2s ease-in-out;
 }
 
 .informative-box--content.active .content {
-  display: block;
+  transform: scale(1);
+  height: auto;
+  transition: all 0.2s ease-in-out;
 }
 
 .informative-box--content.active .more {
@@ -1329,6 +1334,46 @@ i {
 }
 
 /* ----- 5: PAGES ------- */
+
+section.cadastro header {
+  padding-top: 31px;
+  padding-bottom: 30px;
+}
+
+section.cadastro header div.intro-message .name {
+  color: #666666;
+  font-family: "aleo", serif;
+  font-size: 1rem;
+  letter-spacing: 0;
+  line-height: 1.1875rem;
+  text-align: center;
+}
+
+section.cadastro .cadastro-options h2.featured-title {
+  color: #111111;
+  font-family: "aleo", serif;
+  font-size: 1.75rem;
+  font-weight: bold;
+  letter-spacing: 0;
+  line-height: 1.9375rem;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+section.cadastro .cadastro-options .opcoes-inciso {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 30px;
+  max-width: 70%;
+  margin: 0 auto;
+}
+
+@media (min-width: 1600px) {
+  section.cadastro .cadastro-options .opcoes-inciso {
+    max-width: 58%;
+    margin: 0 auto;
+  }
+}
 
 /* ----- 6: VENDORS ------- */
 
