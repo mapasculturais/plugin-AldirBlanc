@@ -1,20 +1,17 @@
 <?php
     $this->jsObject['registrationId'] = $registration_id;
 ?>
-<section id="termos" >
+<section class="termos" >
+    <p class="termos--summay"><?php \MapasCulturais\i::_e("De acordo com os critérios da LEI Nº 14.017 com sanção presidencial em 29 DE JUNHO DE 2020. Para ter acesso ao Auxílio Emergencial Cultural, você deve cumprir os seguintes requisitos:");?> </p>
 
-    <header class="termos--header">
-        <p><?php \MapasCulturais\i::_e("De acordo com os critérios da LEI Nº 14.017 com sanção presidencial em 29 DE JUNHO DE 2020. Para ter acesso ao Auxílio Emergencial Cultural, você deve cumprir os seguintes requisitos:");?> </p>
-
-        <h2><?php \MapasCulturais\i::_e("Termos e Condições");?></h2>
-    </header>
+    <h2><?php \MapasCulturais\i::_e("Termos e Condições");?></h2>
 
     <div class="termos--list">
         <div class="term">
             <span class="term--box"></span>
             <label for="one" class="term--label">
                 <input type="checkbox" class="term--input" id="one" />
-                <span>
+                <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Declaro atuação no setor cultural e fonte de renda, conforme lei nº 14.017, de
                     29 de junho de 2020, que dispõe sobre ações emergenciais destinadas ao setor
                     cultural a serem adotadas durante o estado de calamidade pública.");?>
@@ -25,7 +22,7 @@
             <span class="term--box"></span>
             <label for="two" class="term--label">
                 <input type="checkbox" class="term--input" id="two" />
-                <span>
+                <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Declaro que não sou titular de benefício previdenciário ou assistencial do
                     governo federal, exceto do programa bolsa família, conforme inciso iii do art.
                     6º da lei nº 14.017.");?>
@@ -36,7 +33,7 @@
             <span class="term--box"></span>
             <label for="three" class="term--label">
                 <input type="checkbox" class="term--input" id="three" />
-                <span>
+                <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Declaro que não sou titular de benefício previdenciário ou assistencial do
                     governo federal, exceto do programa bolsa família, conforme inciso iii do art.
                     6º da lei nº 14.017.");?>
@@ -47,7 +44,7 @@
             <span class="term--box"></span>
             <label for="four" class="term--label">
                 <input type="checkbox" class="term--input" id="four" />
-                <span>
+                <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Declaro que não estou recebendo benefício do seguro desemprego ou
                     programa de transferência de renda federal, exceto do programa bolsa família,
                     conforme inciso iii do art. 6º da lei nº 14.017.");?>
@@ -58,7 +55,7 @@
             <span class="term--box"></span>
             <label for="five" class="term--label">
                 <input type="checkbox" class="term--input" id="five" />
-                <span>
+                <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Declaro renda familiar per capita de até meio salário mínimo ou renda familiar
                     total de até três salários mínimos, conforme inciso iv do art. 6º da lei nº 14.017.");?>
             </span>
@@ -68,7 +65,7 @@
             <span class="term--box"></span>
             <label for="six" class="term--label">
                 <input type="checkbox" class="term--input" id="six" />
-                <span>
+                <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Declaro que no ano de 2018, não recebi rendimentos acima de R$ 28.559,70 (vinte
                     e oito mil, quinhentos e cinquenta e nove reais e setenta centavos), conforme
                     inciso v do art. 6º da lei nº 14.017.");?>
@@ -79,7 +76,7 @@
             <span class="term--box"></span>
             <label for="eight" class="term--label">
                 <input type="checkbox" class="term--input" id="eight" />
-                <span>
+                <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Declaro não ser beneficiário(a) do auxílio emergencial previsto na lei nº 13.982,
                     de 2 de abril de 2020, e em conformidade com o inciso vii do art. 6º da lei nº 14.017.");?>
             </span>
@@ -89,7 +86,7 @@
             <span class="term--box"></span>
             <label for="nine" class="term--label">
                 <input type="checkbox" class="term--input" id="nine" />
-                <span>
+                <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Declaro que estou ciente de que, em caso de utilização de qualquer meio ilícito,
                     imoral ou declaração falsa para a participação deste credenciamento, incorro
                     nas penalidades previstas nos artigos 171 e 299 do decreto lei nº 2.848, de 07 de
@@ -101,7 +98,7 @@
             <span class="term--box"></span>
             <label for="ten" class="term--label">
                 <input type="checkbox" class="term--input" id="ten" />
-                <span>
+                <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Declaro que estou ciente da concessão das informações por mim declaradas
                     neste formulário para validação em outras bases de dados oficiais.");?>
             </span>
