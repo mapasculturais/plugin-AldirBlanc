@@ -1,0 +1,141 @@
+//
+// App
+// --------------------------------------------------
+//## Compiles to app.css.
+
+
+//== Colors
+//
+//use sass default color module
+@use 'sass:color';
+
+//## Copy default theme variables
+//## Gray and brand colors for use across application.
+$gray-darker: #333 !default;
+$gray-dark: #666 !default;
+$gray: #ccc !default;
+$gray-light: #e2e2e2 !default;
+$gray-lighter: #eee !default;
+
+$brand-primary: #3a72bc !default;
+$brand-primary-light: color.scale($brand-primary, $lightness: 80%) !default;
+$brand-accent: #000000 !default;
+
+$brand-event: #b3b921 !default;
+$brand-agent: #1dabc6 !default;
+$brand-space: #e83f96 !default;
+$brand-project: #cc0033 !default;
+$brand-opportunity: #ED2CD4 !default;
+$brand-subsite:  #cc0033 !default;
+$brand-seal: #cc0033 !default;
+$brand-developer: #9966cc !default;
+
+$brand-info: #40b4b4 !default;
+$brand-warning: #cc9933 !default;
+$brand-warning-light: color.scale($brand-warning, $lightness: 50%) !default;
+$brand-danger: #cc3333 !default;
+$brand-danger-light: color.scale($brand-danger, $lightness: 50%) !default;
+$brand-success: #66cc66 !default;
+$brand-success-light: color.scale($brand-success, $lightness: 50%) !default;
+$brand-draft: #0d9ecc !default;
+$brand-default: $gray-light !default;
+
+$green-dark: #003c46;
+
+
+//== Icons
+$unicode-approved: "\e0dd" !default;
+$unicode-disapproved: "\e0f1" !default;
+$unicode-waiting: "\e02d" !default;
+
+
+#main-section {
+    @media screen and (max-width: 767px) {
+        margin-top: 38px;
+    }
+}
+
+.screen-reader-text {
+    display: inline-block;
+}
+
+.lab-main-content {
+    display: flex;
+    box-sizing: border-box;
+    flex-flow: column wrap;
+    min-height: calc(100vh - 4.875rem);
+    line-height: 1.5;
+    padding: 0 1.5rem;
+    @media screen and (min-width: 768px) {
+        background-image: url(/assets/aldirblanc/img/homepage_header_background.svg);
+        background-repeat: no-repeat;
+        background-position: top center;
+        background-size: contain;
+        width: 75%;
+        max-width: 960px;
+        margin: 0 auto;
+        padding-top: 6rem;
+    }
+    .box {
+        text-align: center;
+    }
+}
+#lab-status {
+    .box {
+        background-color: #fff;
+        border-radius: 2px;
+    }
+}
+.lab-form-detail{
+    text-align: left;
+}
+
+.lab-form-question {
+    font-size: 1.8rem;
+    border-bottom: 2px solid #f8f8f8;
+    .icon-help {
+        font-size: 1rem;
+        line-height: 1;
+        vertical-align: super;
+        text-align: center;
+        height: 1rem;
+        width: 1rem;
+        border-radius: .5rem;
+        color: #ccc;
+        background: white;
+        &:focus {
+            color: $brand-primary;
+        }
+        @media screen and (min-width: 768px) {
+            display: none;
+        }
+    }
+}
+
+.lab-form-answer {
+    position: relative;
+    background: #f8f8f8;
+    padding: .75rem .75rem 2.5rem;
+    border-radius: 2px;
+    @media screen and (min-width: 768px) {
+        padding: 1.5rem;
+    }
+}
+
+.lab-back {
+    position: absolute;
+    left: .75rem;
+    bottom: .75rem;
+    @media screen and (min-width: 768px) {
+        left: 1.5rem;
+        bottom: 1.5rem;
+    }
+    text-align: left!important;
+}
+
+@import "variables";
+@import "general";
+@import "inicio";
+@import "agente";
+@import "termos";
+@import "cadastro.scss";
