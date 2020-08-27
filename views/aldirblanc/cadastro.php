@@ -178,8 +178,14 @@ if(count($cidades) <= 1){
                 switch ($registration->status) {
                     //caso seja do Inciso 2 e nao enviada (Rascunho)
                     case Registration::STATUS_DRAFT:
-                        //todo pegar nome do coletivo ou do espaço
-                        $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registration' => $registration,'registrationUrl' => $registrationUrl,'niceName' => $niceName]);
+                        // Ver com Rafa
+                        // $name = ($agentArray = isset($registration->getRelatedAgents()['coletivo']) ?  )
+                        $agentName = (isset($registration->getRelatedAgents()['coletivo']) ? $registration->getRelatedAgents()['coletivo'][0]->name:'');
+                        $agentName = $agentName == ' ' ? 'Nome não preenchido' : $agentName;
+                        $spaceName = ($registration->getSpaceRelation() != null ? $registration->getSpaceRelation()->space->name : '');
+                        $spaceName = $spaceName == ' ' ? 'Nome não preenchido' : $spaceName;
+                        $name = ($agentName ? $agentName : $spaceName );
+                        $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['name' => $name, 'registration' => $registration,'registrationUrl' => $registrationUrl,'niceName' => $niceName]);
                         break;
                     //caso seja do Inciso 2 e tenha sido enviada
                     default:
