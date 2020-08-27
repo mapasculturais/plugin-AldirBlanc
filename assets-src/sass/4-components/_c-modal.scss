@@ -1,0 +1,40 @@
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    background-color: transparent;
+    border: none !important;
+    box-shadow: none !important;
+
+    @media screen and (max-width: 768px) {
+        top: 10%;
+    }
+
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    text-align: center;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    border: none;
+    border-radius: 10px;
+    border-top: 4px solid #3a72bc;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
