@@ -1,36 +1,67 @@
+// Component schema (HTML schema for block usage)
+// <element class="status-card"> 
+//      <element class="status-card--title"> This is the opcional title </element>
+//      <element class="status-card--content"> This is the opcional content </element>
+// </element>
+
 .modal {
     display: none;
     position: fixed;
-    z-index: 1;
-    background-color: transparent;
+    background-color: rgba(0, 0, 0, 0.60);
     border: none !important;
     box-shadow: none !important;
+    height: 100%;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    width: 100%;
+    z-index: 9999;
 
-    @media screen and (max-width: 768px) {
-        top: 10%;
+    .modal-content {
+        @extend .card;
+        box-sizing: border-box;
+        margin: 30% auto 0;
+        position: relative;
+        text-align: center;
+        width: 60%;
+
+        @include mobile {
+            width: calc(100% - 30px);
+        }
+
+        &--title {
+            color: $gray-darker;
+            font-size: $font-size-h4;
+            font-weight: bold;
+            line-height: 1.4;
+            margin: 0 0 25px;
+            padding: 0;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 30px;
+            font-weight: lighter;
+            height: 20px;
+            line-height: 0.4;
+            padding: 10px;
+            position: absolute;
+            right: 0;
+            top: 0px;
+            width: 20px;
+            z-index: 9999999;
+        }
+
+        .text {
+            margin-bottom: 25px;
+        }
+
     }
 
 }
 
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    text-align: center;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    border: none;
-    border-radius: 10px;
-    border-top: 4px solid #3a72bc;
-    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
 
 .close:hover,
 .close:focus {

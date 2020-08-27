@@ -251,7 +251,7 @@ if (count($cidades) <= 1) {
                         //caso seja do Inciso 1 e tenha sido enviada
                     default:
                         $registrationStatusName = $summaryStatusName[$registration->status];
-                        $this->part('aldirblanc/cadastro/application-status',  [ 'registration' => $registration, 'registrationStatusName' => $registrationStatusName]);
+                        $this->part('aldirblanc/cadastro/application-status',  ['registration' => $registration, 'registrationStatusName' => $registrationStatusName]);
                         break;
                 }
             }
@@ -308,6 +308,7 @@ if (count($cidades) <= 1) {
         <!-- Modal content -->
         <div class="modal-content">
             <span class="close">&times;</span>
+            <h2 class="modal-content--title"></h2>
             <p class="text"></p>
             <button class="btn js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></button>
         </div>
