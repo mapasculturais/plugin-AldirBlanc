@@ -139,7 +139,12 @@ class Plugin extends \MapasCulturais\Plugin
             'type' => 'boolean',
             'private' => true,
         ]);
-
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'inciso', [
+            'label' => i::__('Inciso'),
+            'type' => 'number',
+            'private' => true,
+        ]);
+        
         if($this->config['inciso1_enabled']){
             /**
              * Id da inscrição no insico I
