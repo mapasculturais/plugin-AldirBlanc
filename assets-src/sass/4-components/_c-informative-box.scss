@@ -1,0 +1,127 @@
+// Component schema (HTML schema for block usage)
+// <button class="informative-box">
+//     <element class="informative-box--status"></element>
+//     <element class="informative-box--icon"></element>
+//     <element class="informative-box--title">
+//         <h2> Title here </h2>
+//         <i class="status-icon"></i>
+//     </element>
+//     <element class="informative-box--content">
+//          <span class="more"> </span>
+//          <span class="content">
+//              <div class="item">
+//                  <span class="label"></span>
+//              </div>
+//          </span>
+//     </element>
+// </button>
+
+
+.informative-box {
+    height: auto;
+    background-color: #FFFFFF;
+    box-shadow: 0 2px 6px 0 rgba(0,0,0,0.3);
+    border-radius: 10px;
+    padding: 14px;
+    position: relative;
+    margin-left: 23px;
+    padding-left: 40px;
+    cursor: pointer;
+
+    &--icon {
+        position: absolute;
+        left: -21.5px;
+        width: 50px;
+        height: 50px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        i {
+            z-index: 99;
+            font-size: 20px;
+            color: $brand-primary;
+        }
+
+        &:before {
+            content: "";
+            display: block;
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            padding: 1px;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3);
+        }
+
+
+        &:after {
+            content: "";
+            display: block;
+            width: 39px;
+            height: 67px;
+            position: absolute;
+            background: white;
+            z-index: 0;
+            right: -10px;
+        }
+    }
+
+    &--title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 13px;
+
+        h2 {
+            color: #111111;
+            font-family: $f_title;
+            font-size: $font-size-base;
+            font-weight: bold;
+            letter-spacing: 0;
+            line-height: 1.1875rem;
+            margin-bottom: 0;
+        }
+
+        i {
+            margin-left: 31px;
+            font-size: 44px;
+            color: $brand-primary;
+        }
+    }
+
+
+    &--content {
+        text-align: left;
+        color: #666666;
+        font-family: $f_body;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0;
+        line-height: 17px;
+
+        .more {
+            cursor: pointer;
+            // remove
+            display: none;
+        }
+
+        .content {
+            // display: none;
+            display: block;
+        }
+
+        &.active {
+            .content {
+                display: block;
+            }
+
+            .more {
+                display: none;
+            }
+        }
+    }
+}
+
