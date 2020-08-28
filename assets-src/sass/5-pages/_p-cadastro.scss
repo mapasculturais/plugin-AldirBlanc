@@ -34,10 +34,23 @@ section.cadastro {
             grid-gap: 30px;
             max-width: 70%;
             margin: 0 auto;
+            align-items: flex-start;
             
             @include large {
                 max-width: 58%;
                 margin: 0 auto;
+            }
+
+            .draf-option {
+                a {
+                    text-decoration: none;;
+                }
+
+                div.btn  {
+                    width: calc(100% - 23px);
+                    margin-left: auto;
+                    display: block;
+                }
             }
         }
     }

@@ -34,7 +34,7 @@
         padding-top: 20px;
     }
 
-    &.active {
+    &.active, &:hover {
         background-color: $brand-primary;
         transition: all 0.2s ease-in-out;
 
