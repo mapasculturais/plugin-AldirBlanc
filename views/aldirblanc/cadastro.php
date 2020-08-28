@@ -43,16 +43,6 @@ if (count($cidades) <= 1) {
         }
 
         /**
-         * Ao clicar nos cards do Inciso II, o usuário é encaminhado para tela de opções do local de atividade do beneficiário.
-         */
-        $('.js-lab-option').click(function() {
-            $('.js-lab-item').fadeOut(1);
-            $('.js-questions').fadeIn(11);
-            $('#local-atividade').fadeIn(1100);
-            returning = false;
-        });
-
-        /**
          * Ao clicar em uma das opções do local de atividade do beneficiário , o usuário é encaminhado para tela de opções de personalidades jurídica do beneficiário.
          */
         $('.coletivo').click(function() {
@@ -159,21 +149,55 @@ if (count($cidades) <= 1) {
         $('.informative-box .informative-box--content .more').hover(function(e) {
             $(this.parentElement).addClass('active');
         })
+
+        /**
+         * Ao clicar nos cards do Inciso II, o usuário é encaminhado para tela de opções do local de atividade do beneficiário.
+         */
+        let selectedInciso = '';
+
+        $('.lab-option').click(function() {
+            selectedInciso = $(this).attr('id');
+            $('.lab-option').removeClass('active');
+            $(this).toggleClass('active');
+
+            // $('.js-questions').fadeIn(11);
+            // $('#local-atividade').fadeIn(1100);
+            returning = false;
+        });
+
+        
+
+
     });
 </script>
-<section class="lab-main-content">
-    <header>
+<section class="lab-main-content cadastro">
+    <!-- <header>
         <div>
             <h1>Cadastro - Lei Aldir Blanc</h1>
         </div>
+    </header> -->
+
+    <header>
+        <div class="intro-message">
+            <div class="name"> Olá, <?= $niceName ?>! </div>
+
+            <!-- <span class="info">
+                Por favor, responda às perguntas abaixo para iniciar seu cadastro.  
+            </span> -->
+        
+        </div>
+    
     </header>
-    <p class="intro-message">Olá, <?= $niceName ?>! <br />
-        Por favor, responda às perguntas abaixo para iniciar seu cadastro.</p>
 
-    <div class="js-lab-item lab-item">
-        <p class="lab-form-question">Para quem você está solicitando o auxílio? <a class="js-help icon icon-help" href="#" title=""></a></p>
+   
 
-        <div class="lab-form-filter">
+    <div class="js-lab-item lab-item cadastro-options">
+        <!-- <p class="lab-form-question">Para quem você está solicitando o auxílio? <a class="js-help icon icon-help" href="#" title=""></a></p> -->
+        <h2 class="featured-title"> 
+            Selecione abaixo o auxílio desejado
+        </h2>
+
+        <div class="lab-form-filter opcoes-inciso">
             <?php
             $inciso1Title = 'Trabalhadoras e trabalhadores da Cultura';
             $inciso2Title = 'Espaços e organizações culturais';
@@ -219,10 +243,11 @@ if (count($cidades) <= 1) {
             }
             //se em menos inscriçoes que a configuração do pugin permite para o inciso 1 mosra a opçao de cadasrtrar
 
-
+            //echo count($registrationsInciso1);
             if (count($registrationsInciso1) < $inciso1Limite && $inciso1_enabled) {
             ?>
-                <button onclick="location.href='<?= $this->controller->createUrl('individual') ?>'" clickable id="option3" class="informative-box lab-option">
+                <!-- <button onclick="location.href='<?= $this->controller->createUrl('individual') ?>'" clickable id="option3" class="informative-box lab-option"> -->
+                <button id="option3" class="informative-box lab-option">
                     <div class="informative-box--icon">
                         <i class="fas fa-users"></i>
                     </div>

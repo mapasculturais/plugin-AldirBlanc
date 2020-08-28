@@ -18,6 +18,7 @@
 
 
 .informative-box {
+    width: calc(100% - 23px);
     height: auto;
     background-color: #FFFFFF;
     box-shadow: 0 2px 6px 0 rgba(0,0,0,0.3);
@@ -27,9 +28,32 @@
     padding: 0px;
     padding-bottom: 24px;
     cursor: pointer;
+    transition: all 0.2s ease-in-out;
 
     &:not(.has-status) {
         padding-top: 20px;
+    }
+
+    &.active {
+        background-color: $brand-primary;
+        transition: all 0.2s ease-in-out;
+
+        .informative-box--icon {
+            i {
+                color: white;
+            }
+
+            &:before, &:after, & {
+                background-color: $brand-primary;
+                transition: all 0.2s ease-in-out;
+            }
+        }
+
+        .informative-box--title, .informative-box--content {
+            h2, i, .content, .more {
+                color: white;
+            }
+        }
     }
 
     &--status {
@@ -38,7 +62,7 @@
         text-align: left;
         color: white;
         padding: 9px 32px;
-        border-radius: 10px 10px 0 0;
+        border-radius: 8px 8px 0 0;
         margin-bottom: 10px;
         font-weight: bold;
     }
@@ -61,6 +85,7 @@
         }
 
         &:before {
+            transition: all 0.2s ease-in-out;
             content: "";
             display: block;
             width: 50px;
@@ -73,6 +98,7 @@
 
 
         &:after {
+            transition: all 0.2s ease-in-out;
             content: "";
             display: block;
             width: 39px;
@@ -112,7 +138,7 @@
 
     &--content {
         text-align: left;
-        color: #666666;
+        color: $brand-secondary;
         font-family: $f_body;
         font-size: 0.75rem;
         font-weight: 600;
@@ -123,17 +149,22 @@
         .more {
             cursor: pointer;
             // remove
-            display: none;
+            // display: none;
         }
 
         .content {
-            // display: none;
+            transform: scale(0);
             display: block;
+            height: 0;
+            margin-right: 18px;
+            transition: all .2s ease-in-out;
         }
 
         &.active {
             .content {
-                display: block;
+                transform: scale(1);
+                height: auto;
+                transition: all .2s ease-in-out;
             }
 
             .more {
@@ -157,6 +188,21 @@
         .informative-box--status {
             background: white;
         }
+
+        .informative-box--title {
+            h2 {
+                color: white;
+                font-weight: bold;
+            }
+        }
+
+        .informative-box--content {
+            color: white;
+        }
+
+        i {
+            color: white;
+        }
     }
 
     &.status-10 {
@@ -164,6 +210,16 @@
 
         .informative-box--status {
             color: $theme-color-secondary;
+        }
+
+        .informative-box--icon {
+            &:before {
+                background-color: $theme-color-secondary;
+            }
+
+            &:after {
+                background-color: $theme-color-secondary;   
+            }
         }
     }
 
@@ -173,6 +229,16 @@
         .informative-box--status {
             color: $theme-color-quaternary;
         }
+
+        .informative-box--icon {
+            &:before {
+                background-color: $theme-color-quaternary;
+            }
+
+            &:after {
+                background-color: $theme-color-quaternary;   
+            }
+        }
     }
 
     &.status-3 {
@@ -181,6 +247,16 @@
         .informative-box--status {
             color: $theme-color-tertiary;
         }
+
+        .informative-box--icon {
+            &:before {
+                background-color: $theme-color-tertiary;
+            }
+
+            &:after {
+                background-color: $theme-color-tertiary;   
+            }
+        }
     }
 
     &.status-2 {
@@ -188,6 +264,16 @@
 
         .informative-box--status {
             color: $theme-color-quaternary;
+        }
+
+        .informative-box--icon {
+            &:before {
+                background-color: $theme-color-quaternary;
+            }
+
+            &:after {
+                background-color: $theme-color-quaternary;   
+            }
         }
     }
 }

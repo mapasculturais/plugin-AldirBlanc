@@ -1,0 +1,48 @@
+section.cadastro {
+    header {
+        padding-top: 31px;
+        padding-bottom: 30px;
+
+        div.intro-message {
+            .name {
+                color: $brand-secondary;
+                font-family: $f_title;
+                font-size: $font-size-base;
+                letter-spacing: 0;
+                line-height: 1.1875rem;
+                text-align: center;
+            }
+        }
+
+    }   
+
+    .cadastro-options {
+        h2.featured-title {
+            color: #111111;
+            font-family: $f_title;
+            font-size: $font-size-h3;
+            font-weight: bold;
+            letter-spacing: 0;
+            line-height: 1.9375rem;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .opcoes-inciso {
+            display: grid;
+            grid-template-columns: repeat(2, 50%);
+            grid-gap: 30px;
+            max-width: 70%;
+            margin: 0 auto;
+            
+            @include large {
+                max-width: 58%;
+                margin: 0 auto;
+            }
+        }
+    }
+
+    .inactive {
+        display: none;
+    }
+}

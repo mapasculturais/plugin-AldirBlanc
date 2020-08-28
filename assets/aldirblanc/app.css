@@ -1029,7 +1029,7 @@ i {
   text-align: left;
   color: white;
   padding: 9px 32px;
-  border-radius: 10px 10px 0 0;
+  border-radius: 8px 8px 0 0;
   margin-bottom: 10px;
   font-weight: bold;
 }
@@ -1112,15 +1112,20 @@ i {
 
 .informative-box--content .more {
   cursor: pointer;
-  display: none;
 }
 
 .informative-box--content .content {
+  transform: scale(0);
   display: block;
+  height: 0;
+  margin-right: 18px;
+  transition: all 0.2s ease-in-out;
 }
 
 .informative-box--content.active .content {
-  display: block;
+  transform: scale(1);
+  height: auto;
+  transition: all 0.2s ease-in-out;
 }
 
 .informative-box--content.active .more {
@@ -1134,12 +1139,42 @@ i {
   background: white;
 }
 
+.informative-box.status-10 .informative-box--title h2,
+.informative-box.status-8 .informative-box--title h2,
+.informative-box.status-3 .informative-box--title h2,
+.informative-box.status-2 .informative-box--title h2 {
+  color: white;
+  font-weight: bold;
+}
+
+.informative-box.status-10 .informative-box--content,
+.informative-box.status-8 .informative-box--content,
+.informative-box.status-3 .informative-box--content,
+.informative-box.status-2 .informative-box--content {
+  color: white;
+}
+
+.informative-box.status-10 i,
+.informative-box.status-8 i,
+.informative-box.status-3 i,
+.informative-box.status-2 i {
+  color: white;
+}
+
 .informative-box.status-10 {
   background-color: #B4BA00;
 }
 
 .informative-box.status-10 .informative-box--status {
   color: #B4BA00;
+}
+
+.informative-box.status-10 .informative-box--icon:before {
+  background-color: #B4BA00;
+}
+
+.informative-box.status-10 .informative-box--icon:after {
+  background-color: #B4BA00;
 }
 
 .informative-box.status-8 {
@@ -1150,6 +1185,14 @@ i {
   color: #666666;
 }
 
+.informative-box.status-8 .informative-box--icon:before {
+  background-color: #666666;
+}
+
+.informative-box.status-8 .informative-box--icon:after {
+  background-color: #666666;
+}
+
 .informative-box.status-3 {
   background-color: #C60931;
 }
@@ -1158,12 +1201,28 @@ i {
   color: #C60931;
 }
 
+.informative-box.status-3 .informative-box--icon:before {
+  background-color: #C60931;
+}
+
+.informative-box.status-3 .informative-box--icon:after {
+  background-color: #C60931;
+}
+
 .informative-box.status-2 {
   background-color: #666666;
 }
 
 .informative-box.status-2 .informative-box--status {
   color: #666666;
+}
+
+.informative-box.status-2 .informative-box--icon:before {
+  background-color: #666666;
+}
+
+.informative-box.status-2 .informative-box--icon:after {
+  background-color: #666666;
 }
 
 .modal {
@@ -1275,6 +1334,46 @@ i {
 }
 
 /* ----- 5: PAGES ------- */
+
+section.cadastro header {
+  padding-top: 31px;
+  padding-bottom: 30px;
+}
+
+section.cadastro header div.intro-message .name {
+  color: #666666;
+  font-family: "aleo", serif;
+  font-size: 1rem;
+  letter-spacing: 0;
+  line-height: 1.1875rem;
+  text-align: center;
+}
+
+section.cadastro .cadastro-options h2.featured-title {
+  color: #111111;
+  font-family: "aleo", serif;
+  font-size: 1.75rem;
+  font-weight: bold;
+  letter-spacing: 0;
+  line-height: 1.9375rem;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+section.cadastro .cadastro-options .opcoes-inciso {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 30px;
+  max-width: 70%;
+  margin: 0 auto;
+}
+
+@media (min-width: 1600px) {
+  section.cadastro .cadastro-options .opcoes-inciso {
+    max-width: 58%;
+    margin: 0 auto;
+  }
+}
 
 /* ----- 6: VENDORS ------- */
 
