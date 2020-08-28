@@ -35,6 +35,13 @@ article.registration {
             position: initial;
         }
 
+        .alert.danger {
+            background: none;
+            border: 0;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
         ul {
             li {
                 padding: 0;
