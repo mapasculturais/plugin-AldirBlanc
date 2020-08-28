@@ -93,8 +93,16 @@ section.cadastro {
             justify-content: center;
             flex-wrap: wrap;
 
+            h2{
+                margin-bottom: -35px;
+            }
+
             label{
                 margin: 20px;
+                text-align: left;
+                line-height: 19px;
+                font-size: 16px;
+                vertical-align: center;
 
                 @include desktop {
                     width: 30%;
