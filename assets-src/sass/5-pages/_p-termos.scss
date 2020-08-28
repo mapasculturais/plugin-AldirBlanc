@@ -1,5 +1,5 @@
 .termos {
-    padding-top: 10px;
+    margin-top: 100px;
 
     h2 {
         font-family: $headings-font-family;
@@ -9,7 +9,7 @@
         margin: auto;
 
         @include desktop {
-            width: 50%;
+            width: 40%;
         }
     }
 
@@ -21,7 +21,7 @@
         padding-right: 8%;
 
         @include desktop {
-            width: 50%;
+            width: 40%;
         }
     }
 

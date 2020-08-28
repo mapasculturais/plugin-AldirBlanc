@@ -15,7 +15,7 @@
                     <?php if($agent->avatar): ?>
                         <img src="<?php echo $agent->avatar;?>" class="agentes--thumbnail" alt="<?php echo $agent->name ?>">
                     <?php else:?>
-                        <img src="<?php $app->view->asset('img/avatar--agent.png');?>" class="thumbnail" alt="<?php echo $agent->name ?>">
+                        <img src="<?php $app->view->asset('img/avatar--agent.png');?>" class="agentes--thumbnail" alt="<?php echo $agent->name ?>">
                     <?php endif; ?>
                 </div>
 
@@ -39,9 +39,13 @@
                     </span>
 
                     <span class="agentes--descricao">
-                          <?php foreach($agent->areas as $area): ?>
-                              <span><?php echo $area ?></span><br>
-                          <?php endforeach; ?>
+                         <?php if(count($agent->areas) > 0): ?>
+                              <?php foreach($agent->areas as $area): ?>
+                                  <span><?php echo $area ?></span><br>
+                              <?php endforeach; ?>
+                         <?php else:?>
+                             <span><?php \MapasCulturais\i::_e("Agente sem áreas de atuação definidas"); ?></span><br>
+                         <?php endif; ?>
                     </span>
                 </div>
             </div>
