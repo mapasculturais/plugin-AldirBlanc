@@ -840,6 +840,70 @@ i {
 
 /* ----- 3: LAYOUT ------- */
 
+header {
+  position: relative;
+}
+
+header #logo-svg {
+  color: red;
+}
+
+header .logo-state {
+  display: none;
+  height: auto;
+  margin: 0 auto;
+  padding: 10px;
+  transition: all 0.3s ease-in-out;
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  width: 200px;
+}
+
+@media (min-width: 1025px) {
+  header .logo-state {
+    display: block;
+    left: 0;
+    position: absolute;
+  }
+}
+
+header .logo {
+  height: auto;
+  margin: 0 auto;
+  padding-top: 5px;
+  width: 200px;
+}
+
+header .logout {
+  height: 100%;
+  padding: 0 15px;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+header .logout i {
+  width: 100%;
+}
+
+header .logout a {
+  color: #666666;
+  display: block;
+  margin-top: 15px;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  width: 100%;
+}
+
+header .logout a:hover {
+  text-decoration: none;
+  opacity: 0.85;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=85)";
+  filter: alpha(opacity=85);
+}
+
 .termos {
   padding-top: 10px;
 }
@@ -1008,6 +1072,7 @@ i {
 }
 
 .informative-box {
+  width: calc(100% - 23px);
   height: auto;
   background-color: #FFFFFF;
   box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3);
@@ -1017,10 +1082,51 @@ i {
   padding: 0px;
   padding-bottom: 24px;
   cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
 .informative-box:not(.has-status) {
   padding-top: 20px;
+}
+
+.informative-box.active,
+.informative-box:hover {
+  background-color: #31AAC9;
+  transition: all 0.2s ease-in-out;
+}
+
+.informative-box.active .informative-box--icon i,
+.informative-box:hover .informative-box--icon i {
+  color: white;
+}
+
+.informative-box.active .informative-box--icon:before,
+.informative-box.active .informative-box--icon:after,
+.informative-box.active .informative-box--icon,
+.informative-box:hover .informative-box--icon:before,
+.informative-box:hover .informative-box--icon:after,
+.informative-box:hover .informative-box--icon {
+  background-color: #31AAC9;
+  transition: all 0.2s ease-in-out;
+}
+
+.informative-box.active .informative-box--title h2,
+.informative-box.active .informative-box--title i,
+.informative-box.active .informative-box--title .content,
+.informative-box.active .informative-box--title .more,
+.informative-box.active .informative-box--content h2,
+.informative-box.active .informative-box--content i,
+.informative-box.active .informative-box--content .content,
+.informative-box.active .informative-box--content .more,
+.informative-box:hover .informative-box--title h2,
+.informative-box:hover .informative-box--title i,
+.informative-box:hover .informative-box--title .content,
+.informative-box:hover .informative-box--title .more,
+.informative-box:hover .informative-box--content h2,
+.informative-box:hover .informative-box--content i,
+.informative-box:hover .informative-box--content .content,
+.informative-box:hover .informative-box--content .more {
+  color: white;
 }
 
 .informative-box--status {
@@ -1053,6 +1159,7 @@ i {
 }
 
 .informative-box--icon:before {
+  transition: all 0.2s ease-in-out;
   content: "";
   display: block;
   width: 50px;
@@ -1064,6 +1171,7 @@ i {
 }
 
 .informative-box--icon:after {
+  transition: all 0.2s ease-in-out;
   content: "";
   display: block;
   width: 39px;
@@ -1238,14 +1346,18 @@ i {
   top: 0;
   width: 100%;
   z-index: 9999;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal .modal-content {
   box-sizing: border-box;
-  margin: 30% auto 0;
   position: relative;
   text-align: center;
   width: 60%;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
 }
 
 @media (max-width: 829px) {
@@ -1362,10 +1474,11 @@ section.cadastro .cadastro-options h2.featured-title {
 
 section.cadastro .cadastro-options .opcoes-inciso {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, 50%);
   grid-gap: 30px;
   max-width: 70%;
   margin: 0 auto;
+  align-items: flex-start;
 }
 
 @media (min-width: 1600px) {
@@ -1373,6 +1486,20 @@ section.cadastro .cadastro-options .opcoes-inciso {
     max-width: 58%;
     margin: 0 auto;
   }
+}
+
+section.cadastro .cadastro-options .opcoes-inciso .draf-option a {
+  text-decoration: none;
+}
+
+section.cadastro .cadastro-options .opcoes-inciso .draf-option div.btn {
+  width: calc(100% - 23px);
+  margin-left: auto;
+  display: block;
+}
+
+section.cadastro .inactive {
+  display: none;
 }
 
 /* ----- 6: VENDORS ------- */

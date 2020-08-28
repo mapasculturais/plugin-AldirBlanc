@@ -155,13 +155,14 @@ if (count($cidades) <= 1) {
          */
         let selectedInciso = '';
 
-        $('.lab-option').click(function() {
-            selectedInciso = $(this).attr('id');
-            $('.lab-option').removeClass('active');
-            $(this).toggleClass('active');
+        $('.js-lab-option').click(function() {
+            // selectedInciso = $(this).attr('id');
+            // $('.lab-option').removeClass('active');
+            // $(this).toggleClass('active');
 
-            // $('.js-questions').fadeIn(11);
-            // $('#local-atividade').fadeIn(1100);
+            $('.js-lab-item').fadeOut(1);
+            $('.js-questions').fadeIn(11);
+            $('#local-atividade').fadeIn(1100);
             returning = false;
         });
 
@@ -232,7 +233,7 @@ if (count($cidades) <= 1) {
                         //caso seja do Inciso 2 e nao enviada (Rascunho)
                     case Registration::STATUS_DRAFT:
                         //todo pegar nome do coletivo ou do espaço
-                        $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName]);
+                        $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName, 'registrationStatusName' => 'Cadastro iniciado']);
                         break;
                         //caso seja do Inciso 2 e tenha sido enviada
                     default:                        
@@ -246,8 +247,8 @@ if (count($cidades) <= 1) {
             //echo count($registrationsInciso1);
             if (count($registrationsInciso1) < $inciso1Limite && $inciso1_enabled) {
             ?>
-                <!-- <button onclick="location.href='<?= $this->controller->createUrl('individual') ?>'" clickable id="option3" class="informative-box lab-option"> -->
-                <button id="option3" class="informative-box lab-option">
+                <button onclick="location.href='<?= $this->controller->createUrl('individual') ?>'" clickable id="option3" class="informative-box lab-option">
+                <!-- <button id="option3" class="informative-box lab-option"> -->
                     <div class="informative-box--icon">
                         <i class="fas fa-users"></i>
                     </div>
@@ -271,7 +272,7 @@ if (count($cidades) <= 1) {
                 switch ($registration->status) {
                         //caso seja do Inciso 1 e nao enviada (Rascunho)
                     case Registration::STATUS_DRAFT:
-                        $this->part('aldirblanc/cadastro/application-inciso1-draft',  ['registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName]);
+                        $this->part('aldirblanc/cadastro/application-inciso1-draft',  ['registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName, 'registrationStatusName' => 'Cadastro iniciado']);
                         break;
                         //caso seja do Inciso 1 e tenha sido enviada
                     default:

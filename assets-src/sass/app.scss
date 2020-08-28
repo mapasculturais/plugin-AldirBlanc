@@ -15,7 +15,7 @@
 /* ----- 3: LAYOUT ------- */
 @import '3-layout/l-header';
 @import '3-layout/l-footer';
-@import '3-layout/l-termos';
+@import '3-layout/l-form';
 
 /* ----- 4: COMPONENTS ------- */
 @import '4-components/c-example-block';
@@ -29,7 +29,9 @@
 
 /* ----- 5: PAGES ------- */
 @import '5-pages/p-cadastro';
-
+@import '5-pages/p-formulario';
+@import '5-pages/p-termos';
+@import '5-pages/p-agentes';
 
 /* ----- 6: VENDORS ------- */
 // @import './../example-vendor/sss.css';
