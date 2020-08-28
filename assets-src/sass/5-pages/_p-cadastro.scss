@@ -1,4 +1,8 @@
 section.cadastro {
+    overflow: hidden;
+    padding-left: 5px;
+    padding-right: 5px;
+
     header {
         padding-top: 31px;
         padding-bottom: 30px;
@@ -25,32 +29,36 @@ section.cadastro {
             letter-spacing: 0;
             line-height: 1.9375rem;
             text-align: center;
-            margin-bottom: 40px;
+            margin: 0 25px 40px;
         }
 
         .opcoes-inciso {
             display: grid;
-            grid-template-columns: repeat(2, 50%);
+            grid-template-columns: repeat(1, 100%);
             grid-gap: 30px;
-            max-width: 70%;
+            max-width: calc(100% - 23px);
             margin: 0 auto;
             align-items: flex-start;
             
-            @include large {
+            @include desktop {
+                grid-template-columns: repeat(2, 50%);
                 max-width: 58%;
                 margin: 0 auto;
             }
 
             .draf-option {
                 a {
-                    text-decoration: none;;
+                    text-decoration: none;
                 }
-
                 div.btn  {
-                    width: calc(100% - 23px);
-                    margin-left: auto;
+                    width: calc(100% - 150px);
+                    margin: 0 auto;
                     display: block;
+                    @include desktop {
+                        width: calc(100% - 50px);
+                    }
                 }
+                
             }
         }
     }

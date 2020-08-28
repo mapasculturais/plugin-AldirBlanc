@@ -26,6 +26,7 @@ footer#main-footer {
 }
 .support {
     background-color: $gray-lighter;
+    box-sizing: border-box;
     color: $gray-dark;
     display: block;
     padding: 10px 20px;
