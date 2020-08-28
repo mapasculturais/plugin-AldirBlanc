@@ -1,0 +1,67 @@
+.agentes{
+
+  h3{
+    text-align: center;
+  }
+
+  i{
+    display: flex;
+    justify-content: center;
+    padding: 2%;
+    font-size: 30px;
+  }
+
+  &--summary{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    font-family: $headings-font-family;
+  }
+
+  &--thumbnail{
+    border-radius: 100px;
+    z-index: 2;
+  }
+
+  %--header{
+    text-align: center;
+  }
+
+  &--titulo{
+    display: block;
+    font-weight: bold;
+  }
+
+  &--descricao{
+    display: block;
+    font-weight: normal;
+    padding-bottom: 10px;
+  }
+
+  &--wrapper{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  &--item{
+    margin: 20px;
+
+    @include desktop {
+      width: 30%;
+    }
+
+    @include tablet {
+      width: 30%;
+    }
+
+    @include mobile {
+      width: 90%;
+    }
+  }
+
+  &--btn{
+    display: flex;
+    justify-content: center;
+  }
+}
