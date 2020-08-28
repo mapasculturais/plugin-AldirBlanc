@@ -45,7 +45,16 @@
   }
 
   &--item{
-    margin: 10px;
+    margin: 20px;
+
+    @include desktop {
+      width: 30%;
+    }
+
+    @include tablet {
+      width: 30%;
+    }
+
     @include mobile {
       width: 90%;
     }
