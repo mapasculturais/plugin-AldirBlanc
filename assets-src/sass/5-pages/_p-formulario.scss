@@ -31,6 +31,10 @@ article.registration {
             }
         }
 
+        .attachment-list .attachment-list-item .btn-group {
+            position: initial;
+        }
+
         ul {
             li {
                 padding: 0;
@@ -46,9 +50,25 @@ article.registration {
                     }
                 }
 
+                textarea {
+                    width: 100%
+                }
 
                 &.attachment-list-item-type-checkboxes {
-                    
+                    p {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+
+                        label  {
+                            display: flex;
+                            align-items: center;
+
+                            input[type="checkbox"] {
+                                margin-right: 5px;
+                                width: auto;
+                            }
+                        }
+                    }
                 }
 
                 .attachment-description {
