@@ -288,25 +288,40 @@ if (count($cidades) <= 1) {
 
     <!-- Begin .js-questions -->
     <div class="js-questions questions inactive">
+        <div id="local-atividade" class="js-questions-tab questions--tab inactive">
+            <i class="questions--icon fas fa-university"></i>
+            <h4 class="questions--title"><?php i::_e('Onde o beneficiário desenvolve suas atividades?') ?></h4>
+            <p class="questions--summary"><?php i::_e('Escolha a opção que melhor identifica a situação do local onde o beneficiário do subsídio desenvolve a atividade cultural.') ?></p>
 
-        <div id="local-atividade" class="js-questions-tab questions-tab inactive">
-            <h4 class="questions-tab-title"><?php i::_e('Onde o beneficiário desenvolve suas atividades?') ?></h4>
-            <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica a situação do local onde o beneficiário do subsídio desenvolve a atividade cultural.') ?></p>
-            <div class="options-questions">
-                <label>
-                    <input type="radio" class="coletivo" name="coletivo" value="espaco" /><?php i::_e('Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado;') ?>
+            <div class="questions--options ">
+                <label class="informative-box">
+                    <div class="informative-box--title">
+                        <h2><?php i::_e('Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado;') ?></h2>
+                        <i class="far fa-check-circle"></i>
+                    </div>
+                    <input type="radio" class="coletivo" name="coletivo" value="espaco" />
                 </label>
-                <label>
-                    <input type="radio" class="coletivo" name="coletivo" value="coletivo" /><?php i::_e('Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.') ?>
+                <label class="informative-box">
+                    <div class="informative-box--title">
+                        <h2><?php i::_e('Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.') ?></h2>
+                        <i class="far fa-check-circle"></i>
+                    </div>
+                    <input type="radio" class="coletivo" name="coletivo" value="coletivo" />
                 </label>
             </div>
-            <button class="btn js-back">Voltar</button>
+            <p>
+
+            </p>
+            <div class="questions--nav">
+                <button class="btn js-back">Voltar</button>
+                <button class="btn js-back">Avançar</button>
+            </div>
         </div>
 
-        <div id="personalidade-juridica" class="js-questions-tab questions-tab inactive">
-            <h4 class="questions-tab-title"><?php i::_e('Qual a personalidade jurídica do beneficiário?') ?></h4>
-            <p class="questions-tab-summary"><?php i::_e('Escolha a opção que melhor identifica o beneficiário do subsídio previsto no inciso II do art. 2º da lei federal nº 14.017/2020.') ?></p>
-            <div class="options-questions">
+        <div id="personalidade-juridica" class="js-questions-tab questions--tab inactive">
+            <h4 class="questions--title"><?php i::_e('Qual a personalidade jurídica do beneficiário?') ?></h4>
+            <p class="questions--summary"><?php i::_e('Escolha a opção que melhor identifica o beneficiário do subsídio previsto no inciso II do art. 2º da lei federal nº 14.017/2020.') ?></p>
+            <div class="questions--options">
                 <label>
                     <input type="radio" class="formalizado" name="formalizado" value="formalizado" /><?php i::_e('Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.') ?>
                 </label>
@@ -318,7 +333,7 @@ if (count($cidades) <= 1) {
         </div>
 
         <?php if (count($cidades) > 1) : ?>
-            <div id="select-cidade" class="js-questions-tab questions-tab lab-form-answer inactive">
+            <div id="select-cidade" class="js-questions-tab questions--tab lab-form-answer inactive">
                 <p class="lab-form-question"><?php \MapasCulturais\i::_e("Em qual cidade?"); ?></p>
                 <?php $this->part('aldirblanc/cadastro/select-cidade', ['cidades' => $cidades]) ?>
                 <button class="btn btn-back js-back"><?php i::_e('Voltar') ?></button>

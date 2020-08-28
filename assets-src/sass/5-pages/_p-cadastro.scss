@@ -66,4 +66,62 @@ section.cadastro {
     .inactive {
         display: none;
     }
+
+
+    .questions{
+        text-align: center;
+
+        &--icon{
+            padding: 10px;
+            font-size: 30px;
+        }
+
+        &--title{
+            font-size: 26px;
+            line-height: 31px;
+        }
+
+        &--summay{
+            font-size:16px;
+            line-height: 19px;
+            text-align: center;
+        }
+
+        &--options{
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+
+            label{
+                margin: 20px;
+
+                @include desktop {
+                    width: 30%;
+                }
+
+                @include tablet {
+                    width: 30%;
+                }
+
+                @include mobile {
+                    width: 90%;
+                }
+            }
+            label > input{
+                visibility: hidden;
+            }
+        }
+
+        &--nav{
+            margin-left: 10%;
+            margin-right: 10%;
+            display: flex;
+            justify-content: center;
+
+            .btn{
+                margin: 20px;
+            }
+        }
+    }
 }
+
