@@ -17,14 +17,16 @@
     top: 0;
     width: 100%;
     z-index: 9999;
+    justify-content: center;
+    align-items: center;
 
     .modal-content {
         @extend .card;
         box-sizing: border-box;
-        margin: 30% auto 0;
         position: relative;
         text-align: center;
         width: 60%;
+        height: fit-content;
 
         @include mobile {
             width: calc(100% - 30px);

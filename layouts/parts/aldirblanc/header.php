@@ -23,6 +23,7 @@ if ($title = $this->getTitle()) {
 <body <?php $this->bodyProperties() ?>>
     <?php $this->bodyBegin(); ?>
     <header id="main-header" class="clearfix" ng-class="{'sombra':data.global.viewMode !== 'list'}">
-        <?php $this->part('header-logo') ?>
+        <?php $this->part('aldirblanc/header-logos') ?>
+        <?php $this->part('aldirblanc/header-logout') ?>
     </header>
     <section id="main-section" class="clearfix">
