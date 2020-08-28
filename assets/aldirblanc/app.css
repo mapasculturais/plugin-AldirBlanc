@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 /* ----- 1: SETTINGS ------- */
 
 /* ----- 2: ATOMS ------- */
@@ -844,10 +846,6 @@ header {
   position: relative;
 }
 
-header #logo-svg {
-  color: red;
-}
-
 header .logo-state {
   display: none;
   height: auto;
@@ -904,55 +902,51 @@ header .logout a:hover {
   filter: alpha(opacity=85);
 }
 
-.termos {
-  padding-top: 10px;
+footer#main-footer {
+  background-color: #fff;
+  height: 60px;
+  margin-top: 30px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 0 5px #999;
+  -webkit-box-shadow: 0 0 5px #999;
+  -moz-box-shadow: 0 0 5px #999;
 }
 
-.termos h2 {
-  font-family: "aleo";
-  text-align: center;
-  font-weight: bold;
-  padding-top: 20px;
-  margin: auto;
-}
-
-@media (min-width: 1025px) {
-  .termos h2 {
-    width: 50%;
-  }
-}
-
-.termos--summay {
-  font-family: "aleo";
-  text-align: center;
-  margin: auto;
-  padding-left: 8%;
-  padding-right: 8%;
+footer#main-footer .logo-state {
+  float: left;
+  height: auto;
+  margin: 0 auto;
+  padding: 5px;
+  transition: all 0.3s ease-in-out;
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  width: auto;
 }
 
 @media (min-width: 1025px) {
-  .termos--summay {
-    width: 50%;
+  footer#main-footer .logo-state {
+    display: none;
   }
 }
 
-.termos--list {
-  margin: auto;
+footer#main-footer .credits {
+  float: right;
+  width: auto;
 }
 
-@media (min-width: 1025px) {
-  .termos--list {
-    width: 40%;
-  }
+.support {
+  background-color: #eee;
+  box-sizing: border-box;
+  color: #666;
+  display: block;
+  padding: 10px 20px;
+  text-decoration: underline;
+  width: 100%;
 }
 
-.termos--text {
-  line-height: 17px;
-}
-
-.termos--nav-terms {
-  display: flex;
-  justify-content: center;
+input {
+  height: 51px;
 }
 
 /* ----- 4: COMPONENTS ------- */
@@ -998,6 +992,7 @@ header .logout a:hover {
 }
 
 .card,
+article.registration .registration-fieldset,
 .term,
 .modal .modal-content,
 .status-card,
@@ -1230,6 +1225,16 @@ header .logout a:hover {
   transition: all 0.2s ease-in-out;
 }
 
+.informative-box--content .content .item {
+  font-weight: normal;
+  margin-bottom: 8px;
+}
+
+.informative-box--content .content .item .label {
+  display: block;
+  font-weight: bold;
+}
+
 .informative-box--content.active .content {
   transform: scale(1);
   height: auto;
@@ -1301,12 +1306,32 @@ header .logout a:hover {
   background-color: #666666;
 }
 
+.informative-box.status-8 .informative-box--title i {
+  border: 4px solid;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  font-size: 22px;
+}
+
+.informative-box.status-8 .informative-box--title i:before {
+  content: "\F068";
+  font-weight: 600;
+}
+
 .informative-box.status-3 {
   background-color: #C60931;
 }
 
 .informative-box.status-3 .informative-box--status {
   color: #C60931;
+}
+
+.informative-box.status-3 .informative-box--title i:before {
+  content: "\F057";
 }
 
 .informative-box.status-3 .informative-box--icon:before {
@@ -1447,6 +1472,12 @@ header .logout a:hover {
 
 /* ----- 5: PAGES ------- */
 
+section.cadastro {
+  overflow: hidden;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
 section.cadastro header {
   padding-top: 31px;
   padding-bottom: 30px;
@@ -1469,20 +1500,21 @@ section.cadastro .cadastro-options h2.featured-title {
   letter-spacing: 0;
   line-height: 1.9375rem;
   text-align: center;
-  margin-bottom: 40px;
+  margin: 0 25px 40px;
 }
 
 section.cadastro .cadastro-options .opcoes-inciso {
   display: grid;
-  grid-template-columns: repeat(2, 50%);
+  grid-template-columns: repeat(1, 100%);
   grid-gap: 30px;
-  max-width: 70%;
+  max-width: calc(100% - 23px);
   margin: 0 auto;
   align-items: flex-start;
 }
 
-@media (min-width: 1600px) {
+@media (min-width: 1025px) {
   section.cadastro .cadastro-options .opcoes-inciso {
+    grid-template-columns: repeat(2, 50%);
     max-width: 58%;
     margin: 0 auto;
   }
@@ -1493,13 +1525,243 @@ section.cadastro .cadastro-options .opcoes-inciso .draf-option a {
 }
 
 section.cadastro .cadastro-options .opcoes-inciso .draf-option div.btn {
-  width: calc(100% - 23px);
-  margin-left: auto;
+  width: calc(100% - 150px);
+  margin: 0 auto;
   display: block;
+}
+
+@media (min-width: 1025px) {
+  section.cadastro .cadastro-options .opcoes-inciso .draf-option div.btn {
+    width: calc(100% - 50px);
+  }
 }
 
 section.cadastro .inactive {
   display: none;
+}
+
+article.registration {
+  background: none;
+}
+
+article.registration h1 {
+  font-size: 1.75rem;
+  color: #111111;
+  line-height: 1.9375rem;
+  text-align: center;
+  margin-bottom: 35px;
+  font-weight: bold;
+}
+
+article.registration .registration-header {
+  display: none;
+}
+
+article.registration .registration-fieldset:first-of-type h4 {
+  font-weight: bold;
+}
+
+article.registration .registration-fieldset:first-of-type h4,
+article.registration .registration-fieldset:first-of-type .registration-id {
+  color: #111111;
+  font-family: "Open Sans", "Arial", sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0;
+  line-height: 1.375rem;
+}
+
+article.registration .registration-fieldset .attachment-list .attachment-list-item .btn-group {
+  position: initial;
+}
+
+article.registration .registration-fieldset .alert.danger {
+  background: none;
+  border: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+article.registration .registration-fieldset ul li {
+  padding: 0;
+  border-bottom: 0;
+  padding-bottom: 35px;
+}
+
+article.registration .registration-fieldset ul li.attachment-list-item-type-section {
+  padding-top: 0;
+  margin-bottom: 40px;
+}
+
+article.registration .registration-fieldset ul li.attachment-list-item-type-section .label {
+  font-size: 1rem;
+}
+
+article.registration .registration-fieldset ul li textarea {
+  width: 100%;
+}
+
+article.registration .registration-fieldset ul li.attachment-list-item-type-checkboxes p {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+article.registration .registration-fieldset ul li.attachment-list-item-type-checkboxes p label {
+  display: flex;
+  align-items: center;
+}
+
+article.registration .registration-fieldset ul li.attachment-list-item-type-checkboxes p label input[type=checkbox] {
+  margin-right: 5px;
+  width: auto;
+}
+
+article.registration .registration-fieldset ul li .attachment-description {
+  font-size: 0.6875rem;
+  line-height: 0.9375rem;
+}
+
+article.registration .registration-fieldset ul li select {
+  width: 100%;
+  height: 51px;
+  padding-right: 8px;
+}
+
+article.registration .registration-fieldset ul li .field-location .field-En_CEP,
+article.registration .registration-fieldset ul li .field-location .field-En_Bairro {
+  width: 100%;
+}
+
+article.registration .registration-fieldset ul li .field-location section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 15px;
+}
+
+article.registration .registration-fieldset ul li .field-location section p label select {
+  width: 100%;
+  height: 51px;
+}
+
+article.registration .registration-fieldset ul li input {
+  width: 100%;
+}
+
+.termos {
+  padding-top: 10px;
+}
+
+.termos h2 {
+  font-family: "aleo";
+  text-align: center;
+  font-weight: bold;
+  padding-top: 20px;
+  margin: auto;
+}
+
+@media (min-width: 1025px) {
+  .termos h2 {
+    width: 50%;
+  }
+}
+
+.termos--summay {
+  font-family: "aleo";
+  text-align: center;
+  margin: auto;
+  padding-left: 8%;
+  padding-right: 8%;
+}
+
+@media (min-width: 1025px) {
+  .termos--summay {
+    width: 50%;
+  }
+}
+
+.termos--list {
+  margin: auto;
+}
+
+@media (min-width: 1025px) {
+  .termos--list {
+    width: 40%;
+  }
+}
+
+.termos--text {
+  line-height: 17px;
+}
+
+.termos--nav-terms {
+  display: flex;
+  justify-content: center;
+}
+
+.agentes h3 {
+  text-align: center;
+}
+
+.agentes i {
+  display: flex;
+  justify-content: center;
+  padding: 2%;
+  font-size: 30px;
+}
+
+.agentes--summary {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  font-family: "aleo";
+}
+
+.agentes--thumbnail {
+  border-radius: 100px;
+  z-index: 2;
+}
+
+.agentes--titulo {
+  display: block;
+  font-weight: bold;
+}
+
+.agentes--descricao {
+  display: block;
+  font-weight: normal;
+  padding-bottom: 10px;
+}
+
+.agentes--wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.agentes--item {
+  margin: 20px;
+}
+
+@media (min-width: 1025px) {
+  .agentes--item {
+    width: 30%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .agentes--item {
+    width: 30%;
+  }
+}
+
+@media (max-width: 829px) {
+  .agentes--item {
+    width: 90%;
+  }
+}
+
+.agentes--btn {
+  display: flex;
+  justify-content: center;
 }
 
 /* ----- 6: VENDORS ------- */
