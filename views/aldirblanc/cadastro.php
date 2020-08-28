@@ -203,48 +203,6 @@ if (count($cidades) <= 1) {
             $inciso1Title = 'Trabalhadoras e trabalhadores da Cultura';
             $inciso2Title = 'Espaços e organizações culturais';
 
-            if (count($registrationsInciso2) < $inciso2Limite && $inciso2_enabled) {
-            ?>
-
-                <button id="option1" role="button" class="informative-box js-lab-option lab-option">
-                    <div class="informative-box--icon">
-                        <i class="fas fa-university"></i>
-                    </div>
-
-                    <div class="informative-box--title">
-                        <h2><?= $inciso2Title ?></h2>
-                        <i class="far fa-check-circle"></i>
-                    </div>
-
-                    <div class="informative-box--content" data-content="">
-                        <span class="more"> Mais informações </span>
-                        <span class="content">
-                            Farão jus ao benefício espaços, organizações da sociedade civil, empresas, cooperativas e instituições com finalidade cultural, como previsto nos Arts. 7º e 8º - Lei 14.017/2020. Prevê subsídio de R$3.000,00 (três mil reais) a R$10.000,00 (dez mil reais), prescrito pela gestão local.
-                        </span>
-                    </div>
-                </button>
-
-                <!-- End #option1 -->
-            <?php
-            }
-            foreach ($registrationsInciso2 as $registration) {
-                $registrationUrl = $this->controller->createUrl('formulario', [$registration->id]);
-                switch ($registration->status) {
-                        //caso seja do Inciso 2 e nao enviada (Rascunho)
-                    case Registration::STATUS_DRAFT:
-                        //todo pegar nome do coletivo ou do espaço
-                        $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName, 'registrationStatusName' => 'Cadastro iniciado']);
-                        break;
-                        //caso seja do Inciso 2 e tenha sido enviada
-                    default:                        
-                        $registrationStatusName = $summaryStatusName[$registration->status];
-                        $this->part('aldirblanc/cadastro/application-status',  ['registration' => $registration, 'registrationStatusName' => $registrationStatusName]);
-                        break;
-                }
-            }
-            //se em menos inscriçoes que a configuração do pugin permite para o inciso 1 mosra a opçao de cadasrtrar
-
-            //echo count($registrationsInciso1);
             if (count($registrationsInciso1) < $inciso1Limite && $inciso1_enabled) {
             ?>
                 <button onclick="location.href='<?= $this->controller->createUrl('individual') ?>'" clickable id="option3" class="informative-box lab-option">
@@ -281,6 +239,45 @@ if (count($cidades) <= 1) {
                         break;
                 }
             }
+            if (count($registrationsInciso2) < $inciso2Limite && $inciso2_enabled) {
+                ?>
+    
+                    <button id="option1" role="button" class="informative-box js-lab-option lab-option">
+                        <div class="informative-box--icon">
+                            <i class="fas fa-university"></i>
+                        </div>
+    
+                        <div class="informative-box--title">
+                            <h2><?= $inciso2Title ?></h2>
+                            <i class="far fa-check-circle"></i>
+                        </div>
+    
+                        <div class="informative-box--content" data-content="">
+                            <span class="more"> Mais informações </span>
+                            <span class="content">
+                                Farão jus ao benefício espaços, organizações da sociedade civil, empresas, cooperativas e instituições com finalidade cultural, como previsto nos Arts. 7º e 8º - Lei 14.017/2020. Prevê subsídio de R$3.000,00 (três mil reais) a R$10.000,00 (dez mil reais), prescrito pela gestão local.
+                            </span>
+                        </div>
+                    </button>
+    
+                    <!-- End #option1 -->
+                <?php
+                }
+                foreach ($registrationsInciso2 as $registration) {
+                    $registrationUrl = $this->controller->createUrl('formulario', [$registration->id]);
+                    switch ($registration->status) {
+                            //caso seja do Inciso 2 e nao enviada (Rascunho)
+                        case Registration::STATUS_DRAFT:
+                            //todo pegar nome do coletivo ou do espaço
+                            $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName, 'registrationStatusName' => 'Cadastro iniciado']);
+                            break;
+                            //caso seja do Inciso 2 e tenha sido enviada
+                        default:                        
+                            $registrationStatusName = $summaryStatusName[$registration->status];
+                            $this->part('aldirblanc/cadastro/application-status',  ['registration' => $registration, 'registrationStatusName' => $registrationStatusName]);
+                            break;
+                    }
+                }
             ?>
         </div>
 
