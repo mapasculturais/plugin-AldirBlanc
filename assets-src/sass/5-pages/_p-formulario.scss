@@ -1,5 +1,9 @@
 article.registration {
+    
     background: none;
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
 
     h1 {
         font-size: $font-size-h3;
@@ -14,8 +18,19 @@ article.registration {
         display: none;
     }
 
+    .registration-help {
+        text-align: center;
+    }
+    
     .registration-fieldset {
         @extend .card;
+        
+        &:last-of-type{
+            box-shadow: none;
+            border: 0;
+            background-color: transparent;
+            text-align: center;
+        }
 
         &:first-of-type {
             h4 {
@@ -57,6 +72,24 @@ article.registration {
                     }
                 }
 
+                // Label dos campos
+                span.label {
+                    color: #111111;
+                    font-family: "Open Sans";
+                    font-size: $font-size-base;
+                    font-weight: lighter;
+                    text-transform: capitalize;
+                }
+
+                // Descrição dos campos
+                .attachment-description {
+                    color: #111111;
+                    font-family: "Open Sans";
+                    font-size: 11px;
+                    line-height: $line-height-base;
+                    margin: 15px 0 10px;
+                }
+
                 textarea {
                     width: 100%
                 }
@@ -78,10 +111,7 @@ article.registration {
                     }
                 }
 
-                .attachment-description {
-                    font-size: 0.6875rem;
-                    line-height: 0.9375rem;
-                }
+                
 
                 select {
                     width: 100%;

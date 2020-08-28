@@ -35,6 +35,7 @@
     };
 
     &:hover {
+        border: 0;
         color: $light;
         text-decoration: none;
         @include opacity(0.85);
