@@ -158,6 +158,16 @@
             height: 0;
             margin-right: 18px;
             transition: all .2s ease-in-out;
+
+            .item {
+                font-weight: normal;
+                margin-bottom: 8px;
+                
+                .label {
+                    display: block;
+                    font-weight: bold;;
+                }
+            }
         }
 
         &.active {
