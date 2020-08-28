@@ -18,6 +18,7 @@
 
 
 .informative-box {
+    width: calc(100% - 23px);
     height: auto;
     background-color: #FFFFFF;
     box-shadow: 0 2px 6px 0 rgba(0,0,0,0.3);
@@ -27,9 +28,32 @@
     padding: 0px;
     padding-bottom: 24px;
     cursor: pointer;
+    transition: all 0.2s ease-in-out;
 
     &:not(.has-status) {
         padding-top: 20px;
+    }
+
+    &.active {
+        background-color: $brand-primary;
+        transition: all 0.2s ease-in-out;
+
+        .informative-box--icon {
+            i {
+                color: white;
+            }
+
+            &:before, &:after, & {
+                background-color: $brand-primary;
+                transition: all 0.2s ease-in-out;
+            }
+        }
+
+        .informative-box--title, .informative-box--content {
+            h2, i, .content, .more {
+                color: white;
+            }
+        }
     }
 
     &--status {
@@ -61,6 +85,7 @@
         }
 
         &:before {
+            transition: all 0.2s ease-in-out;
             content: "";
             display: block;
             width: 50px;
@@ -73,6 +98,7 @@
 
 
         &:after {
+            transition: all 0.2s ease-in-out;
             content: "";
             display: block;
             width: 39px;

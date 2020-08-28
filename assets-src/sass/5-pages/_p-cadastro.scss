@@ -30,7 +30,7 @@ section.cadastro {
 
         .opcoes-inciso {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, 50%);
             grid-gap: 30px;
             max-width: 70%;
             margin: 0 auto;
@@ -40,5 +40,9 @@ section.cadastro {
                 margin: 0 auto;
             }
         }
+    }
+
+    .inactive {
+        display: none;
     }
 }
