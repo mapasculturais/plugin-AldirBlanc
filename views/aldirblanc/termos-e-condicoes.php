@@ -131,7 +131,7 @@
         if(event.target == btnProsseguir){
             goToNextPage();
         }else{
-            if(modal.style.display == 'block'){
+            if(modal.style.display == 'flex'){
                 modal.style.display = "none";
             }
         }
@@ -150,7 +150,7 @@
             //redirect to next page
             document.location = MapasCulturais.createUrl('aldirblanc', 'aceitar_termos', [MapasCulturais.registrationId])
         }else{
-            modal.style.display = "block";
+            modal.style.display = "flex";
         }
     }
 
