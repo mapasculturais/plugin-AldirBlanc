@@ -51,9 +51,10 @@ section.cadastro {
                     text-decoration: none;
                 }
                 div.btn  {
-                    width: calc(100% - 150px);
+                    width: 80%;
                     margin: 0 auto;
                     display: block;
+                    padding: 14px 20px;
                     @include desktop {
                         width: calc(100% - 50px);
                     }
