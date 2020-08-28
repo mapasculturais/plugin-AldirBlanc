@@ -249,6 +249,24 @@
                 background-color: $theme-color-quaternary;   
             }
         }
+
+        .informative-box--title {
+            i {
+                border: 4px solid;
+                border-radius: 50%;
+                width: 38px;
+                height: 38px;
+                justify-content: center;
+                align-items: center;
+                display: flex;
+                font-size: 22px;
+                
+                &:before {
+                    content: "\f068";
+                    font-weight: 600;
+                }
+            }
+        }
     }
 
     &.status-3 {
@@ -258,7 +276,16 @@
             color: $theme-color-tertiary;
         }
 
+        .informative-box--title {
+            i {
+                &:before {
+                    content: "\f057";
+                }
+            }
+        }
+
         .informative-box--icon {
+
             &:before {
                 background-color: $theme-color-tertiary;
             }
