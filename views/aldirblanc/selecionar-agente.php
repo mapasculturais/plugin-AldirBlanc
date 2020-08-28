@@ -2,45 +2,60 @@
     
 ?>
 
-<article class="main-content" >
-    <section id="selecionar-agentes">
-        <h3 class="title-section"><?php \MapasCulturais\i::_e("Selecione um agente");?></h3>
-        <div id="agentes">
-            <?php foreach($agents as $agent): ?>
-                <div class="wrapper" >
-                    <div class="profile">
-                        <?php if($agent->avatar): ?>
-                            <img src="<?php echo $agent->avatar;?>" class="thumbnail" alt="<?php echo $agent->name ?>">
-                        <?php else:?>
-                            <img src="<?php $app->view->asset('img/avatar--agent.png');?>" class="thumbnail" alt="<?php echo $agent->name ?>">
-                        <?php endif; ?>
-
-                        <h3 class="name"><?php echo $agent->name ?></h3>
-                        <p class="title"><?php \MapasCulturais\i::_e("Tipo");?></p>
-                        <p class="description"><?php echo $agent->type ?></p>
-                        <p class="title"><?php \MapasCulturais\i::_e("Áreas de Atuação");?></p>
-                        <p class="description" >
-                            <?php foreach($agent->areas as $area): ?>
-                                <span><?php echo $area ?></span><br>
-                            <?php endforeach; ?>
-                        </p>
-                        <button type="button" agentOwner="<?php echo isset($agentOwner) ? $agentOwner : ''; ?>" opportunity="<?php echo isset($opportunity) ? $opportunity : ''; ?>" category="<?php echo isset($category) ? $category : ''; ?>" inciso="<?php echo isset($inciso) ? $inciso : ''; ?>" class="btn btn-selecionar" name="<?php echo $agent->name; ?>" value="<?php echo $agent->id; ?>"> <?php \MapasCulturais\i::_e("Selecionar");?></button>
-                    </div>
+<section class="agentes">
+    <header class="agentes--header">
+        <i class="fas fa-users"></i>
+        <h3 class="agentes--title"><?php \MapasCulturais\i::_e("Selecione um agente para acompanhar a solicitação");?></h3>
+        <p class="agentes--summary"><?php \MapasCulturais\i::_e("in hac habitasse platea dictumst. Vivamus adipiscing fermentum quam volutpat aliquam. Integer et elit eget elit facilisis tris.");?></p>
+    </header>
+    <div class="agentes--wrapper">
+        <?php foreach($agents as $agent): ?>
+            <div class="informative-box agentes--item" agentOwner="<?php echo isset($agentOwner) ? $agentOwner : ''; ?>" opportunity="<?php echo isset($opportunity) ? $opportunity : ''; ?>" category="<?php echo isset($category) ? $category : ''; ?>" inciso="<?php echo isset($inciso) ? $inciso : ''; ?>" name="<?php echo $agent->name; ?>" value="<?php echo $agent->id; ?>">
+                <div class="informative-box--icon">
+                    <?php if($agent->avatar): ?>
+                        <img src="<?php echo $agent->avatar;?>" class="agentes--thumbnail" alt="<?php echo $agent->name ?>">
+                    <?php else:?>
+                        <img src="<?php $app->view->asset('img/avatar--agent.png');?>" class="thumbnail" alt="<?php echo $agent->name ?>">
+                    <?php endif; ?>
                 </div>
-            <?php endforeach; ?>
-        </div>
-        <div id="modalAlert" class="modal">
-            <!-- Modal content -->
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <p class="text"></p>
-                <button class="btn" id="confirmar"><?php \MapasCulturais\i::_e("Confirmar");?></button>
+
+                <div class="informative-box--title">
+                    <h2><?=$agent->name?></h2>
+                    <i class="far fa-check-circle"></i>
+                </div>
+
+                <div class="informative-box--content agentes-item" data-content="">
+
+                    <span class="agentes--titulo">
+                        <?php \MapasCulturais\i::_e("Tipo");?>
+                    </span>
+
+                    <span class="agentes--descricao">
+                        <?=$agent->type?>
+                    </span>
+
+                    <span class="agentes--titulo">
+                        <?php \MapasCulturais\i::_e("Áreas de Atuação");?>
+                    </span>
+
+                    <span class="agentes--descricao">
+                          <?php foreach($agent->areas as $area): ?>
+                              <span><?php echo $area ?></span><br>
+                          <?php endforeach; ?>
+                    </span>
+                </div>
             </div>
+        <?php endforeach; ?>
+    </div>
+    <div id="modalAlert" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p class="text"></p>
+            <button class="btn" id="confirmar"><?php \MapasCulturais\i::_e("Confirmar");?></button>
         </div>
-    </section>
-
-
-</article>
+    </div>
+</section>
 
 <script>
     $(document).ready(function(){
@@ -48,7 +63,7 @@
             handleSelectionEffect(this)
         });
 
-        $('.btn-selecionar').on('click', function (event) {
+        $('.agentes--item').on('click', function (event) {
             let agentRelated = '';
             let modal       = $('#modalAlert');
             let agentId     = $(this).attr('value');
