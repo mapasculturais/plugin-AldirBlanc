@@ -1,4 +1,3 @@
-    <div class="push"></div>
 </section>
 <footer id="main-footer">
 

@@ -33,3 +33,13 @@ footer#main-footer {
     text-decoration: underline;
     width: 100%;
 }
+
+/* Fixed footer */
+body.controller-aldirblanc {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+body.controller-aldirblanc #main-section {
+    flex: 1;
+}
