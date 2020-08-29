@@ -43,9 +43,11 @@
                     <span class="label">Número:</span> <?php echo $registration->number; ?> </br>
                 </div>
 
-                <div class="item">
-                    <span class="label">Data do envio:</span> <?php echo $registration->sentTimestamp ? $registration->sentTimestamp->format(\MapasCulturais\i::__('d/m/Y à\s H:i')) : ''; ?>. </br>
-                </div>
+                <?php if(!empty($registration->sentTimestamp)): ?>
+                    <div class="item">
+                        <span class="label">Data do envio:</span> <?php echo $registration->sentTimestamp ? $registration->sentTimestamp->format(\MapasCulturais\i::__('d/m/Y à\s H:i')) : ''; ?>. </br>
+                    </div>
+                <?php endif; ?>
 
                 <div class="item">
                     <span class="label">Responsável:</span> <?php echo $registration->owner->name; ?> </br>

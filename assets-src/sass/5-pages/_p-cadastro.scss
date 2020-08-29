@@ -67,6 +67,7 @@ section.cadastro {
     .selected {
         background-color: $brand-primary;
         transition: all 0.2s ease-in-out;
+        transform: scale(1.1);
 
         .informative-box--icon {
             i {
@@ -89,6 +90,14 @@ section.cadastro {
     .questions{
         text-align: center;
 
+        .select2-container {
+            max-width: 60%;
+
+            @include mobile {
+                max-width: 90%;
+            }
+        }
+
         p{
             font-family: $f_title;
         }
@@ -104,10 +113,12 @@ section.cadastro {
             font-family: $f_title;
         }
 
-        &--summay{
-            font-size:16px;
+        &--summary{
+            font-size: 16px;
             line-height: 19px;
             text-align: center;
+            max-width: 320px;
+            margin: 0 auto;
         }
 
         &--note{
