@@ -1,79 +1,82 @@
-.agentes{
+.agentes {
 
-  h3{
-    text-align: center;
-  }
-
-  i{
-    display: flex;
-    justify-content: center;
-    padding: 2%;
-    font-size: 30px;
-  }
-
-  &--summary{
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    font-family: $headings-font-family;
-  }
-
-  &--thumbnail{
-    border-radius: 100px;
-    z-index: 2;
-  }
-
-  %--head{
-    text-align: center;
-    margin-left: 15px;
-
-  }
-
-  &--titulo{
-    display: block;
-    font-weight: bold;
-  }
-
-  &--descricao{
-    display: block;
-    font-weight: normal;
-    padding-bottom: 10px;
-
-  }
-
-  &--wrapper{
-    width: 90%;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-column-gap: 30px;
-    grid-row-gap: 40px;
-    margin: 0 auto;
-
-    @include mobile {
-      grid-template-columns:auto;
+    h3 {
+        text-align: center;
     }
 
-    @include tablet {
-      grid-template-columns: auto;
+    i {
+        display: flex;
+        justify-content: center;
+        padding: 2%;
+        font-size: 30px;
     }
-  }
 
-  &--tab{
-    display: flex;
-    justify-content: center;
-  }
+    &--summary {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        font-family: $headings-font-family;
+        max-width: 320px;
+    }
 
-  &--item{
-    &.active, &:hover {
-      span{
-        color: white;
-      }
+    &--thumbnail {
+        border-radius: 100px;
+        z-index: 2;
+    }
+
+    %--head {
+        text-align: center;
+        margin-left: 15px;
 
     }
-  }
 
-  &--btn{
-    display: flex;
-    justify-content: center;
-  }
+    &--titulo {
+        display: block;
+        font-weight: bold;
+    }
+
+    &--descricao {
+        display: block;
+        font-weight: normal;
+        padding-bottom: 10px;
+
+    }
+
+    &--wrapper {
+        width: 90%;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-column-gap: 30px;
+        grid-row-gap: 40px;
+        margin: 0 auto;
+
+        @include mobile {
+            grid-template-columns: auto;
+        }
+
+        @include tablet {
+            grid-template-columns: auto;
+        }
+    }
+
+    &--tab {
+        display: flex;
+        justify-content: center;
+    }
+
+    &--item {
+
+        &.active,
+        &:hover {
+            span {
+                color: white;
+            }
+
+        }
+    }
+
+    &--btn {
+        display: flex;
+        justify-content: center;
+    }
 }
