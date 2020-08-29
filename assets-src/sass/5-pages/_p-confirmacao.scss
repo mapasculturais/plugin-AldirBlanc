@@ -1,0 +1,73 @@
+body.controller-aldirblanc.action-confirmacao {
+    section#main-section {
+
+        article {
+            .btn {
+                display: block;
+                margin-bottom: 15px;
+                margin-left: auto;
+                margin-right: auto;
+                max-width: 70%;
+            }
+        }
+
+        #registration-attachments {
+            @extend .card;
+            text-align: left;
+
+            h4 {
+                &.ng-binding {
+                    color: #111111;
+                    font-family: "Open Sans", "Arial", sans-serif;
+                    font-size: 1rem;
+                    font-weight: bold;
+                    letter-spacing: 0;
+                    line-height: 1.375rem;
+                }
+            }
+
+            ul {
+                li {
+
+                    margin-bottom: 25px;
+                    padding-bottom: 0;
+
+                    &.attachment-list-item.registration-view-mode {
+                        padding: 0;
+
+                        .ng-scope {
+
+                            label {
+                                color: #111111;
+                                display: block;
+                                font-size: $font-size-base;
+                                font-weight: lighter;
+                                padding-bottom: 10px;
+                                width: 100%;
+                            }
+                            span.ng-scope {
+                                color: $brand-secondary;
+                                font-size: $font-size-base;
+                            }
+
+                            // Arquivo
+                            .attachment-title {
+
+                                color: $brand-secondary;
+                                font-size: $font-size-base;
+                                text-decoration: none;
+
+                                &::before {
+                                    color: $brand-secondary;
+                                    font-size: $font-size-base;
+                                    font-family: "Font Awesome 5 Free";
+                                    content: "\f1c1";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
