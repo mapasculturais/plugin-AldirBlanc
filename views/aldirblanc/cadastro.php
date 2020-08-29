@@ -45,8 +45,8 @@ if (count($cidades) <= 1) {
         function showModal(){
             var msg   = "";
             var modal = $('#modalAlert');
-            var coletivo   =  $('input[name=coletivo]:checked',).siblings().find('.js-text').text();
-            var fomalizado =  $('input[name=formalizado]:checked',).siblings().find('.js-text').text();
+            var coletivo   =  $('input[name=coletivo]:checked').siblings().find('.js-text').text();
+            var fomalizado =  $('input[name=formalizado]:checked').siblings().find('.js-text').text();
 
             coletivo = coletivo.replace(".", "");
             fomalizado = fomalizado.replace(".", "");
@@ -88,6 +88,22 @@ if (count($cidades) <= 1) {
                     msg = "Você precisa selecionar a cidade."
                 }
             }
+
+            $('.modal-content').find('.text').html(msg);
+
+            $('.close').on('click', function() {
+                modal.fadeOut('slow');
+            });
+
+        }
+
+        function showModalAlert(msg){
+            var modal = $('#modalAlert');
+
+            modal.css("display", "flex").hide().fadeIn(1200);
+
+            $('.modal-content').find('.js-title').text('Atenção!');
+            $('.modal-content').find('.js-confirmar').hide();
 
             $('.modal-content').find('.text').html(msg);
 
@@ -179,11 +195,24 @@ if (count($cidades) <= 1) {
         $('.js-next').click(function() {
             var parentId = $(this).closest('.js-questions-tab').attr('id');
             if(parentId == 'local-atividade'){
-                goToQuestionPersonality()
+                var hasSeletedColetivo =  $('input[name=coletivo]:checked');
+                if(hasSeletedColetivo.length > 0){
+                    goToQuestionPersonality()
+                }else{
+                    showModalAlert('Você precisa selecionar um opção para avançar')
+                }
+
             }else if(parentId == 'select-cidade'){
+
                 showModal()
+
             }else{
-                goToQuestionCounty()
+                var hasSeletedFormalizado =  $('input[name=formalizado]:checked');
+                if(hasSeletedFormalizado.length > 0){
+                    goToQuestionCounty()
+                }else{
+                    showModalAlert('Você precisa selecionar um opção para avançar')
+                }
             }
         });
 
