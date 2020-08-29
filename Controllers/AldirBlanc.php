@@ -32,9 +32,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->config = $app->plugins['AldirBlanc']->config;
         $opportunitiesArrayInciso2 = $this->config['inciso2_opportunity_ids'];
         $opportunityInciso1 = $this->config['inciso1_opportunity_id'];
-        if ( in_array ($opportunityInciso1, array_values($opportunitiesArrayInciso2) )){
-            throw new \Exception('Oportunidade do Inciso 1 não pode ser igual a do inciso 2 ');
+        if (array_unique($opportunitiesArrayInciso2) != $opportunitiesArrayInciso2 || in_array ($opportunityInciso1, array_values($opportunitiesArrayInciso2) )){
+            throw new \Exception('A mesma oportunidade não pode ser utiilizada para duas cidades ou dois incisos');
         }
+       
         $app->hook('view.render(<<aldirblanc/individual>>):before', function () use ($app) {
             $app->view->includeEditableEntityAssets();
         });
