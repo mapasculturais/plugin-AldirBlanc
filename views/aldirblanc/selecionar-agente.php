@@ -3,7 +3,7 @@
 ?>
 
 <section class="agentes">
-    <header class="agentes--header">
+    <header class="agentes--head">
         <i class="fas fa-users"></i>
         <h3 class="agentes--title"><?php \MapasCulturais\i::_e("Selecione um agente para acompanhar a solicitação");?></h3>
         <p class="agentes--summary"><?php \MapasCulturais\i::_e("in hac habitasse platea dictumst. Vivamus adipiscing fermentum quam volutpat aliquam. Integer et elit eget elit facilisis tris.");?></p>
