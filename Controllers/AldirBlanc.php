@@ -30,7 +30,11 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $app = App::i();
 
         $this->config = $app->plugins['AldirBlanc']->config;
-
+        $opportunitiesArrayInciso2 = $this->config['inciso2_opportunity_ids'];
+        $opportunityInciso1 = $this->config['inciso1_opportunity_id'];
+        if ( in_array ($opportunityInciso1, array_values($opportunitiesArrayInciso2) )){
+            throw new \Exception('Oportunidade do Inciso 1 não pode ser igual a do inciso 2 ');
+        }
         $app->hook('view.render(<<aldirblanc/individual>>):before', function () use ($app) {
             $app->view->includeEditableEntityAssets();
         });
@@ -490,7 +494,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $tipo = $this->data['tipo'];
         if($tipo != 1 && $tipo != 2){
             //@TODO tratar esse erro
-            throw \Exception();
+            throw new \Exception();
         }
         $this->requireAuthentication();
         $app = App::i();
