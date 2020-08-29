@@ -39,8 +39,7 @@ if (count($cidades) <= 1) {
          */
         function goToNextPage() {
             params.category = coletivo + '-' + formalizado;
-            // document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params)
-            console.log(MapasCulturais.createUrl('aldirblanc', 'coletivo', params))
+            document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params)
         }
 
         function showModal(){
