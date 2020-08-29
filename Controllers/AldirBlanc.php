@@ -67,7 +67,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $categoryName = $this->config['inciso2_categories'][$slug];
             return $categoryName;
         } else {
-            throw \Exception('Categoria não existe');
+            throw new \Exception('Categoria não existe');
         }
     }
     /**

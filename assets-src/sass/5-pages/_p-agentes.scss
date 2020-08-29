@@ -44,7 +44,7 @@
   &--wrapper{
     width: 90%;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     grid-column-gap: 30px;
     grid-row-gap: 40px;
     margin: 0 auto;
@@ -56,6 +56,11 @@
     @include tablet {
       grid-template-columns: auto;
     }
+  }
+
+  &--tab{
+    display: flex;
+    justify-content: center;
   }
 
   &--item{
