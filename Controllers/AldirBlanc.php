@@ -70,6 +70,25 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             throw new \Exception('Categoria não existe');
         }
     }
+     /**
+     * Retorna o inciso da registration
+     *
+     * @return string;
+     */
+    function getInciso(Registration $registration)
+    {
+        $opportunity = $registration->opportunity;
+        $opportunityInciso1Id = $this->config['inciso1_opportunity_id'];
+        $opportunitiesArrayInciso2Ids = $this->config['inciso2_opportunity_ids'];
+        if ($opportunity->id == $opportunityInciso1Id ) {
+            return 1;
+        } else if (in_array($opportunity->id, $opportunitiesArrayInciso2Ids) ){
+            return 2;
+        } else{
+            return 0;
+        }
+
+    }
     /**
      * Retorna a oportunidade do inciso I
      *
@@ -333,10 +352,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 }
             }
         }
-
-        $registration->inciso = $this->data['inciso'];
-
         $registration->save(true);
+
         if (isset($space)){
             $space->checkPermission('@control');
             $relation = new RegistrationSpaceRelationEntity();

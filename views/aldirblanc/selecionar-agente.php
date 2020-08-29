@@ -74,7 +74,7 @@
             let agentOwner  = $(this).attr('agentOwner');
             if (agentOwner !== '') {
                 agentId = agentOwner;
-                agentRelated = this.value;
+                agentRelated = $(this).attr('value');
             }
 
             modal.fadeIn(1500, function() {

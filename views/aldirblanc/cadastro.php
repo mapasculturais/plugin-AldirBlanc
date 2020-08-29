@@ -227,15 +227,16 @@ if (count($cidades) <= 1) {
             }
             foreach ($registrationsInciso1 as $registration) {
                 $registrationUrl = $this->controller->createUrl('formulario', [$registration->id]);
+                $inciso = $this->controller->getInciso($registration);
                 switch ($registration->status) {
                         //caso seja do Inciso 1 e nao enviada (Rascunho)
                     case Registration::STATUS_DRAFT:
-                        $this->part('aldirblanc/cadastro/application-inciso1-draft',  ['registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName, 'registrationStatusName' => 'Cadastro iniciado']);
+                        $this->part('aldirblanc/cadastro/application-inciso1-draft',  ['inciso'=> $inciso ,'registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName, 'registrationStatusName' => 'Cadastro iniciado']);
                         break;
                         //caso seja do Inciso 1 e tenha sido enviada
                     default:
                         $registrationStatusName = $summaryStatusName[$registration->status];
-                        $this->part('aldirblanc/cadastro/application-status',  ['registration' => $registration, 'registrationStatusName' => $registrationStatusName]);
+                        $this->part('aldirblanc/cadastro/application-status',  ['inciso'=> $inciso ,'registration' => $registration, 'registrationStatusName' => $registrationStatusName]);
                         break;
                 }
             }
@@ -265,16 +266,17 @@ if (count($cidades) <= 1) {
                 }
                 foreach ($registrationsInciso2 as $registration) {
                     $registrationUrl = $this->controller->createUrl('formulario', [$registration->id]);
+                    $inciso = $this->controller->getInciso($registration);
                     switch ($registration->status) {
                             //caso seja do Inciso 2 e nao enviada (Rascunho)
                         case Registration::STATUS_DRAFT:
                             //todo pegar nome do coletivo ou do espaço
-                            $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName, 'registrationStatusName' => 'Cadastro iniciado']);
+                            $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['inciso'=> $inciso ,'registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName, 'registrationStatusName' => 'Cadastro iniciado']);
                             break;
                             //caso seja do Inciso 2 e tenha sido enviada
                         default:                        
                             $registrationStatusName = $summaryStatusName[$registration->status];
-                            $this->part('aldirblanc/cadastro/application-status',  ['registration' => $registration, 'registrationStatusName' => $registrationStatusName]);
+                            $this->part('aldirblanc/cadastro/application-status',  ['inciso'=> $inciso , 'registration' => $registration, 'registrationStatusName' => $registrationStatusName]);
                             break;
                     }
                 }
