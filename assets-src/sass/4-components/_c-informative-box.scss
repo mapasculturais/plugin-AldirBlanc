@@ -150,13 +150,12 @@
         .more {
             cursor: pointer;
             // remove
-            // display: none;
+            display: none;
         }
 
         .content {
-            transform: scale(0);
+            // transform: scale(0);
             display: block;
-            height: 0;
             margin-right: 18px;
             transition: all .2s ease-in-out;
 
