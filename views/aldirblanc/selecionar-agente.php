@@ -81,9 +81,7 @@
                 agentRelated = this.value;
             }
 
-            modal.fadeIn(1500, function() {
-                modal.css('display', 'flex')
-            });
+            modal.css("display", "flex").hide().fadeIn(1500);
             
             let msg = `<?php \MapasCulturais\i::_e("Realizar inscrição para <strong>_name_</strong> no Auxílio Emergencial da Cultura.");?>`;
             msg = msg.replace(/_name_/g, agentName);

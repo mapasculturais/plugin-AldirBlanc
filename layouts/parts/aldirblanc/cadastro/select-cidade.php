@@ -9,7 +9,7 @@ ksort($cidades)
 ?>
 <form>
     <select id="option4" class="js-select-cidade">
-        <option value="-1"><?php \MapasCulturais\i::_e("Selecione sua cidade");?></option>
+        <option></option>
         <?php foreach($cidades as $nome => $oportunidade): ?>
             <option value="<?=$oportunidade?>"><?=$nome?></option>
         <?php endforeach; ?>
@@ -20,7 +20,8 @@ ksort($cidades)
     $(document).ready(function() {
         $('select.js-select-cidade').select2({
             placeholder: `<?php \MapasCulturais\i::_e("Selecione sua cidade");?>`,
-            allowClear: true
+            width: '100%',
+            height: '100px'
         });
     });
 </script>

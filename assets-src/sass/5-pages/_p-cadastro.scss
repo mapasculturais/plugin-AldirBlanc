@@ -64,13 +64,34 @@ section.cadastro {
         }
     }
 
-    .inactive {
-        display: none;
-    }
+    .selected {
+        background-color: $brand-primary;
+        transition: all 0.2s ease-in-out;
 
+        .informative-box--icon {
+            i {
+                color: white;
+            }
+
+            &:before, &:after, & {
+                background-color: $brand-primary;
+                transition: all 0.2s ease-in-out;
+            }
+        }
+
+        .informative-box--title, .informative-box--content {
+            h2, i, .content, .more {
+                color: white;
+            }
+        }
+    }
 
     .questions{
         text-align: center;
+
+        p{
+            font-family: $f_title;
+        }
 
         &--icon{
             padding: 10px;
@@ -80,6 +101,7 @@ section.cadastro {
         &--title{
             font-size: 26px;
             line-height: 31px;
+            font-family: $f_title;
         }
 
         &--summay{
@@ -88,10 +110,36 @@ section.cadastro {
             text-align: center;
         }
 
+        &--note{
+            font-size: 14px;
+            line-height: 17px;
+            color: $brand-secondary;
+            margin: auto;
+            font-family: $f_title;
+
+            @include desktop {
+                width: 40%;
+            }
+
+            @include tablet {
+                width: 60%;
+            }
+
+            @include mobile {
+                width: 90%;
+            }
+        }
+
         &--options{
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
+
+            .select2-choices {
+                min-height: 150px;
+                max-height: 150px;
+                overflow-y: auto;
+            }
 
             h2{
                 margin-bottom: -35px;
@@ -122,13 +170,21 @@ section.cadastro {
         }
 
         &--nav{
-            margin-left: 10%;
-            margin-right: 10%;
             display: flex;
             justify-content: center;
+            margin: 15px;
+            flex-wrap: wrap;
+
+            @include mobile {
+                flex-wrap: wrap-reverse;
+            }
 
             .btn{
-                margin: 20px;
+                margin:auto;
+                @include mobile {
+                    margin:10px;
+                    width: calc(100% - 20px);
+                }
             }
         }
     }
