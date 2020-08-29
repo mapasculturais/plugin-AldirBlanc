@@ -97,7 +97,7 @@ if (count($cidades) <= 1) {
 
         }
 
-        function showModalAlert(msg){
+        function showModalMsg(title, msg){
             var modal = $('#modalAlert');
 
             modal.css("display", "flex").hide().fadeIn(1200);
@@ -199,19 +199,16 @@ if (count($cidades) <= 1) {
                 if(hasSeletedColetivo.length > 0){
                     goToQuestionPersonality()
                 }else{
-                    showModalAlert('Você precisa selecionar um opção para avançar')
+                    showModalMsg('Atenção!', 'Você precisa selecionar um opção para avançar')
                 }
-
             }else if(parentId == 'select-cidade'){
-
                 showModal()
-
             }else{
                 var hasSeletedFormalizado =  $('input[name=formalizado]:checked');
                 if(hasSeletedFormalizado.length > 0){
                     goToQuestionCounty()
                 }else{
-                    showModalAlert('Você precisa selecionar um opção para avançar')
+                    showModalMsg('Atenção!','Você precisa selecionar um opção para avançar')
                 }
             }
         });
@@ -232,6 +229,12 @@ if (count($cidades) <= 1) {
         $('.informative-box .informative-box--content .more').hover(function(e) {
             $(this.parentElement).addClass('active');
         })
+
+        // $('.more').click(function(e) {
+        //
+        //     showModalMsg('')
+        // })
+
 
         /**
          * Ao clicar nos cards do Inciso II, o usuário é encaminhado para tela de opções do local de atividade do beneficiário.
