@@ -89,6 +89,14 @@ section.cadastro {
     .questions{
         text-align: center;
 
+        .select2-container {
+            max-width: 60%;
+
+            @include mobile {
+                max-width: 90%;
+            }
+        }
+
         p{
             font-family: $f_title;
         }

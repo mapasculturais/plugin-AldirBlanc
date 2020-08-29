@@ -110,7 +110,6 @@ if (count($cidades) <= 1) {
             $('.close').on('click', function() {
                 modal.fadeOut('slow');
             });
-
         }
 
         /**
@@ -226,15 +225,9 @@ if (count($cidades) <= 1) {
         });
 
 
-        $('.informative-box .informative-box--content .more').hover(function(e) {
-            $(this.parentElement).addClass('active');
-        })
-
-        // $('.more').click(function(e) {
-        //
-        //     showModalMsg('')
+        // $('.informative-box .informative-box--content .more').hover(function(e) {
+        //     $(this.parentElement).addClass('active');
         // })
-
 
         /**
          * Ao clicar nos cards do Inciso II, o usuário é encaminhado para tela de opções do local de atividade do beneficiário.
@@ -254,20 +247,10 @@ if (count($cidades) <= 1) {
     });
 </script>
 <section class="lab-main-content cadastro">
-    <!-- <header>
-        <div>
-            <h1>Cadastro - Lei Aldir Blanc</h1>
-        </div>
-    </header> -->
-
     <header>
         <div class="intro-message">
             <div class="name"> Olá, <?= $niceName ?>! </div>
-            <!-- <span class="info">
-                Por favor, responda às perguntas abaixo para iniciar seu cadastro.  
-            </span> -->
         </div>
-    
     </header>
 
     <div class="js-lab-item lab-item cadastro-options">
@@ -294,7 +277,7 @@ if (count($cidades) <= 1) {
                         <i class="far fa-check-circle"></i>
                     </div>
 
-                    <div class="informative-box--content" data-content="">
+                    <div class="informative-box--content active" data-content="">
                         <span class="more"> Mais informações </span>
                         <span class="content">
                             Farão jus à renda emergencial os(as) trabalhadores(as) da cultura com atividades interrompidas e que se enquadrem, comprovadamente, ao disposto no Art. 6º - Lei 14.017/2020. Prevê o pagamento de cinco parcelas de R$ 600 (seiscentos reais), podendo ser prorrogado conforme Art 5º - Lei 14.017/2020.
@@ -330,8 +313,8 @@ if (count($cidades) <= 1) {
                             <i class="far fa-check-circle"></i>
                         </div>
     
-                        <div class="informative-box--content" data-content="">
-                            <span class="more"> Mais informações </span>
+                        <div class="informative-box--content active" data-content="">
+                            <span class="more js"> Mais informações </span>
                             <span class="content">
                                 Farão jus ao benefício espaços, organizações da sociedade civil, empresas, cooperativas e instituições com finalidade cultural, como previsto nos Arts. 7º e 8º - Lei 14.017/2020. Prevê subsídio de R$3.000,00 (três mil reais) a R$10.000,00 (dez mil reais), prescrito pela gestão local.
                             </span>
