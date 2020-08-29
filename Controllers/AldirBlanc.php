@@ -83,6 +83,11 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $opportunity = $app->repo('Opportunity')->find($opportunity_id);
 
+        if(!$opportunity){
+            // @todo tratar esse erro
+            throw new \Exception();
+        }
+
         return $opportunity;
     }
     
@@ -91,14 +96,21 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
      *
      * @return \MapasCulturais\Entities\Opportunity;
      */
-    function getOpportunityInciso2(string $opportunityId)
+    function getOpportunityInciso2(string $opportunity_id)
     {
-        if (!in_array($opportunityId, $this->config['inciso2_opportunity_ids'])){
+        if (!in_array($opportunity_id, $this->config['inciso2_opportunity_ids'])){
             // @todo tratar esse erro
             throw new \Exception();
         }
         $app = App::i();
-        $opportunity = $app->repo('Opportunity')->find($opportunityId);
+        
+        $opportunity = $app->repo('Opportunity')->find($opportunity_id);
+
+
+        if(!$opportunity){
+            // @todo tratar esse erro
+            throw new \Exception();
+        }
         return $opportunity;
     }
     /**
@@ -257,7 +269,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 // @todo tratar esse erro
                 throw new \Exception();
             }
-            $registration->opportunity = $this->getOpportunityInciso2($this->data['opportunity']);
+
+            $opportunity = $this->getOpportunityInciso2($this->data['opportunity']);
+
+            eval(\psy\sh());
+
+            $registration->opportunity = $opportunity;
             //pega o nome da category pela slug
             $category = $this->getCategoryName($this->data['category']);
             $registration->category = $category;
