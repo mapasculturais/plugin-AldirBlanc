@@ -17,22 +17,27 @@
     padding: 20px 15px;
     text-align: center;
 
-    &--primary {
+    &--primary,
+    &.status-1 {
         @extend .status-card;
         background-color: $theme-color-primary;
     }
 
-    &--secondary {
+    &--secondary,
+    &.status-10 {
         @extend .status-card;
         background-color: $theme-color-secondary;
     }
 
-    &--tertiary {
+    &--tertiary,
+    &.status-2,
+    &.status-3 {
         @extend .status-card;
         background-color: $theme-color-tertiary;
     }
 
-    &--quaternary {
+    &--quaternary,
+    &.status-8 {
         @extend .status-card;
         background-color: $theme-color-quaternary;
     }

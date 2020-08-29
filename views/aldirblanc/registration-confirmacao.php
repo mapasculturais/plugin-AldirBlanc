@@ -22,6 +22,7 @@ $_params = [
     'action' => $action,
     'opportunity' => $entity->opportunity
 ];
+
 ?>
 <article class="main-content registration" ng-controller="OpportunityController">
 
@@ -38,7 +39,6 @@ $_params = [
         <a href="<?= $this->controller->createUrl('formulario', [$entity->id]) ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Editar formulário"); ?></a>
 
     </article>
-    <?php $this->part('singles/registration--valuers-list', $_params) ?>
     <div ng-if="data.sent" style="display:block" id="modalAlert" class="">
         <!-- Modal content -->
         <div class="modal-content">
@@ -50,5 +50,3 @@ $_params = [
     </div>
 
 </article>
-<?php $this->part('singles/registration--sidebar--left', $_params) ?>
-<?php $this->part('singles/registration--sidebar--right', $_params) ?>
