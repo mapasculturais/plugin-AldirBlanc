@@ -23,8 +23,10 @@
     z-index: 2;
   }
 
-  %--header{
+  %--head{
     text-align: center;
+    margin-left: 15px;
+
   }
 
   &--titulo{
@@ -36,27 +38,32 @@
     display: block;
     font-weight: normal;
     padding-bottom: 10px;
+
   }
 
   &--wrapper{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+    width: 90%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-column-gap: 30px;
+    grid-row-gap: 40px;
+    margin: 0 auto;
 
-  &--item{
-    margin: 20px;
-
-    @include desktop {
-      width: 30%;
+    @include mobile {
+      grid-template-columns:auto;
     }
 
     @include tablet {
-      width: 30%;
+      grid-template-columns: auto;
     }
+  }
 
-    @include mobile {
-      width: 90%;
+  &--item{
+    &.active, &:hover {
+      span{
+        color: white;
+      }
+
     }
   }
 
