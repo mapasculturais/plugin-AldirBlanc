@@ -42,10 +42,10 @@ if (count($cidades) <= 1) {
             document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params)
         }
 
-        function clearButtons() {
-            $('.modal-content').find('.js-confirmar').remove();
-            $('.modal-content').find('.btn-ok').remove();
-        }
+        // function clearButtons() {
+        //     $('.modal-content').find('.btn').removeClass('js-confirmar');
+        //     $('.modal-content').find('.btn').removeClass('btn-ok');
+        // }
 
         function showModal(){
             var msg   = "";
@@ -62,8 +62,10 @@ if (count($cidades) <= 1) {
 
             $('.modal-content').find('.js-confirmar').show();
             $('.modal-content').find('.js-title').text('Confirmação');
-            clearButtons();
-            $('.modal-content').append('<button class="btn js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></button>')
+
+
+            $('.modal-content').find('.btn').val('next');
+            $('.modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("Confirmar"); ?>');
 
             if(params.opportunity != null){
 
@@ -106,9 +108,8 @@ if (count($cidades) <= 1) {
 
             $('.modal-content').find('.js-title').text(title);
 
-            clearButtons();
-
-            $('.modal-content').append('<button class="btn-ok"><?php \MapasCulturais\i::_e("OK"); ?></button>')
+            $('.modal-content').find('.btn').val('close');
+            $('.modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("OK"); ?>');
 
             $('.modal-content').find('.text').text(msg);
 
@@ -219,11 +220,25 @@ if (count($cidades) <= 1) {
             }
         });
 
-        $('.js-confirmar').click(function() {
-            $('.js-questions-tab').hide();
-            $('.js-questions').html('<h4>Enviando informações ...</h4>');
-            $('#modalAlert').fadeOut('slow')
-            goToNextPage();
+        $('button.js-confirmar').click(function() {
+            if(this.value == 'next'){
+                $('.js-questions-tab').hide();
+                $('.js-questions').html('<h4>Enviando informações ...</h4>');
+                $('#modalAlert').fadeOut('slow')
+                goToNextPage();
+            }else{
+                $('#modalAlert').fadeOut('slow')
+            }
+        });
+
+        //Fechar modal ao clicar fora dela.
+        $(window).click(function (event) {
+            var modal =  $('#modalAlert');
+            if( event.target.value != 'next'){
+                if($(event.target).css('display') == 'flex'){
+                    modal.fadeOut('slow')
+                }
+            }
         });
 
         /**
