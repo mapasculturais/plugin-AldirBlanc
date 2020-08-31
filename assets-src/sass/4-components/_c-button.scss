@@ -26,11 +26,11 @@
     white-space: inherit;
     width: auto;
 
-    &.secondary {
+    &.secondary, &--secondary {
         background-color: $brand-secondary;
     };
 
-    &.tertiary {
+    &.tertiary,  &--tertiary {
         background-color: $brand-tertiary;
     };
 
