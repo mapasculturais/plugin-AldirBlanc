@@ -9,23 +9,15 @@
     <div class="termos--list">
         <div class="term">
             <span class="term--box"></span>
-            <label for="one" class="term--label">
-                <input type="checkbox" class="term--input" id="one" />
-                <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro atuação no setor cultural e fonte de renda, conforme lei nº 14.017, de
-                    29 de junho de 2020, que dispõe sobre ações emergenciais destinadas ao setor
-                    cultural a serem adotadas durante o estado de calamidade pública.");?>
-            </span>
-            </label>
-        </div>
-        <div class="term">
-            <span class="term--box"></span>
             <label for="two" class="term--label">
                 <input type="checkbox" class="term--input" id="two" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que não sou titular de benefício previdenciário ou assistencial do
-                    governo federal, exceto do programa bolsa família, conforme inciso iii do art.
-                    6º da lei nº 14.017.");?>
+                <?php \MapasCulturais\i::_e("Declaro que o(a) espaço artístico e cultural, 
+                micro ou pequena empresa cultural, organização cultural comunitária, 
+                cooperativa cultural ou instituição cultural ao qual represento 
+                tem finalidade cultural e teve suas atividades interrompidas em 
+                decorrência da pandemia da covid 19, conforme dispõe o inciso II 
+                do artigo 2º da Lei 14.017/2020.");?>
             </span>
             </label>
         </div>
@@ -34,9 +26,10 @@
             <label for="three" class="term--label">
                 <input type="checkbox" class="term--input" id="three" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que não sou titular de benefício previdenciário ou assistencial do
-                    governo federal, exceto do programa bolsa família, conforme inciso iii do art.
-                    6º da lei nº 14.017.");?>
+                <?php \MapasCulturais\i::_e("Declaro que o espaço artístico e 
+                cultural NÃO foi criado ou está vinculado à administração pública 
+                de qualquer esfera, conforme vedação prevista no § Único do 
+                Art. 8º da Lei 14.017/2020;");?>
             </span>
             </label>
         </div>
@@ -45,9 +38,11 @@
             <label for="four" class="term--label">
                 <input type="checkbox" class="term--input" id="four" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que não estou recebendo benefício do seguro desemprego ou
-                    programa de transferência de renda federal, exceto do programa bolsa família,
-                    conforme inciso iii do art. 6º da lei nº 14.017.");?>
+                <?php \MapasCulturais\i::_e("Declaro que o espaço artístico 
+                e cultural NÃO está vinculado às fundações,  
+                institutos ou instituições criados ou mantidos por grupos 
+                de empresas, conforme vedação prevista no § Único do Art. 8º 
+                da Lei 14.017/2020;");?>
             </span>
             </label>
         </div>
@@ -56,8 +51,10 @@
             <label for="five" class="term--label">
                 <input type="checkbox" class="term--input" id="five" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro renda familiar per capita de até meio salário mínimo ou renda familiar
-                    total de até três salários mínimos, conforme inciso iv do art. 6º da lei nº 14.017.");?>
+                <?php \MapasCulturais\i::_e("Declaro que o espaço artístico e cultural 
+                NÃO é gerido pelos serviços sociais do Sistema S 
+                (Sescoop, Sesi, Senai, Sesc, Senac, Sest, Senat e Senar), 
+                conforme vedação prevista no § Único do Art. 8º da Lei 14.017/2020;");?>
             </span>
             </label>
         </div>
@@ -66,31 +63,11 @@
             <label for="six" class="term--label">
                 <input type="checkbox" class="term--input" id="six" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que no ano de 2018, não recebi rendimentos acima de R$ 28.559,70 (vinte
-                    e oito mil, quinhentos e cinquenta e nove reais e setenta centavos), conforme
-                    inciso v do art. 6º da lei nº 14.017.");?>
-            </span>
-            </label>
-        </div>
-        <div class="term">
-            <span class="term--box"></span>
-            <label for="eight" class="term--label">
-                <input type="checkbox" class="term--input" id="eight" />
-                <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro não ser beneficiário(a) do auxílio emergencial previsto na lei nº 13.982,
-                    de 2 de abril de 2020, e em conformidade com o inciso vii do art. 6º da lei nº 14.017.");?>
-            </span>
-            </label>
-        </div>
-        <div class="term">
-            <span class="term--box"></span>
-            <label for="nine" class="term--label">
-                <input type="checkbox" class="term--input" id="nine" />
-                <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que estou ciente de que, em caso de utilização de qualquer meio ilícito,
-                    imoral ou declaração falsa para a participação deste credenciamento, incorro
-                    nas penalidades previstas nos artigos 171 e 299 do decreto lei nº 2.848, de 07 de
-                    dezembro de 1940 (código penal).");?>
+                <?php \MapasCulturais\i::_e("Declaro que estou solicitando apenas 
+                este subsídio mensal, em todo território nacional, e que não irei 
+                requerer esse mesmo benefício para outro espaço artístico e cultural 
+                ao qual sou responsável pela gestão, pois estou ciente da vedação de 
+                recebimento cumulativo prevista no § 3º do artigo 7º da Lei 14.017/2020.");?>
             </span>
             </label>
         </div>
@@ -99,8 +76,10 @@
             <label for="ten" class="term--label">
                 <input type="checkbox" class="term--input" id="ten" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que estou ciente da concessão das informações por mim declaradas
-                    neste formulário para validação em outras bases de dados oficiais.");?>
+                <?php \MapasCulturais\i::_e("Declaro que li e que concordo 
+                com os termos previstos em edital e no decreto de 
+                regulamentação publicado pelo ente repassador dos recursos 
+                do subsídio mensal.");?>
             </span>
             </label>
         </div>
