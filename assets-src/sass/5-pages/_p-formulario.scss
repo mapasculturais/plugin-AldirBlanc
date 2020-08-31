@@ -28,6 +28,11 @@ article.registration {
     .edit-box {
         border-radius: 14px;
 
+        @include tablet {
+            width: calc(100vw - 100px)!important;
+            margin: 0 auto!important;
+        }
+
         header {
             h1 {
                 font-size: 16px;
@@ -36,8 +41,19 @@ article.registration {
             }
         }
 
+        .mc-cancel {
+            background-color: #efefef;
+            color: #2d2d2d;
+
+            &:hover {
+                background-color: #2d2d2d;
+                color: #efefef;
+            }
+        }
+
         .submit-attach-opportunity {
-            @extend .btn--primary;
+            @extend .btn;
+            margin-bottom: 0;
         }
     }
     

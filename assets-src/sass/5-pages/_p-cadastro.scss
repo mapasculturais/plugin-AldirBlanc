@@ -55,8 +55,17 @@ section.cadastro {
                     margin: 0 auto;
                     display: block;
                     padding: 14px 20px;
+
                     @include desktop {
-                        width: calc(100% - 50px);
+                        width: calc(100% - 24px);
+                        margin: 0 auto;
+                        margin-right: 0;
+                        display: block;
+                        padding: 14px 20px;
+                    }
+
+                    @include tablet {
+                        width: 100%;
                     }
                 }
                 
