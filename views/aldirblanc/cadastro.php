@@ -9,11 +9,15 @@ $inciso2_enabled = $this->controller->config['inciso2_enabled'];
 $inciso1_enabled = $this->controller->config['inciso1_enabled'];
 
 $this->jsObject['opportunityId'] = null;
-if (count($cidades) <= 1) {
+
+if (count($cidades) === 0) {
+    $inciso2_enabled = false;
+    
+} else if(count($cidades) === 1) {
     /**
      * Pega oportunidade/cidade default para cadastro do inciso II.
      */
-    $this->jsObject['opportunityId'] = isset(array_values($cidades)[0]) ? array_values($cidades)[0] : null;
+    $this->jsObject['opportunityId'] = reset($cidades);
 }
 
 ?>
