@@ -1,4 +1,4 @@
-<?php $linkSuporte = isset($this->controller->config['link_suportesuporte']) ? $this->controller->config['link_suportesuporte'] : '';?>
+<?php $linkSuporte = isset($this->controller->config['link_suporte']) ? $this->controller->config['link_suportesuporte'] : '';?>
 </section>
 <footer id="main-footer">
 
