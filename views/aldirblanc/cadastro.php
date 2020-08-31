@@ -13,7 +13,7 @@ if (count($cidades) <= 1) {
     /**
      * Pega oportunidade/cidade default para cadastro do inciso II.
      */
-    $this->jsObject['opportunityId'] = array_values($cidades)[0];
+    $this->jsObject['opportunityId'] = isset(array_values($cidades)[0]) ? array_values($cidades)[0] : null;
 }
 
 ?>
