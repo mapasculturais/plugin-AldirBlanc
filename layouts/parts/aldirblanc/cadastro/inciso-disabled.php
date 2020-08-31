@@ -13,7 +13,7 @@
 
     <div class="informative-box--title">
         <h2><?= $title ?></h2>
-        <i class="far fa-check-circle"></i>
+        <i class="fas fa-minus"></i>
     </div>
 
     <div class="informative-box--content active" data-content="">

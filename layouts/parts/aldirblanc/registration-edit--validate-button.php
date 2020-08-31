@@ -10,10 +10,10 @@
 <div ng-if="entityValidated" style="display:flex" id="modalAlert" class="modal">
     <!-- Modal content -->
     <div class="modal-content">
-        <span class="close">&times;</span>
+        <!-- <span class="close">&times;</span> -->
         <h2 class="modal-content--title">Preenchimento Finalizado</h2>
         <p class="text">Agradecemos sua participação!</p>
         <p class="text">Antes de enviar a inscrição, releia atentamente os dados preenchidos e certifique-se que estão todos corretos. Você pode editar o formulário caso encontre alguma informação incorreta.</p>
-        <a href="<?= $this->controller->createUrl('confirmacao', [$entity->id]) ?>" ng-click="" class="btn btn-primary js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></a>
+        <a href="<?= $this->controller->createUrl('confirmacao', [$entity->id]) ?>" ng-click="" class="btn btn-primary js-confirmar"><?php \MapasCulturais\i::_e("Revisar formulário"); ?></a>
     </div>
 </div>
