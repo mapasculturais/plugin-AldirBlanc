@@ -395,7 +395,7 @@ if (count($cidades) === 0) {
                 </label>
             </div>
             <div class="questions--nav">
-                <button class="btn btn-back js-back"><?php i::_e('Voltar') ?></button>
+                <button class="btn secondary btn-back js-back"><?php i::_e('Voltar') ?></button>
                 <button class="btn btn-next js-next"><?php i::_e("Avançar"); ?></button>
             </div>
         </div>
@@ -423,7 +423,7 @@ if (count($cidades) === 0) {
                 <?php i::_e('* Subsídio mensal para manutenção de espaços artísticos e culturais, microempresas e pequenas empresas culturais, cooperativas, instituições e organizações culturais comunitárias que tiveram as suas atividades interrompidas por força das medidas de isolamento social.') ?>
             </p>
             <div class="questions--nav">
-                <button class="btn btn-back js-back"><?php i::_e('Voltar') ?></button>
+                <button class="btn secondary btn-back js-back"><?php i::_e('Voltar') ?></button>
                 <button class="btn btn-next js-next"><?php i::_e("Avançar"); ?></button>
             </div>
         </div>
@@ -435,7 +435,7 @@ if (count($cidades) === 0) {
                 <p class="questions--summary"><?php i::_e('Indique a cidade onde o beneficiário do subsídio está instalado ou tem desenvolvido, atualmente, suas atividades culturais.') ?></p>
                 <?php $this->part('aldirblanc/cadastro/select-cidade', ['cidades' => $cidades]) ?>
                 <div class="questions--nav">
-                    <button class="btn btn-back js-back"><?php i::_e('Voltar') ?></button>
+                    <button class="btn secondary btn-back js-back"><?php i::_e('Voltar') ?></button>
                     <button class="btn btn-next js-next"><?php i::_e("Avançar"); ?></button>
                 </div>
             </div>

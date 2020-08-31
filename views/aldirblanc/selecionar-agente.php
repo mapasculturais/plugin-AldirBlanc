@@ -6,7 +6,7 @@
     <header class="agentes--head">
         <i class="fas fa-users"></i>
         <h3 class="agentes--title"><?php \MapasCulturais\i::_e("Selecione um agente para acompanhar a solicitação");?></h3>
-        <p class="agentes--summary"><?php \MapasCulturais\i::_e("in hac habitasse platea dictumst. Vivamus adipiscing fermentum quam volutpat aliquam. Integer et elit eget elit facilisis tris.");?></p>
+        <p class="agentes--summary"><?php \MapasCulturais\i::_e("O benefício é destinado aos trabalhadores e trabalhadoras da cultura que tiveram suas atividades interrompidas e se enquadram ao disposto no Art. 6º - Lei 14.017/2020.");?></p>
     </header>
     <div class="agentes--wrapper">
         <?php foreach($agents as $agent): ?>
@@ -81,7 +81,7 @@
                 agentRelated = this.value;
             }
 
-            modal.css("display", "flex").hide().fadeIn(1500);
+            modal.css("display", "flex").hide().fadeIn(900);
             
             let msg = `<?php \MapasCulturais\i::_e("Realizar inscrição para <strong>_name_</strong> no Auxílio Emergencial da Cultura.");?>`;
             msg = msg.replace(/_name_/g, agentName);

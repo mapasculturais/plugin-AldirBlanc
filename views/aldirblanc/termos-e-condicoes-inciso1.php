@@ -114,8 +114,11 @@
         <!-- Modal content -->
         <div class="modal-content">
             <span class="close">&times;</span>
-                <?php \MapasCulturais\i::_e("Você precisa aceitar todos os termos para proseguir com a inscrição no auxílio emergencial da cultura.");?>
-            <p></p>
+            <h2 class="modal-content--title title-modal">Atenção!</h2>
+            <p>
+                <?php \MapasCulturais\i::_e("Você precisa aceitar todos os termos para continuar com a inscrição no auxílio emergencial da cultura.");?>
+            </p>
+            <button id="btn-close" class="btn secondary">OK</button>
         </div>
     </div>
 
