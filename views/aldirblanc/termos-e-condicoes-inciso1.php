@@ -4,7 +4,7 @@
 <section class="termos" >
     <p class="termos--summay"><?php \MapasCulturais\i::_e("De acordo com os critérios da LEI Nº 14.017 com sanção presidencial em 29 DE JUNHO DE 2020. Para ter acesso ao Auxílio Emergencial Cultural, você deve cumprir os seguintes requisitos:");?> </p>
 
-    <h2><?php \MapasCulturais\i::_e("Termos e Condições");?></h2>
+    <h2><?php \MapasCulturais\i::_e("Termos e Condições Inciso I");?></h2>
 
     <div class="termos--list">
         <div class="term">

@@ -272,7 +272,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
             $opportunity = $this->getOpportunityInciso2($this->data['opportunity']);
 
-            eval(\psy\sh());
 
             $registration->opportunity = $opportunity;
             //pega o nome da category pela slug
@@ -480,12 +479,14 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     function GET_termos_e_condicoes()
     {
+        $app = App::i();
+        $registration = $app->repo('Registration')->find($this->data['id']);
         $this->requireAuthentication();
         if (!isset($this->data['id'])) {
             // @todo tratar esse erro
             throw new \Exception();
         }
-        $this->render('termos-e-condicoes', ['registration_id' => $this->data['id']]);
+        $this->render('termos-e-condicoes-inciso'.$registration->inciso, ['registration_id' => $this->data['id']]);
     }
     /**
      * Aceitar os termos e condiçoes
