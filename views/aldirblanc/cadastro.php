@@ -302,6 +302,10 @@ if (count($cidades) === 0) {
                 </button>
             <?php
             }
+            else if(!$inciso1_enabled && isset($this->controller->config['msg_inciso1_disabled'])){    
+                $mensagemInciso1Disabled = $this->controller->config['msg_inciso1_disabled'];
+                $this->part('aldirblanc/cadastro/inciso-disabled',  ['mensagem' => $mensagemInciso1Disabled, 'title' => $inciso1Title ]);  
+            }
             foreach ($registrationsInciso1 as $registration) {
                 $registrationUrl = $this->controller->createUrl('formulario', [$registration->id]);
                 switch ($registration->status) {
@@ -339,6 +343,10 @@ if (count($cidades) === 0) {
     
                     <!-- End #option1 -->
                 <?php
+                }
+                else if(!$inciso2_enabled && isset($this->controller->config['msg_inciso2_disabled'])){    
+                    $mensagemInciso2Disabled = $this->controller->config['msg_inciso2_disabled'];
+                    $this->part('aldirblanc/cadastro/inciso-disabled',  ['mensagem' => $mensagemInciso2Disabled, 'title' => $inciso2Title ]);  
                 }
                 foreach ($registrationsInciso2 as $registration) {
                     $registrationUrl = $this->controller->createUrl('formulario', [$registration->id]);
