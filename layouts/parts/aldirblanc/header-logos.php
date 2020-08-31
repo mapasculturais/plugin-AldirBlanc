@@ -5,9 +5,9 @@
 ?>
 
 <div class="logo-state">
-    <img src="<?php $this->asset('aldirblanc/img/logo-sergipe.png') ?>">
+    <img src="<?php $this->asset('aldirblanc/img/governo-para.png') ?>">
 </div>
 
 <div class="logo">
-    <img src="<?php $this->asset('aldirblanc/img/logo-aldir.png') ?>">
+    <img src="<?php $this->asset('aldirblanc/img/logo-aldir-para.png') ?>">
 </div>

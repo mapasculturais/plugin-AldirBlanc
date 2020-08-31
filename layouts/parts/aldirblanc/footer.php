@@ -2,7 +2,7 @@
 <footer id="main-footer">
 
     <div class="logo-state">
-        <img src="<?php $this->asset('aldirblanc/img/logo-sergipe.png') ?>">
+        <img src="<?php $this->asset('aldirblanc/img/governo-para.png') ?>">
     </div>
 
     <div class="credits">
