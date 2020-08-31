@@ -285,12 +285,13 @@ if (count($cidades) === 0) {
                 <button onclick="location.href='<?= $this->controller->createUrl('individual') ?>'" clickable id="option3" class="informative-box lab-option">
                 <!-- <button id="option3" class="informative-box lab-option"> -->
                     <div class="informative-box--icon">
-                        <i class="fas fa-users"></i>
+                        <i class="fas fa-user"></i>
                     </div>
 
                     <div class="informative-box--title">
                         <h2><?= $inciso1Title ?></h2>
-                        <i class="far fa-check-circle"></i>
+                        <i class="fas fa-minus"></i>
+                        <!-- <i class="far fa-check-circle"></i> -->
                     </div>
 
                     <div class="informative-box--content active" data-content="">
@@ -330,7 +331,8 @@ if (count($cidades) === 0) {
     
                         <div class="informative-box--title">
                             <h2><?= $inciso2Title ?></h2>
-                            <i class="far fa-check-circle"></i>
+                            <!-- <i class="far fa-check-circle"></i> -->
+                            <i class="fas fa-minus"></i>
                         </div>
     
                         <div class="informative-box--content active" data-content="">

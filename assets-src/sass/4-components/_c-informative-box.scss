@@ -54,6 +54,22 @@
                 color: white;
             }
         }
+
+        .informative-box--title {
+            i.fa-minus {
+                border: none;
+                width: auto;
+                height: auto;
+                display: block;
+                min-width: auto;
+                font-size: 44px;
+                
+                &:before {
+                    content: "\f058";
+                    font-weight: 400;
+                }
+            }
+        }
     }
 
     &--status {
@@ -133,6 +149,23 @@
             margin-left: 31px;
             font-size: 44px;
             color: $brand-primary;
+        }
+
+        i.fa-minus {
+            border: 4px solid;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            min-width: 36px;
+            font-size: 22px;
+            
+            &:before {
+                content: "\f068";
+                font-weight: 600;
+            }
         }
     }
 
