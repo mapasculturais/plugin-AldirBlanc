@@ -1,3 +1,4 @@
+<?php $linkSuporte = isset($this->controller->config['link_suporte']) ? $this->controller->config['link_suportesuporte'] : '';?>
 </section>
 <footer id="main-footer">
 
@@ -11,11 +12,16 @@
 
 </footer>
 
+<?php if ($linkSuporte){
+?>
 <div class="support">
-    <a href="">Suporte</a>
+    <a target="_blank" href="<?= $linkSuporte; ?> ">
+        Suporte
+    </a>
 </div>
-
-<?php $this->bodyEnd(); ?>
+<?php
+}
+ $this->bodyEnd(); ?>
 </body>
 
 </html>

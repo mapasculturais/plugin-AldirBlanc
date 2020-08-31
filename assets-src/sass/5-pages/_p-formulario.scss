@@ -13,6 +13,7 @@ article.registration {
         margin-bottom: 35px;
         font-weight: bold;
     }
+
     #editable-entity{
         visibility: hidden;
     }
@@ -22,6 +23,22 @@ article.registration {
 
     .registration-help {
         text-align: center;
+    }
+
+    .edit-box {
+        border-radius: 14px;
+
+        header {
+            h1 {
+                font-size: 16px;
+                line-height: 22px;
+                margin-bottom: 10px;
+            }
+        }
+
+        .submit-attach-opportunity {
+            @extend .btn--primary;
+        }
     }
     
     .registration-fieldset {
