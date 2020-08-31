@@ -51,9 +51,8 @@ $_messages = [
 <section id="lab-status" class="lab-main-content">
 
     <article class="main-content registration" ng-controller="OpportunityController">
-
-        <?php if (isset($registration->status)) : ?>
-
+        <?php $status = $registration->status; ?>
+        <?php if(isset($status)) : ?>
             <div class="status-card status-<?= $registration->status ?>">
                 <h2 class="status-card--title"><?= $_messages[$registration->status]['title'] ?></h2>
                 <p class="status-card--content"><?= $_messages[$registration->status]['message'] ?></p>
@@ -68,9 +67,10 @@ $_messages = [
         <?php $this->part('aldirblanc/registration-single--header', $_params) ?>
         <?php $this->part('singles/registration-single--fields', $_params) ?>
 
-        <div class="wrap-button">
+        <!-- <div class="wrap-button">
             <a href="" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar"); ?></a>
-        </div><!-- .wrap-button -->
+        </div> -->
+        <!-- .wrap-button -->
 
     </article>
 

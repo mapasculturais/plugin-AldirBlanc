@@ -1,9 +1,9 @@
 <?php $sentDate = $entity->sentTimestamp; ?>
 <?php if ($sentDate): ?>
-<div class="alert success">
+<!-- <div class="alert success">
     <?php \MapasCulturais\i::_e("Inscrição enviada no dia");?>    
     <?php echo $sentDate->format(\MapasCulturais\i::__('d/m/Y à\s H:i:s')); ?>
-</div>
+</div> -->
 <?php endif; ?>
 
 <h3 class="registration-header"><?php \MapasCulturais\i::_e("Confirmação da Inscrição");?></h3>
