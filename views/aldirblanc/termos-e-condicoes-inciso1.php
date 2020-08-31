@@ -124,6 +124,7 @@
 <script>
     var span          = document.getElementsByClassName("close")[0];
     var modal         = document.getElementById("modalAlert");
+    var btnClose      = document.getElementById("btn-close");
     var btnProsseguir = document.querySelector(".js-btn");
 
     // When the user clicks anywhere outside of the modal, close it
@@ -139,6 +140,10 @@
     }
     // When the user clicks on <span> (x), close the modal
     span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    btnClose.onclick = function() {
         modal.style.display = "none";
     }
 
