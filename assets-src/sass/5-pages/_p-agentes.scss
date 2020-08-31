@@ -12,11 +12,11 @@
     }
 
     &--summary {
-        display: flex;
-        justify-content: center;
         text-align: center;
         font-family: $headings-font-family;
         max-width: 320px;
+        margin: 0 auto;
+        padding-bottom: 30px;
     }
 
     &--thumbnail {

@@ -41,6 +41,10 @@
             padding: 0;
         }
 
+        .btn-ok{
+            @extend .btn;
+        }
+
         .close {
             color: #aaa;
             float: right;

@@ -13,7 +13,9 @@ article.registration {
         margin-bottom: 35px;
         font-weight: bold;
     }
-
+    #editable-entity{
+        visibility: hidden;
+    }
     .registration-header {
         display: none;
     }

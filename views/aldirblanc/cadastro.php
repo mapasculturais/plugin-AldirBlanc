@@ -46,6 +46,11 @@ if (count($cidades) === 0) {
             document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params)
         }
 
+        // function clearButtons() {
+        //     $('.modal-content').find('.btn').removeClass('js-confirmar');
+        //     $('.modal-content').find('.btn').removeClass('btn-ok');
+        // }
+
         function showModal(){
             var msg   = "";
             var modal = $('#modalAlert');
@@ -57,11 +62,17 @@ if (count($cidades) === 0) {
 
             var nomeCidade =  $('.js-select-cidade option:selected').text();
 
-            modal.css("display", "flex").hide().fadeIn(1200);
+            modal.css("display", "flex").hide().fadeIn(900);
+
             $('.modal-content').find('.js-confirmar').show();
             $('.modal-content').find('.js-title').text('Confirmação');
 
+
+            $('.modal-content').find('.btn').val('next');
+            $('.modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("Confirmar"); ?>');
+
             if(params.opportunity != null){
+
                 msg = `<?php \MapasCulturais\i::_e("Você está solicitando o auxílio para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>"); ?>`;
                 msg = msg.replace(/_fomalizado_/g, fomalizado);
                 msg = msg.replace(/_coletivo_/g, coletivo);
@@ -71,31 +82,26 @@ if (count($cidades) === 0) {
                 }else{
                     msg = msg.replace(/_cidade_/g, ".");
                 }
+
             }else{
                 var cidade = $('.js-select-cidade option:selected').val();
                 if( cidade > 0 ){
-
-
                     msg = `<?php \MapasCulturais\i::_e("Você está solicitando o auxílio para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>"); ?>`;
                     msg = msg.replace(/_fomalizado_/g, fomalizado);
                     msg = msg.replace(/_coletivo_/g, coletivo);
-
                     if(nomeCidade){
                         msg = msg.replace(/_cidade_/g, " na cidade de <strong>" + nomeCidade + "</strong>.");
                     }else{
                         msg = msg.replace(/_cidade_/g, ".");
                     }
-
                 }else{
-                    $('.modal-content').find('.js-title').text('Atenção!');
-                    $('.modal-content').find('.js-confirmar').hide();
-                    msg = "Você precisa selecionar a cidade."
+                    showModalMsg('Atenção!', 'Você precisa selecionar a cidade.')
                 }
             }
 
             $('.modal-content').find('.text').html(msg);
 
-            $('.close').on('click', function() {
+            $('.close, .btn-ok').on('click', function() {
                 modal.fadeOut('slow');
             });
 
@@ -104,15 +110,17 @@ if (count($cidades) === 0) {
         function showModalMsg(title, msg){
             var modal = $('#modalAlert');
 
-            modal.css("display", "flex").hide().fadeIn(1200);
+            $('.modal-content').find('.js-title').text(title);
 
-            $('.modal-content').find('.js-title').text('Atenção!');
-            $('.modal-content').find('.js-confirmar').hide();
+            $('.modal-content').find('.btn').val('close');
+            $('.modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("OK"); ?>');
 
-            $('.modal-content').find('.text').html(msg);
+            $('.modal-content').find('.text').text(msg);
 
-            $('.close').on('click', function() {
-                modal.fadeOut('slow');
+            modal.css("display", "flex").hide().fadeIn(900);
+
+            $('.close, .btn-ok').on('click', function() {
+                modal.fadeOut('fast');
             });
         }
 
@@ -121,7 +129,7 @@ if (count($cidades) === 0) {
          */
         function goToQuestionPersonality(){
             $('.js-questions-tab').hide();
-            $('#personalidade-juridica').fadeIn(1100);
+            $('#personalidade-juridica').fadeIn(900);
             returning = false;
         }
 
@@ -134,7 +142,7 @@ if (count($cidades) === 0) {
 
             if (returning) {
                 $('.js-questions-tab').hide();
-                $('#select-cidade').fadeIn(1100);
+                $('#select-cidade').fadeIn(900);
                 return;
             }
 
@@ -145,7 +153,7 @@ if (count($cidades) === 0) {
              */
             if (params.opportunity == null && hasCities.length > 0) {
                 $('.js-questions-tab').hide();
-                $('#select-cidade').fadeIn(1100);
+                $('#select-cidade').fadeIn(900);
                 returning = false;
             } else {
                 $('.js-questions-tab').hide();
@@ -179,16 +187,16 @@ if (count($cidades) === 0) {
             switch (parentId) {
                 case 'personalidade-juridica':
                     $('#personalidade-juridica').hide();
-                    $('#local-atividade').fadeIn(1100);
+                    $('#local-atividade').fadeIn(900);
                     break;
                 case 'local-atividade':
                     $('.js-questions').hide();
                     $('#personalidade-juridica').hide();
-                    $('.js-lab-item').fadeIn(1100);
+                    $('.js-lab-item').fadeIn(900);
                     break;
                 case 'select-cidade':
                     $('#select-cidade').hide();
-                    $('#personalidade-juridica').fadeIn(1100);
+                    $('#personalidade-juridica').fadeIn(900);
                     params.opportunity = null;
                     $(".js-select-cidade").select2("val", "-1");
                     break;
@@ -202,7 +210,7 @@ if (count($cidades) === 0) {
                 if(hasSeletedColetivo.length > 0){
                     goToQuestionPersonality()
                 }else{
-                    showModalMsg('Atenção!', 'Você precisa selecionar um opção para avançar')
+                    showModalMsg('Atenção!', 'Você precisa selecionar uma opção para avançar')
                 }
             }else if(parentId == 'select-cidade'){
                 showModal()
@@ -211,27 +219,31 @@ if (count($cidades) === 0) {
                 if(hasSeletedFormalizado.length > 0){
                     goToQuestionCounty()
                 }else{
-                    showModalMsg('Atenção!','Você precisa selecionar um opção para avançar')
+                    showModalMsg('Atenção!','Você precisa selecionar uma opção para avançar')
                 }
             }
         });
 
-        $('.js-confirmar').click(function() {
-            $('.js-questions-tab').hide();
-            $('.js-questions').html('<h4>Enviando informações ...</h4>');
-            $('#modalAlert').fadeOut('slow')
-            goToNextPage();
+        $('button.js-confirmar').click(function() {
+            if(this.value == 'next'){
+                $('.js-questions-tab').hide();
+                $('.js-questions').html('<h4>Enviando informações ...</h4>');
+                $('#modalAlert').fadeOut('slow')
+                goToNextPage();
+            }else{
+                $('#modalAlert').fadeOut('slow')
+            }
         });
 
-        // Exibe/esconde texto explicativo das opções de cadastro em celulares
-        $('.js-help').click(function() {
-            $('.js-detail').toggle('1000');
+        //Fechar modal ao clicar fora dela.
+        $(window).click(function (event) {
+            var modal =  $('#modalAlert');
+            if( event.target.value != 'next'){
+                if($(event.target).css('display') == 'flex'){
+                    modal.fadeOut('slow')
+                }
+            }
         });
-
-
-        // $('.informative-box .informative-box--content .more').hover(function(e) {
-        //     $(this.parentElement).addClass('active');
-        // })
 
         /**
          * Ao clicar nos cards do Inciso II, o usuário é encaminhado para tela de opções do local de atividade do beneficiário.
@@ -245,7 +257,7 @@ if (count($cidades) === 0) {
 
             $('.js-lab-item').fadeOut(1);
             $('.js-questions').fadeIn(11);
-            $('#local-atividade').fadeIn(1100);
+            $('#local-atividade').fadeIn(900);
             returning = false;
         });
     });
