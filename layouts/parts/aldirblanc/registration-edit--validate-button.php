@@ -1,5 +1,5 @@
 <div class="registration-fieldset">
-    <a ng-click="validateRegistration()" class="btn btn-secondary">Validar</a>
+    <a ng-click="validateRegistration()" class="btn btn-secondary btn-validate">Validar</a>
     <div class="errors-header" ng-if="entityErrors">
         <p class="errors-header-title">O cadastro não foi enviado!</p>
         <p>Corrija os campos e envie novamente</p>
@@ -10,7 +10,8 @@
         </a>
     </div>
 </div>
-<div ng-if="entityValidated" style="display:flex" id="modalAlert" class="modal">
+
+<div show="{{entityValidated}}" ng-show="entityValidated" id="modalAlert" class="modal">
     <!-- Modal content -->
     <div class="modal-content">
         <!-- <span class="close">&times;</span> -->
@@ -20,3 +21,11 @@
         <a href="<?= $this->controller->createUrl('confirmacao', [$entity->id]) ?>" ng-click="" class="btn btn-primary js-confirmar"><?php \MapasCulturais\i::_e("Revisar formulário"); ?></a>
     </div>
 </div>
+
+<script>
+    $(window).ready(function () {
+        $('.btn-validate').click(function () {
+            $('#modalAlert').css('display', 'flex')
+        });
+    });
+</script>

@@ -1,3 +1,11 @@
+
+#editable-entity{
+    border-left: none!important;
+    background: transparent!important;
+    margin-top: 67px;
+    box-shadow:none;
+}
+
 article.registration {
     
     background: none;
@@ -90,10 +98,6 @@ article.registration {
         }
     }
 
-
-    #editable-entity{
-        visibility: hidden;
-    }
     .registration-header {
         display: none;
     }

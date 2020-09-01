@@ -1,6 +1,9 @@
 <?php
-$linkSuporte      = isset($this->controller->config['link_suporte']) ? $this->controller->config['link_suporte'] : '';
-$termosECondicoes = isset($this->controller->config['privacidade_termos_condicoes']) ? $this->controller->config['privacidade_termos_condicoes'] : '';
+$app = \MapasCulturais\App::i();
+$aldirBlancController = $app->controller('aldirblanc');
+$linkSuporte      = isset($aldirBlancController->config['link_suporte']) ? $aldirBlancController->config['link_suporte'] : '';
+$termosECondicoes = isset($aldirBlancController->config['privacidade_termos_condicoes']) ? $aldirBlancController->config['privacidade_termos_condicoes'] : '';
+eval(\psy\sh());
 ;?>
 </section>
 
