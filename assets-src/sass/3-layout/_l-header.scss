@@ -7,6 +7,7 @@ header {
         padding: 10px;
         @include transition(all, 0.3s, ease-in-out);
         width: 200px;
+
         @include desktop {
             display: block;
             left: 0;
@@ -18,6 +19,10 @@ header {
         margin: 0 auto;
         padding-top: 5px;
         width: 200px;
+
+        @include tablet {
+            width: 136px;
+        }
     }
     .logout {
         height: 100%;
