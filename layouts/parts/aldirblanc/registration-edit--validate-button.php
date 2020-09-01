@@ -11,7 +11,7 @@
     </div>
 </div>
 
-<div show="{{entityValidated}}" ng-show="entityValidated" style="display:none"  id="modalAlert" class="modal">
+<div show="{{entityValidated}}" ng-show="entityValidated" id="modalAlert" class="modal">
     <!-- Modal content -->
     <div class="modal-content">
         <!-- <span class="close">&times;</span> -->
