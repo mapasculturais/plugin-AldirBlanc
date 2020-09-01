@@ -18,6 +18,7 @@ if ($title = $this->getTitle()) {
     <!--[if lt IE 9]>
         <script src="<?php $this->asset('js/html5.js'); ?>" type="text/javascript"></script>
     <![endif]-->
+<<<<<<< HEAD
 
     <!-- Primary Meta Tags -->
     <meta name="title" content="<?php echo $title == $site_name ? $title : "{$site_name} - {$title}"; ?>">
@@ -37,6 +38,8 @@ if ($title = $this->getTitle()) {
     <meta property="twitter:description" content=" A Lei de Emergência Cultural Aldir Blanc surgiu com o objetivo de ajudar trabalhadoras e trabalhadores da Cultura bem como espaços culturais brasileiros no período de isolamento social,
     ocasionado pela pandemia da COVID-19. Solicite seu benefício!">
     <meta property="twitter:image" content="https://metatags.io/assets/meta-tags-16a33a6a8531e519cc0936fbba0ad904e52d35f34a46c97a2c9f6f7dd7d336f2.png">
+=======
+>>>>>>> c30507eff157cb24379f8ac01183b4f82c3ee158
 </head>
 
 <body <?php $this->bodyProperties() ?>>
