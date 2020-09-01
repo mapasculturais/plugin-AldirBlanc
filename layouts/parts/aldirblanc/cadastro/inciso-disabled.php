@@ -16,7 +16,7 @@
         <i class="fas fa-minus"></i>
     </div>
 
-    <div class="informative-box--content active" data-content="">
+    <div class="disabled informative-box--content active" data-content="">
         
         <span class="content">
             <?= $mensagem;?>
