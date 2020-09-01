@@ -1,3 +1,11 @@
+
+#editable-entity{
+    border-left: none!important;
+    background: transparent!important;
+    margin-top: 67px;
+    box-shadow:none;
+}
+
 article.registration {
     
     background: none;
@@ -17,6 +25,51 @@ article.registration {
         max-width: 300px;
         margin-left: auto;
         margin-right: auto;
+    }
+
+    .registration-fieldset  {
+        ul {
+            li {   
+                .relation-field-info, .icon-agent  {
+                    display: none;
+                }
+
+                > div {
+                    > span:first-of-type {
+                        display: flex;
+                        justify-content: space-between;
+                        
+                        span:last-of-type {
+                            color: #C60931;
+                            font-size: 11px;
+                            letter-spacing: 0;
+                            line-height: 15px;
+                            text-transform: lowercase;
+                        }
+                    }
+
+                }
+
+                .alert {
+                    padding: 0;
+                    padding-left: 40px;
+
+                    &:before {
+                        content: "\f071";
+                        font-weight: 600;
+                        font-family: "Font Awesome 5 Free";
+                    }
+                }
+
+                div.invalidField {
+                    input {
+                        border: 1px solid #C60931;
+                        border-radius: 2px;
+                        background-color: rgba(198,9,49,0.15);
+                    }
+                }
+            }
+        }
     }
 
     .errors {
@@ -45,10 +98,6 @@ article.registration {
         }
     }
 
-
-    #editable-entity{
-        visibility: hidden;
-    }
     .registration-header {
         display: none;
     }

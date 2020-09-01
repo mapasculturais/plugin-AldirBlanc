@@ -46,14 +46,9 @@ if (count($cidades) === 0) {
             document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params)
         }
 
-        // function clearButtons() {
-        //     $('.modal-content').find('.btn').removeClass('js-confirmar');
-        //     $('.modal-content').find('.btn').removeClass('btn-ok');
-        // }
-
         function showModal(){
             var msg   = "";
-            var modal = $('#modalAlert');
+            var modal = $('#modalAlertCadastro');
             var coletivo   =  $('input[name=coletivo]:checked').siblings().find('.js-text').text();
             var fomalizado =  $('input[name=formalizado]:checked').siblings().find('.js-text').text();
 
@@ -64,12 +59,12 @@ if (count($cidades) === 0) {
 
             modal.css("display", "flex").hide().fadeIn(900);
 
-            $('.modal-content').find('.js-confirmar').show();
-            $('.modal-content').find('.js-title').text('Confirmação');
+            $('#modalAlertCadastro .modal-content').find('.js-confirmar').show();
+            $('#modalAlertCadastro .modal-content').find('.js-title').text('Confirmação');
 
 
-            $('.modal-content').find('.btn').val('next');
-            $('.modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("Confirmar"); ?>');
+            $('#modalAlertCadastro .modal-content').find('.btn').val('next');
+            $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("Confirmar"); ?>');
 
             if(params.opportunity != null){
 
@@ -95,11 +90,11 @@ if (count($cidades) === 0) {
                         msg = msg.replace(/_cidade_/g, ".");
                     }
                 }else{
-                    showModalMsg('Atenção!', 'Você precisa selecionar a cidade.')
+                    showModalMsg('Atenção!', 'Você precisa selecionar a cidade.');
                 }
             }
 
-            $('.modal-content').find('.text').html(msg);
+            $('#modalAlertCadastro .modal-content').find('.modal-content-text').html(msg);
 
             $('.close, .btn-ok').on('click', function() {
                 modal.fadeOut('slow');
@@ -107,17 +102,18 @@ if (count($cidades) === 0) {
 
         }
 
-        function showModalMsg(title, msg){
-            var modal = $('#modalAlert');
+        function showModalMsg(title, message){
+            let modal   = $('#modalAlertCadastro');
+            let text = document.getElementById("modal-content-text");
 
-            $('.modal-content').find('.js-title').text(title);
+            $('#modalAlertCadastro .modal-content').find('.js-title').text(title);
 
-            $('.modal-content').find('.btn').val('close');
-            $('.modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("OK"); ?>');
+            $('#modalAlertCadastro .modal-content').find('.btn').val('close');
+            $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("OK"); ?>');
 
-            $('.modal-content').find('.text').text(msg);
+            text.textContent = message ;
 
-            modal.css("display", "flex").hide().fadeIn(900);
+            modal.fadeIn('fast');
 
             $('.close, .btn-ok').on('click', function() {
                 modal.fadeOut('fast');
@@ -129,7 +125,7 @@ if (count($cidades) === 0) {
          */
         function goToQuestionPersonality(){
             $('.js-questions-tab').hide();
-            $('#personalidade-juridica').fadeIn(900);
+            $('#personalidade-juridica').fadeIn('fast');
             returning = false;
         }
 
@@ -142,7 +138,7 @@ if (count($cidades) === 0) {
 
             if (returning) {
                 $('.js-questions-tab').hide();
-                $('#select-cidade').fadeIn(900);
+                $('#select-cidade').fadeIn('fast');
                 return;
             }
 
@@ -153,10 +149,10 @@ if (count($cidades) === 0) {
              */
             if (params.opportunity == null && hasCities.length > 0) {
                 $('.js-questions-tab').hide();
-                $('#select-cidade').fadeIn(900);
+                $('#select-cidade').fadeIn('fast');
                 returning = false;
             } else {
-                $('.js-questions-tab').hide();
+                // $('.js-questions-tab').hide();
                 showModal()
             }
         }
@@ -187,16 +183,16 @@ if (count($cidades) === 0) {
             switch (parentId) {
                 case 'personalidade-juridica':
                     $('#personalidade-juridica').hide();
-                    $('#local-atividade').fadeIn(900);
+                    $('#local-atividade').fadeIn('fast');
                     break;
                 case 'local-atividade':
                     $('.js-questions').hide();
                     $('#personalidade-juridica').hide();
-                    $('.js-lab-item').fadeIn(900);
+                    $('.js-lab-item').fadeIn('fast');
                     break;
                 case 'select-cidade':
                     $('#select-cidade').hide();
-                    $('#personalidade-juridica').fadeIn(900);
+                    $('#personalidade-juridica').fadeIn('fast');
                     params.opportunity = null;
                     $(".js-select-cidade").select2("val", "-1");
                     break;
@@ -205,6 +201,7 @@ if (count($cidades) === 0) {
 
         $('.js-next').click(function() {
             var parentId = $(this).closest('.js-questions-tab').attr('id');
+
             if(parentId == 'local-atividade'){
                 var hasSeletedColetivo =  $('input[name=coletivo]:checked');
                 if(hasSeletedColetivo.length > 0){
@@ -228,16 +225,16 @@ if (count($cidades) === 0) {
             if(this.value == 'next'){
                 $('.js-questions-tab').hide();
                 $('.js-questions').html('<h4>Enviando informações ...</h4>');
-                $('#modalAlert').fadeOut('slow')
+                $('#modalAlertCadastro').fadeOut('slow')
                 goToNextPage();
             }else{
-                $('#modalAlert').fadeOut('slow')
+                $('#modalAlertCadastro').fadeOut('slow')
             }
         });
 
         //Fechar modal ao clicar fora dela.
         $(window).click(function (event) {
-            var modal =  $('#modalAlert');
+            var modal =  $('#modalAlertCadastro');
             if( event.target.value != 'next'){
                 if($(event.target).css('display') == 'flex'){
                     modal.fadeOut('slow')
@@ -257,7 +254,7 @@ if (count($cidades) === 0) {
 
             $('.js-lab-item').fadeOut(1);
             $('.js-questions').fadeIn(11);
-            $('#local-atividade').fadeIn(900);
+            $('#local-atividade').fadeIn('fast');
             returning = false;
         });
     });
@@ -445,12 +442,12 @@ if (count($cidades) === 0) {
 
     </div><!-- End .box -->
 
-    <div id="modalAlert" class="modal">
+    <div id="modalAlertCadastro" class="modal">
         <!-- Modal content -->
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2 class="modal-content--title js-title"></h2>
-            <p class="text"></p>
+            <p id="modal-content-text" class="modal-content-text"></p>
             <button class="btn js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></button>
         </div>
     </div>
