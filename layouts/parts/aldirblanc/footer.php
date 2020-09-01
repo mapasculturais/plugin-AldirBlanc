@@ -29,13 +29,15 @@ $termosECondicoes = isset($this->controller->config['privacidade_termos_condicoe
 
     <div class="credits">
         <a href="https://github.com/mapasculturais/mapasculturais" target="_blank">
-            Mapas Culturais
+        Software livre Mapas Culturais
         </a> 
-        <span> e </span> 
+        <span> por </span> 
 
         <a href="https://hacklab.com.br/" class="hacklab" target="_blank">
             hacklab <span>/</span>
         </a>
+
+        <span> e comunidade </span>
         <!-- <img alt="Mapas Culturais e hacklab/" src="<?php $this->asset('aldirblanc/img/mapas-culturais-hacklab.png') ?>"> -->
     </div>
 
