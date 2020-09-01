@@ -28,7 +28,26 @@ footer#main-footer {
     }
     .credits {
         float: right;
-        width: auto;
+        color: #111111;
+        font-family: $f_body;
+        font-size: 14px;
+        font-weight: bold;
+        letter-spacing: 0;
+        line-height: 19px;
+        text-align: right;
+        max-width: 114px;
+        margin-top: 9px;
+
+        a {
+            text-decoration: none;
+        }
+    
+        a.hacklab {
+            span {
+                margin-left: -3px;
+                color: #DD4B39;
+            }
+        }
     }
 
 }
