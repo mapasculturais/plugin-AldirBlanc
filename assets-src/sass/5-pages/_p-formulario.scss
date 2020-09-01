@@ -19,6 +19,51 @@ article.registration {
         margin-right: auto;
     }
 
+    .registration-fieldset  {
+        ul {
+            li {   
+                .relation-field-info, .icon-agent  {
+                    display: none;
+                }
+
+                > div {
+                    > span:first-of-type {
+                        display: flex;
+                        justify-content: space-between;
+                        
+                        span:last-of-type {
+                            color: #C60931;
+                            font-size: 11px;
+                            letter-spacing: 0;
+                            line-height: 15px;
+                            text-transform: lowercase;
+                        }
+                    }
+
+                }
+
+                .alert {
+                    padding: 0;
+                    padding-left: 40px;
+
+                    &:before {
+                        content: "\f071";
+                        font-weight: 600;
+                        font-family: "Font Awesome 5 Free";
+                    }
+                }
+
+                div.invalidField {
+                    input {
+                        border: 1px solid #C60931;
+                        border-radius: 2px;
+                        background-color: rgba(198,9,49,0.15);
+                    }
+                }
+            }
+        }
+    }
+
     .errors {
         text-align:left;
         font-size: 12px;
