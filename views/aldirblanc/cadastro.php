@@ -73,7 +73,7 @@ if (count($cidades) === 0) {
 
             if(params.opportunity != null){
 
-                msg = `<?php \MapasCulturais\i::_e("Você está solicitando o auxílio para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>"); ?>`;
+                msg = `<?php \MapasCulturais\i::_e("Você está solicitando o benefício para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>"); ?>`;
                 msg = msg.replace(/_fomalizado_/g, fomalizado);
                 msg = msg.replace(/_coletivo_/g, coletivo);
 
@@ -86,7 +86,7 @@ if (count($cidades) === 0) {
             }else{
                 var cidade = $('.js-select-cidade option:selected').val();
                 if( cidade > 0 ){
-                    msg = `<?php \MapasCulturais\i::_e("Você está solicitando o auxílio para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>"); ?>`;
+                    msg = `<?php \MapasCulturais\i::_e("Você está solicitando o benefício para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>"); ?>`;
                     msg = msg.replace(/_fomalizado_/g, fomalizado);
                     msg = msg.replace(/_coletivo_/g, coletivo);
                     if(nomeCidade){
@@ -270,9 +270,9 @@ if (count($cidades) === 0) {
     </header>
 
     <div class="js-lab-item lab-item cadastro-options">
-        <!-- <p class="lab-form-question">Para quem você está solicitando o auxílio? <a class="js-help icon icon-help" href="#" title=""></a></p> -->
+        <!-- <p class="lab-form-question">Para quem você está solicitando o benefício? <a class="js-help icon icon-help" href="#" title=""></a></p> -->
         <h2 class="featured-title"> 
-            Selecione abaixo o auxílio desejado
+            Selecione abaixo o benefício desejado
         </h2>
 
         <div class="lab-form-filter opcoes-inciso">
