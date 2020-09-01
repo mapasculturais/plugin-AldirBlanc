@@ -1,10 +1,9 @@
 <div class="registration-fieldset">
     <a ng-click="validateRegistration()" class="btn btn-secondary">Validar</a>
-
-    <div class="errors-header"ng-repeat="field in data.fields" ng-if="entityErrors[field.fieldName] && $first">
-        <p class="errors-header-title">O cadastro não foi enviado!</p>
-        <p>Corrija os campos e envie novamente</p>
-    </div>
+<!--    <div class="errors-header" ng-if="field.id == data.fields[0].id">-->
+<!--        <p class="errors-header-title">O cadastro não foi enviado!</p>-->
+<!--        <p >Corrija os campos e envie novamente</p>-->
+<!--    </div>-->
 
     <div class="errors" ng-repeat="field in data.fields" ng-if="entityErrors[field.fieldName]">
         <a ng-click="scrollTo('wrapper-' + field.fieldName, 130)">
