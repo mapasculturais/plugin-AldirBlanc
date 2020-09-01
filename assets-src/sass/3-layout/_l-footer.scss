@@ -6,6 +6,10 @@ footer#main-footer {
     position: relative;
     @include box-shadow(0, 0, 5px, #999);
 
+    a {
+        color: black;
+    }
+
     .logo-state {
         float: left;
         height: auto;
@@ -16,6 +20,10 @@ footer#main-footer {
 
         @include desktop {
             display: none;
+        }
+
+        @include mobile{
+            width: 40%;
         }
     }
     .credits {
@@ -29,9 +37,24 @@ footer#main-footer {
     box-sizing: border-box;
     color: $gray-dark;
     display: block;
+    font-size: 14px;
+    font-weight: normal;
     padding: 10px 20px;
-    text-decoration: underline;
     width: 100%;
+    text-align: center;
+
+    .link{
+        font-weight: bold;
+    }
+}
+
+.terms-conditions{
+    margin-top: 22px;
+    margin-left: 11%;
+
+    @include mobile {
+        display: none;
+    }
 }
 
 /* Fixed footer */

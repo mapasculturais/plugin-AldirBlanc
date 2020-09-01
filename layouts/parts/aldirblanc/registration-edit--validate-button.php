@@ -1,9 +1,14 @@
 <div class="registration-fieldset">
     <a ng-click="validateRegistration()" class="btn btn-secondary">Validar</a>
-    <div ng-repeat="field in data.fields" ng-if="entityErrors[field.fieldName]">
+
+    <div class="errors-header"ng-repeat="field in data.fields" ng-if="entityErrors[field.fieldName] && $first">
+        <p class="errors-header-title">O cadastro não foi enviado!</p>
+        <p>Corrija os campos e envie novamente</p>
+    </div>
+
+    <div class="errors" ng-repeat="field in data.fields" ng-if="entityErrors[field.fieldName]">
         <a ng-click="scrollTo('wrapper-' + field.fieldName, 130)">
-            {{field.title}}:
-            <span ng-repeat="error in entityErrors[field.fieldName]">{{error}} </span>
+            {{field.title.replace(':', '')}}: <span class="errors-field" ng-repeat="error in entityErrors[field.fieldName]">{{error}} </span>
         </a>
     </div>
 </div>

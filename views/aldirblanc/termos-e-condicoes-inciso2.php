@@ -92,12 +92,13 @@
     <div id="modalAlert" class="modal">
         <!-- Modal content -->
         <div class="modal-content">
+            <h2 class="modal-content--title title-modal">Atenção!</h2>
             <span class="close">&times;</span>
             <p>
                 <?php \MapasCulturais\i::_e("Você precisa aceitar todos os termos para proseguir com a inscrição no auxílio emergencial da cultura.");?>
             </p>
 
-            <button id="btn-close" class="btn secondary "> OK </button>
+            <button id="btn-close" class="btn "> OK </button>
         </div>
     </div>
 

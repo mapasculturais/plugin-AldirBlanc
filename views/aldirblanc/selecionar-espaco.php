@@ -31,13 +31,12 @@
             <!-- Modal content -->
             <div class="modal-content">
                 <span class="close">&times;</span>
+                <h2 class="modal-content--title title-modal">Confirmação</h2>
                 <p class="text"></p>
                 <button class="btn" id="confirmar"><?php \MapasCulturais\i::_e("Confirmar");?></button>
             </div>
         </div>
     </section>
-
-
 </article>
 
 <script>
@@ -54,8 +53,9 @@
             let inciso      = $(this).attr('inciso');
             let category    = $(this).attr('category');
             let opportunity = $(this).attr('opportunity');
-            opportunity
-            modal.fadeIn(1500);
+
+            modal.css("display", "flex").hide().fadeIn(900);
+
             let msg = `<?php \MapasCulturais\i::_e("Realizar inscrição para <strong>_name_</strong> no Auxílio Emergencial da Cultura.");?>`;
             msg = msg.replace(/_name_/g, spaceName);
             $('.modal-content').find('.text').html(msg);
