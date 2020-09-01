@@ -7,8 +7,8 @@ $termosECondicoes = isset($aldirBlancController->config['privacidade_termos_cond
 
 <?php if ($linkSuporte){
     ?>
-    <div class="support">
-        Precisa de ajuda? <a target="_blank" class="link" href="<?= $linkSuporte; ?> ">Clique aqui</a>
+    <div class="help-section">
+        Precisa de ajuda? <a href="https://bit.ly/3hOQfBz" target="_blank"> Clique aqui </a> para falar com nossa equipe de suporte por chat. Ou envie um email para <a href="mailto:suportemapaculturalpa@gmail.com" target="_blank"> suportemapaculturalpa@gmail.com </a>
     </div>
     <?php
 }?>

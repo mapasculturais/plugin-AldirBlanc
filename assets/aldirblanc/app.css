@@ -961,8 +961,14 @@ footer#main-footer .credits {
   letter-spacing: 0;
   line-height: 19px;
   text-align: right;
-  max-width: 114px;
+  max-width: 300px;
   margin-top: 9px;
+}
+
+@media (max-width: 1024px) {
+  footer#main-footer .credits {
+    max-width: 160px;
+  }
 }
 
 footer#main-footer .credits a {
@@ -7965,6 +7971,13 @@ section.cadastro .help-section {
   }
 }
 
+#editable-entity {
+  border-left: none !important;
+  background: transparent !important;
+  margin-top: 67px;
+  box-shadow: none;
+}
+
 article.registration {
   background: none;
   float: none;
@@ -7984,6 +7997,41 @@ article.registration h1 {
   max-width: 300px;
   margin-left: auto;
   margin-right: auto;
+}
+
+article.registration .registration-fieldset ul li .relation-field-info,
+article.registration .registration-fieldset ul li .icon-agent {
+  display: none;
+}
+
+article.registration .registration-fieldset ul li > div > span:first-of-type {
+  display: flex;
+  justify-content: space-between;
+}
+
+article.registration .registration-fieldset ul li > div > span:first-of-type span:last-of-type {
+  color: #C60931;
+  font-size: 11px;
+  letter-spacing: 0;
+  line-height: 15px;
+  text-transform: lowercase;
+}
+
+article.registration .registration-fieldset ul li .alert {
+  padding: 0;
+  padding-left: 40px;
+}
+
+article.registration .registration-fieldset ul li .alert:before {
+  content: "\F071";
+  font-weight: 600;
+  font-family: "Font Awesome 5 Free";
+}
+
+article.registration .registration-fieldset ul li div.invalidField input {
+  border: 1px solid #C60931;
+  border-radius: 2px;
+  background-color: rgba(198, 9, 49, 0.15);
 }
 
 article.registration .errors {
@@ -8014,10 +8062,6 @@ article.registration .errors-header-title {
 article.registration .errors-field {
   color: #cc0033;
   font-weight: normal;
-}
-
-article.registration #editable-entity {
-  visibility: hidden;
 }
 
 article.registration .registration-header {
