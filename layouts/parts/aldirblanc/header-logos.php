@@ -5,7 +5,7 @@
 ?>
 
 <div class="logo-state">
-    <img src="<?php $this->asset('aldirblanc/img/governo-para.png') ?>">
+    <img src="<?php $this->asset('aldirblanc/img/secult-para.png') ?>">
 </div>
 
 <div class="logo">
