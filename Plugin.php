@@ -29,7 +29,11 @@ class Plugin extends \MapasCulturais\Plugin
                 'espaco-nao-formalizado' => 'Espaço não formalizado',
                 'coletivo-formalizado' => 'Coletivo formalizado',
                 'coletivo-nao-formalizado' => 'Coletivo não formalizado'
-            ]
+            ],
+            'msg_inciso1_disabled' => 'Em breve!',
+            'msg_inciso2_disabled' => 'A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!',
+            'link_suporte' => 'https://bit.ly/3hOQfBz',
+            'privacidade_termos_condicoes' =>'https://mapacultural.pa.gov.br/files/subsite/2/termos-e-politica.pdf',
         ];
        
         parent::__construct($config);
@@ -74,7 +78,7 @@ class Plugin extends \MapasCulturais\Plugin
         /**
          * modifica o template do autenticador quando o redirect url for para o plugin aldir blanc
          */
-        $app->hook('controller(auth).render(multiple-local)', function() use ($app, $plugin) {
+        $app->hook('controller(auth).render(<<*>>)', function() use ($app, $plugin) {
             $redirect_url = @$_SESSION['mapasculturais.auth.redirect_path'] ?: '';
             
             if(strpos($redirect_url, '/aldirblanc') === 0){

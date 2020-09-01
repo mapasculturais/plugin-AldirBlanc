@@ -10,6 +10,17 @@ if ($title = $this->getTitle()) {
 <html lang="<?php echo $app->getCurrentLCode(); ?>" dir="ltr">
 
 <head>
+    <?php if ($env = env('GTM_TAG', '')): ?>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-177006856-1"></script>
+
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', <?= $env?>);
+        </script>
+    <?php endif;?>
     <meta charset="UTF-8" />
     <title><?php echo $title == $site_name ? $title : "{$site_name} - {$title}"; ?></title>
     <link rel="profile" href="http://gmpg.org/xfn/11" />
@@ -18,6 +29,8 @@ if ($title = $this->getTitle()) {
     <!--[if lt IE 9]>
         <script src="<?php $this->asset('js/html5.js'); ?>" type="text/javascript"></script>
     <![endif]-->
+    
+
 </head>
 
 <body <?php $this->bodyProperties() ?>>
