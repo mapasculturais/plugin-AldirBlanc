@@ -53,8 +53,22 @@ if ($title = $this->getTitle()) {
     <!--[if lt IE 9]>
         <script src="<?php $this->asset('js/html5.js'); ?>" type="text/javascript"></script>
     <![endif]-->
-
+    <?php
+        if ($env = env('GTM_TAG', '')){
+            ?>
+            <!-- Global site tag (gtag.js) - Google Analytics -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id=UA-177006856-1"></script>
     
+            <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', <?= $env?>);
+            </script>
+        <?php
+        }
+    ?>
+
 </head>
 
 <body <?php $this->bodyProperties() ?>>
