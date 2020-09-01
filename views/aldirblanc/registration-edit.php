@@ -28,7 +28,11 @@ $_params = [
 <div id="editable-entity" class="clearfix sombra" >
 </div>
 <article class="main-content registration" ng-controller="OpportunityController">
-        <h1> Cadastro de pessoa física </h1>
+        <?php if($entity->inciso == 1): ?> 
+            <h1> Solicitação de trabalhadora ou trabalhador da cultura </h1>
+        <?php else: ?> 
+            <h1> Cadastro de pessoa física </h1>
+        <?php endif; ?> 
         <?php $this->applyTemplateHook('form','begin'); ?>
         
         <?php $this->part('singles/registration-edit--header', $_params) ?>

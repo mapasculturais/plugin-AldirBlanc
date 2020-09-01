@@ -6,7 +6,7 @@
  */
 ?>
 <div>
-<button id="" role="button" class="informative-box ">
+<button id="" role="button" class="informative-box disabled">
     <div class="informative-box--icon">
         <i class="fas fa-university"></i>
     </div>

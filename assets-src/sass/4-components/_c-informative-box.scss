@@ -34,7 +34,12 @@
         padding-top: 20px;
     }
 
-    &.active, &:hover {
+    &.disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+    &.active, &:not(.disabled):hover {
         background-color: $brand-primary;
         transition: all 0.2s ease-in-out;
 
