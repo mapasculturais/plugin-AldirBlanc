@@ -2,9 +2,7 @@
 $app = \MapasCulturais\App::i();
 $aldirBlancController = $app->controller('aldirblanc');
 $linkSuporte      = isset($aldirBlancController->config['link_suporte']) ? $aldirBlancController->config['link_suporte'] : '';
-$termosECondicoes = isset($aldirBlancController->config['privacidade_termos_condicoes']) ? $aldirBlancController->config['privacidade_termos_condicoes'] : '';
-eval(\psy\sh());
-;?>
+$termosECondicoes = isset($aldirBlancController->config['privacidade_termos_condicoes']) ? $aldirBlancController->config['privacidade_termos_condicoes'] : '';?>
 </section>
 
 <?php if ($linkSuporte){
