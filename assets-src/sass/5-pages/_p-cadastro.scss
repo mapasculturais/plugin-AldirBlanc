@@ -216,6 +216,10 @@ section.cadastro {
         text-align: center;
         margin-top: 80px;
         margin-bottom: 40px;
+
+        @include tablet {
+            max-width: calc(100% - 30px);
+        }
     }
 }
 
