@@ -74,7 +74,7 @@ class Plugin extends \MapasCulturais\Plugin
         /**
          * modifica o template do autenticador quando o redirect url for para o plugin aldir blanc
          */
-        $app->hook('controller(auth).render(multiple-local)', function() use ($app, $plugin) {
+        $app->hook('controller(auth).render(<<*>>)', function() use ($app, $plugin) {
             $redirect_url = @$_SESSION['mapasculturais.auth.redirect_path'] ?: '';
             
             if(strpos($redirect_url, '/aldirblanc') === 0){
