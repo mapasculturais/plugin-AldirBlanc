@@ -98,7 +98,7 @@
                 <?php \MapasCulturais\i::_e("Você precisa aceitar todos os termos para proseguir com a inscrição no auxílio emergencial da cultura.");?>
             </p>
 
-            <button id="btn-close" class="btn secondary "> OK </button>
+            <button id="btn-close" class="btn "> OK </button>
         </div>
     </div>
 

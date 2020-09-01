@@ -23,7 +23,7 @@ footer#main-footer {
         }
 
         @include mobile{
-            width: 46%;
+            width: 40%;
         }
     }
     .credits {
@@ -51,7 +51,7 @@ footer#main-footer {
 .terms-conditions{
     margin-top: 22px;
     margin-left: 11%;
-    display: inline-flex;
+
     @include mobile {
         display: none;
     }
