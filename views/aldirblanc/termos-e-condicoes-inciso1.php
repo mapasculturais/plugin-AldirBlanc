@@ -127,10 +127,8 @@
             <label for="eleven" class="term--label">
                 <input type="checkbox" class="term--input" id="eleven" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que estou ciente de que, em caso de utilização de qualquer meio ilícito,
-                    imoral ou declaração falsa para a participação deste credenciamento, incorro
-                    nas penalidades previstas nos artigos 171 e 299 do decreto lei nº 2.848, de 07 de
-                    dezembro de 1940 (código penal).");?>
+                <?php \MapasCulturais\i::_e("Declaro que estou ciente da concessão das informações por mim declaradas
+                    neste formulário para validação em outras bases de dados oficiais.");?>
             </span>
             </label>
         </div>
@@ -139,16 +137,6 @@
             <label for="twelve" class="term--label">
                 <input type="checkbox" class="term--input" id="twelve" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que estou ciente da concessão das informações por mim declaradas
-                    neste formulário para validação em outras bases de dados oficiais.");?>
-            </span>
-            </label>
-        </div>
-        <div class="term">
-            <span class="term--box"></span>
-            <label for="thirteen" class="term--label">
-                <input type="checkbox" class="term--input" id="thirteen" />
-                <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Concordo com a inclusão das informações por mim declaradas neste
                     formulário na base de dados do Mapa Cultural do Pará.");?>
             </span>
@@ -156,8 +144,8 @@
         </div>
         <div class="term">
             <span class="term--box"></span>
-            <label for="fourteen" class="term--label">
-                <input type="checkbox" class="term--input" id="fourteen" />
+            <label for="thirteen" class="term--label">
+                <input type="checkbox" class="term--input" id="thirteen" />
                 <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Declaro que a presente inscrição para acesso ao auxílio emergencial, de que
                     trata a lei a lei 14.017/2020, é autodeclarada e única em todo o território
