@@ -884,6 +884,12 @@ header .logo {
   width: 200px;
 }
 
+@media (max-width: 1024px) {
+  header .logo {
+    width: 136px;
+  }
+}
+
 header .logout {
   height: 100%;
   padding: 0 15px;
@@ -940,12 +946,6 @@ footer#main-footer .logo-state {
   width: auto;
 }
 
-@media (min-width: 1025px) {
-  footer#main-footer .logo-state {
-    display: none;
-  }
-}
-
 @media (max-width: 829px) {
   footer#main-footer .logo-state {
     width: 40%;
@@ -954,7 +954,24 @@ footer#main-footer .logo-state {
 
 footer#main-footer .credits {
   float: right;
-  width: auto;
+  color: #111111;
+  font-family: "Open Sans", "Arial", sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 0;
+  line-height: 19px;
+  text-align: right;
+  max-width: 114px;
+  margin-top: 9px;
+}
+
+footer#main-footer .credits a {
+  text-decoration: none;
+}
+
+footer#main-footer .credits a.hacklab span {
+  margin-left: -3px;
+  color: #DD4B39;
 }
 
 .support {
