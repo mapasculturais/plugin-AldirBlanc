@@ -327,10 +327,14 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 ]);
 
                 if(count($agentsQuery) == 1){
+                    if (!isset($agentsQuery[0]['id']) || $agentsQuery[0]['id'] == "" ) {
+                        // @todo tratar esse erro
+                        throw new \Exception();
+                    }
                     $agentRelated = $app->repo('agent')->find($agentsQuery[0]['id']);
                 }
                 else if (count($agentsQuery) == 0) {
-                    $agentRelated = new \MapasCulturais\Entities\Agent($this->_getUser());
+                    $agentRelated = new \MapasCulturais\Entities\Agent($agent->user);
                     //@TODO: confirmar nome e tipo do Agente coletivo
                     $agentRelated->name = ' ';
                     $agentRelated->type = 2;
@@ -533,7 +537,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $this->requireAuthentication();
         $app = App::i();
-        $user = $this->_getUser();
         $tipo = $this->data['tipo'];
         $agent_controller = $app->controller('agent');
         $agentsQuery = $agent_controller->apiQuery([
@@ -563,7 +566,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
 
         $app = App::i();
-        $user = $this->_getUser();
         $space_controller = $app->controller('space');
         $spacesQuery = $space_controller->apiQuery([
             '@select' => 'id,name,terms,agent_id',
@@ -605,22 +607,5 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $registration->checkPermission('control');
         $this->data['entity'] = $registration;
         $this->render('registration-confirmacao', $this->data);
-    }
-
-    protected function _getUser(){
-        $app = App::i();
-        $user = null;
-        if($app->user->is('admin') && key_exists('userId', $this->data)){
-            $user = $app->repo('User')->find($this->data['userId']);
-
-
-        }elseif($app->user->is('admin') && key_exists('agentId', $this->data)){
-            $agent = $app->repo('Agent')->find($this->data['agentId']);
-            $user = $agent->user;
-        }
-        if(!$user)
-            $user = $app->user;
-
-        return $user;
     }
 }
