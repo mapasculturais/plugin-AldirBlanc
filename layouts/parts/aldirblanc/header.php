@@ -12,13 +12,13 @@ if ($title = $this->getTitle()) {
 <head>
     <?php if ($env = env('GTM_TAG', '')): ?>
         <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-177006856-1"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=<?= $env?>"></script>
 
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', <?= $env?>);
+            gtag('config', '<?= $env?>');
         </script>
     <?php endif;?>
     <meta charset="UTF-8" />
