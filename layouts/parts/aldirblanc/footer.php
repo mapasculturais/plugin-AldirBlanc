@@ -2,7 +2,9 @@
 $app = \MapasCulturais\App::i();
 $aldirBlancController = $app->controller('aldirblanc');
 $linkSuporte      = isset($aldirBlancController->config['link_suporte']) ? $aldirBlancController->config['link_suporte'] : '';
-$termosECondicoes = isset($aldirBlancController->config['privacidade_termos_condicoes']) ? $aldirBlancController->config['privacidade_termos_condicoes'] : '';?>
+$termosECondicoes = isset($aldirBlancController->config['privacidade_termos_condicoes']) ? $aldirBlancController->config['privacidade_termos_condicoes'] : '';
+$logotipo = isset($aldirBlancController->config['logotipo_footer']) ? $aldirBlancController->config['logotipo_footer'] : '';?>
+
 </section>
 
 <?php if ($linkSuporte){
@@ -15,10 +17,13 @@ $termosECondicoes = isset($aldirBlancController->config['privacidade_termos_cond
 
 <footer id="main-footer">
 
-    <div class="logo-state">
-        <img src="<?php $this->asset('aldirblanc/img/governo-para.png') ?>">
-    </div>
-
+    <?php if ($logotipo){
+        ?>
+       <div class="logo-state">
+            <img src="<?= $logotipo ?>">
+        </div>
+        <?php
+    }?>
 
     <?php if ($termosECondicoes){
         ?>

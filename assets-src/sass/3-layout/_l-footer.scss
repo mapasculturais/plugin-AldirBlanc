@@ -18,10 +18,6 @@ footer#main-footer {
         @include transition(all, 0.3s, ease-in-out);
         width: auto;
 
-        @include desktop {
-            display: none;
-        }
-
         @include mobile{
             width: 40%;
         }
