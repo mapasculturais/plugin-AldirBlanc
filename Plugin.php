@@ -16,8 +16,9 @@ class Plugin extends \MapasCulturais\Plugin
         if (App::i()->view->subsite){
             $config = App::i()->view->subsite->aldir_blanc_config;
         }
-
         $config += [
+            'logotipo_central' => 'https://mapacultural.pa.gov.br/assets/mapacultural.pa.gov.br/img/logo-aldir-para.png',
+            'logotipo_instituicao' => 'https://mapacultural.pa.gov.br/assets/mapacultural.pa.gov.br/img/secult-para.png',
             'inciso1_enabled' => true,
             'inciso2_enabled' => true,
             'inciso1_opportunity_id' => null,
