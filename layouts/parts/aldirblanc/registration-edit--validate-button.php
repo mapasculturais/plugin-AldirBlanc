@@ -1,5 +1,5 @@
 <div class="registration-fieldset">
-    <a ng-click="validateRegistration()" class="btn btn-secondary btn-validate">Validar</a>
+    <a ng-init="validateRegistration()" ng-click="validateRegistration()" class="btn btn-secondary btn-validate">Validar</a>
     <div class="errors-header" ng-if="entityErrors">
         <p class="errors-header-title">O cadastro não foi enviado!</p>
         <p>Corrija os campos e envie novamente</p>
