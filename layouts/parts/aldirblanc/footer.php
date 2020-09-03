@@ -3,7 +3,7 @@ $app = \MapasCulturais\App::i();
 $aldirBlancController = $app->controller('aldirblanc');
 $linkSuporte      = isset($aldirBlancController->config['link_suporte']) ? $aldirBlancController->config['link_suporte'] : '';
 $termosECondicoes = isset($aldirBlancController->config['privacidade_termos_condicoes']) ? $aldirBlancController->config['privacidade_termos_condicoes'] : '';
-$logotipo = isset($aldirBlancController->config['logotipo_footer']) ? $aldirBlancController->config['logotipo_footer'] : '';?>
+$logotipo = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldirBlancController->config['logotipo_instituicao'] : '';?>
 
 </section>
 
