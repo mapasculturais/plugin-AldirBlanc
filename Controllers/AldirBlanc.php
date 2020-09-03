@@ -80,7 +80,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $opportunity_id = $this->config['inciso1_opportunity_id'];
 
         $app = App::i();
-
+        if (!isset($opportunity_id) || $opportunity_id == "") {
+            // @todo tratar esse erro
+            throw new \Exception();
+        }
         $opportunity = $app->repo('Opportunity')->find($opportunity_id);
 
         if(!$opportunity){
@@ -98,7 +101,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
      */
     function getOpportunityInciso2(string $opportunity_id)
     {
-        if (!in_array($opportunity_id, $this->config['inciso2_opportunity_ids'])){
+        if (!in_array($opportunity_id, $this->config['inciso2_opportunity_ids']) || $opportunity_id == "" ){
             // @todo tratar esse erro
             throw new \Exception();
         }
@@ -154,7 +157,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $this->requireAuthentication();
         $app = App::i();
-        if (isset($this->data['agent'])) {
+        if (isset($this->data['agent']) && $this->data['agent'] != "" ) {
             $agent = $app->repo('Agent')->find($this->data['agent']);
         } else {
             $agent = $app->user->profile;
@@ -200,7 +203,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
 
         $app = App::i();
-        if (isset($this->data['agent'])) {
+        if (isset($this->data['agent']) && $this->data['agent'] != "" ) {
             $agent = $app->repo('Agent')->find($this->data['agent']);
         } else {
             $agent = $app->user->profile;
@@ -288,6 +291,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 ]);
                 
                 if(count($spaces_ids) == 1){
+                    if (!isset($spaces_ids[0]['id']) || $spaces_ids[0]['id'] == "" ) {
+                        // @todo tratar esse erro
+                        throw new \Exception();
+                    }
                     $space = $app->repo('space')->find($spaces_ids[0]['id']);
                 }
                 else if (count($spaces_ids) == 0) {
@@ -303,7 +310,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     $app->redirect($this->createUrl('selecionar_espaco', ['agent' => $agent->id, 'inciso' =>2, 'category' => $this->data['category'],'opportunity' => $this->data['opportunity']]) );
                 } 
                 // Pega dados da página de seleção de espaço e cria o objeto do espaço
-                if (isset($this->data['space']) && $this->data['space'] !=""){
+                if (isset($this->data['space']) && $this->data['space'] != "" ){
                     $space = $app->repo('space')->find($this->data['space']);  
 
                 }
@@ -320,10 +327,14 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 ]);
 
                 if(count($agentsQuery) == 1){
+                    if (!isset($agentsQuery[0]['id']) || $agentsQuery[0]['id'] == "" ) {
+                        // @todo tratar esse erro
+                        throw new \Exception();
+                    }
                     $agentRelated = $app->repo('agent')->find($agentsQuery[0]['id']);
                 }
                 else if (count($agentsQuery) == 0) {
-                    $agentRelated = new \MapasCulturais\Entities\Agent($this->_getUser());
+                    $agentRelated = new \MapasCulturais\Entities\Agent($agent->user);
                     //@TODO: confirmar nome e tipo do Agente coletivo
                     $agentRelated->name = ' ';
                     $agentRelated->type = 2;
@@ -469,9 +480,17 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $inciso1 = $this->getOpportunityInciso1();
         
         $summaryStatusName = $this->getStatusNames();
+        if (!$app->user){
+            // @todo tratar esse erro
+            throw new \Exception();
+        }
         $registrationsInciso1 = $app->repo('Registration')->findByOpportunityAndUser($inciso1, $app->user);
         $opportunitiesIdsInciso2 = array_values($this->config['inciso2_opportunity_ids']);
         $agentID = $app->user->profile->id;
+        if (!isset($opportunitiesIdsInciso2) || $opportunitiesIdsInciso2 == "" ){
+            // @todo tratar esse erro
+            throw new \Exception();
+        }
         $registrationsInciso2 = $app->repo('Registration')->findBy(['opportunity' => $opportunitiesIdsInciso2, 'owner' => $agentID]);
         $name = $app->user->profile->name;
         $this->render('cadastro', ['cidades' => $this->getCidades(), 'registrationsInciso1' => $registrationsInciso1, 'registrationsInciso2' => $registrationsInciso2, 'summaryStatusName'=>$summaryStatusName, 'niceName' => $name]);
@@ -480,12 +499,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function GET_termos_e_condicoes()
     {
         $app = App::i();
-        $registration = $app->repo('Registration')->find($this->data['id']);
-        $this->requireAuthentication();
-        if (!isset($this->data['id'])) {
+        if (!isset($this->data['id']) || $this->data['id'] == "" ) {
             // @todo tratar esse erro
             throw new \Exception();
         }
+        $registration = $app->repo('Registration')->find($this->data['id']);
+        $this->requireAuthentication();
+       
         $this->render('termos-e-condicoes-inciso'.$registration->inciso, ['registration_id' => $this->data['id']]);
     }
     /**
@@ -517,7 +537,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $this->requireAuthentication();
         $app = App::i();
-        $user = $this->_getUser();
         $tipo = $this->data['tipo'];
         $agent_controller = $app->controller('agent');
         $agentsQuery = $agent_controller->apiQuery([
@@ -547,7 +566,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
 
         $app = App::i();
-        $user = $this->_getUser();
         $space_controller = $app->controller('space');
         $spacesQuery = $space_controller->apiQuery([
             '@select' => 'id,name,terms,agent_id',
@@ -589,22 +607,5 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $registration->checkPermission('control');
         $this->data['entity'] = $registration;
         $this->render('registration-confirmacao', $this->data);
-    }
-
-    protected function _getUser(){
-        $app = App::i();
-        $user = null;
-        if($app->user->is('admin') && key_exists('userId', $this->data)){
-            $user = $app->repo('User')->find($this->data['userId']);
-
-
-        }elseif($app->user->is('admin') && key_exists('agentId', $this->data)){
-            $agent = $app->repo('Agent')->find($this->data['agentId']);
-            $user = $agent->user;
-        }
-        if(!$user)
-            $user = $app->user;
-
-        return $user;
     }
 }
