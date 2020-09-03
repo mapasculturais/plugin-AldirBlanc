@@ -12,8 +12,7 @@ $this->jsObject['opportunityId'] = null;
 
 if (count($cidades) === 0) {
     $inciso2_enabled = false;
-    
-} else if(count($cidades) === 1) {
+} else if (count($cidades) === 1) {
     /**
      * Pega oportunidade/cidade default para cadastro do inciso II.
      */
@@ -46,55 +45,61 @@ if (count($cidades) === 0) {
             document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params)
         }
 
-        function showModal(){
-            var msg   = "";
+        function showModal() {
+            var modalTitle = "";
+            var msg = "";
             var modal = $('#modalAlertCadastro');
-            var coletivo   =  $('input[name=coletivo]:checked').siblings().find('.js-text').text();
-            var fomalizado =  $('input[name=formalizado]:checked').siblings().find('.js-text').text();
+            var coletivo = $('input[name=coletivo]:checked').siblings().find('.js-text').text();
+            var fomalizado = $('input[name=formalizado]:checked').siblings().find('.js-text').text();
 
             coletivo = coletivo.replace(".", "");
             fomalizado = fomalizado.replace(".", "");
 
-            var nomeCidade =  $('.js-select-cidade option:selected').text();
+            var nomeCidade = $('.js-select-cidade option:selected').text();
 
             modal.css("display", "flex").hide().fadeIn(900);
 
             $('#modalAlertCadastro .modal-content').find('.js-confirmar').show();
-            $('#modalAlertCadastro .modal-content').find('.js-title').text('Confirmação');
+
+            //$('#modalAlertCadastro .modal-content').find('.js-title').text('Confirmação');
+
+            modalTitle = "Confirmação";
 
 
             $('#modalAlertCadastro .modal-content').find('.btn').val('next');
             $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("Confirmar"); ?>');
 
-            if(params.opportunity != null){
-
+            if (params.opportunity != null) {
                 msg = `<?php \MapasCulturais\i::_e("Você está solicitando o benefício para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>"); ?>`;
                 msg = msg.replace(/_fomalizado_/g, fomalizado);
                 msg = msg.replace(/_coletivo_/g, coletivo);
 
-                if(nomeCidade){
+                if (nomeCidade) {
                     msg = msg.replace(/_cidade_/g, " na cidade de <strong>" + nomeCidade + "</strong>.");
-                }else{
+                } else {
                     msg = msg.replace(/_cidade_/g, ".");
                 }
 
-            }else{
+            } else {
                 var cidade = $('.js-select-cidade option:selected').val();
-                if( cidade > 0 ){
+                if (cidade > 0) {
                     msg = `<?php \MapasCulturais\i::_e("Você está solicitando o benefício para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>"); ?>`;
                     msg = msg.replace(/_fomalizado_/g, fomalizado);
                     msg = msg.replace(/_coletivo_/g, coletivo);
-                    if(nomeCidade){
+                    if (nomeCidade) {
                         msg = msg.replace(/_cidade_/g, " na cidade de <strong>" + nomeCidade + "</strong>.");
-                    }else{
+                    } else {
                         msg = msg.replace(/_cidade_/g, ".");
                     }
-                }else{
-                    showModalMsg('Atenção!', 'Você precisa selecionar a cidade.');
+                } else {
+                    msg =  'Você precisa selecionar a cidade.';
+                    modalTitle = "Atenção";
                 }
             }
 
-            $('#modalAlertCadastro .modal-content').find('.modal-content-text').html(msg);
+            showModalMsg( modalTitle, msg);
+
+            //$('#modalAlertCadastro .modal-content').find('.modal-content-text').html(msg);
 
             $('.close, .btn-ok').on('click', function() {
                 modal.fadeOut('slow');
@@ -102,8 +107,8 @@ if (count($cidades) === 0) {
 
         }
 
-        function showModalMsg(title, message){
-            let modal   = $('#modalAlertCadastro');
+        function showModalMsg(title, message) {
+            let modal = $('#modalAlertCadastro');
             let text = document.getElementById("modal-content-text");
 
             $('#modalAlertCadastro .modal-content').find('.js-title').text(title);
@@ -111,8 +116,8 @@ if (count($cidades) === 0) {
             $('#modalAlertCadastro .modal-content').find('.btn').val('close');
             $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("OK"); ?>');
 
-            text.textContent = message ;
 
+            text.innerHTML = message;
             modal.fadeIn('fast');
 
             $('.close, .btn-ok').on('click', function() {
@@ -123,7 +128,7 @@ if (count($cidades) === 0) {
         /**
          * Ao clicar em uma das opções do local de atividade do beneficiário , o usuário é encaminhado para tela de opções de personalidades jurídica do beneficiário.
          */
-        function goToQuestionPersonality(){
+        function goToQuestionPersonality() {
             $('.js-questions-tab').hide();
             $('#personalidade-juridica').fadeIn('fast');
             returning = false;
@@ -133,8 +138,10 @@ if (count($cidades) === 0) {
          * Ao clicar em uma das opções de opções de personalidades jurídica do beneficiário, o usuário é encaminhado para tela de seleção da oportunidade/cidade,
          * senão é redirecionado conforme os parametros selecionados.
          */
-        function goToQuestionCounty(){
-            $('.js-questions-tab').hide();
+        function goToQuestionCounty(hide = true) {
+            if(hide) {
+                $('.js-questions-tab').hide();
+            }
 
             if (returning) {
                 $('.js-questions-tab').hide();
@@ -202,41 +209,45 @@ if (count($cidades) === 0) {
         $('.js-next').click(function() {
             var parentId = $(this).closest('.js-questions-tab').attr('id');
 
-            if(parentId == 'local-atividade'){
-                var hasSeletedColetivo =  $('input[name=coletivo]:checked');
-                if(hasSeletedColetivo.length > 0){
+            if (parentId == 'local-atividade') {
+                var hasSeletedColetivo = $('input[name=coletivo]:checked');
+                if (hasSeletedColetivo.length > 0) {
                     goToQuestionPersonality()
-                }else{
+                } else {
                     showModalMsg('Atenção!', 'Você precisa selecionar uma opção para avançar')
                 }
-            }else if(parentId == 'select-cidade'){
+            } else if (parentId == 'select-cidade') {
                 showModal()
-            }else{
-                var hasSeletedFormalizado =  $('input[name=formalizado]:checked');
-                if(hasSeletedFormalizado.length > 0){
-                    goToQuestionCounty()
-                }else{
-                    showModalMsg('Atenção!','Você precisa selecionar uma opção para avançar')
+            } else {
+                var hasSeletedFormalizado = $('input[name=formalizado]:checked');
+                if (hasSeletedFormalizado.length > 0) {
+                    if($('#select-cidade').lenght) {
+                        goToQuestionCounty()
+                    } else {
+                        goToQuestionCounty(false)
+                    }
+                } else {
+                    showModalMsg('Atenção!', 'Você precisa selecionar uma opção para avançar')
                 }
             }
         });
 
         $('button.js-confirmar').click(function() {
-            if(this.value == 'next'){
+            if (this.value == 'next') {
                 $('.js-questions-tab').hide();
                 $('.js-questions').html('<h4>Enviando informações ...</h4>');
                 $('#modalAlertCadastro').fadeOut('slow')
                 goToNextPage();
-            }else{
+            } else {
                 $('#modalAlertCadastro').fadeOut('slow')
             }
         });
 
         //Fechar modal ao clicar fora dela.
-        $(window).click(function (event) {
-            var modal =  $('#modalAlertCadastro');
-            if( event.target.value != 'next'){
-                if($(event.target).css('display') == 'flex'){
+        $(window).click(function(event) {
+            var modal = $('#modalAlertCadastro');
+            if (event.target.value != 'next') {
+                if ($(event.target).css('display') == 'flex') {
                     modal.fadeOut('slow')
                 }
             }
@@ -268,7 +279,7 @@ if (count($cidades) === 0) {
 
     <div class="js-lab-item lab-item cadastro-options">
         <!-- <p class="lab-form-question">Para quem você está solicitando o benefício? <a class="js-help icon icon-help" href="#" title=""></a></p> -->
-        <h2 class="featured-title"> 
+        <h2 class="featured-title">
             Selecione abaixo o benefício desejado
         </h2>
 
@@ -280,7 +291,7 @@ if (count($cidades) === 0) {
             if (count($registrationsInciso1) < $inciso1Limite && $inciso1_enabled) {
             ?>
                 <button onclick="location.href='<?= $this->controller->createUrl('individual') ?>'" clickable id="option3" class="informative-box lab-option">
-                <!-- <button id="option3" class="informative-box lab-option"> -->
+                    <!-- <button id="option3" class="informative-box lab-option"> -->
                     <div class="informative-box--icon">
                         <i class="fas fa-user"></i>
                     </div>
@@ -299,10 +310,9 @@ if (count($cidades) === 0) {
                     </div>
                 </button>
             <?php
-            }
-            else if(!$inciso1_enabled && isset($this->controller->config['msg_inciso1_disabled'])){    
+            } else if (!$inciso1_enabled && isset($this->controller->config['msg_inciso1_disabled'])) {
                 $mensagemInciso1Disabled = $this->controller->config['msg_inciso1_disabled'];
-                $this->part('aldirblanc/cadastro/inciso-disabled',  ['mensagem' => $mensagemInciso1Disabled, 'title' => $inciso1Title ]);  
+                $this->part('aldirblanc/cadastro/inciso-disabled',  ['mensagem' => $mensagemInciso1Disabled, 'title' => $inciso1Title]);
             }
             foreach ($registrationsInciso1 as $registration) {
                 $registrationUrl = $this->controller->createUrl('formulario', [$registration->id]);
@@ -319,49 +329,48 @@ if (count($cidades) === 0) {
                 }
             }
             if (count($registrationsInciso2) < $inciso2Limite && $inciso2_enabled) {
-                ?>
-    
-                    <button id="option1" role="button" class="informative-box js-lab-option lab-option">
-                        <div class="informative-box--icon">
-                            <i class="fas fa-university"></i>
-                        </div>
-    
-                        <div class="informative-box--title">
-                            <h2><?= $inciso2Title ?></h2>
-                            <!-- <i class="far fa-check-circle"></i> -->
-                            <i class="fas fa-minus"></i>
-                        </div>
-    
-                        <div class="informative-box--content active" data-content="">
-                            <span class="more js"> Mais informações </span>
-                            <span class="content">
-                                Farão jus ao benefício espaços, organizações da sociedade civil, empresas, cooperativas e instituições com finalidade cultural, como previsto nos Arts. 7º e 8º - Lei 14.017/2020. Prevê subsídio de R$3.000,00 (três mil reais) a R$10.000,00 (dez mil reais), prescrito pela gestão local.
-                            </span>
-                        </div>
-                    </button>
-    
-                    <!-- End #option1 -->
-                <?php
+            ?>
+
+                <button id="option1" role="button" class="informative-box js-lab-option lab-option">
+                    <div class="informative-box--icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+
+                    <div class="informative-box--title">
+                        <h2><?= $inciso2Title ?></h2>
+                        <!-- <i class="far fa-check-circle"></i> -->
+                        <i class="fas fa-minus"></i>
+                    </div>
+
+                    <div class="informative-box--content active" data-content="">
+                        <span class="more js"> Mais informações </span>
+                        <span class="content">
+                            Farão jus ao benefício espaços, organizações da sociedade civil, empresas, cooperativas e instituições com finalidade cultural, como previsto nos Arts. 7º e 8º - Lei 14.017/2020. Prevê subsídio de R$3.000,00 (três mil reais) a R$10.000,00 (dez mil reais), prescrito pela gestão local.
+                        </span>
+                    </div>
+                </button>
+
+                <!-- End #option1 -->
+            <?php
+            } else if (!$inciso2_enabled && isset($this->controller->config['msg_inciso2_disabled'])) {
+                $mensagemInciso2Disabled = $this->controller->config['msg_inciso2_disabled'];
+                $this->part('aldirblanc/cadastro/inciso-disabled',  ['mensagem' => $mensagemInciso2Disabled, 'title' => $inciso2Title]);
+            }
+            foreach ($registrationsInciso2 as $registration) {
+                $registrationUrl = $this->controller->createUrl('formulario', [$registration->id]);
+                switch ($registration->status) {
+                        //caso seja do Inciso 2 e nao enviada (Rascunho)
+                    case Registration::STATUS_DRAFT:
+                        //todo pegar nome do coletivo ou do espaço
+                        $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName, 'registrationStatusName' => 'Cadastro iniciado']);
+                        break;
+                        //caso seja do Inciso 2 e tenha sido enviada
+                    default:
+                        $registrationStatusName = $summaryStatusName[$registration->status];
+                        $this->part('aldirblanc/cadastro/application-status',  ['registration' => $registration, 'registrationStatusName' => $registrationStatusName]);
+                        break;
                 }
-                else if(!$inciso2_enabled && isset($this->controller->config['msg_inciso2_disabled'])){    
-                    $mensagemInciso2Disabled = $this->controller->config['msg_inciso2_disabled'];
-                    $this->part('aldirblanc/cadastro/inciso-disabled',  ['mensagem' => $mensagemInciso2Disabled, 'title' => $inciso2Title ]);  
-                }
-                foreach ($registrationsInciso2 as $registration) {
-                    $registrationUrl = $this->controller->createUrl('formulario', [$registration->id]);
-                    switch ($registration->status) {
-                            //caso seja do Inciso 2 e nao enviada (Rascunho)
-                        case Registration::STATUS_DRAFT:
-                            //todo pegar nome do coletivo ou do espaço
-                            $this->part('aldirblanc/cadastro/application-inciso2-draft',  ['registration' => $registration, 'registrationUrl' => $registrationUrl, 'niceName' => $niceName, 'registrationStatusName' => 'Cadastro iniciado']);
-                            break;
-                            //caso seja do Inciso 2 e tenha sido enviada
-                        default:                        
-                            $registrationStatusName = $summaryStatusName[$registration->status];
-                            $this->part('aldirblanc/cadastro/application-status',  ['registration' => $registration, 'registrationStatusName' => $registrationStatusName]);
-                            break;
-                    }
-                }
+            }
             ?>
         </div>
 
@@ -413,7 +422,7 @@ if (count($cidades) === 0) {
                         <h2 class="js-text"><?php i::_e('Espaço artístico e cultural mantido por coletivo ou grupo cultural (sem CNPJ) ou por pessoa física (CPF).') ?></h2>
                         <i class="far fa-check-circle"></i>
                     </div>
-                    <input type="radio" class="formalizado" name="formalizado" value="nao-formalizado"/>
+                    <input type="radio" class="formalizado" name="formalizado" value="nao-formalizado" />
                 </label>
             </div>
             <p class="questions--note">
