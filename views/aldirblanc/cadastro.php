@@ -42,7 +42,7 @@ if (count($cidades) === 0) {
          */
         function goToNextPage() {
             params.category = coletivo + '-' + formalizado;
-            document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params)
+            document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params);
         }
 
         function showModal() {
@@ -64,7 +64,6 @@ if (count($cidades) === 0) {
             //$('#modalAlertCadastro .modal-content').find('.js-title').text('Confirmação');
 
             modalTitle = "Confirmação";
-
 
             $('#modalAlertCadastro .modal-content').find('.btn').val('next');
             $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("Confirmar"); ?>');
@@ -104,7 +103,6 @@ if (count($cidades) === 0) {
             $('.close, .btn-ok').on('click', function() {
                 modal.fadeOut('slow');
             });
-
         }
 
         function showModalMsg(title, message) {
@@ -113,8 +111,10 @@ if (count($cidades) === 0) {
 
             $('#modalAlertCadastro .modal-content').find('.js-title').text(title);
 
-            $('#modalAlertCadastro .modal-content').find('.btn').val('close');
-            $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("OK"); ?>');
+            if(title != "Confirmação") {
+                $('#modalAlertCadastro .modal-content').find('.btn').val('close');
+                $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("OK"); ?>');
+            } 
 
 
             text.innerHTML = message;
@@ -388,14 +388,16 @@ if (count($cidades) === 0) {
                 <label class="informative-box">
                     <div class="informative-box--title">
                         <h2 class="js-text"><?php i::_e('Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado;') ?></h2>
-                        <i class="far fa-check-circle"></i>
+                        <i class="fas fa-minus"></i>
+                        <!-- <i class="far fa-check-circle"></i> -->
                     </div>
                     <input type="radio" class="coletivo" name="coletivo" value="espaco" />
                 </label>
                 <label class="informative-box">
                     <div class="informative-box--title">
                         <h2 class="js-text"><?php i::_e('Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.') ?></h2>
-                        <i class="far fa-check-circle"></i>
+                        <i class="fas fa-minus"></i>
+                        <!-- <i class="far fa-check-circle"></i> -->
                     </div>
                     <input type="radio" class="coletivo" name="coletivo" value="coletivo" />
                 </label>
@@ -413,14 +415,16 @@ if (count($cidades) === 0) {
                 <label class="informative-box">
                     <div class="informative-box--title">
                         <h2 class="js-text"><?php i::_e('Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.') ?></h2>
-                        <i class="far fa-check-circle"></i>
+                        <i class="fas fa-minus"></i>
+                        <!-- <i class="far fa-check-circle"></i> -->
                     </div>
                     <input type="radio" class="formalizado" name="formalizado" value="formalizado" />
                 </label>
                 <label class="informative-box">
                     <div class="informative-box--title">
                         <h2 class="js-text"><?php i::_e('Espaço artístico e cultural mantido por coletivo ou grupo cultural (sem CNPJ) ou por pessoa física (CPF).') ?></h2>
-                        <i class="far fa-check-circle"></i>
+                        <i class="fas fa-minus"></i>
+                        <!-- <i class="far fa-check-circle"></i> -->
                     </div>
                     <input type="radio" class="formalizado" name="formalizado" value="nao-formalizado" />
                 </label>

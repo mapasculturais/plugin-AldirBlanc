@@ -21,7 +21,7 @@
 
                 <div class="informative-box--title">
                     <h2><?=$agent->name?></h2>
-                    <i class="far fa-check-circle"></i>
+                    <i class="fas fa-minus"></i>
                 </div>
 
                 <div class="informative-box--content agentes-item" data-content="">
@@ -68,6 +68,9 @@
         });
 
         $('.agentes--item').on('click', function (event) {
+            $('.agentes--item').removeClass('active');
+            $(this).toggleClass('active');
+
             let agentRelated = '';
             let modal       = $('#modalAlert');
             let agentId     = $(this).attr('value');
@@ -88,7 +91,8 @@
             $('.modal-content').find('.text').html(msg);
 
             $('.close').on('click', function () {
-                modal.fadeOut('slow');
+                $('.agentes--item').removeClass('active');
+                modal.fadeOut('300');
             });
 
             $('#confirmar').on('click', function () {
