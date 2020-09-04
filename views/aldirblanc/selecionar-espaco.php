@@ -21,7 +21,7 @@
 
                 <div class="informative-box--title">
                     <h2><?php echo $space->name ?></h2>
-                    <i class="far fa-check-circle"></i>
+                    <i class="fas fa-minus"></i>
                 </div>
 
                 <div class="informative-box--content espaco-item" data-content="">
@@ -59,6 +59,9 @@
         });
 
         $('.btn-selecionar').on('click', function (event) {
+            $('.espaco--item').removeClass('active');
+            $(this).toggleClass('active');
+
             let modal       = $('#modalAlert');
             let space       = $(this).attr('space');
             let spaceName   = $(this).attr('name');
@@ -74,6 +77,7 @@
             $('.modal-content').find('.text').html(msg);
 
             $('.close').on('click', function () {
+                $('.espaco--item').removeClass('active');
                 modal.fadeOut('slow');
             });
 

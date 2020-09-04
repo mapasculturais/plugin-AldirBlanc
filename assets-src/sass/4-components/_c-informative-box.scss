@@ -39,7 +39,7 @@
         opacity: 0.5;
     }
 
-    &.active, &:not(.disabled):hover {
+    &.active, &.selected, &:not(.disabled):hover {
         background-color: $brand-primary;
         transition: all 0.2s ease-in-out;
 
