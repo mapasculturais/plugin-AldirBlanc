@@ -31,7 +31,7 @@ $_params = [
         <?php if($entity->inciso == 1): ?> 
             <h1> Solicitação de trabalhadora ou trabalhador da cultura </h1>
         <?php else: ?> 
-            <h1> Cadastro de pessoa física </h1>
+            <h1> Espaços e organizações culturais </h1>
         <?php endif; ?> 
         <?php $this->applyTemplateHook('form','begin'); ?>
         
