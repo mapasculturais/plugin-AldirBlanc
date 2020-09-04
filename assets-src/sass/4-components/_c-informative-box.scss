@@ -101,6 +101,12 @@
         justify-content: center;
         align-items: center;
 
+        img.thumbnail {
+            z-index: 1;
+            border-radius: 50%;
+            border: 0px;
+        }
+
         i {
             z-index: 99;
             font-size: 20px;

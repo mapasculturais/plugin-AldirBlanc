@@ -42,7 +42,7 @@ if (count($cidades) === 0) {
          */
         function goToNextPage() {
             params.category = coletivo + '-' + formalizado;
-            document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params)
+            document.location = MapasCulturais.createUrl('aldirblanc', 'coletivo', params);
         }
 
         function showModal() {
@@ -64,7 +64,6 @@ if (count($cidades) === 0) {
             //$('#modalAlertCadastro .modal-content').find('.js-title').text('Confirmação');
 
             modalTitle = "Confirmação";
-
 
             $('#modalAlertCadastro .modal-content').find('.btn').val('next');
             $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("Confirmar"); ?>');
@@ -104,7 +103,6 @@ if (count($cidades) === 0) {
             $('.close, .btn-ok').on('click', function() {
                 modal.fadeOut('slow');
             });
-
         }
 
         function showModalMsg(title, message) {
@@ -113,8 +111,10 @@ if (count($cidades) === 0) {
 
             $('#modalAlertCadastro .modal-content').find('.js-title').text(title);
 
-            $('#modalAlertCadastro .modal-content').find('.btn').val('close');
-            $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("OK"); ?>');
+            if(title != "Confirmação") {
+                $('#modalAlertCadastro .modal-content').find('.btn').val('close');
+                $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("OK"); ?>');
+            } 
 
 
             text.innerHTML = message;
