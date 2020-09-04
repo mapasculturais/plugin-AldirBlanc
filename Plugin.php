@@ -71,10 +71,6 @@ class Plugin extends \MapasCulturais\Plugin
             $this->part('aldirblanc/home-search');
         });
 
-        $app->hook("GET(aldirblanc.<<*>>):before", function () use($plugin) {
-            $plugin->registerAssets();
-        });
-
         /**
          * modifica o template do autenticador quando o redirect url for para o plugin aldir blanc
          */
