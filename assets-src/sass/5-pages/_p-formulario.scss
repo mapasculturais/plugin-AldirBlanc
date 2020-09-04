@@ -2,8 +2,13 @@
 #editable-entity{
     border-left: none!important;
     background: transparent!important;
-    margin-top: 67px;
+    margin: 0 !important;
     box-shadow:none;
+
+    .alert {
+        margin-top: 50px;
+        margin-bottom: -50px;
+    }
 }
 
 article.registration {
