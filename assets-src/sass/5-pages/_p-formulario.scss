@@ -62,7 +62,7 @@ article.registration {
                 }
 
                 div.invalidField {
-                    input {
+                    input, select, textarea {
                         border: 1px solid #C60931;
                         border-radius: 2px;
                         background-color: rgba(198,9,49,0.15);
