@@ -35,7 +35,7 @@ $_params = [
 
         <?php $this->applyTemplateHook('form', 'end'); ?>
         <p class="registration-help"><?php \MapasCulturais\i::_e("Certifique-se que você preencheu as informações corretamente antes de enviar sua inscrição."); ?> <strong><?php \MapasCulturais\i::_e("Depois de enviada, não será mais possível editá-la."); ?></strong></p>
-        <a class="btn btn-confirmar" ng-click="sendRegistration()" rel='noopener noreferrer'><?php \MapasCulturais\i::_e("Confirmar envio"); ?></a>
+        <a class="btn btn-confirmar" ng-click="sendRegistration(false)" rel='noopener noreferrer'><?php \MapasCulturais\i::_e("Confirmar envio"); ?></a>
         <a href="<?= $this->controller->createUrl('formulario', [$entity->id]) ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Editar formulário"); ?></a>
 
     </article>
