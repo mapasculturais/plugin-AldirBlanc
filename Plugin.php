@@ -17,16 +17,8 @@ class Plugin extends \MapasCulturais\Plugin
             $config = App::i()->view->subsite->aldir_blanc_config;
         }
         $config += [
-<<<<<<< HEAD
-            'logotipo_central' => env('AB_LOGOTIPO_CENTRAL',''),
-            'logotipo_instituicao' => env('AB_LOGOTIPO_INSTITUICAO',''),
-=======
-          
-            'inciso1_enabled' => true,
-            'inciso2_enabled' => true,
             'logotipo_central' => env('AB_LOGOTIPO_CENTRAL','https://mapacultural.pa.gov.br/assets/mapacultural.pa.gov.br/img/logo-aldir-para.png'),
             'logotipo_instituicao' => env('AB_LOGOTIPO_INSTITUICAO','https://mapacultural.pa.gov.br/assets/mapacultural.pa.gov.br/img/secult-para.png'),
->>>>>>> b10f376afe31ad638c9ca3fbd12a2a875d3209b8
             'inciso1_enabled' => env('AB_INCISO1_ENABLE',true),
             'inciso2_enabled' => env('AB_INCISO2_ENABLE',true),
             'inciso1_opportunity_id' => null,
