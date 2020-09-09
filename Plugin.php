@@ -25,10 +25,10 @@ class Plugin extends \MapasCulturais\Plugin
             'inciso1_limite' => 1,
             'inciso2_limite' => 1,
             'inciso2_categories' => [
-                'espaco-formalizado' => 'Espaço formalizado',
-                'espaco-nao-formalizado' => 'Espaço não formalizado',
-                'coletivo-formalizado' => 'Coletivo formalizado',
-                'coletivo-nao-formalizado' => 'Coletivo não formalizado'
+                'espaco-formalizado' => 'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
+                'espaco-nao-formalizado' => 'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
+                'coletivo-formalizado' => 'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
+                'coletivo-nao-formalizado' => 'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO'
             ],
             'msg_inciso1_disabled' => 'Em breve!',
             'msg_inciso2_disabled' => 'A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!',
