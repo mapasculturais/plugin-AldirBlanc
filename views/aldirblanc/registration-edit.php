@@ -1,4 +1,7 @@
 <?php
+
+use AldirBlanc\Controllers\AldirBlanc;
+
 $action = preg_replace("#^(\w+/)#", "", $this->template);
 
 $this->bodyProperties['ng-app'] = "entity.app";
@@ -23,6 +26,11 @@ $_params = [
     'opportunity' => $entity->opportunity
 ];
 
+
+$plugin = \MapasCulturais\App::i()->plugins['AldirBlanc'];
+if(false) $plugin = new \AldirBlanc\Plugin;
+
+$inciso2_categories = $plugin->config['inciso2_categories'];
 ?>
 
 <div id="editable-entity" class="clearfix sombra" >
@@ -32,12 +40,20 @@ $_params = [
             <h1> Solicitação de trabalhadora ou trabalhador da cultura </h1>
         <?php else: ?> 
             <h1> Espaços e organizações culturais </h1>
+            <h2 class="category"><?php echo $entity->category ?></h2>
+            <?php if ($entity->category == $inciso2_categories['espaco-formalizado']): ?>
+
+            <?php elseif ($entity->category == $inciso2_categories['espaco-nao-formalizado']): ?>
+
+            <?php elseif ($entity->category == $inciso2_categories['coletivo-formalizado']): ?>
+
+            <?php elseif ($entity->category == $inciso2_categories['coletivo-nao-formalizado']): ?>
+                
+            <?php endif; ?>
         <?php endif; ?> 
         <?php $this->applyTemplateHook('form','begin'); ?>
         
         <?php $this->part('singles/registration-edit--header', $_params) ?>
-        
-        <?php $this->part('singles/registration-edit--categories', $_params) ?>
         
         <?php $this->part('singles/registration-edit--fields', $_params) ?>
 
