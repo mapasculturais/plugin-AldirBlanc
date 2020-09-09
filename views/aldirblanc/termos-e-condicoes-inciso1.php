@@ -1,4 +1,7 @@
 <?php
+    use MapasCulturais\App;
+    $app = App::i();
+    
     $this->jsObject['registrationId'] = $registration_id;
 
 ?>
@@ -138,7 +141,7 @@
                 <input type="checkbox" class="term--input" id="twelve" />
                 <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Concordo com a inclusão das informações por mim declaradas neste
-                    formulário na base de dados do Mapa Cultural do Pará.");?>
+                    formulário na base de dados na plataforma ").$app->view->dict('site: name').".";?>
             </span>
             </label>
         </div>

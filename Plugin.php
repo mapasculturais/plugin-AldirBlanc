@@ -17,24 +17,27 @@ class Plugin extends \MapasCulturais\Plugin
             $config = App::i()->view->subsite->aldir_blanc_config;
         }
         $config += [
-            'logotipo_central' => 'https://mapacultural.pa.gov.br/assets/mapacultural.pa.gov.br/img/logo-aldir-para.png',
-            'logotipo_instituicao' => 'https://mapacultural.pa.gov.br/assets/mapacultural.pa.gov.br/img/secult-para.png',
+          
             'inciso1_enabled' => true,
             'inciso2_enabled' => true,
+            'logotipo_central' => env('AB_LOGOTIPO_CENTRAL','https://mapacultural.pa.gov.br/assets/mapacultural.pa.gov.br/img/logo-aldir-para.png'),
+            'logotipo_instituicao' => env('AB_LOGOTIPO_INSTITUICAO','https://mapacultural.pa.gov.br/assets/mapacultural.pa.gov.br/img/secult-para.png'),
+            'inciso1_enabled' => env('AB_INCISO1_ENABLE',true),
+            'inciso2_enabled' => env('AB_INCISO2_ENABLE',true),
             'inciso1_opportunity_id' => null,
             'inciso2_opportunity_ids' => [],
-            'inciso1_limite' => 1,
-            'inciso2_limite' => 1,
+            'inciso1_limite' => env('AB_INCISO1_LIMITE',1),
+            'inciso2_limite' => env('AB_INCISO2_LIMITE',1),
             'inciso2_categories' => [
                 'espaco-formalizado' => 'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
                 'espaco-nao-formalizado' => 'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
                 'coletivo-formalizado' => 'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
                 'coletivo-nao-formalizado' => 'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO'
             ],
-            'msg_inciso1_disabled' => 'Em breve!',
-            'msg_inciso2_disabled' => 'A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!',
-            'link_suporte' => 'https://bit.ly/3hOQfBz',
-            'privacidade_termos_condicoes' =>'https://mapacultural.pa.gov.br/files/subsite/2/termos-e-politica.pdf',
+            'msg_inciso1_disabled' => env('AB_INCISO1_DISABLE_MESSAGE','Em breve!'),
+            'msg_inciso2_disabled' => env('AB_INCISO2_DISABLE_MESSAGE','A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!'),
+            'link_suporte' => env('AB_LINK_SUPORTE','https://bit.ly/3hOQfBz'),
+            'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS','https://mapacultural.pa.gov.br/files/subsite/2/termos-e-politica.pdf'),
         ];
        
         parent::__construct($config);
