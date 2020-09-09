@@ -61,6 +61,42 @@ article.registration {
                     }
                 }
 
+                &.attachment-list-item-type-checkbox  {
+                    label  {
+                        display: grid;
+                        grid-template-columns: 25px auto;
+
+                        input {
+                            width: auto;
+                            margin-top: 5px;
+                        }
+                    }
+
+                    > div  {
+                        display: flex;
+                        flex-direction: column-reverse;
+                        align-items: flex-end;
+
+                        span:last-child {
+                            color: #C60931;
+                            font-size: 11px;
+                            letter-spacing: 0;
+                            line-height: 15px;
+                            text-transform: lowercase;
+                            margin-bottom: 15px;
+                        }
+                    }
+
+                    div.invalidField {
+                        border: 2px solid rgba(198, 9, 49, 1);
+                        padding: 14px;
+                        border-radius: 10px;
+                        background-color: rgba(198, 9, 49, 0.15);
+                        
+                    }
+                    
+                }
+
                 div.invalidField {
                     input, select, textarea {
                         border: 1px solid #C60931;
@@ -260,6 +296,10 @@ article.registration {
 
                 input {
                     width: 100%;
+
+                    &[type='checkbox'] {
+                        width: auto;
+                    }
                 }
             }
             
