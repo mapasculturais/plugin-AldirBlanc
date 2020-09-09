@@ -138,7 +138,7 @@
                 <input type="checkbox" class="term--input" id="twelve" />
                 <span class="termos--text">
                 <?php \MapasCulturais\i::_e("Concordo com a inclusão das informações por mim declaradas neste
-                    formulário na base de dados do Mapa Cultural do Pará.");?>
+                    formulário na base de dados desta plataforma.");?>
             </span>
             </label>
         </div>
