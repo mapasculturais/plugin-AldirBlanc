@@ -7973,6 +7973,11 @@ section.cadastro .questions--nav .modal .modal-content .btn-ok,
   box-shadow: none;
 }
 
+h2.category {
+  font-size: 1em;
+  text-align: center;
+}
+
 article.registration {
   background: none;
   float: none;
@@ -8243,6 +8248,10 @@ article.registration .registration-fieldset ul li .field-location section p labe
 
 article.registration .registration-fieldset ul li input {
   width: 100%;
+}
+
+article.registration .registration-fieldset ul li input[type=checkbox] {
+  width: auto;
 }
 
 .termos {

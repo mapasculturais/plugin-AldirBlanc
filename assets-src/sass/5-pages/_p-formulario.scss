@@ -6,6 +6,11 @@
     box-shadow:none;
 }
 
+h2.category {
+    font-size: 1em;
+    text-align: center;
+}
+
 article.registration {
     
     background: none;
@@ -301,6 +306,10 @@ article.registration {
 
                 input {
                     width: 100%;
+
+                    &[type='checkbox'] {
+                        width: auto;
+                    }
                 }
             }
             
