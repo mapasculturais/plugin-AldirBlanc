@@ -27,10 +27,10 @@ class Plugin extends \MapasCulturais\Plugin
             'inciso1_limite' => env('AB_INCISO1_LIMITE',1),
             'inciso2_limite' => env('AB_INCISO2_LIMITE',1),
             'inciso2_categories' => [
-                'espaco-formalizado' => 'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                'espaco-nao-formalizado' => 'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                'coletivo-formalizado' => 'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                'coletivo-nao-formalizado' => 'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO'
+                'espaco-formalizado' => 'COM CNPJ E ESPAÇO FÍSICO',
+                'espaco-nao-formalizado' => 'COM CNPJ E SEM ESPAÇO FÍSICO',
+                'coletivo-formalizado' => 'COM CPF E ESPAÇO FÍSICO',
+                'coletivo-nao-formalizado' => 'COM CPF E SEM ESPAÇO FÍSICO',
             ],
             'msg_inciso1_disabled' => env('AB_INCISO1_DISABLE_MESSAGE','Em breve!'),
             'msg_inciso2_disabled' => env('AB_INCISO2_DISABLE_MESSAGE','A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!'),
