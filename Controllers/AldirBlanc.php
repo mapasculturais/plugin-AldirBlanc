@@ -608,4 +608,27 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->data['entity'] = $registration;
         $this->render('registration-confirmacao', $this->data);
     }
+
+
+    function GET_generateOpportunities() {
+        $this->requireAuthentication();
+
+        $app = App::i();
+
+        if(!$app->user->is('admin')) {
+            $this->errorJson('Permissao negada', 403);
+        }
+
+        $plugin = $app->plugins['AldirBlanc'];
+
+        try {
+            $plugin->createOpportunityInciso1();
+            $plugin->createOpportunityInciso2();
+
+        } catch (\Exception $e) {
+            $this->errorJson($e->getMessage(), 400);
+        }
+
+        $this->json("Sucesso");
+    }
 }

@@ -24,6 +24,9 @@ class Plugin extends \MapasCulturais\Plugin
             'inciso2_enabled' => env('AB_INCISO2_ENABLE',true),
             'inciso1_opportunity_id' => null,
             'inciso2_opportunity_ids' => [],
+            'inciso1' => [],
+            'inciso2' => [],
+            'inciso2_default' => [],
             'inciso1_limite' => env('AB_INCISO1_LIMITE',1),
             'inciso2_limite' => env('AB_INCISO2_LIMITE',1),
             'inciso2_categories' => [
@@ -44,14 +47,23 @@ class Plugin extends \MapasCulturais\Plugin
     }
 
     public function configOpportunitiesIds($config) {
+        
+        if(!isset($config['project_id'])) {
+            return $config;
+        }
+
         $project = App::i()->repo('Project')->find($config['project_id']);
+
+        if(!$project) {
+            return $config;
+        }
 
         $opportunityInciso1 = App::i()->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1);
 
         if(!empty($opportunityInciso1)) {
             $config['inciso1_opportunity_id'] = $opportunityInciso1[0]->id;
         }
-        
+
         $opportunitiesIds = [];
         foreach($config['inciso2'] as $value) {
             $opportunity = App::i()->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $value['city']);
@@ -62,7 +74,8 @@ class Plugin extends \MapasCulturais\Plugin
         }
 
         if(!empty($opportunitiesIds)) {
-            $config['inciso2_opportunity_ids'] = $opportunitiesIds;
+            // $config['inciso2_opportunity_ids'] = $opportunitiesIds;
+            $config['inciso2_opportunity_ids'] = array_merge( $config['inciso2_opportunity_ids'], $opportunitiesIds);
         }
         
         return $config;
@@ -91,7 +104,7 @@ class Plugin extends \MapasCulturais\Plugin
 
             echo
             '
-            <a class="btn btn-primary" href="/auth/createincisos" target="_blank">
+            <a class="btn btn-primary" href="/aldirblanc/generateOpportunities" target="_blank">
                 Criar oportunidades do aldir blanc
             </a>
 
@@ -151,25 +164,7 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
 
-        $app->hook('GET(auth.createincisos)', function () use($plugin){
-            try {
-                // $plugin->createOpportunityInciso1();
-                $plugin->createOpportunityInciso2();
-
-                $erroObj = [
-                    'result' => 'success'
-                ];
-                $plugin->json($erroObj);
-            } catch (Exception $e) {
-                $erroObj = [
-                    'result' => 'error',
-                    'msg' => $e->getMessage()
-                ];
-                $plugin->json($erroObj);
-            }
-            
-
-        });
+        
         
         
     }
@@ -210,6 +205,18 @@ class Plugin extends \MapasCulturais\Plugin
         $this->registerMetadata('MapasCulturais\Entities\Opportunity', 'aldirBlancFields', [
             'label' => i::__('Lista de ID dos campos AldirBlanc'),
             'type' => 'boolean',
+            'private' => true,
+        ]);
+
+        $this->registerMetadata('MapasCulturais\Entities\Opportunity', 'aldirblanc_inciso', [
+            'label' => i::__('Inciso do Aldirblanc'),
+            'type' => 'string',
+            'private' => true,
+        ]);
+
+        $this->registerMetadata('MapasCulturais\Entities\Opportunity', 'aldirblanc_city', [
+            'label' => i::__('Cidades do Aldirblanc'),
+            'type' => 'string',
             'private' => true,
         ]);
 
@@ -262,19 +269,17 @@ class Plugin extends \MapasCulturais\Plugin
             );
         }
 
-        $idProjectFromConfig = $this->config['project_id'] ? $this->config['project_id'] : null; 
-
-        if(!$idProjectFromConfig) {
-            throw new \Exception('Defina a configuração "project_id" no config.php["AldirBlanc"] ');
-        }
-
         //VALIDAÇÕES PARA VER SE AS CONFIG TÃO SETADAS
         $aldirblancSettings = $this->config['inciso1'] ? $this->config['inciso1'] : [];
 
         if(empty($aldirblancSettings)) {
-            throw new \Exception(
-                'Defina as configurações "registrationFrom","registrationTo","shortDescription","name","owner","avatar","seal" no config.php["AldirBlanc"]["inciso1"]'
-            );
+            return ;
+        }
+
+        $idProjectFromConfig = $this->config['project_id'] ? $this->config['project_id'] : null; 
+
+        if(!$idProjectFromConfig) {
+            throw new \Exception('Defina a configuração "project_id" no config.php["AldirBlanc"] ');
         }
 
         $project = $app->repo('Project')->find($idProjectFromConfig);
@@ -346,11 +351,13 @@ class Plugin extends \MapasCulturais\Plugin
             throw new \Exception('Defina a configuração "project_id" no config.php["AldirBlanc"] ');
         }
 
-        $inciso2Cities = $this->config['inciso2'] ? $this->config['inciso2'] : [];
+        $inciso2Cities = isset($this->config['inciso2']) ? $this->config['inciso2'] : [];
 
         if(empty($inciso2Cities)) {
             throw new \Exception('Defina a configuração "inciso2" no config.php["AldirBlanc"] ');
         }
+
+        $inciso2DefaultConfigs = isset($this->config['inciso2_default']) ? $this->config['inciso2_default'] : [];
 
         $project = $app->repo('Project')->find($idProjectFromConfig);
 
@@ -358,20 +365,39 @@ class Plugin extends \MapasCulturais\Plugin
             throw new \Exception('Id do projeto está invalido');
         }
 
+        $cityDefault = [
+           'registrationFrom' => date('Y-m-d'),
+           'registrationTo' => '2020-12-01',
+           'shortDescription' => 'DESCRIÇÃO PADRÃO',
+           'owner' => $project->owner->id,
+           'city' => 'CIDADE PADRÃO',
+           'name' => 'NOME PADRÃO',
+           'avatar' => 'avatar-aldirblanc.jpg',
+           'seal' => null,
+           'status' => 1
+        ];
+
+        
+
         //Faz um loop em todas as cidades
         foreach ($inciso2Cities as $city) {
 
-            $city = array_merge($this->config['inciso2_default'], $city);
+            $default = array_merge($cityDefault, $inciso2DefaultConfigs);
+            $city = array_merge($default, $city);
 
-            $city['registrationFrom'] = $this->checkIfIsValidDateString($city['registrationFrom']) ? $city['registrationFrom'] : date('Y-m-d');
-            $city['registrationTo'] = $this->checkIfIsValidDateString($city['registrationTo']) ? $city['registrationTo'] : '2020-12-01';
-            $city['shortDescription'] = isset($city['shortDescription']) ? $city['shortDescription'] : 'DESCRIÇÃO PADRÃO';
-            $city['owner'] = is_int($city['owner']) ? $city['owner'] : $project->owner;
-            $city['city'] = isset($city['city']) ? $city['city'] : 'NOME PADRÃO';
-            $city['avatar'] = isset($city['avatar']) ? $city['avatar'] : null;
-            $city['seal'] = isset($city['seal']) ? $city['seal'] : null;
-            $city['status'] = isset($city['status']) ? $city['status'] : 1;
+            $city['name'] = ($city['name'] === 'NOME PADRÃO') ? "Lei Aldir Blanc - Inciso II | {$city['city']}" : $city['name'];
 
+            if(isset($city['registrationTo']) ) {
+                if(! $this->checkIfIsValidDateString($city['registrationTo'])) {
+                    throw new \Exception('Campo registrationTo não é uma data valida');
+                }
+            }
+
+            if(isset($city['registrationFrom']) ) {
+                if(! $this->checkIfIsValidDateString($city['registrationFrom'])) {
+                    throw new \Exception('Campo registrationFrom não é uma data valida');
+                }
+            }
 
             $owner = $app->repo("Agent")->find($city['owner']);
 
@@ -429,6 +455,17 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->disableAccessControl();
 
+        $opportunityProject = $project;
+
+        if($inciso == 2) {
+            $opportunityProject = new \MapasCulturais\Entities\Project();
+            $opportunityProject->parent = $project;
+            $opportunityProject->name = $params['name'];
+            $opportunityProject->status = 1;
+            $opportunityProject->type = $project->type->id;
+            $opportunityProject->save(true);
+        }
+
         $opportunity = new \MapasCulturais\Entities\ProjectOpportunity();
         $opportunity->name = $params['name'];
         $opportunity->status = $params['status'];
@@ -436,35 +473,24 @@ class Plugin extends \MapasCulturais\Plugin
         $opportunity->registrationFrom = new \Datetime($params['registrationFrom']);
         $opportunity->registrationTo = new \DateTime( $params['registrationTo'] );
         $opportunity->owner = $params['owner'];
-        $opportunity->ownerEntity = $project;
+        $opportunity->ownerEntity = $opportunityProject;
         $opportunity->type = 9;
+        $opportunity->aldirblanc_inciso = $inciso;
+        if($inciso == 2) {
+            $opportunity->aldirblanc_city = $params['city'];
+        }
         
+        $opportunity->save();
+
         $evaluationMethodConfiguration = new \MapasCulturais\Entities\EvaluationMethodConfiguration();
         $evaluationMethodConfiguration->type = "simple";
         $evaluationMethodConfiguration->opportunity = $opportunity;
 
-        $opportunityMeta = new \MapasCulturais\Entities\OpportunityMeta();
-        $opportunityMeta->owner = $opportunity;
-        $opportunityMeta->key = 'aldirblanc_inciso';
-        $opportunityMeta->value = $inciso;
-
-        $project->_relatedOpportunities = [$opportunity];
-
-        $opportunity->save();
+        $opportunityProject->_relatedOpportunities = [$opportunity];
 
         $evaluationMethodConfiguration->save();
 
-        $opportunityMeta->save();
-
-        if($inciso == 2) {
-            $opportunityMetaCity = new \MapasCulturais\Entities\OpportunityMeta();
-            $opportunityMetaCity->owner = $opportunity;
-            $opportunityMetaCity->key = 'aldirblanc_city';
-            $opportunityMetaCity->value = $params['city'];
-            $opportunityMetaCity->save();
-        }
-
-        $project->save();
+        $opportunityProject->save();
 
         $app->em->flush();
 
