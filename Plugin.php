@@ -84,6 +84,22 @@ class Plugin extends \MapasCulturais\Plugin
         
         $plugin = $this;
 
+        $app->hook('template(panel.opportunities.panel-header):end', function () use($app){
+
+            if(!$app->user->is('admin')) {
+                return;
+            }
+
+            echo
+            '
+            <a class="btn btn-primary" href="/auth/createincisos" target="_blank">
+                Criar oportunidades do aldir blanc
+            </a>
+
+            
+            ';
+        });
+
         // add hooks
         $app->hook('mapasculturais.styles', function () use ($app) {
             $app->view->printStyles('aldirblanc');
@@ -317,7 +333,7 @@ class Plugin extends \MapasCulturais\Plugin
     }
 
     public function createOpportunityInciso2() {
-         $app = App::i();
+        $app = App::i();
 
         if($app->user->is('guest')) {
             throw new \Exception(
@@ -346,7 +362,7 @@ class Plugin extends \MapasCulturais\Plugin
         //Faz um loop em todas as cidades
         foreach ($inciso2Cities as $city) {
 
-            $city = $this->config['inciso2_default'] + $city;
+            $city = array_merge($this->config['inciso2_default'], $city);
 
             $city['registrationFrom'] = $this->checkIfIsValidDateString($city['registrationFrom']) ? $city['registrationFrom'] : date('Y-m-d');
             $city['registrationTo'] = $this->checkIfIsValidDateString($city['registrationTo']) ? $city['registrationTo'] : '2020-12-01';
