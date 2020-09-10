@@ -45,6 +45,10 @@ article.registration {
                             letter-spacing: 0;
                             line-height: 15px;
                             text-transform: lowercase;
+
+                            &:before {
+                                content: "*"
+                            }
                         }
                     }
 
@@ -91,7 +95,7 @@ article.registration {
                         border: 2px solid rgba(198, 9, 49, 1);
                         padding: 14px;
                         border-radius: 10px;
-                        background-color: rgba(198, 9, 49, 0.15);
+                        background-color: rgba(198, 9, 49, 0.02);
                         
                     }
                     
@@ -101,7 +105,7 @@ article.registration {
                     input, select, textarea {
                         border: 1px solid #C60931;
                         border-radius: 2px;
-                        background-color: rgba(198,9,49,0.15);
+                        background-color: rgba(198, 9, 49, 0.02);
                     }
                 }
             }
@@ -203,6 +207,7 @@ article.registration {
         }
 
         .alert.danger {
+            display: none;
             background: none;
             border: 0;
             margin-bottom: 0;
