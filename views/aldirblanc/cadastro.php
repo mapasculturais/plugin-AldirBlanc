@@ -442,7 +442,7 @@ if (count($cidades) === 0) {
             <div id="select-cidade" class="js-questions-tab questions--tab lab-form-answer inactive">
                 <i class="questions--icon fas fa-university"></i>
                 <h4 class="questions--title"><?php i::_e('Selecione a cidade') ?></h4>
-                <p class="questions--summary"><?php i::_e('Indique a cidade onde o beneficiário do subsídio está instalado ou tem desenvolvido, atualmente, suas atividades culturais.') ?></p>
+                <p class="questions--summary"><?php i::_e('Indique a cidade onde o beneficiário do subsídio está instalado ou tem desenvolvido, atualmente, suas atividades culturais. Se sua cidade não constar na lista, é porque ela está operando a Lei Aldir Blanc por outro sistema. ') ?></p>
                 <?php $this->part('aldirblanc/cadastro/select-cidade', ['cidades' => $cidades]) ?>
                 <div class="questions--nav">
                     <button class="btn secondary btn-back js-back"><?php i::_e('Voltar') ?></button>
