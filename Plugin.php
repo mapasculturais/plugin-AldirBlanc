@@ -270,19 +270,17 @@ class Plugin extends \MapasCulturais\Plugin
             );
         }
 
-        $idProjectFromConfig = $this->config['project_id'] ? $this->config['project_id'] : null; 
-
-        if(!$idProjectFromConfig) {
-            throw new \Exception('Defina a configuração "project_id" no config.php["AldirBlanc"] ');
-        }
-
         //VALIDAÇÕES PARA VER SE AS CONFIG TÃO SETADAS
         $aldirblancSettings = $this->config['inciso1'] ? $this->config['inciso1'] : [];
 
         if(empty($aldirblancSettings)) {
-            throw new \Exception(
-                'Defina as configurações "registrationFrom","registrationTo","shortDescription","name","owner","avatar","seal" no config.php["AldirBlanc"]["inciso1"]'
-            );
+            return ;
+        }
+
+        $idProjectFromConfig = $this->config['project_id'] ? $this->config['project_id'] : null; 
+
+        if(!$idProjectFromConfig) {
+            throw new \Exception('Defina a configuração "project_id" no config.php["AldirBlanc"] ');
         }
 
         $project = $app->repo('Project')->find($idProjectFromConfig);
