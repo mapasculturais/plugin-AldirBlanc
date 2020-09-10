@@ -11,7 +11,9 @@ $logotipo_central = isset($aldirBlancController->config['logotipo_central']) ? $
 <?php if ($logotipo_instituicao){
     ?>
    <div class="logo-state">
-        <img src="<?= $logotipo_instituicao ?>">
+        <a href="http://www.secult.pa.gov.br/" target="_blank">
+            <img src="<?= $logotipo_instituicao ?>">
+        </a>
     </div>
     <?php
 }?>
@@ -19,7 +21,9 @@ $logotipo_central = isset($aldirBlancController->config['logotipo_central']) ? $
 <?php if ($logotipo_central){
     ?>
     <div class="logo">
-      <img src="<?= $logotipo_central ?>">
+        <a href="https://leialdirblanc.pa.gov.br/" target="_blank">
+            <img src="<?= $logotipo_central ?>">
+        </a>
     </div>
     <?php
 }?>

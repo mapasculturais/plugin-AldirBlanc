@@ -20,7 +20,9 @@ $logotipo = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldi
     <?php if ($logotipo){
         ?>
        <div class="logo-state">
-            <img src="<?= $logotipo ?>">
+            <a href="http://www.secult.pa.gov.br/" target="_blank">
+                <img src="<?= $logotipo ?>">
+            </a>
         </div>
         <?php
     }?>
