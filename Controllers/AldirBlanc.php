@@ -620,14 +620,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
 
         $plugin = $app->plugins['AldirBlanc'];
-
-        try {
-            $plugin->createOpportunityInciso1();
-            $plugin->createOpportunityInciso2();
-
-        } catch (\Exception $e) {
-            $this->errorJson($e->getMessage(), 400);
-        }
+        $plugin->createOpportunityInciso1();
+        $plugin->createOpportunityInciso2();
 
         $this->json("Sucesso");
     }
