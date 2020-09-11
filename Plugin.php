@@ -23,6 +23,7 @@ class Plugin extends \MapasCulturais\Plugin
             'logotipo_instituicao' => env('AB_LOGOTIPO_INSTITUICAO',''),
             'inciso1_enabled' => env('AB_INCISO1_ENABLE',true),
             'inciso2_enabled' => env('AB_INCISO2_ENABLE',true),
+            'project_id' => env('AB_INCISO2_PROJECT_ID',null),
             'inciso1_opportunity_id' => null,
             'inciso2_opportunity_ids' => [],
             'inciso1' => (array) json_decode(env('AB_INCISO1', '[]')),
@@ -49,7 +50,7 @@ class Plugin extends \MapasCulturais\Plugin
 
     public function configOpportunitiesIds($config) {
         
-        if(!isset($config['project_id'])) {
+        if(empty($config['project_id'])) {
             return $config;
         }
 
@@ -76,7 +77,6 @@ class Plugin extends \MapasCulturais\Plugin
         }
 
         if(!empty($opportunitiesIds)) {
-            // $config['inciso2_opportunity_ids'] = $opportunitiesIds;
             $config['inciso2_opportunity_ids'] = array_merge( $config['inciso2_opportunity_ids'], $opportunitiesIds);
         }
         
