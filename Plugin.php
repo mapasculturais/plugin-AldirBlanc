@@ -532,7 +532,6 @@ class Plugin extends \MapasCulturais\Plugin
     //importa de um .txt dos campos de cadastro que cada opportunidade deve ter
     function importFields($opportunityId, $inciso) {
         $app = App::i();
-        $app->disableAccessControl();
 
         $fieldIdList= [];
 
@@ -546,103 +545,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         $opportunity =  $app->repo("Opportunity")->find($opportunity_id);
 
-
-        if (!is_null($importSource)) {
-
-            // Fields
-            foreach($importSource->fields as $field) {
-
-                $newField = new \MapasCulturais\Entities\RegistrationFieldConfiguration;
-                $newField->owner = $opportunity;
-                $newField->title = $field->title;
-                $newField->description = $field->description;
-                $newField->maxSize = $field->maxSize;
-                $newField->fieldType = $field->fieldType;
-                $newField->required = $field->required;
-                $newField->categories = $field->categories;
-                $newField->fieldOptions = $field->fieldOptions;
-                $newField->displayOrder = $field->displayOrder;
-                
-                $app->em->persist($newField);
-
-                $newField->save();
-
-                $fieldIdList[] = $newField->id;
-
-            }
-
-            //Files (attachments)
-            foreach($importSource->files as $file) {
-
-                $newFile = new \MapasCulturais\Entities\RegistrationFileConfiguration;
-
-                $newFile->owner = $opportunity;
-                $newFile->title = $file->title;
-                $newFile->description = $file->description;
-                $newFile->required = $file->required;
-                $newFile->categories = $file->categories;
-                $newFile->displayOrder = $file->displayOrder;
-                $newFile->aldirBlanc = true;
-
-                $app->em->persist($newFile);
-
-                $newFile->save();
-
-                $fieldIdList[] = $newFile->id;
-
-                if (is_object($file->template)) {
-
-                    $originFile = $app->repo("RegistrationFileConfigurationFile")->find($file->template->id);
-
-                    if (is_object($originFile)) { // se nao achamos o arquivo, talvez este campo tenha sido apagado
-
-                        $tmp_file = sys_get_temp_dir() . '/' . $file->template->name;
-
-                        if (file_exists($originFile->path)) {
-                            copy($originFile->path, $tmp_file);
-
-                            $newTemplateFile = array(
-                                'name' => $file->template->name,
-                                'type' => $file->template->mimeType,
-                                'tmp_name' => $tmp_file,
-                                'error' => 0,
-                                'size' => filesize($tmp_file)
-                            );
-
-                            $newTemplate = new \MapasCulturais\Entities\RegistrationFileConfigurationFile($newTemplateFile);
-
-                            $newTemplate->owner = $newFile;
-                            $newTemplate->description = $file->template->description;
-                            $newTemplate->group = $file->template->group;
-
-                            $app->em->persist($newTemplate);
-
-                            $newTemplate->save();
-                        }
-
-                    }
-
-                }
-            }
-
-            // Metadata
-            foreach($importSource->meta as $key => $value) {
-                $opportunity->$key = $value;
-            }
-
-            $opportunity->setMetadata('aldirBlancFields', json_encode($fieldIdList));
-
-
-
-            $opportunity->save(true);
-
-            $app->em->flush();
-
-        }
-
-
-
-        $app->enableAccessControl();
+        $opportunity->importFields($importSource);
 
     }
 
