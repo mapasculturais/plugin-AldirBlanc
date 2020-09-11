@@ -67,6 +67,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         $opportunitiesIds = [];
         foreach($config['inciso2'] as $value) {
+            $value = (array) $value;
             $opportunity = App::i()->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $value['city']);
             if(!empty($opportunity)) {
                 $city = $value['city'];
@@ -352,7 +353,7 @@ class Plugin extends \MapasCulturais\Plugin
             throw new \Exception('Defina a configuração "project_id" no config.php["AldirBlanc"] ');
         }
 
-        $inciso2Cities = isset($this->config['inciso2']) ? $this->config['inciso2'] : [];
+        $inciso2Cities = $this->config['inciso2'];
 
         if(empty($inciso2Cities)) {
             throw new \Exception('Defina a configuração "inciso2" no config.php["AldirBlanc"] ');
