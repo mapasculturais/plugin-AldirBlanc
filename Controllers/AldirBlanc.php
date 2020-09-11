@@ -618,7 +618,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if(!$app->user->is('admin')) {
             $this->errorJson('Permissao negada', 403);
         }
-
+        
+        set_time_limit(0);
+        
         $plugin = $app->plugins['AldirBlanc'];
 
         try {
