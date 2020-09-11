@@ -422,7 +422,7 @@ if (count($cidades) === 0) {
                 </label>
                 <label class="informative-box">
                     <div class="informative-box--title">
-                        <h2 class="js-text"><?php i::_e('Espaço artístico e cultural mantido por coletivo ou grupo cultural (sem CNPJ) ou por pessoa física (CPF).') ?></h2>
+                        <h2 class="js-text"><?php i::_e('Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico') ?></h2>
                         <i class="fas fa-minus"></i>
                         <!-- <i class="far fa-check-circle"></i> -->
                     </div>
