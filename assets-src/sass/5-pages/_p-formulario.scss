@@ -2,8 +2,18 @@
 #editable-entity{
     border-left: none!important;
     background: transparent!important;
-    margin-top: 67px;
+    margin: 0 !important;
     box-shadow:none;
+
+    .alert {
+        margin-top: 50px;
+        margin-bottom: -50px;
+    }
+}
+
+h2.category {
+    font-size: 1em;
+    text-align: center;
 }
 
 h2.category {
@@ -212,7 +222,7 @@ article.registration {
         }
 
         .alert.danger {
-            display: none;
+            display: none!important;
             background: none;
             border: 0;
             margin-bottom: 0;
@@ -261,6 +271,10 @@ article.registration {
                     p {
                         display: grid;
                         grid-template-columns: repeat(2, 1fr);
+
+                        @include tablet {
+                            grid-template-columns: auto;
+                        }
 
                         label  {
                             display: flex;
