@@ -8202,7 +8202,7 @@ article.registration .registration-fieldset .attachment-list .attachment-list-it
 }
 
 article.registration .registration-fieldset .alert.danger {
-  display: none;
+  display: none !important;
   background: none;
   border: 0;
   margin-bottom: 0;
@@ -8248,6 +8248,12 @@ article.registration .registration-fieldset ul li textarea {
 article.registration .registration-fieldset ul li.attachment-list-item-type-checkboxes p {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 1024px) {
+  article.registration .registration-fieldset ul li.attachment-list-item-type-checkboxes p {
+    grid-template-columns: auto;
+  }
 }
 
 article.registration .registration-fieldset ul li.attachment-list-item-type-checkboxes p label {

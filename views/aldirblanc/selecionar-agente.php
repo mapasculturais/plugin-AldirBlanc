@@ -5,7 +5,10 @@
 <section class="agentes">
     <header class="agentes--head">
         <i class="fas fa-users"></i>
-        <h3 class="agentes--title"><?php \MapasCulturais\i::_e("Selecione um agente para acompanhar a solicitação");?></h3>
+        <?php 
+        $texto =  !isset($agentOwner) && $inciso == 2 ? 'Selecione o responsável' : 'Selecione o beneficiário';
+        ?>
+        <h3 class="agentes--title"><?php \MapasCulturais\i::_e($texto);?></h3>
         <p class="agentes--summary"><?php \MapasCulturais\i::_e("O benefício é destinado aos trabalhadores e trabalhadoras da cultura que tiveram suas atividades interrompidas e se enquadram ao disposto no Art. 6º - Lei 14.017/2020.");?></p>
     </header>
     <div class="agentes--wrapper">
