@@ -71,5 +71,3 @@ $inciso2_categories = $plugin->config['inciso2_categories'];
         <?php $this->applyTemplateHook('form','end'); ?>
 
 </article>
-<?php $this->part('singles/registration--sidebar--left', $_params) ?>
-<?php $this->part('singles/registration--sidebar--right', $_params) ?>
