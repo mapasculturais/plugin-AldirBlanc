@@ -50,7 +50,9 @@ class Plugin extends \MapasCulturais\Plugin
             parent::__construct($cached);
         } else {
             $config = $this->configOpportunitiesIds($config);
-            $app->cache->save($cache_id, $config, 3600);
+            if(!empty($config['inciso2_opportunity_ids'])){
+                $app->cache->save($cache_id, $config, 3600);
+            }
             parent::__construct($config);
         }
     }
