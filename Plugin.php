@@ -460,11 +460,14 @@ class Plugin extends \MapasCulturais\Plugin
             throw new \Exception('Arquivo para importar campos de incriçao nao existe');
         }
 
+        $app->log->debug("========================");
+
         $app->disableAccessControl();
 
         $opportunityProject = $project;
 
         if($inciso == 2) {
+            $app->log->debug( "Criando projeto {$params['name']}");
             $opportunityProject = new \MapasCulturais\Entities\Project();
             $opportunityProject->parent = $project;
             $opportunityProject->name = $params['name'];
@@ -480,7 +483,7 @@ class Plugin extends \MapasCulturais\Plugin
                 $this->setAvatarToEntity($params['avatar'] , $opportunityProject);
             }
         }
-
+        $app->log->debug( "Criando oportunidade {$params['name']}");
         $opportunity = new \MapasCulturais\Entities\ProjectOpportunity();
         $opportunity->name = $params['name'];
         $opportunity->status = $params['status'];
@@ -509,6 +512,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->em->flush();
 
+        $app->log->debug( "Importando campos da oportunidade {$params['name']}");
         $this->importFields($opportunity->id, $inciso);
 
         if($inciso == 2) {
@@ -530,6 +534,8 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->enableAccessControl();
         $app->em->flush();
+
+        $app->log->debug( "finalizada oportunidade {$params['name']}\n\n\n");
     }
 
     //importa de um .txt dos campos de cadastro que cada opportunidade deve ter
