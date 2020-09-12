@@ -195,7 +195,13 @@ class Plugin extends \MapasCulturais\Plugin
 
         $this->registerMetadata('MapasCulturais\Entities\Opportunity', 'aldirBlancFields', [
             'label' => i::__('Lista de ID dos campos AldirBlanc'),
-            'type' => 'boolean',
+            'type' => 'array',
+            'serialize' => function($val) {
+                return json_encode($val);
+            },
+            'unserialize' => function($val) {
+                return json_decode($val);
+            },
             'private' => true,
         ]);
 
@@ -536,6 +542,21 @@ class Plugin extends \MapasCulturais\Plugin
 
         $opportunity->importFields($importSource);
 
+        // pegar as fields e definir o metadado para bloquear a edição
+        $opportunity->refresh();
+
+        $field_ids = [];
+        foreach ($opportunity->registrationFieldConfigurations as $field) {
+            $field_ids[] = "field_{$field->id}";
+        }
+        
+        foreach ($opportunity->registrationFileConfigurations as $file) {
+            $field_ids[] = "file_{$file->id}";
+        }
+        
+        $opportunity->aldirBlancFields = $field_ids;
+
+        $opportunity->save();
     }
 
     function setAvatarToEntity($avatarName, \MapasCulturais\Entity $entity) {
