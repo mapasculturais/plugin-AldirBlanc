@@ -13,9 +13,10 @@ class Plugin extends \MapasCulturais\Plugin
 {
     function __construct(array $config = [])
     {
+        $app = App::i();
         // se for multisite pega do subsite_meta
-        if (App::i()->view->subsite){
-            $config = App::i()->view->subsite->aldir_blanc_config;
+        if ($app->view->subsite){
+            $config = $app->view->subsite->aldir_blanc_config;
         }
 
         $config += [
@@ -43,9 +44,15 @@ class Plugin extends \MapasCulturais\Plugin
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS',null),
         ];
 
-        $config = $this->configOpportunitiesIds($config);
+        $cache_id = __METHOD__ . ':' . 'config';
 
-        parent::__construct($config);
+        if ($cached = $app->cache->fetch($cache_id)) {
+            parent::__construct($cached);
+        } else {
+            $config = $this->configOpportunitiesIds($config);
+            $app->cache->save($cache_id, $config, 3600);
+            parent::__construct($config);
+        }
     }
 
     public function configOpportunitiesIds($config) {
