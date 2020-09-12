@@ -54,13 +54,15 @@ class Plugin extends \MapasCulturais\Plugin
             return $config;
         }
 
-        $project = App::i()->repo('Project')->find($config['project_id']);
+        $app = App::i();
+
+        $project = $app->repo('Project')->find($config['project_id']);
 
         if(!$project) {
             return $config;
         }
 
-        $opportunityInciso1 = App::i()->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1);
+        $opportunityInciso1 = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1);
 
         if(!empty($opportunityInciso1)) {
             $config['inciso1_opportunity_id'] = $opportunityInciso1[0]->id;
@@ -69,7 +71,7 @@ class Plugin extends \MapasCulturais\Plugin
         $opportunitiesIds = [];
         foreach($config['inciso2'] as $value) {
             $value = (array) $value;
-            $opportunity = App::i()->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $value['city']);
+            $opportunity = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $value['city']);
             if(!empty($opportunity)) {
                 $city = $value['city'];
                 $opportunitiesIds[$city] = $opportunity[0]->id;
@@ -99,19 +101,10 @@ class Plugin extends \MapasCulturais\Plugin
         $plugin = $this;
 
         $app->hook('template(panel.opportunities.panel-header):end', function () use($app){
-
             if(!$app->user->is('admin')) {
                 return;
             }
-
-            echo
-            '
-            <a class="btn btn-primary" href="/aldirblanc/generateOpportunities" target="_blank">
-                Criar oportunidades do aldir blanc
-            </a>
-
-
-            ';
+            $this->part('aldirblanc/generate-opportunities-button');
         });
 
         // add hooks
@@ -135,7 +128,7 @@ class Plugin extends \MapasCulturais\Plugin
          * modifica o template do autenticador quando o redirect url for para o plugin aldir blanc
          */
         $app->hook('controller(auth).render(<<*>>)', function() use ($app, $plugin) {
-            $redirect_url = @$_SESSION['mapasculturais.auth.redirect_path'] ?: '';
+            $redirect_url = $_SESSION['mapasculturais.auth.redirect_path'] ?? '';
             
             if(strpos($redirect_url, '/aldirblanc') === 0){
                 $plugin->registerAssets();
@@ -165,10 +158,6 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
-
-        
-        
-        
     }
 
     /**
