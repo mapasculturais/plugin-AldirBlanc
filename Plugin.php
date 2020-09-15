@@ -471,6 +471,8 @@ class Plugin extends \MapasCulturais\Plugin
             $app->log->debug( "Criando projeto {$params['name']}");
             $opportunityProject = new \MapasCulturais\Entities\Project();
             $opportunityProject->parent = $project;
+            $opportunityProject->shortDescription = $params['shortDescription'];
+            $opportunityProject->area=30;
             $opportunityProject->name = $params['name'];
             $opportunityProject->status = 1;
             $opportunityProject->type = $project->type->id;
