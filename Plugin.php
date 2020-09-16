@@ -71,7 +71,9 @@ class Plugin extends \MapasCulturais\Plugin
             return $config;
         }
 
-        $opportunityInciso1 = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1);
+        $activeOpportunityInciso1 = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1, 1);
+        $draftOpportunityInciso1 = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1, 0);
+        $opportunityInciso1 = array_merge($activeOpportunityInciso1, $draftOpportunityInciso1);
 
         if(!empty($opportunityInciso1)) {
             $config['inciso1_opportunity_id'] = $opportunityInciso1[0]->id;
@@ -80,7 +82,10 @@ class Plugin extends \MapasCulturais\Plugin
         $opportunitiesIds = [];
         foreach($config['inciso2'] as $value) {
             $value = (array) $value;
-            $opportunity = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $value['city']);
+
+            $activeOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $value['city'], 1);
+            $draftOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $value['city'], 0);
+            $opportunity = array_merge($activeOpportunities, $draftOpportunities);
             if(!empty($opportunity)) {
                 $city = $value['city'];
                 $opportunitiesIds[$city] = $opportunity[0]->id;
@@ -321,7 +326,9 @@ class Plugin extends \MapasCulturais\Plugin
 
         // $opportunityMeta = $app->repo("OpportunityMeta")->findOneBy(array('key' => 'aldirblanc_inciso', 'value' => 1));
 
-        $opportunity = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1);
+        $activeOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1, 1);
+        $draftOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1, 0);
+        $opportunity = array_merge($activeOpportunities, $draftOpportunities);
 
         if(count($opportunity) > 0) {
 
@@ -413,9 +420,9 @@ class Plugin extends \MapasCulturais\Plugin
                 throw new \Exception('Owner invalido');
             }
 
-            // $opportunityMeta = $app->repo("OpportunityMeta")->findOneBy(array('key' => 'aldirblanc_city', 'value' => $city['city']));
-
-            $opportunity = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $city['city']);
+            $activeOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $city['city'], 1);
+            $draftOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $city['city'], 0);
+            $opportunity = array_merge($activeOpportunities, $draftOpportunities);
 
             //cria opportunidade SOMENTE se ainda NÃO tiver sido criada para a cidade "[i]"
             if(count($opportunity) == 0) {
