@@ -47,6 +47,7 @@ class Plugin extends \MapasCulturais\Plugin
         $skipConfig = false;
         
         $app->applyHookBoundTo($this, 'aldirblanc.config',[&$config,&$skipConfig]);
+
         
         if (!$skipConfig) {
             $cache_id = __METHOD__ . ':' . 'config';
@@ -127,6 +128,10 @@ class Plugin extends \MapasCulturais\Plugin
         // add hooks
         $app->hook('mapasculturais.styles', function () use ($app) {
             $app->view->printStyles('aldirblanc');
+        });
+
+        $app->hook('opportunity.blockedFields', function ($entity) use ($app) {
+            $app->view->jsObject['blockedFields'] = $entity->aldirBlancFields;
         });
 
         $app->hook('template(subsite.<<create|edit>>.tabs):end', function () {
