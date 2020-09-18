@@ -476,24 +476,36 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function GET_cadastro()
     {
         $this->requireAuthentication();
-        $app = App::i();
-        $inciso1 = $this->getOpportunityInciso1();
         
+        $app = App::i();
+
+        $registrationsInciso1 = [];
+        $registrationsInciso2 = [];
+
         $summaryStatusName = $this->getStatusNames();
-        if (!$app->user){
-            // @todo tratar esse erro
-            throw new \Exception();
+
+        $owner_id = $app->user->profile->id;
+        $owner_name = $app->user->profile->name;
+
+        $repo = $app->repo('Registration');
+        
+        if ($this->config['inciso1_enabled']) {
+            $inciso1 = $this->getOpportunityInciso1();
+            $registrationsInciso1 = $repo->findByOpportunityAndUser($inciso1, $app->user);
         }
-        $registrationsInciso1 = $app->repo('Registration')->findByOpportunityAndUser($inciso1, $app->user);
-        $opportunitiesIdsInciso2 = array_values($this->config['inciso2_opportunity_ids']);
-        $agentID = $app->user->profile->id;
-        if (!isset($opportunitiesIdsInciso2) || $opportunitiesIdsInciso2 == "" ){
-            // @todo tratar esse erro
-            throw new \Exception();
+        
+        if ($this->config['inciso2_enabled']) {
+            $opportunitiesIdsInciso2 = array_values($this->config['inciso2_opportunity_ids']);
+            $registrationsInciso2 = $repo->findBy(['opportunity' => $opportunitiesIdsInciso2, 'owner' => $owner_id]);
         }
-        $registrationsInciso2 = $app->repo('Registration')->findBy(['opportunity' => $opportunitiesIdsInciso2, 'owner' => $agentID]);
-        $name = $app->user->profile->name;
-        $this->render('cadastro', ['cidades' => $this->getCidades(), 'registrationsInciso1' => $registrationsInciso1, 'registrationsInciso2' => $registrationsInciso2, 'summaryStatusName'=>$summaryStatusName, 'niceName' => $name]);
+        
+        $this->render('cadastro', [
+                'cidades' => $this->getCidades(), 
+                'registrationsInciso1' => $registrationsInciso1, 
+                'registrationsInciso2' => $registrationsInciso2, 
+                'summaryStatusName'=>$summaryStatusName, 
+                'niceName' => $owner_name
+            ]);
     }
 
     function GET_termos_e_condicoes()
