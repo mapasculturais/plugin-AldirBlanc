@@ -1,0 +1,1 @@
+<p class="registration-help" style="color:red;"><?php \MapasCulturais\i::_e("A edição destas opções estão desabilitadas."); ?> </p> 

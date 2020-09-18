@@ -44,17 +44,25 @@ class Plugin extends \MapasCulturais\Plugin
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS',null),
         ];
 
-        $cache_id = __METHOD__ . ':' . 'config';
+        $skipConfig = false;
+        
+        $app->applyHookBoundTo($this, 'aldirblanc.config',[&$config,&$skipConfig]);
 
-        if ($cached = $app->cache->fetch($cache_id)) {
-            parent::__construct($cached);
-        } else {
-            $config = $this->configOpportunitiesIds($config);
-            if(!empty($config['inciso2_opportunity_ids'])){
-                $app->cache->save($cache_id, $config, 3600);
+        
+        if (!$skipConfig) {
+            $cache_id = __METHOD__ . ':' . 'config';
+
+            if ($cached = $app->cache->fetch($cache_id)) {
+                $config = $cached;
+            } else {
+                $config = $this->configOpportunitiesIds($config);
+                if(!empty($config['inciso2_opportunity_ids'])){
+                    $app->cache->save($cache_id, $config, 3600);
+                }
+                
             }
-            parent::__construct($config);
         }
+        parent::__construct($config);
     }
 
     public function configOpportunitiesIds($config) {
@@ -80,6 +88,7 @@ class Plugin extends \MapasCulturais\Plugin
         $opportunitiesIds = [];
         foreach($config['inciso2'] as $value) {
             $value = (array) $value;
+            
             $opportunity = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $value['city']);
             if(!empty($opportunity)) {
                 $city = $value['city'];
@@ -120,6 +129,34 @@ class Plugin extends \MapasCulturais\Plugin
         $app->hook('mapasculturais.styles', function () use ($app) {
             $app->view->printStyles('aldirblanc');
         });
+
+        //No cadastro da oportunidade (inciso2), adiciona os campos para bloqueio de edição/deleção
+        $app->hook('opportunity.blockedFields', function ($entity) use ($app) {
+            if(!$app->user->is('admin')) {
+                $app->view->jsObject['blockedOpportunityFields'] = $entity->aldirBlancFields;
+            }
+        });
+
+        //No cadastro da oportunidade (inciso2), muda a permissao de editar as categorias
+        $app->hook('opportunity.blockedCategoryFields', function (&$entity,&$can_edit) use ($app) {
+            if(!$app->user->is('admin')) {
+                $fields = $entity->aldirBlancFields;
+                if(!empty($fields)) {
+                    $can_edit = false;
+                }
+            }            
+        });
+        
+        //No cadastro da oportunidade (inciso2), apresenta mensagem de bloqueio de edição das categorias
+        $app->hook('template(opportunity.<<create|edit>>.categories-messages):begin', function ($entity) use($app) {
+            if(!$app->user->is('admin')) {
+                $fields = $entity->aldirBlancFields;
+                if(!empty($fields)) {
+                    $this->part('aldirblanc/categories-messages');
+                }
+            }            
+        });
+        
 
         $app->hook('template(subsite.<<create|edit>>.tabs):end', function () {
             $this->part('aldirblanc/subsite-tab');
@@ -321,7 +358,9 @@ class Plugin extends \MapasCulturais\Plugin
 
         // $opportunityMeta = $app->repo("OpportunityMeta")->findOneBy(array('key' => 'aldirblanc_inciso', 'value' => 1));
 
-        $opportunity = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1);
+        $activeOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1, 1);
+        $draftOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1, 0);
+        $opportunity = array_merge($activeOpportunities, $draftOpportunities);
 
         if(count($opportunity) > 0) {
 
@@ -413,9 +452,9 @@ class Plugin extends \MapasCulturais\Plugin
                 throw new \Exception('Owner invalido');
             }
 
-            // $opportunityMeta = $app->repo("OpportunityMeta")->findOneBy(array('key' => 'aldirblanc_city', 'value' => $city['city']));
-
-            $opportunity = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $city['city']);
+            $activeOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $city['city'], 1);
+            $draftOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $city['city'], 0);
+            $opportunity = array_merge($activeOpportunities, $draftOpportunities);
 
             //cria opportunidade SOMENTE se ainda NÃO tiver sido criada para a cidade "[i]"
             if(count($opportunity) == 0) {

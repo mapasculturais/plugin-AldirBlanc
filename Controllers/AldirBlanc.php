@@ -468,6 +468,22 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
     }
 
+    function GET_fixregistrationinciso1() {
+        ini_set('max_execution_time', 0);
+        App::i()->disableAccessControl();
+        $op = App::i()->repo('Opportunity')->find($this->config['inciso1_opportunity_id']);
+        $registrations = App::i()->repo('Registration')->findBy(['opportunity' => $op]);
+
+        foreach ($registrations as $registration) {
+            if($registration->inciso == null) {
+                $registration->inciso = 1;
+                $registration->save();
+            } 
+        }
+        App::i()->em->flush();
+        App::i()->enableAccessControl();
+    }
+
     /**
      * Tela onde o usuário escolhe o inciso I ou II
      *
