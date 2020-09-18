@@ -21,13 +21,28 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     const CATEGORY_ESPACO_NAO_FORMALIZADO = 1;
     const CATEGORY_COLETIVO_FORMALIZADO = 2;
     const CATEGORY_COLETIVO_NAO_FORMALIZADO = 3;
+    
+    /**
+     * Configuração do plugin
+     *
+     * @var array
+     */
     protected $config = [];
+
+    /**
+     * Instância do plugin
+     *
+     * @var \AldirBlanc\Plugin
+     */
+    protected $plugin;
 
     function __construct()
     {
         parent::__construct();
 
         $app = App::i();
+
+        $this->plugin = $app->plugins['AldirBlanc'];
 
         $this->config = $app->plugins['AldirBlanc']->config;
         $opportunitiesArrayInciso2 = $this->config['inciso2_opportunity_ids'];
@@ -649,10 +664,77 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         set_time_limit(0);
         
-        $plugin = $app->plugins['AldirBlanc'];
-        $plugin->createOpportunityInciso1();
-        $plugin->createOpportunityInciso2();
+        $this->plugin->createOpportunityInciso1();
+        $this->plugin->createOpportunityInciso2();
 
         $this->json("Sucesso");
+    }
+
+    function GET_reporte() {
+
+        $data = [
+            'inciso1' => null, 
+            'inciso2' => null
+        ];
+
+        if ($this->config['inciso1_enabled']) {
+            $data['inciso1'] = $this->getInciso1ReportData();
+        }
+        
+        if ($this->config['inciso2_enabled']) {
+            $data['inciso2'] = $this->getInciso2ReportData();
+        }
+        
+        $this->render('reporte', $data);
+    }
+
+    function getInciso1ReportData() {
+        if (!$this->config['inciso1_enabled']) return null;
+
+        $app = App::i();
+
+        $dql = "
+            SELECT 
+                COUNT(e.id) 
+            FROM 
+                MapasCulturais\Entities\Registration e 
+            WHERE 
+                e.status > 0 AND 
+                e.opportunity = :opportunityId";
+
+        $query = $app->em->createQuery($dql);
+
+        $query->setParameters([
+            'opportunityId' => $this->config['inciso1_opportunity_id']
+        ]);
+
+        return (object) [
+            'total' => $query->getSingleScalarResult()
+        ];
+    }
+
+    function getInciso2ReportData() {
+        if (!$this->config['inciso2_enabled']) return null;
+
+        $app = App::i();
+
+        $dql = "
+            SELECT 
+                COUNT(e.id) 
+            FROM 
+                MapasCulturais\Entities\Registration e 
+            WHERE 
+                e.status > 0 AND 
+                e.opportunity IN(:opportunities)";
+
+        $query = $app->em->createQuery($dql);
+
+        $query->setParameters([
+            'opportunities' => $this->config['inciso2_opportunity_ids']
+        ]);
+
+        return (object) [
+            'total' => $query->getSingleScalarResult()
+        ];
     }
 }
