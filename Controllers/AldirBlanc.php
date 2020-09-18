@@ -730,7 +730,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $query = $app->em->createQuery($dql);
 
         $query->setParameters([
-            'opportunities' => $this->config['inciso2_opportunity_ids']
+            'opportunities' => array_values($this->config['inciso2_opportunity_ids'])
         ]);
 
         return (object) [
