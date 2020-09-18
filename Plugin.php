@@ -24,8 +24,8 @@ class Plugin extends \MapasCulturais\Plugin
             'inciso1_enabled' => env('AB_INCISO1_ENABLE',true),
             'inciso2_enabled' => env('AB_INCISO2_ENABLE',true),
             'project_id' => env('AB_INCISO2_PROJECT_ID',null),
-            'inciso1_opportunity_id' => null,
-            'inciso2_opportunity_ids' => [],
+            'inciso1_opportunity_id' => env('AB_INCISO1_OPPORTUNITY_ID', null),
+            'inciso2_opportunity_ids' => (array) json_decode(env('AB_INCISO2_OPPORTUNITY_IDS', '[]')),
             'inciso1' => (array) json_decode(env('AB_INCISO1', '[]')),
             'inciso2' => (array) json_decode(env('AB_INCISO2_CITIES', '[]')),
             'inciso2_default' => (array) json_decode(env('AB_INCISO2_DEFAULT', '[]')),
@@ -43,17 +43,25 @@ class Plugin extends \MapasCulturais\Plugin
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS','https://mapacultural.pa.gov.br/files/subsite/2/termos-e-politica.pdf'),
         ];
 
-        $cache_id = __METHOD__ . ':' . 'config';
+        $skipConfig = false;
+        
+        $app->applyHookBoundTo($this, 'aldirblanc.config',[&$config,&$skipConfig]);
 
-        if ($cached = $app->cache->fetch($cache_id)) {
-            parent::__construct($cached);
-        } else {
-            $config = $this->configOpportunitiesIds($config);
-            if(!empty($config['inciso2_opportunity_ids'])){
-                $app->cache->save($cache_id, $config, 3600);
+        
+        if (!$skipConfig) {
+            $cache_id = __METHOD__ . ':' . 'config';
+
+            if ($cached = $app->cache->fetch($cache_id)) {
+                $config = $cached;
+            } else {
+                $config = $this->configOpportunitiesIds($config);
+                if(!empty($config['inciso2_opportunity_ids'])){
+                    $app->cache->save($cache_id, $config, 3600);
+                }
+                
             }
-            parent::__construct($config);
         }
+        parent::__construct($config);
     }
 
     public function configOpportunitiesIds($config) {
@@ -79,6 +87,7 @@ class Plugin extends \MapasCulturais\Plugin
         $opportunitiesIds = [];
         foreach($config['inciso2'] as $value) {
             $value = (array) $value;
+            
             $opportunity = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $value['city']);
             if(!empty($opportunity)) {
                 $city = $value['city'];
@@ -119,6 +128,34 @@ class Plugin extends \MapasCulturais\Plugin
         $app->hook('mapasculturais.styles', function () use ($app) {
             $app->view->printStyles('aldirblanc');
         });
+
+        //No cadastro da oportunidade (inciso2), adiciona os campos para bloqueio de edição/deleção
+        $app->hook('opportunity.blockedFields', function ($entity) use ($app) {
+            if(!$app->user->is('admin')) {
+                $app->view->jsObject['blockedOpportunityFields'] = $entity->aldirBlancFields;
+            }
+        });
+
+        //No cadastro da oportunidade (inciso2), muda a permissao de editar as categorias
+        $app->hook('opportunity.blockedCategoryFields', function (&$entity,&$can_edit) use ($app) {
+            if(!$app->user->is('admin')) {
+                $fields = $entity->aldirBlancFields;
+                if(!empty($fields)) {
+                    $can_edit = false;
+                }
+            }            
+        });
+        
+        //No cadastro da oportunidade (inciso2), apresenta mensagem de bloqueio de edição das categorias
+        $app->hook('template(opportunity.<<create|edit>>.categories-messages):begin', function ($entity) use($app) {
+            if(!$app->user->is('admin')) {
+                $fields = $entity->aldirBlancFields;
+                if(!empty($fields)) {
+                    $this->part('aldirblanc/categories-messages');
+                }
+            }            
+        });
+        
 
         $app->hook('template(subsite.<<create|edit>>.tabs):end', function () {
             $this->part('aldirblanc/subsite-tab');
@@ -320,7 +357,9 @@ class Plugin extends \MapasCulturais\Plugin
 
         // $opportunityMeta = $app->repo("OpportunityMeta")->findOneBy(array('key' => 'aldirblanc_inciso', 'value' => 1));
 
-        $opportunity = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1);
+        $activeOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1, 1);
+        $draftOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_inciso', 1, 0);
+        $opportunity = array_merge($activeOpportunities, $draftOpportunities);
 
         if(count($opportunity) > 0) {
 
@@ -412,9 +451,9 @@ class Plugin extends \MapasCulturais\Plugin
                 throw new \Exception('Owner invalido');
             }
 
-            // $opportunityMeta = $app->repo("OpportunityMeta")->findOneBy(array('key' => 'aldirblanc_city', 'value' => $city['city']));
-
-            $opportunity = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $city['city']);
+            $activeOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $city['city'], 1);
+            $draftOpportunities = $app->repo('Opportunity')->findByProjectAndOpportunityMeta($project, 'aldirblanc_city', $city['city'], 0);
+            $opportunity = array_merge($activeOpportunities, $draftOpportunities);
 
             //cria opportunidade SOMENTE se ainda NÃO tiver sido criada para a cidade "[i]"
             if(count($opportunity) == 0) {
@@ -470,6 +509,8 @@ class Plugin extends \MapasCulturais\Plugin
             $app->log->debug( "Criando projeto {$params['name']}");
             $opportunityProject = new \MapasCulturais\Entities\Project();
             $opportunityProject->parent = $project;
+            $opportunityProject->shortDescription = $params['shortDescription'];
+            $opportunityProject->area=30;
             $opportunityProject->name = $params['name'];
             $opportunityProject->status = 1;
             $opportunityProject->type = $project->type->id;
