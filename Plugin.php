@@ -131,8 +131,23 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
         $app->hook('opportunity.blockedFields', function ($entity) use ($app) {
-            $app->view->jsObject['blockedFields'] = $entity->aldirBlancFields;
+            $app->view->jsObject['blockedOpportunityFields'] = $entity->aldirBlancFields;
         });
+
+        $app->hook('opportunity.blockedCategoryFields', function (&$entity,&$can_edit) use ($app) {
+            $fields = $entity->aldirBlancFields;
+            if(!empty($fields)) {
+                $can_edit = false;
+            }            
+        });
+        
+        $app->hook('template(opportunity.<<create|edit>>.categories-messages):begin', function ($entity) use($app) {
+            $fields = $entity->aldirBlancFields;
+            if(!empty($fields)) {
+                $this->part('aldirblanc/categories-messages');
+            }            
+        });
+        
 
         $app->hook('template(subsite.<<create|edit>>.tabs):end', function () {
             $this->part('aldirblanc/subsite-tab');
