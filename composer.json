@@ -1,0 +1,12 @@
+{
+    "name": "elljsistemas/aldir-blanc",
+    "authors": [
+        {
+            "name": "ErleBiazzio",
+            "email": "erleibiazzio@gmail.com"
+        }
+    ],
+    "require": {
+        "league/csv": "^9.6"
+    }
+}
