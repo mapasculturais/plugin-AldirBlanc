@@ -69,7 +69,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         /**
          * Prepara o Header do documento
          */
-        $csv->insertOne([
+        $headers = [
             "CPF",
             "SEXO",
             "FLAG_CAD_ESTADUAL",
@@ -98,71 +98,115 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             "FLAG_ATUACAO_HUMANIDADES",
             "FAMILIARCPF",
             "GRAUPARENTESCO",
-        ]);
-
-        /**
-         * Mapeamento de campos
-         */
-        $fields = [
-            "CPF" => function ($registrations) {
-                return str_replace(['.', '-'], '', $registrations->field_30);
-            },
-            'SEXO' => function ($registrations) {
-                if ($registrations->field_17 == 'Masculino') {
-                    return 1;
-                } else if ($registrations->field_17 == 'Feminino') {
-                    return 2;
-                } else {
-                    return 0;
-                }
-            },
-            "FLAG_CAD_ESTADUAL" => 1,
-            "SISTEMA_CAD_ESTADUAL" => function ($registration) {
-                $app = \MapasCulturais\App::i();
-                return $app->view->dict('site: name', false);
-            },
-            "IDENTIFICADOR_CAD_ESTADUAL" => 'number',
-            "FLAG_CAD_MUNICIPAL" => 0,
-            "SISTEMA_CAD_MUNICIPAL" => null,
-            "IDENTIFICADOR_CAD_MUNICIPAL" => null,
-            "FLAG_CAD_DISTRITAL" => 0,
-            "SISTEMA_CAD_DISTRITAL" => null,
-            "IDENTIFICADOR_CAD_DISTRITAL" => null,
-            "FLAG_CAD_SNIIC" => null,
-            "SISTEMA_CAD_SNIIC" => null,
-            "IDENTIFICADOR_CAD_SNIIC" => null,
-            "FLAG_CAD_SALIC" => 0,
-            "FLAG_CAD_SICAB" => 0,
-            "FLAG_CAD_OUTROS" => 0,
-            "SISTEMA_CAD_OUTROS" => null,
-            "IDENTIFICADOR_CAD_OUTROS" => null,
-            "FLAG_ATUACAO_ARTES_CENICAS" => 0,
-            "FLAG_ATUACAO_AUDIOVISUAL" => 0,
-            "FLAG_ATUACAO_MUSICA" => 0,
-            "FLAG_ATUACAO_ARTES_VISUAIS" => 0,
-            "FLAG_ATUACAO_PATRIMONIO_CULTURAL" => 0,
-            "FLAG_ATUACAO_MUSEUS_MEMORIA" => 0,
-            "FLAG_ATUACAO_HUMANIDADES" => 0,
-            "FAMILIARCPF" => 1,
-            "GRAUPARENTESCO" => 1,
         ];
+        $csv->insertOne($headers);
 
         //Itera sobre os registros mapeados
-        $data = [];
+        $data_candidate = [];
+        $data_familyGroup = [];
         foreach ($registrations as $key => $registration) {
 
+            /**
+             * Mapeamento de campos
+             */
+            $fields = [
+                "CPF" => function ($registration) {
+                    return str_replace(['.', '-'], '', $registration->field_30);
+                },
+                'SEXO' => function ($registration) {
+                    if ($registration->field_17 == 'Masculino') {
+                        return 1;
+                    } else if ($registration->field_17 == 'Feminino') {
+                        return 2;
+                    } else {
+                        return 0;
+                    }
+                },
+                "FLAG_CAD_ESTADUAL" => 1,
+                "SISTEMA_CAD_ESTADUAL" => function () {
+                    $app = \MapasCulturais\App::i();
+                    return $app->view->dict('site: name', false);
+                },
+                "IDENTIFICADOR_CAD_ESTADUAL" => 'number',
+                "FLAG_CAD_MUNICIPAL" => 0,
+                "SISTEMA_CAD_MUNICIPAL" => null,
+                "IDENTIFICADOR_CAD_MUNICIPAL" => null,
+                "FLAG_CAD_DISTRITAL" => 0,
+                "SISTEMA_CAD_DISTRITAL" => null,
+                "IDENTIFICADOR_CAD_DISTRITAL" => null,
+                "FLAG_CAD_SNIIC" => null,
+                "SISTEMA_CAD_SNIIC" => null,
+                "IDENTIFICADOR_CAD_SNIIC" => null,
+                "FLAG_CAD_SALIC" => 0,
+                "FLAG_CAD_SICAB" => 0,
+                "FLAG_CAD_OUTROS" => 0,
+                "SISTEMA_CAD_OUTROS" => null,
+                "IDENTIFICADOR_CAD_OUTROS" => null,
+                "FLAG_ATUACAO_ARTES_CENICAS" => function ($registration) {
+                    return in_array("Teatro", $registration->field_10) ? 1 : 0;
+                },
+                "FLAG_ATUACAO_AUDIOVISUAL" => function ($registration) {
+                    return in_array("Audiovisual", $registration->field_10) ? 1 : 0;
+                },
+                "FLAG_ATUACAO_MUSICA" => function ($registration) {
+                    return in_array("Música", $registration->field_10) ? 1 : 0;
+                },
+                "FLAG_ATUACAO_ARTES_VISUAIS" => function ($registration) {
+                    return in_array("Artes Visuais", $registration->field_10) ? 1 : 0;
+                },
+                "FLAG_ATUACAO_PATRIMONIO_CULTURAL" => function ($registration) {
+                    return in_array("*", $registration->field_10) ? 1 : "Informações";
+                },
+                "FLAG_ATUACAO_MUSEUS_MEMORIA" => function ($registration) {
+                    return in_array("Museu", $registration->field_10) ? 1 : 0;
+                },
+                "FLAG_ATUACAO_HUMANIDADES" => function ($registration) {
+                    return in_array("*", $registration->field_10) ? 1 : "Informações";
+                },
+                "FAMILIARCPF" => function ($registration) {
+                    foreach($registration->field_5 as $key => $value){
+                        return $value->cpf;
+                    };
+                },
+                "GRAUPARENTESCO" => function ($registration) {
+                    foreach($registration->field_5 as $key => $value){
+                        return $value->relationship;
+                    };
+                },
+            ];
+            // var_dump($registration->field_5);
+            // exit();
             foreach ($fields as $csv_column => $column) {
                 if (is_callable($column)) {
-                    $data[$key][$csv_column] = $column($registration);
+                    if ($csv_column == "FAMILIARCPF" || $csv_column == "GRAUPARENTESCO") {
+                        $data_candidate[$key][$csv_column] = null;
+                        $data_familyGroup[$key][$csv_column] = $column($registration); 
+                        // var_dump($column($registration));
+                        // exit();                       
+                    } else {
+                        $data_candidate[$key][$csv_column] = $column($registration);
+                        $data_familyGroup[$key][$csv_column] = null;
+                    }
+
                 } else if (is_string($column) && strlen($column) > 0) {
-                    $data[$key][$csv_column] = $registration->$column;
+                    if (($csv_column == "FAMILIARCPF" || $csv_column == "GRAUPARENTESCO")) {
+                        $data_candidate[$key][$csv_column] = null;
+                        $data_familyGroup[$key][$csv_column] = null;
+                    } else {
+                        $data_candidate[$key][$csv_column] = $registration->$column;
+                        $data_familyGroup[$key][$csv_column] = null;
+                    }
+
                 } else {
-                    $data[$key][$csv_column] = $column;
+                    $data_candidate[$key][$csv_column] = $column;
+                    $data_familyGroup[$key][$csv_column] = null;
                 }
             }
-
-            $csv->insertOne($data[$key]);
+            $csv->insertOne($data_candidate[$key]);
+            $csv->insertOne($data_familyGroup[$key]);
+           
         }
+
         
         //Faz o output do CSV
         $csv->output("user.csv");
