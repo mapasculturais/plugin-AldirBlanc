@@ -528,6 +528,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if ($this->config['inciso2_enabled']) {
             $opportunitiesIdsInciso2 = array_values($this->config['inciso2_opportunity_ids']);
             $registrationsInciso2 = $repo->findBy(['opportunity' => $opportunitiesIdsInciso2, 'owner' => $owner_id]);
+            $opportunitiesInciso2 = $app->repo('Opportunity')->findRegistrationDateByIds($opportunitiesIdsInciso2); 
         }
         
         $this->render('cadastro', [
@@ -535,7 +536,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 'registrationsInciso1' => $registrationsInciso1, 
                 'registrationsInciso2' => $registrationsInciso2, 
                 'summaryStatusName'=>$summaryStatusName, 
-                'niceName' => $owner_name
+                'niceName' => $owner_name,
+                'opportunitiesInciso2' => $opportunitiesInciso2
             ]);
     }
 

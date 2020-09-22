@@ -1,5 +1,6 @@
 <?php
 
+use Doctrine\Common\Util\Debug;
 use MapasCulturais\i;
 use MapasCulturais\Entities\Registration;
 
@@ -9,6 +10,8 @@ $inciso2_enabled = $this->controller->config['inciso2_enabled'];
 $inciso1_enabled = $this->controller->config['inciso1_enabled'];
 
 $this->jsObject['opportunityId'] = null;
+$this->jsObject['opportunitiesInciso2'] = $opportunitiesInciso2;
+$this->jsObject['serverDate'] = new DateTime();
 
 if (count($cidades) === 0) {
     $inciso2_enabled = false;
@@ -20,7 +23,9 @@ if (count($cidades) === 0) {
 }
 
 ?>
-<script>
+
+<script type="text/javascript">
+
     $(document).ready(function() {
 
         var params = {
@@ -36,7 +41,10 @@ if (count($cidades) === 0) {
         if (MapasCulturais.opportunityId != null) {
             params.opportunity = MapasCulturais.opportunityId
         }
-
+        if (MapasCulturais.opportunitiesInciso2 != null) {
+            params.opportunitiesInciso2 = MapasCulturais.opportunitiesInciso2
+        }
+        debugger;
         /**
          * Redireciona o usuário para próxima tela conforme paramentros selecionados.
          */
@@ -67,7 +75,7 @@ if (count($cidades) === 0) {
 
             $('#modalAlertCadastro .modal-content').find('.btn').val('next');
             $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("Confirmar"); ?>');
-
+            
             if (params.opportunity != null) {
                 msg = `<?php \MapasCulturais\i::_e("Você está solicitando o benefício para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>"); ?>`;
                 msg = msg.replace(/_fomalizado_/g, fomalizado);
@@ -96,6 +104,11 @@ if (count($cidades) === 0) {
                 }
             }
 
+            if (!(MapasCulturais.serverDate >= op.registrationFrom && MapasCulturais.serverDate <= op.registrationTo )) {
+               msg = msg + '';
+            }
+            
+            
             showModalMsg( modalTitle, msg);
 
             //$('#modalAlertCadastro .modal-content').find('.modal-content-text').html(msg);
@@ -124,6 +137,7 @@ if (count($cidades) === 0) {
                 modal.fadeOut('fast');
             });
         }
+        
 
         /**
          * Ao clicar em uma das opções do local de atividade do beneficiário , o usuário é encaminhado para tela de opções de personalidades jurídica do beneficiário.
@@ -459,8 +473,9 @@ if (count($cidades) === 0) {
             <span class="close">&times;</span>
             <h2 class="modal-content--title js-title"></h2>
             <p id="modal-content-text" class="modal-content-text"></p>
-            <button class="btn js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></button>
+            <button class="btn js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></button>        
         </div>
     </div>
 
 </section>
+
