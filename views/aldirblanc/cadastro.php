@@ -44,7 +44,6 @@ if (count($cidades) === 0) {
         if (MapasCulturais.opportunitiesInciso2 != null) {
             params.opportunitiesInciso2 = MapasCulturais.opportunitiesInciso2
         }
-        debugger;
         /**
          * Redireciona o usuário para próxima tela conforme paramentros selecionados.
          */
@@ -104,10 +103,21 @@ if (count($cidades) === 0) {
                 }
             }
 
-            if (!(MapasCulturais.serverDate >= op.registrationFrom && MapasCulturais.serverDate <= op.registrationTo )) {
-               msg = msg + '';
-            }
-            
+            let selectedCityId = $('.js-select-cidade option:selected').val();
+            let cityObj = MapasCulturais.opportunitiesInciso2.filter(city => city.id == selectedCityId)[0]
+            if (!(MapasCulturais.serverDate.date >= cityObj.registrationFrom.date && MapasCulturais.serverDate.date <= cityObj.registrationTo.date)) {
+                modalTitle = cityObj.name;
+
+                msg = `Infelizmente não será possivel realizar sua inscrição:
+                <br>
+                <br>
+                > Data de inicio das inscrições: <strong> ${new Date(cityObj.registrationFrom.date).toLocaleDateString("pt-BR")} </strong>
+                <br>
+                <br>
+                > Data de fim das inscrições: <strong> ${new Date(cityObj.registrationTo.date).toLocaleDateString("pt-BR")} </strong>`
+                
+                $('.js-confirmar').hide();
+            } 
             
             showModalMsg( modalTitle, msg);
 
