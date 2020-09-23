@@ -204,6 +204,14 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
+        $app->hook('GET(aldirblanc.<<*>>):before', function() use ($plugin, $app) {
+            if ($app->user->is('mediador')) {
+                $limit = 1000;
+                
+                $plugin->_config['inciso1_limite'] = $limit;
+                $plugin->_config['inciso2_limite'] = $limit;
+            }
+        });
     }
 
     /**
