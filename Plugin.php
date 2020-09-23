@@ -4,6 +4,7 @@ namespace AldirBlanc;
 
 use Exception;
 use MapasCulturais\App;
+use MapasCulturais\Definitions\Role;
 use MapasCulturais\i;
 
 // @todo refatorar autoloader de plugins para resolver classes em pastas
