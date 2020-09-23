@@ -516,7 +516,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $app = App::i();
 
         if ($app->user->is('mediador')) {
-            $app->redirect($this->createUrl('mediacao'));
+            $app->redirect($this->createUrl('cadastro'));
         } else if ($app->user->aldirblanc_tipo_usuario == 'solicitante') {
             $app->redirect($this->createUrl('cadastro'));
         } else {
