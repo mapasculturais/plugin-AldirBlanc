@@ -255,6 +255,23 @@ class Plugin extends \MapasCulturais\Plugin
 
         /* registrinado metadados do usuário */
 
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_contato_tipo', [
+            'label' => i::__('Tipo de contato da mediação'),
+            'type' => 'select',
+            'private' => true,
+            'options' => [
+                'telefone-fixo' => i::__('Telefone Fixo'),
+                'whatsapp' => i::__('Whatsapp'),
+                'sms' => i::__('SMS'),
+            ]
+        ]);
+
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_contato', [
+            'label' => i::__('Número telefônico do contato'),
+            'type' => 'text',
+            'private' => true
+        ]);
+
         /**
          * Tipo de usuário na aldir 
          * @var string
