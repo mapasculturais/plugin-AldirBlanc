@@ -12,7 +12,8 @@ use MapasCulturais\Entities\RegistrationSpaceRelation as RegistrationSpaceRelati
  *
  * By default this controller is registered with the id 'registration'.
  *
- *  @property-read \MapasCulturais\Entities\Registration $requestedEntity The Requested Entity
+ * @property-read \MapasCulturais\Entities\Registration $requestedEntity The Requested Entity
+ * @property-read mixed $config configuração do plugin
  */
 // class AldirBlanc extends \MapasCulturais\Controllers\EntityController {
 class AldirBlanc extends \MapasCulturais\Controllers\Registration
@@ -22,12 +23,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     const CATEGORY_COLETIVO_FORMALIZADO = 2;
     const CATEGORY_COLETIVO_NAO_FORMALIZADO = 3;
     
-    /**
-     * Configuração do plugin
-     *
-     * @var array
-     */
-    protected $config = [];
 
     /**
      * Instância do plugin
@@ -44,7 +39,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $this->plugin = $app->plugins['AldirBlanc'];
 
-        $this->config = $app->plugins['AldirBlanc']->config;
         $opportunitiesArrayInciso2 = $this->config['inciso2_opportunity_ids'];
         $opportunityInciso1 = $this->config['inciso1_opportunity_id'];
         if (array_unique($opportunitiesArrayInciso2) != $opportunitiesArrayInciso2 || in_array ($opportunityInciso1, array_values($opportunitiesArrayInciso2) )){
@@ -85,6 +79,11 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             throw new \Exception('Categoria não existe');
         }
     }
+
+    function getConfig() {
+        return $this->plugin->config;
+    }
+
     /**
      * Retorna a oportunidade do inciso I
      *
