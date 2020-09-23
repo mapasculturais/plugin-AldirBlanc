@@ -205,8 +205,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         if ($app->user->is('mediador')) {
             $agent = $this->createMediado();
-
-            $app->redirect($this->createUrl('nova_inscricao', ['agent' => $agent->id, 'inciso' => 2]));
+            $this->data = array_merge($this->data, ['agent' => $agent->id, 'inciso' => 2]);
+            $app->redirect($this->createUrl('nova_inscricao', $this->data ));
             
         } else if (isset($this->data['agent']) && $this->data['agent'] != "" ) {
             $agent = $app->repo('Agent')->find($this->data['agent']);
@@ -301,7 +301,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
      * 
      */
     function GET_nova_inscricao()
-    {
+    {   
         $this->requireAuthentication();
         if (!isset($this->data['agent']) || !in_array(intval(@$this->data['inciso']), [1, 2])) {
             // @todo tratar esse erro
@@ -382,20 +382,23 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     'type'=>'EQ(2)',
 
                 ]);
-
-                if(count($agentsQuery) == 1){
+                
+                if(count($agentsQuery) == 1 && !$app->user->is('mediador')){
                     if (!isset($agentsQuery[0]['id']) || $agentsQuery[0]['id'] == "" ) {
                         // @todo tratar esse erro
                         throw new \Exception();
                     }
                     $agentRelated = $app->repo('agent')->find($agentsQuery[0]['id']);
                 }
-                else if (count($agentsQuery) == 0) {
+                else if (count($agentsQuery) == 0 || $app->user->is('mediador') ) {
+                    $app->disableAccessControl();
                     $agentRelated = new \MapasCulturais\Entities\Agent($agent->user);
                     //@TODO: confirmar nome e tipo do Agente coletivo
                     $agentRelated->name = ' ';
                     $agentRelated->type = 2;
+                    $agentRelated->parent = $agent;
                     $agentRelated->save(true);
+                    $app->enableAccessControl();
                 }                  
                 else if (count($agentsQuery) > 1 && (!isset($this->data['agentRelated']) || $this->data['agentRelated'] == '' )) {
 
