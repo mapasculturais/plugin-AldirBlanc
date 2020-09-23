@@ -8,6 +8,8 @@ use MapasCulturais\i;
 
 // @todo refatorar autoloader de plugins para resolver classes em pastas
 require_once 'Controllers/AldirBlanc.php';
+require_once 'Controllers/DataPrev.php';
+require_once 'vendor/autoload.php';
 
 class Plugin extends \MapasCulturais\Plugin
 {
@@ -216,6 +218,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
+        $app->registerController('dataprev', 'AldirBlanc\Controllers\DataPrev');
 
         /* registrinado metadados do usuário */
 
