@@ -43,6 +43,7 @@ class Plugin extends \MapasCulturais\Plugin
             'link_suporte' => env('AB_LINK_SUPORTE',null),
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS',null),
             'mediados_owner' => env('AB_MEDIADOS_OWNER',''),
+            'lista_mediadores' =>  (array) json_decode(env('AB_LISTA_MEDIADORES', '[]'))
         ];
 
         $skipConfig = false;
@@ -212,6 +213,13 @@ class Plugin extends \MapasCulturais\Plugin
                 
                 $plugin->_config['inciso1_limite'] = $limit;
                 $plugin->_config['inciso2_limite'] = $limit;
+            }
+        });
+        
+        $app->hook('entity(User).save:after', function() use ($plugin, $app) {
+            $emails = $plugin->config['lista_mediadores'];
+            if (in_array($this->email, $emails) ){
+                $this->addRole('mediador');
             }
         });
     }
