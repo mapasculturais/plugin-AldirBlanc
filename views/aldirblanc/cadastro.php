@@ -1,5 +1,6 @@
 <?php
 
+use Doctrine\Common\Util\Debug;
 use MapasCulturais\i;
 use MapasCulturais\Entities\Registration;
 
@@ -9,6 +10,8 @@ $inciso2_enabled = $this->controller->config['inciso2_enabled'];
 $inciso1_enabled = $this->controller->config['inciso1_enabled'];
 
 $this->jsObject['opportunityId'] = null;
+$this->jsObject['opportunitiesInciso2'] = $opportunitiesInciso2;
+$this->jsObject['serverDate'] = new DateTime();
 
 if (count($cidades) === 0) {
     $inciso2_enabled = false;
@@ -53,9 +56,8 @@ if (count($cidades) === 0) {
 
                     <div class="informative-box--content active" data-content="">
                         <span class="more"> Mais informações </span>
-                        <span class="content">
-                            Farão jus à renda emergencial os(as) trabalhadores(as) da cultura com atividades interrompidas e que se enquadrem, comprovadamente, ao disposto no Art. 6º - Lei 14.017/2020. Prevê o pagamento de cinco parcelas de R$ 600 (seiscentos reais), podendo ser prorrogado conforme Art 5º - Lei 14.017/2020.
-                        </span>
+                        <span class="content"><i>
+                        Renda emergencial destinada aos trabalhadores e trabalhadoras da cultura que tiveram suas atividades interrompidas e se enquadram ao disposto no Art. 6º - Lei 14.017/2020. Prevê o pagamento de três parcelas de R$ 600,00 (seiscentos reais), podendo ser prorrogado conforme Art 5º - Lei 14.017/2020.</i></span>
                     </div>
                 </button>
             <?php
@@ -92,10 +94,9 @@ if (count($cidades) === 0) {
                     </div>
 
                     <div class="informative-box--content active" data-content="">
-                        <span class="more js"> Mais informações </span>
-                        <span class="content">
-                            Farão jus ao benefício espaços, organizações da sociedade civil, empresas, cooperativas e instituições com finalidade cultural, como previsto nos Arts. 7º e 8º - Lei 14.017/2020. Prevê subsídio de R$3.000,00 (três mil reais) a R$10.000,00 (dez mil reais), prescrito pela gestão local.
-                        </span>
+                        <span class="more js">Mais informações</span>
+                        <span class="content"><i>    
+                        Benefício destinado a espaços, organizações da sociedade civil, empresas, cooperativas e instituições com finalidade cultural, conforme Arts. 7º e 8º - Lei 14.017/2020. Prevê subsídio mensal entre R$ 3.000,00 (três mil reais) e R$ 10.000,00 (dez mil reais), conforme definição da gestão local.</i></span>
                     </div>
                 </button>
 
@@ -210,8 +211,9 @@ if (count($cidades) === 0) {
             <span class="close">&times;</span>
             <h2 class="modal-content--title js-title"></h2>
             <p id="modal-content-text" class="modal-content-text"></p>
-            <button class="btn js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></button>
+            <button class="btn js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></button>        
         </div>
     </div>
 
 </section>
+
