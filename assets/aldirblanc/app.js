@@ -108,6 +108,10 @@ $(document).ready(function () {
   if (MapasCulturais.opportunityId != null) {
     params.opportunity = MapasCulturais.opportunityId;
   }
+
+  if (MapasCulturais.opportunitiesInciso2 != null) {
+    params.opportunitiesInciso2 = MapasCulturais.opportunitiesInciso2;
+  }
   /**
    * Redireciona o usuário para próxima tela conforme paramentros selecionados.
    */
@@ -132,10 +136,10 @@ $(document).ready(function () {
 
     modalTitle = "Confirmação";
     $('#modalAlertCadastro .modal-content').find('.btn').val('next');
-    $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("Confirmar"); ?>');
+    $('#modalAlertCadastro .modal-content').find('.btn').text('Confirmar');
 
     if (params.opportunity != null) {
-      msg = "<?php MapasCulturaisi::_e(\"Voc\xEA est\xE1 solicitando o benef\xEDcio para <strong>_fomalizado_</strong> para espa\xE7o do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Voc\xEA confirma essas informa\xE7\xF5es?</p>\"); ?>";
+      msg = "Voc\xEA est\xE1 solicitando o benef\xEDcio para <strong>_fomalizado_</strong> para espa\xE7o do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Voc\xEA confirma essas informa\xE7\xF5es?</p>";
       msg = msg.replace(/_fomalizado_/g, fomalizado);
       msg = msg.replace(/_coletivo_/g, coletivo);
 
@@ -148,7 +152,7 @@ $(document).ready(function () {
       var cidade = $('.js-select-cidade option:selected').val();
 
       if (cidade > 0) {
-        msg = "<?php MapasCulturaisi::_e(\"Voc\xEA est\xE1 solicitando o benef\xEDcio para <strong>_fomalizado_</strong> para espa\xE7o do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Voc\xEA confirma essas informa\xE7\xF5es?</p>\"); ?>";
+        msg = "Voc\xEA est\xE1 solicitando o benef\xEDcio para <strong>_fomalizado_</strong> para espa\xE7o do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Voc\xEA confirma essas informa\xE7\xF5es?</p>";
         msg = msg.replace(/_fomalizado_/g, fomalizado);
         msg = msg.replace(/_coletivo_/g, coletivo);
 
@@ -161,6 +165,17 @@ $(document).ready(function () {
         msg = 'Você precisa selecionar a cidade.';
         modalTitle = "Atenção";
       }
+    }
+
+    var selectedCityId = $('.js-select-cidade option:selected').val();
+    var cityObj = MapasCulturais.opportunitiesInciso2.filter(function (city) {
+      return city.id == selectedCityId;
+    })[0];
+
+    if (!(MapasCulturais.serverDate.date >= cityObj.registrationFrom.date && MapasCulturais.serverDate.date <= cityObj.registrationTo.date)) {
+      modalTitle = cityObj.name;
+      msg = "Infelizmente n\xE3o ser\xE1 possivel realizar sua inscri\xE7\xE3o:\n            <br>\n            <br>\n            > Data de inicio das inscri\xE7\xF5es: <strong> ".concat(new Date(cityObj.registrationFrom.date).toLocaleDateString("pt-BR"), " </strong>\n            <br>\n            <br>\n            > Data de fim das inscri\xE7\xF5es: <strong> ").concat(new Date(cityObj.registrationTo.date).toLocaleDateString("pt-BR"), " </strong>");
+      $('.js-confirmar').hide();
     }
 
     showModalMsg(modalTitle, msg); //$('#modalAlertCadastro .modal-content').find('.modal-content-text').html(msg);
@@ -177,7 +192,7 @@ $(document).ready(function () {
 
     if (title != "Confirmação") {
       $('#modalAlertCadastro .modal-content').find('.btn').val('close');
-      $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("OK"); ?>');
+      $('#modalAlertCadastro .modal-content').find('.btn').text('OK');
     }
 
     text.innerHTML = message;
@@ -344,7 +359,7 @@ $(document).ready(function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-throw new Error("Module build failed (from ./node_modules/css-loader/index.js):\nModuleBuildError: Module build failed (from ./node_modules/sass-loader/dist/cjs.js):\nSassError: Can't find stylesheet to import.\n   ╷\n33 │ @import '5-pages/p-mediacao';\n   │         ^^^^^^^^^^^^^^^^^^^^\n   ╵\n  /home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/sass/app.scss 33:9  root stylesheet\n    at /home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/webpack/lib/NormalModule.js:316:20\n    at /home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/loader-runner/lib/LoaderRunner.js:367:11\n    at /home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/loader-runner/lib/LoaderRunner.js:233:18\n    at context.callback (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/loader-runner/lib/LoaderRunner.js:111:13)\n    at /home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass-loader/dist/index.js:73:7\n    at Function.call$2 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:88191:16)\n    at _render_closure1.call$2 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:77610:12)\n    at _RootZone.runBinary$3$3 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:26152:18)\n    at _RootZone.runBinary$3 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:26156:19)\n    at _FutureListener.handleError$1 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24600:19)\n    at _Future__propagateToListeners_handleError.call$0 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24897:40)\n    at Object._Future__propagateToListeners (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:4311:88)\n    at _Future._completeError$2 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24725:9)\n    at _AsyncAwaitCompleter.completeError$2 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24117:12)\n    at Object._asyncRethrow (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:4065:17)\n    at /home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:14087:20\n    at _wrapJsFunctionForAsync_closure.$protected (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:4090:15)\n    at _wrapJsFunctionForAsync_closure.call$2 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24138:12)\n    at _awaitOnObject_closure0.call$2 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24130:25)\n    at _RootZone.runBinary$3$3 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:26152:18)\n    at _RootZone.runBinary$3 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:26156:19)\n    at _FutureListener.handleError$1 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24600:19)\n    at _Future__propagateToListeners_handleError.call$0 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24897:40)\n    at Object._Future__propagateToListeners (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:4311:88)\n    at _Future._completeError$2 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24725:9)\n    at _AsyncAwaitCompleter.completeError$2 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24117:12)\n    at Object._asyncRethrow (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:4065:17)\n    at /home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:16672:20\n    at _wrapJsFunctionForAsync_closure.$protected (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:4090:15)\n    at _wrapJsFunctionForAsync_closure.call$2 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24138:12)\n    at _awaitOnObject_closure0.call$2 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24130:25)\n    at _RootZone.runBinary$3$3 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:26152:18)\n    at _RootZone.runBinary$3 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:26156:19)\n    at _FutureListener.handleError$1 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24600:19)\n    at _Future__propagateToListeners_handleError.call$0 (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:24897:40)\n    at Object._Future__propagateToListeners (/home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/node_modules/sass/sass.dart.js:4311:88)");
+// removed by extract-text-webpack-plugin
 
 /***/ }),
 
@@ -355,8 +370,8 @@ throw new Error("Module build failed (from ./node_modules/css-loader/index.js):\
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/js/app.js */"./js/app.js");
-module.exports = __webpack_require__(/*! /home/rafael/devel/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/sass/app.scss */"./sass/app.scss");
+__webpack_require__(/*! /home/hacklab/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/js/app.js */"./js/app.js");
+module.exports = __webpack_require__(/*! /home/hacklab/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/sass/app.scss */"./sass/app.scss");
 
 
 /***/ })
