@@ -231,6 +231,20 @@ class Plugin extends \MapasCulturais\Plugin
         $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function($user){ return $user->is('admin'); });
         $app->registerRole($role_definition);
 
+        $def_autorizacao = new \MapasCulturais\Definitions\FileGroup('mediacao-autorizacao', [
+            '^application/.*$',
+            '^image/(jpeg|png)$'
+        ], ['O arquivo deve ser um documento ou uma imagem .jpg ou .png'], true, null, true);
+
+        $def_documento = new \MapasCulturais\Definitions\FileGroup('mediacao-documento', [
+            '^application/.*',
+            '^image/(jpeg|png)$'
+        ], ['O arquivo deve ser um documento ou uma imagem .jpg ou .png'], true, null, true);
+
+        // registra campos para mediaçào
+        $app->registerFileGroup('aldirblanc', $def_autorizacao);
+        $app->registerFileGroup('aldirblanc', $def_documento);
+
         /* registrinado metadados do usuário */
 
         /**
