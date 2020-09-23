@@ -2,7 +2,6 @@
 
 namespace AldirBlanc;
 
-use Exception;
 use MapasCulturais\App;
 use MapasCulturais\Definitions\Role;
 use MapasCulturais\i;
@@ -43,6 +42,7 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_inciso2_disabled' => env('AB_INCISO2_DISABLE_MESSAGE','A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!'),
             'link_suporte' => env('AB_LINK_SUPORTE',null),
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS',null),
+            'mediados_owner' => env('AB_MEDIADOS_OWNER',''),
         ];
 
         $skipConfig = false;
