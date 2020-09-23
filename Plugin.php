@@ -217,6 +217,10 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
 
+        // registra o role para mediadores
+        $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function($user){ return $user->is('admin'); });
+        $app->registerRole($role_definition);
+
         /* registrinado metadados do usuário */
 
         /**
