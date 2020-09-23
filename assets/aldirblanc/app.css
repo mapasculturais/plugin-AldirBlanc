@@ -7966,6 +7966,10 @@ section.cadastro .questions--nav .modal .modal-content .btn-ok,
   }
 }
 
+.mediador .opcoes-inciso {
+  grid-template-columns: none !important;
+}
+
 #editable-entity {
   border-left: none !important;
   background: transparent !important;
