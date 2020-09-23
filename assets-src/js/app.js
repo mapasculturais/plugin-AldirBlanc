@@ -13,7 +13,9 @@ $(document).ready(function() {
     if (MapasCulturais.opportunityId != null) {
         params.opportunity = MapasCulturais.opportunityId
     }
-
+    if (MapasCulturais.opportunitiesInciso2 != null) {
+        params.opportunitiesInciso2 = MapasCulturais.opportunitiesInciso2
+    }
     /**
      * Redireciona o usuário para próxima tela conforme paramentros selecionados.
      */
@@ -43,10 +45,10 @@ $(document).ready(function() {
         modalTitle = "Confirmação";
 
         $('#modalAlertCadastro .modal-content').find('.btn').val('next');
-        $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("Confirmar"); ?>');
-
+        $('#modalAlertCadastro .modal-content').find('.btn').text('Confirmar');
+        
         if (params.opportunity != null) {
-            msg = `<?php \MapasCulturais\i::_e("Você está solicitando o benefício para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>"); ?>`;
+            msg = `Você está solicitando o benefício para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>`;
             msg = msg.replace(/_fomalizado_/g, fomalizado);
             msg = msg.replace(/_coletivo_/g, coletivo);
 
@@ -59,7 +61,7 @@ $(document).ready(function() {
         } else {
             var cidade = $('.js-select-cidade option:selected').val();
             if (cidade > 0) {
-                msg = `<?php \MapasCulturais\i::_e("Você está solicitando o benefício para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>"); ?>`;
+                msg = `Você está solicitando o benefício para <strong>_fomalizado_</strong> para espaço do tipo  <strong>_coletivo_</strong>_cidade_ <br><br><p>Você confirma essas informações?</p>`;
                 msg = msg.replace(/_fomalizado_/g, fomalizado);
                 msg = msg.replace(/_coletivo_/g, coletivo);
                 if (nomeCidade) {
@@ -73,6 +75,22 @@ $(document).ready(function() {
             }
         }
 
+        let selectedCityId = $('.js-select-cidade option:selected').val();
+        let cityObj = MapasCulturais.opportunitiesInciso2.filter(city => city.id == selectedCityId)[0]
+        if (!(MapasCulturais.serverDate.date >= cityObj.registrationFrom.date && MapasCulturais.serverDate.date <= cityObj.registrationTo.date)) {
+            modalTitle = cityObj.name;
+
+            msg = `Infelizmente não será possivel realizar sua inscrição:
+            <br>
+            <br>
+            > Data de inicio das inscrições: <strong> ${new Date(cityObj.registrationFrom.date).toLocaleDateString("pt-BR")} </strong>
+            <br>
+            <br>
+            > Data de fim das inscrições: <strong> ${new Date(cityObj.registrationTo.date).toLocaleDateString("pt-BR")} </strong>`
+            
+            $('.js-confirmar').hide();
+        } 
+        
         showModalMsg( modalTitle, msg);
 
         //$('#modalAlertCadastro .modal-content').find('.modal-content-text').html(msg);
@@ -90,7 +108,7 @@ $(document).ready(function() {
 
         if(title != "Confirmação") {
             $('#modalAlertCadastro .modal-content').find('.btn').val('close');
-            $('#modalAlertCadastro .modal-content').find('.btn').text('<?php \MapasCulturais\i::_e("OK"); ?>');
+            $('#modalAlertCadastro .modal-content').find('.btn').text('OK');
         } 
 
 
@@ -101,6 +119,7 @@ $(document).ready(function() {
             modal.fadeOut('fast');
         });
     }
+    
 
     /**
      * Ao clicar em uma das opções do local de atividade do beneficiário , o usuário é encaminhado para tela de opções de personalidades jurídica do beneficiário.
