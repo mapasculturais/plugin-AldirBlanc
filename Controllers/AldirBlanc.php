@@ -594,7 +594,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 'registrationsInciso1' => $registrationsInciso1, 
                 'registrationsInciso2' => $registrationsInciso2, 
                 'summaryStatusName'=>$summaryStatusName, 
-                'niceName' => $owner_name
+                'niceName' => $owner_name,
+                'opportunitiesInciso2' => $opportunitiesInciso2
             ]);
     }
 
