@@ -2,14 +2,13 @@
 
 namespace AldirBlanc\Controllers;
 
+use DateInterval;
 use DateTime;
 use Exception;
-use DateInterval;
-use MapasCulturais\i;
 use League\Csv\Writer;
 use MapasCulturais\App;
 use MapasCulturais\Entities\Registration;
-
+use MapasCulturais\i;
 
 /**
  * Registration Controller
@@ -57,17 +56,25 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 throw new \Exception("O formato da data é inválido.");
 
             } else {
-                $startDate = $this->data['from'];
-                $finishDate = $this->data['to'];
+                //Data ínicial
+                $startDate = new DateTime($this->data['to']);
+                $startDate = $startDate->format('Y-m-d 00:00');
+
+                //Data final
+                $finishDate = new DateTime($this->data['from']);
+                $finishDate = $finishDate->format('Y-m-d 23:59');
             }
 
         } else {
-            $date = new DateTime();  
-            $finishDate = $date->format('Y-m-d 23:59');          
-            $startDate = $date->sub(new DateInterval('P7D'));
-            
+            //Data ínicial
+            $startDate = new DateTime();
+            $startDate = $startDate->sub(new DateInterval('P7D'))->format('Y-m-d 00:00'); //Retorna o startDate a 7 dias atraz
+
+            //Data final
+            $finishDate = new DateTime();
+            $finishDate = $finishDate->format('Y-m-d 23:59');
         }
-       
+
         $opportunity = $app->repo('Opportunity')->find($opportunity_id);
         $this->registerRegistrationMetadata($opportunity);
 
@@ -76,6 +83,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          * @var string $startDate
          * @var string $finishDate
          * @var string $dql
+         * @var int $opportunity_id
+         * @var array $key_registrations
          */
         $dql = "
         SELECT
@@ -83,7 +92,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         FROM
             MapasCulturais\Entities\Registration e
         WHERE
-            e.sentTimestamp >= :startDate AND
+            e.sentTimestamp >=:startDate AND
             e.sentTimestamp <= :finishDate AND
             e.status = 1 AND
             e.opportunity = :opportunity_Id";
@@ -96,15 +105,15 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         ]);
         $registrations = $query->getResult();
 
-        if(empty($registrations)){
-            echo "Não existe registros para o intervalo selecionado ". $startDate . " - " . $finishDate;
+        if (empty($registrations)) {
+            echo "Não existe registros para o intervalo selecionado " . $startDate . " - " . $finishDate;
             die();
         }
-        
+
         /**
-         * Importa as configurações
+         * Importa as configurações do CSV
          */
-        require dirname(__DIR__) . '/config-csv-inciso1.php';              
+        require dirname(__DIR__) . '/config-csv-inciso1.php';
 
         /**
          * Itera sobre os registros mapeados
@@ -114,41 +123,39 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          */
         $data_candidate = [];
         $data_familyGroup = [];
-        foreach ($registrations as $key_registrations => $registration) {
-            foreach ($fields as $key_fields => $column) {
+        foreach ($registrations as $key_registration => $registration) {
+            foreach ($fields as $key_fields => $field) {
                 if ($key_fields != "FAMILIARCPF" && $key_fields != "GRAUPARENTESCO") {
-
-                    if (is_callable($column)) {
-                        $data_candidate[$key_registrations][$key_fields] = $column($registration);
+                    if (is_callable($field)) {
+                        $data_candidate[$key_registration][$key_fields] = $field($registration);
 
                         if ($key_fields == "CPF") {
-                            $cpf = $column($registration);
-
+                            $cpf_candidate = $field($registration);
                         }
 
-                    } else if (is_string($column) && strlen($column) > 0) {
-                        $data_candidate[$key_registrations][$key_fields] = $registration->$column;
+                    } else if (is_string($field) && strlen($field) > 0) {
+                        $data_candidate[$key_registration][$key_fields] = $registration->$field;
 
                     } else {
-                        $data_candidate[$key_registrations][$key_fields] = $column;
+                        $data_candidate[$key_registration][$key_fields] = $field;
 
                     }
                 } else {
-                    $data_candidate[$key_registrations][$key_fields] = null;
+                    $data_candidate[$key_registration][$key_fields] = null;
 
-                    foreach ($registration->$column as $key_familyGroup => $familyGroup) {
-                        foreach ($headers as $key => $value) {
-                            if ($value == "CPF") {
-                                $data_familyGroup[$key_registrations][$key_familyGroup][$value] = $cpf;
+                    foreach ($registration->$field as $key_familyGroup => $familyGroup) {
+                        foreach ($headers as $key => $header) {
+                            if ($header == "CPF") {
+                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = $cpf_candidate;
 
-                            } elseif ($value == "FAMILIARCPF") {
-                                $data_familyGroup[$key_registrations][$key_familyGroup][$value] = $familyGroup->cpf;
+                            } elseif ($header == "FAMILIARCPF") {
+                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = $familyGroup->cpf;
 
-                            } elseif ($value == "GRAUPARENTESCO") {
-                                $data_familyGroup[$key_registrations][$key_familyGroup][$value] = $familyGroup->relationship;
+                            } elseif ($header == "GRAUPARENTESCO") {
+                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = $familyGroup->relationship;
 
                             } else {
-                                $data_familyGroup[$key_registrations][$key_familyGroup][$value] = null;
+                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = null;
 
                             }
                         }
@@ -157,10 +164,12 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 }
             }
         }
-        
+
         /**
          * Prepara as linhas do CSV
          * @var array $data_candidate
+         * @var array $data_familyGroup
+         * @var array $headers
          * @var array $data
          */
         foreach ($data_candidate as $key_candidate => $candidate) {
