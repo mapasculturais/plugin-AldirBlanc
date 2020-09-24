@@ -183,6 +183,12 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
+        $app->hook('auth.createUser:after', function($user,$response, $url) use ($app, $plugin) {
+            if(strpos($url, '/aldirblanc') === 0){
+                $_SESSION['mapasculturais.auth.redirect_path'] = '/aldirblanc';
+            } 
+        });
+
         $plugin = $this;
 
         /**
@@ -203,6 +209,34 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
+        $app->hook('GET(aldirblanc.<<*>>):before', function() use ($plugin, $app) {
+            if ($app->user->is('mediador')) {
+                $limit = 1000;
+                
+                $plugin->_config['inciso1_limite'] = $limit;
+                $plugin->_config['inciso2_limite'] = $limit;
+            }
+        });
+        
+        $app->hook('entity(User).save:after', function() use ($plugin, $app) {
+            $emails = $plugin->config['lista_mediadores'];
+            if (in_array($this->email, $emails) ){
+                $this->addRole('mediador');
+            }
+        });
+
+        $app->hook('auth.successful', function() use($plugin, $app) {
+            $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
+            $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
+
+            $opportunities = $app->repo('Opportunity')->findBy(['id' => $opportunities_ids]);
+            
+            foreach($opportunities as $opportunity) { 
+                if($opportunity->canUser('@control')) {
+                    $_SESSION['mapasculturais.auth.redirect_path'] = $app->createUrl('panel', 'index');
+                }
+            }
+        });
     }
 
     /**
