@@ -222,3 +222,7 @@ section.cadastro {
         max-width: calc(100% - 30px);
     }
 }
+
+.mediador .opcoes-inciso {
+    grid-template-columns:none !important;
+}
