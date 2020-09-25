@@ -229,7 +229,8 @@ class Plugin extends \MapasCulturais\Plugin
                 $plugin->_config['inciso2_limite'] = $limit;
             }
         });
-        
+
+        // Adiciona permissão para mediador se o email do usuário estiver na lista de mediadores na config
         $app->hook('entity(User).save:after', function() use ($plugin, $app) {
             $emails = $plugin->config['lista_mediadores'];
             if (in_array($this->email, $emails) ){
@@ -249,6 +250,19 @@ class Plugin extends \MapasCulturais\Plugin
                 }
             }
         });
+
+        // Redireciona usuário que acessar a oportunidade dos incisos I e II pelo mapas para o plugin
+        $app->hook('GET(opportunity.single):before', function() use($plugin, $app) {
+            $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
+            $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
+            $requestedOpportunity = $this->requestedEntity;
+            if(!($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
+                $url = $app->createUrl('aldirblanc', 'cadastro');
+                $app->redirect($url);
+            }
+        });
+        
+
     }
 
     /**
