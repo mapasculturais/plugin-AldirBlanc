@@ -42,22 +42,16 @@ $inciso2_categories = $plugin->config['inciso2_categories'];
             <h1> Espaços e organizações culturais </h1>
             <h2 class="category"><?php echo $entity->category ?></h2>
             <p>Solicitação de benefício para
-                <?php if ($entity->category == $inciso2_categories['espaco-formalizado']): ?>
-                    <strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo 
-                    <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.
-
-                <?php elseif ($entity->category == $inciso2_categories['espaco-nao-formalizado']): ?>
-                    <strong>Espaço artístico e cultural mantido por coletivo ou grupo cultural (sem CNPJ) ou por pessoa física (CPF)</strong> para espaço do tipo 
-                    <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.
-
-                <?php elseif ($entity->category == $inciso2_categories['coletivo-formalizado']): ?>
-                    <strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo 
-                    <strong>Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital</strong>.
-                    
-                <?php elseif ($entity->category == $inciso2_categories['coletivo-nao-formalizado']): ?>
-                    <strong>Espaço artístico e cultural mantido por coletivo ou grupo cultural (sem CNPJ) ou por pessoa física (CPF)</strong> para espaço do tipo 
-                    <strong>Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital</strong>.
-                <?php endif; ?>
+                <?php 
+                if ($entity->category == $inciso2_categories['espaco-formalizado']):
+                    echo $plugin->config['texto_categoria_espaco-formalizado'];
+                elseif ($entity->category == $inciso2_categories['espaco-nao-formalizado']): 
+                    echo $plugin->config['texto_categoria_espaco-nao-formalizado'];
+                elseif ($entity->category == $inciso2_categories['coletivo-formalizado']): 
+                    echo $plugin->config['texto_categoria_coletivo-formalizado'];
+                 elseif ($entity->category == $inciso2_categories['coletivo-nao-formalizado']): 
+                    echo $plugin->config['texto_categoria_coletivo-nao-formalizado'];
+                endif; ?>
             </p>
         <?php endif; ?> 
         <?php $this->applyTemplateHook('form','begin'); ?>

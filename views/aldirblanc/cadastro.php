@@ -137,7 +137,7 @@ if (count($cidades) === 0) {
             <div class="questions--options ">
                 <label class="informative-box">
                     <div class="informative-box--title">
-                        <h2 class="js-text"><?php i::_e('Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado;') ?></h2>
+                        <h2 class="js-text"><?php echo $this->controller->config['texto_cadastro_espaco'] ?></h2>
                         <i class="fas fa-minus"></i>
                         <!-- <i class="far fa-check-circle"></i> -->
                     </div>
@@ -145,7 +145,7 @@ if (count($cidades) === 0) {
                 </label>
                 <label class="informative-box">
                     <div class="informative-box--title">
-                        <h2 class="js-text"><?php i::_e('Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.') ?></h2>
+                        <h2 class="js-text"><?php echo $this->controller->config['texto_cadastro_coletivo'] ?></h2>
                         <i class="fas fa-minus"></i>
                         <!-- <i class="far fa-check-circle"></i> -->
                     </div>
@@ -164,7 +164,7 @@ if (count($cidades) === 0) {
             <div class="questions--options">
                 <label class="informative-box">
                     <div class="informative-box--title">
-                        <h2 class="js-text"><?php i::_e('Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.') ?></h2>
+                        <h2 class="js-text"><?php echo $this->controller->config['texto_cadastro_cnpj'] ?></h2>
                         <i class="fas fa-minus"></i>
                         <!-- <i class="far fa-check-circle"></i> -->
                     </div>
@@ -172,7 +172,7 @@ if (count($cidades) === 0) {
                 </label>
                 <label class="informative-box">
                     <div class="informative-box--title">
-                        <h2 class="js-text"><?php i::_e('Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico') ?></h2>
+                        <h2 class="js-text"><?php echo $this->controller->config['texto_cadastro_cpf'] ?></h2>
                         <i class="fas fa-minus"></i>
                         <!-- <i class="far fa-check-circle"></i> -->
                     </div>
