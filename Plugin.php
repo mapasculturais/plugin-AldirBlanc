@@ -2,8 +2,8 @@
 
 namespace AldirBlanc;
 
-use Exception;
 use MapasCulturais\App;
+use MapasCulturais\Definitions\Role;
 use MapasCulturais\i;
 
 // @todo refatorar autoloader de plugins para resolver classes em pastas
@@ -44,6 +44,16 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_inciso2_disabled' => env('AB_INCISO2_DISABLE_MESSAGE','A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!'),
             'link_suporte' => env('AB_LINK_SUPORTE',null),
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS',null),
+            'mediados_owner' => env('AB_MEDIADOS_OWNER',''),
+            'lista_mediadores' =>  (array) json_decode(env('AB_LISTA_MEDIADORES', '[]')),
+            'texto_categoria_espaco-formalizado' => env('AB_TXT_CAT_ESPACO_FORMALIZADO', '<strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.' ),
+            'texto_categoria_espaco-nao-formalizado' => env('AB_TXT_CAT_ESPACO_NAO_FORMALIZADO', '<strong>Espaço artístico e cultural mantido por coletivo ou grupo cultural (sem CNPJ) ou por pessoa física (CPF)</strong> para espaço do tipo <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.' ),
+            'texto_categoria_coletivo-formalizado' => env('AB_TXT_CAT_COLETIVO_FORMALIZADO', '<strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo <strong>Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital</strong>.' ),
+            'texto_categoria_coletivo-nao-formalizado' => env('AB_TXT_CAT_COLETIVO_NAO_FORMALIZADO', '<strong>Espaço artístico e cultural mantido por coletivo ou grupo cultural (sem CNPJ) ou por pessoa física (CPF)</strong> para espaço do tipo <strong>Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital</strong>.' ),
+            'texto_cadastro_espaco'  => env('AB_TXT_CADASTRO_ESPACO', 'Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado.'),
+            'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
+            'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
+            'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
             'csv_inciso1' => require_once dirname(__DIR__) . '/AldirBlanc/config-csv-inciso1.php',
         ];
 
@@ -55,7 +65,7 @@ class Plugin extends \MapasCulturais\Plugin
         if (!$skipConfig) {
             $cache_id = __METHOD__ . ':' . 'config';
 
-            if ($cached = $app->cache->fetch($cache_id)) {
+            if (!isset($_GET['ab_skip_cache']) && ($cached = $app->cache->fetch($cache_id)) ) {
                 $config = $cached;
             } else {
                 $config = $this->configOpportunitiesIds($config);
@@ -110,6 +120,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         // enqueue scripts and styles
+        $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
         $app->view->enqueueStyle('aldirblanc', 'app', 'aldirblanc/app.css');
         $app->view->enqueueStyle('aldirblanc', 'fontawesome', 'https://use.fontawesome.com/releases/v5.8.2/css/all.css');
         $app->view->assetManager->publishFolder('aldirblanc/img', 'aldirblanc/img');
@@ -187,6 +198,12 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
+        $app->hook('auth.createUser:redirectUrl', function(&$redirectUrl) {
+            if(isset($_SESSION['mapasculturais.auth.redirect_path']) && strpos($_SESSION['mapasculturais.auth.redirect_path'], '/aldirblanc') === 0) {
+                $redirectUrl =  '/aldirblanc';
+            } 
+        });
+
         $plugin = $this;
 
         /**
@@ -207,6 +224,34 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
+        $app->hook('GET(aldirblanc.<<*>>):before', function() use ($plugin, $app) {
+            if ($app->user->is('mediador')) {
+                $limit = 1000;
+                
+                $plugin->_config['inciso1_limite'] = $limit;
+                $plugin->_config['inciso2_limite'] = $limit;
+            }
+        });
+        
+        $app->hook('entity(User).save:after', function() use ($plugin, $app) {
+            $emails = $plugin->config['lista_mediadores'];
+            if (in_array($this->email, $emails) ){
+                $this->addRole('mediador');
+            }
+        });
+
+        $app->hook('auth.successful', function() use($plugin, $app) {
+            $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
+            $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
+
+            $opportunities = $app->repo('Opportunity')->findBy(['id' => $opportunities_ids]);
+            
+            foreach($opportunities as $opportunity) { 
+                if($opportunity->canUser('@control')) {
+                    $_SESSION['mapasculturais.auth.redirect_path'] = $app->createUrl('panel', 'index');
+                }
+            }
+        });
     }
 
     /**
@@ -221,7 +266,42 @@ class Plugin extends \MapasCulturais\Plugin
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
         $app->registerController('dataprev', 'AldirBlanc\Controllers\DataPrev');
 
+        // registra o role para mediadores
+        $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function($user){ return $user->is('admin'); });
+        $app->registerRole($role_definition);
+
+        $def_autorizacao = new \MapasCulturais\Definitions\FileGroup('mediacao-autorizacao', [
+            '^application/.*$',
+            '^image/(jpeg|png)$'
+        ], ['O arquivo deve ser um documento ou uma imagem .jpg ou .png'], true, null, true);
+
+        $def_documento = new \MapasCulturais\Definitions\FileGroup('mediacao-documento', [
+            '^application/.*',
+            '^image/(jpeg|png)$'
+        ], ['O arquivo deve ser um documento ou uma imagem .jpg ou .png'], true, null, true);
+
+        // registra campos para mediaçào
+        $app->registerFileGroup('aldirblanc', $def_autorizacao);
+        $app->registerFileGroup('aldirblanc', $def_documento);
+
         /* registrinado metadados do usuário */
+
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_contato_tipo', [
+            'label' => i::__('Tipo de contato da mediação'),
+            'type' => 'select',
+            'private' => true,
+            'options' => [
+                'telefone-fixo' => i::__('Telefone Fixo'),
+                'whatsapp' => i::__('Whatsapp'),
+                'sms' => i::__('SMS'),
+            ]
+        ]);
+
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_contato', [
+            'label' => i::__('Número telefônico do contato'),
+            'type' => 'text',
+            'private' => true
+        ]);
 
         /**
          * Tipo de usuário na aldir 
