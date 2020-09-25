@@ -45,7 +45,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         }
 
         //Oportunidade que a query deve filtrar
-        $opportunity_id = 1;
+        $opportunity_id = $this->config['inciso1_opportunity_id'];
 
          //Data ínicial que a query deve filtrar
          $startDate = new DateTime();
