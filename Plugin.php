@@ -187,9 +187,9 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
-        $app->hook('auth.createUser:after', function($user,$response, $url) use ($app, $plugin) {
-            if(strpos($url, '/aldirblanc') === 0){
-                $_SESSION['mapasculturais.auth.redirect_path'] = '/aldirblanc';
+        $app->hook('auth.createUser:redirectUrl', function(&$redirectUrl) {
+            if(isset($_SESSION['mapasculturais.auth.redirect_path']) && strpos($_SESSION['mapasculturais.auth.redirect_path'], '/aldirblanc') === 0) {
+                $redirectUrl =  '/aldirblanc';
             } 
         });
 
