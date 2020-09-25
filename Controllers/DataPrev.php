@@ -37,6 +37,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
     {   
         //Seta o timeout
         ini_set('max_execution_time', 0);
+        ini_set('memory_limit','768M');
 
         $this->requireAuthentication();
         $app = App::i();
@@ -199,49 +200,49 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 return $field_id;
 
             },
-            "SISTEMA_CAD_ESTADUAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf['SISTEMA_CAD_ESTADUAL'];
-
+            "SISTEMA_CAD_ESTADUAL" => function ($registrations) use ($csv_conf, $app) {
+                return $csv_conf['FLAG_CAD_ESTADUAL'] ? $app->view->dict('site: name', false) : '';
+                
             },
             "IDENTIFICADOR_CAD_ESTADUAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf['SISTEMA_CAD_ESTADUAL'];
+                return $csv_conf['FLAG_CAD_ESTADUAL'] ? $registrations->number : '';
 
             },
             "FLAG_CAD_MUNICIPAL" => function ($registrations) use ($csv_conf) {
                 return $csv_conf["FLAG_CAD_MUNICIPAL"];
 
             },
-            "SISTEMA_CAD_MUNICIPAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["SISTEMA_CAD_MUNICIPAL"];
+            "SISTEMA_CAD_MUNICIPAL" => function ($registrations) use ($csv_conf, $app) {
+                return $csv_conf['FLAG_CAD_MUNICIPAL'] ? $app->view->dict('site: name', false) : '';
 
             },
             "IDENTIFICADOR_CAD_MUNICIPAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["IDENTIFICADOR_CAD_MUNICIPAL"];
+                return $csv_conf['FLAG_CAD_MUNICIPAL'] ? $registrations->number : '';
 
             },
             "FLAG_CAD_DISTRITAL" => function ($registrations) use ($csv_conf) {
                 return $csv_conf["FLAG_CAD_DISTRITAL"];
 
             },
-            "SISTEMA_CAD_DISTRITAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["SISTEMA_CAD_DISTRITAL"];
+            "SISTEMA_CAD_DISTRITAL" => function ($registrations) use ($csv_conf, $app) {
+                return $csv_conf['FLAG_CAD_DISTRITAL'] ? $app->view->dict('site: name', false) : '';
+
 
             },
             "IDENTIFICADOR_CAD_DISTRITAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["IDENTIFICADOR_CAD_DISTRITAL"];
+                return $csv_conf['FLAG_CAD_DISTRITAL'] ? $registrations->number : '';
 
             },
             "FLAG_CAD_SNIIC" => function ($registrations) use ($csv_conf) {
                 return $csv_conf["FLAG_CAD_SNIIC"];
 
             },
-            "SISTEMA_CAD_SNIIC" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["SISTEMA_CAD_SNIIC"];
+            "SISTEMA_CAD_SNIIC" => function ($registrations) use ($csv_conf, $app) {
+                return $csv_conf['FLAG_CAD_SNIIC'] ? $app->view->dict('site: name', false) : '';
 
             },
             "IDENTIFICADOR_CAD_SNIIC" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["IDENTIFICADOR_CAD_SNIIC"];
-
+                return $csv_conf['FLAG_CAD_SNIIC'] ? $registrations->number : '';
             },
             "FLAG_CAD_SALIC" => function ($registrations) use ($csv_conf) {
                 return $csv_conf["FLAG_CAD_SALIC"];
@@ -405,6 +406,10 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                     
                     if(is_array($registration->$_field)) {
                         foreach ($registration->$_field as $key_familyGroup => $familyGroup) {
+                            if(!isset($familyGroup->cpf) || !$familyGroup->relationship){
+                                continue;
+                            }
+
                             foreach ($headers as $key => $header) {
                                 if ($header == "CPF") {
                                     $data_familyGroup[$key_registration][$key_familyGroup][$header] = $cpf_candidate;
