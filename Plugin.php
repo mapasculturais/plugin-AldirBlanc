@@ -264,6 +264,18 @@ class Plugin extends \MapasCulturais\Plugin
                 $app->redirect($url);
             }
         });
+        $app->hook('GET(registration.view):before', function() use($plugin, $app) {
+            $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
+            $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
+            $registration = $this->requestedEntity;
+            $requestedOpportunity = $registration->opportunity;
+            if(!($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
+                $url = $app->createUrl('aldirblanc', 'formulario',[$registration->id]);
+                $app->redirect($url);
+            }
+        });
+        
+
     }
 
     /**
