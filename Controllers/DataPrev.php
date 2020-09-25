@@ -382,6 +382,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         $data_candidate = [];
         $data_familyGroup = [];
         foreach ($registrations as $key_registration => $registration) {
+            $cpf_candidate = '';
             foreach ($fields as $key_fields => $field) {
                 if ($key_fields != "FAMILIARCPF" && $key_fields != "GRAUPARENTESCO") {
                     if (is_callable($field)) {
@@ -400,24 +401,27 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                     }
                 } else {
                     $data_candidate[$key_registration][$key_fields] = null;
-                    $field = $field($registrations);
-                    foreach ($registration->$field as $key_familyGroup => $familyGroup) {
-                        foreach ($headers as $key => $header) {
-                            if ($header == "CPF") {
-                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = $cpf_candidate;
-
-                            } elseif ($header == "FAMILIARCPF") {
-                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = str_replace(['.', '-'], '', $familyGroup->cpf);
-
-                            } elseif ($header == "GRAUPARENTESCO") {
-                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = $familyGroup->relationship;
-
-                            } else {
-                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = null;
-
+                    $_field = $field($registrations);
+                    
+                    if(is_array($registration->$_field)) {
+                        foreach ($registration->$_field as $key_familyGroup => $familyGroup) {
+                            foreach ($headers as $key => $header) {
+                                if ($header == "CPF") {
+                                    $data_familyGroup[$key_registration][$key_familyGroup][$header] = $cpf_candidate;
+    
+                                } elseif ($header == "FAMILIARCPF") {
+                                    $data_familyGroup[$key_registration][$key_familyGroup][$header] = str_replace(['.', '-'], '', $familyGroup->cpf);
+    
+                                } elseif ($header == "GRAUPARENTESCO") {
+                                    $data_familyGroup[$key_registration][$key_familyGroup][$header] = $familyGroup->relationship;
+    
+                                } else {
+                                    $data_familyGroup[$key_registration][$key_familyGroup][$header] = null;
+    
+                                }
                             }
+    
                         }
-
                     }
                 }
             }
