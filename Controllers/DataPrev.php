@@ -34,7 +34,10 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
     }
 
     public function GET_export()
-    {
+    {   
+        //Seta o timeout
+        ini_set('max_execution_time', 0);
+
         $this->requireAuthentication();
         $app = App::i();
         if (!$app->user->is("admin")) {
