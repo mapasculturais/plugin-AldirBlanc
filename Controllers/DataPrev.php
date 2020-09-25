@@ -445,8 +445,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 }
             }
         }
-        var_dump($data);
-        exit();
+       
         /**
          * Cria o CSV
          */
