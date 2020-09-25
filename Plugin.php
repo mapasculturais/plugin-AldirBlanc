@@ -8,6 +8,8 @@ use MapasCulturais\i;
 
 // @todo refatorar autoloader de plugins para resolver classes em pastas
 require_once 'Controllers/AldirBlanc.php';
+require_once 'Controllers/DataPrev.php';
+require_once 'vendor/autoload.php';
 
 class Plugin extends \MapasCulturais\Plugin
 {
@@ -51,7 +53,8 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_espaco'  => env('AB_TXT_CADASTRO_ESPACO', 'Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado.'),
             'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
-            'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.')
+            'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
+            'csv_inciso1' => require_once dirname(__DIR__) . '/AldirBlanc/config-csv-inciso1.php',
         ];
 
         $skipConfig = false;
@@ -275,6 +278,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
+        $app->registerController('dataprev', 'AldirBlanc\Controllers\DataPrev');
 
         // registra o role para mediadores
         $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function($user){ return $user->is('admin'); });
