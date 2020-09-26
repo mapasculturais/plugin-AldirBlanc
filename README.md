@@ -6,7 +6,7 @@ Plugin que implementa no Mapas Culturais os formulários do inciso I e II da Lei
 Antes de tudo certifique-se de estar com a biblioteca CSV instalada em seu ambiente.
 Para ver a documentação da lib, acessar https://csv.thephpleague.com/
 
-**Configuração do **
+**Configuração do arquivo config-csv-inciso1.php**
 
 Para configurar o exportador, você deve copiar o arquivo <b>config-csv-inciso1-exemplo.php</b> que está no caminho .
 
