@@ -44,7 +44,7 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_inciso2_disabled' => env('AB_INCISO2_DISABLE_MESSAGE','A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!'),
             'link_suporte' => env('AB_LINK_SUPORTE',null),
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS',null),
-            'csv_inciso1' => require_once dirname(__DIR__) . '/AldirBlanc/config-csv-inciso1.php',
+            'csv_inciso1' => require_once env('AB_CSV_INCISO1',dirname(__DIR__) . '/AldirBlanc/config-csv-inciso1.php'),
         ];
 
         $skipConfig = false;
