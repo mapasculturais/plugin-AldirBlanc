@@ -1,22 +1,11 @@
 <?php
-$app = \MapasCulturais\App::i();
-$siteName = $app->view->dict('site: name', false);
-
 return [
     "CPF" => 'field_30',
     "SEXO" => "field_17",
     "FLAG_CAD_ESTADUAL" => 1,
-    "SISTEMA_CAD_ESTADUAL" => $siteName,
-    "IDENTIFICADOR_CAD_ESTADUAL" => $siteName,
     "FLAG_CAD_MUNICIPAL" => 0,
-    "SISTEMA_CAD_MUNICIPAL" => null,
-    "IDENTIFICADOR_CAD_MUNICIPAL" => null,
     "FLAG_CAD_DISTRITAL" => 0,
-    "SISTEMA_CAD_DISTRITAL" => null,
-    "IDENTIFICADOR_CAD_DISTRITAL" => null,
     "FLAG_CAD_SNIIC" => 0,
-    "SISTEMA_CAD_SNIIC" => null,
-    "IDENTIFICADOR_CAD_SNIIC" => null,
     "FLAG_CAD_SALIC" => 0,
     "FLAG_CAD_SICAB" => 0,
     "FLAG_CAD_OUTROS" => 0,

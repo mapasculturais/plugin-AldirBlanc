@@ -2,17 +2,22 @@
 
 namespace AldirBlanc\Controllers;
 
+use Exception;
 use MapasCulturais\App;
+use MapasCulturais\Entities\Agent;
 use MapasCulturais\i;
 use MapasCulturais\Entities\Registration;
 use MapasCulturais\Entities\RegistrationSpaceRelation as RegistrationSpaceRelationEntity;
+use MapasCulturais\Entities\User;
+use MapasCulturais\Exceptions\PermissionDenied;
 
 /**
  * Registration Controller
  *
  * By default this controller is registered with the id 'registration'.
  *
- *  @property-read \MapasCulturais\Entities\Registration $requestedEntity The Requested Entity
+ * @property-read \MapasCulturais\Entities\Registration $requestedEntity The Requested Entity
+ * @property-read mixed $config configuração do plugin
  */
 // class AldirBlanc extends \MapasCulturais\Controllers\EntityController {
 class AldirBlanc extends \MapasCulturais\Controllers\Registration
@@ -85,6 +90,11 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             throw new \Exception('Categoria não existe');
         }
     }
+
+    function getConfig() {
+        return $this->plugin->config;
+    }
+
     /**
      * Retorna a oportunidade do inciso I
      *
@@ -160,6 +170,33 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         parent::finish($data, $status, $isAjax);
     }
+
+    protected function createMediado() {
+        $app = App::i();
+
+        $owner_id = $this->config['mediados_owner'];
+        
+        if (!$owner_id) {
+            throw new Exception('Verifique a configuração `mediados_owner`.');
+        }
+        $owner = $app->repo('Agent')->find($owner_id);
+        
+        $app->disableAccessControl();
+        
+        $agent = new Agent($owner->user);
+        $agent->type = 1;
+        $agent->name = "";
+        $agent->shortDescription = "";
+
+        $agent->save(true);
+
+        $agent->createAgentRelation($app->user->profile, 'mediaror', true, true);
+
+        $app->disableAccessControl();
+
+        return $agent;
+    }
+
     /**
     * Redireciona o usuário para o formulário do inciso II
     *
@@ -172,7 +209,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $this->requireAuthentication();
         $app = App::i();
-        if (isset($this->data['agent']) && $this->data['agent'] != "" ) {
+
+        if ($app->user->is('mediador')) {
+            $agent = $this->createMediado();
+            $this->data = array_merge($this->data, ['agent' => $agent->id, 'inciso' => 2]);
+            $app->redirect($this->createUrl('nova_inscricao', $this->data ));
+            
+        } else if (isset($this->data['agent']) && $this->data['agent'] != "" ) {
             $agent = $app->repo('Agent')->find($this->data['agent']);
         } else {
             $agent = $app->user->profile;
@@ -218,7 +261,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
 
         $app = App::i();
-        if (isset($this->data['agent']) && $this->data['agent'] != "" ) {
+
+        if ($app->user->is('mediador')) {
+            $agent = $this->createMediado();
+
+            $app->redirect($this->createUrl('nova_inscricao', ['agent' => $agent->id, 'inciso' => 1]));
+            
+        } else if (isset($this->data['agent']) && $this->data['agent'] != "" ) {
             $agent = $app->repo('Agent')->find($this->data['agent']);
         } else {
             $agent = $app->user->profile;
@@ -259,7 +308,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
      * 
      */
     function GET_nova_inscricao()
-    {
+    {   
         $this->requireAuthentication();
         if (!isset($this->data['agent']) || !in_array(intval(@$this->data['inciso']), [1, 2])) {
             // @todo tratar esse erro
@@ -340,20 +389,23 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     'type'=>'EQ(2)',
 
                 ]);
-
-                if(count($agentsQuery) == 1){
+                
+                if(count($agentsQuery) == 1 && !$app->user->is('mediador')){
                     if (!isset($agentsQuery[0]['id']) || $agentsQuery[0]['id'] == "" ) {
                         // @todo tratar esse erro
                         throw new \Exception();
                     }
                     $agentRelated = $app->repo('agent')->find($agentsQuery[0]['id']);
                 }
-                else if (count($agentsQuery) == 0) {
+                else if (count($agentsQuery) == 0 || $app->user->is('mediador') ) {
+                    $app->disableAccessControl();
                     $agentRelated = new \MapasCulturais\Entities\Agent($agent->user);
                     //@TODO: confirmar nome e tipo do Agente coletivo
                     $agentRelated->name = ' ';
                     $agentRelated->type = 2;
+                    $agentRelated->parent = $agent;
                     $agentRelated->save(true);
+                    $app->enableAccessControl();
                 }                  
                 else if (count($agentsQuery) > 1 && (!isset($this->data['agentRelated']) || $this->data['agentRelated'] == '' )) {
 
@@ -470,8 +522,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $app = App::i();
 
-        if ($app->user->aldirblanc_tipo_usuario == 'assistente-social') {
-            $app->redirect($this->createUrl('assistenteSocial'));
+        if ($app->user->is('mediador')) {
+            $app->redirect($this->createUrl('cadastro'));
         } else if ($app->user->aldirblanc_tipo_usuario == 'solicitante') {
             $app->redirect($this->createUrl('cadastro'));
         } else {
@@ -510,6 +562,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         $app = App::i();
 
+        $controller = $app->controller('registration');
+
         $registrationsInciso1 = [];
         $registrationsInciso2 = [];
 
@@ -522,12 +576,27 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         if ($this->config['inciso1_enabled']) {
             $inciso1 = $this->getOpportunityInciso1();
-            $registrationsInciso1 = $repo->findByOpportunityAndUser($inciso1, $app->user);
+            $registrations = $controller->apiQuery([
+                '@select' => 'id', 
+                'opportunity' => "EQ({$inciso1->id})", 
+                'status' => 'GTE(0)'
+            ]);
+            $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+            $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
         }
         
         if ($this->config['inciso2_enabled']) {
+            $inciso2_ids = implode(',', $this->config['inciso2_opportunity_ids']);
+            $registrations = $controller->apiQuery([
+                '@select' => 'id', 
+                'opportunity' => "IN({$inciso2_ids})", 
+                'status' => 'GTE(0)'
+            ]);
+            $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+            $registrationsInciso2 = $repo->findBy(['id' => $registrations_ids]);
             $opportunitiesIdsInciso2 = array_values($this->config['inciso2_opportunity_ids']);
-            $registrationsInciso2 = $repo->findBy(['opportunity' => $opportunitiesIdsInciso2, 'owner' => $owner_id]);
+            $opportunitiesInciso2 = $app->repo('Opportunity')->findRegistrationDateByIds($opportunitiesIdsInciso2); 
+
         }
         
         $this->render('cadastro', [
@@ -535,7 +604,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 'registrationsInciso1' => $registrationsInciso1, 
                 'registrationsInciso2' => $registrationsInciso2, 
                 'summaryStatusName'=>$summaryStatusName, 
-                'niceName' => $owner_name
+                'niceName' => $owner_name,
+                'opportunitiesInciso2' => $opportunitiesInciso2
             ]);
     }
 
@@ -546,9 +616,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             // @todo tratar esse erro
             throw new \Exception();
         }
-        $registration = $app->repo('Registration')->find($this->data['id']);
         $this->requireAuthentication();
-       
+        $registration = $app->repo('Registration')->find($this->data['id']);
+        
         $this->render('termos-e-condicoes-inciso'.$registration->inciso, ['registration_id' => $this->data['id']]);
     }
     /**
@@ -670,6 +740,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->json("Sucesso");
     }
 
+    /* REPORTE */
     function GET_reporte() {
 
         $data = [

@@ -37,6 +37,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
     {   
         //Seta o timeout
         ini_set('max_execution_time', 0);
+        ini_set('memory_limit','768M');
 
         $this->requireAuthentication();
         $app = App::i();
@@ -45,7 +46,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         }
 
         //Oportunidade que a query deve filtrar
-        $opportunity_id = 1;
+        $opportunity_id = $this->config['inciso1_opportunity_id'];
 
          //Data ínicial que a query deve filtrar
          $startDate = new DateTime();
@@ -199,49 +200,49 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 return $field_id;
 
             },
-            "SISTEMA_CAD_ESTADUAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf['SISTEMA_CAD_ESTADUAL'];
-
+            "SISTEMA_CAD_ESTADUAL" => function ($registrations) use ($csv_conf, $app) {
+                return $csv_conf['FLAG_CAD_ESTADUAL'] ? $app->view->dict('site: name', false) : '';
+                
             },
             "IDENTIFICADOR_CAD_ESTADUAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf['SISTEMA_CAD_ESTADUAL'];
+                return $csv_conf['FLAG_CAD_ESTADUAL'] ? $registrations->number : '';
 
             },
             "FLAG_CAD_MUNICIPAL" => function ($registrations) use ($csv_conf) {
                 return $csv_conf["FLAG_CAD_MUNICIPAL"];
 
             },
-            "SISTEMA_CAD_MUNICIPAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["SISTEMA_CAD_MUNICIPAL"];
+            "SISTEMA_CAD_MUNICIPAL" => function ($registrations) use ($csv_conf, $app) {
+                return $csv_conf['FLAG_CAD_MUNICIPAL'] ? $app->view->dict('site: name', false) : '';
 
             },
             "IDENTIFICADOR_CAD_MUNICIPAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["IDENTIFICADOR_CAD_MUNICIPAL"];
+                return $csv_conf['FLAG_CAD_MUNICIPAL'] ? $registrations->number : '';
 
             },
             "FLAG_CAD_DISTRITAL" => function ($registrations) use ($csv_conf) {
                 return $csv_conf["FLAG_CAD_DISTRITAL"];
 
             },
-            "SISTEMA_CAD_DISTRITAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["SISTEMA_CAD_DISTRITAL"];
+            "SISTEMA_CAD_DISTRITAL" => function ($registrations) use ($csv_conf, $app) {
+                return $csv_conf['FLAG_CAD_DISTRITAL'] ? $app->view->dict('site: name', false) : '';
+
 
             },
             "IDENTIFICADOR_CAD_DISTRITAL" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["IDENTIFICADOR_CAD_DISTRITAL"];
+                return $csv_conf['FLAG_CAD_DISTRITAL'] ? $registrations->number : '';
 
             },
             "FLAG_CAD_SNIIC" => function ($registrations) use ($csv_conf) {
                 return $csv_conf["FLAG_CAD_SNIIC"];
 
             },
-            "SISTEMA_CAD_SNIIC" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["SISTEMA_CAD_SNIIC"];
+            "SISTEMA_CAD_SNIIC" => function ($registrations) use ($csv_conf, $app) {
+                return $csv_conf['FLAG_CAD_SNIIC'] ? $app->view->dict('site: name', false) : '';
 
             },
             "IDENTIFICADOR_CAD_SNIIC" => function ($registrations) use ($csv_conf) {
-                return $csv_conf["IDENTIFICADOR_CAD_SNIIC"];
-
+                return $csv_conf['FLAG_CAD_SNIIC'] ? $registrations->number : '';
             },
             "FLAG_CAD_SALIC" => function ($registrations) use ($csv_conf) {
                 return $csv_conf["FLAG_CAD_SALIC"];
@@ -273,39 +274,45 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                     'Artesanato',
                     'Ópera',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
+                        $result = 1;
                     }
                 }
+
+                return $result;
             },
             "FLAG_ATUACAO_AUDIOVISUAL" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_AUDIOVISUAL"];
                 $options = [
                     'Audiovisual',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
+                        $result = 1;
+                    } 
                 }
+
+                return $result;
             },
             "FLAG_ATUACAO_MUSICA" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSICA"];
                 $options = [
                     'Música',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
+                        $result = 1;
                     }
                 }
+
+                return $result;
             },
             "FLAG_ATUACAO_ARTES_VISUAIS" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSICA"];
@@ -314,13 +321,15 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                     'Moda',
                     'Fotografia',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
+                        $result = 1;
                     }
                 }
+
+                return $result;
             },
             "FLAG_ATUACAO_PATRIMONIO_CULTURAL" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_PATRIMONIO_CULTURAL"];
@@ -329,39 +338,43 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                     'Gastronomia',
                     'Outros',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
+                        $result = 1;
                     }
                 }
+                return $result;
             },
             "FLAG_ATUACAO_MUSEUS_MEMORIA" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSEUS_MEMORIA"];
                 $options = [
                     'Museu',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
+                        $result = 1;
+                    } 
                 }
+                return $result;
             },
             "FLAG_ATUACAO_HUMANIDADES" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSEUS_MEMORIA"];
                 $options = [
                     'Literatura',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
+                        $result = 1;
+                    } 
                 }
+
+                return $result;
             },
             "FAMILIARCPF" => function ($registrations) use ($csv_conf) {
                 return $csv_conf["FAMILIARCPF"];
@@ -382,6 +395,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         $data_candidate = [];
         $data_familyGroup = [];
         foreach ($registrations as $key_registration => $registration) {
+            $cpf_candidate = '';
             foreach ($fields as $key_fields => $field) {
                 if ($key_fields != "FAMILIARCPF" && $key_fields != "GRAUPARENTESCO") {
                     if (is_callable($field)) {
@@ -400,24 +414,31 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                     }
                 } else {
                     $data_candidate[$key_registration][$key_fields] = null;
-                    $field = $field($registrations);
-                    foreach ($registration->$field as $key_familyGroup => $familyGroup) {
-                        foreach ($headers as $key => $header) {
-                            if ($header == "CPF") {
-                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = $cpf_candidate;
-
-                            } elseif ($header == "FAMILIARCPF") {
-                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = str_replace(['.', '-'], '', $familyGroup->cpf);
-
-                            } elseif ($header == "GRAUPARENTESCO") {
-                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = $familyGroup->relationship;
-
-                            } else {
-                                $data_familyGroup[$key_registration][$key_familyGroup][$header] = null;
-
+                    $_field = $field($registrations);
+                    
+                    if(is_array($registration->$_field)) {
+                        foreach ($registration->$_field as $key_familyGroup => $familyGroup) {
+                            if(!isset($familyGroup->cpf) || !$familyGroup->relationship){
+                                continue;
                             }
-                        }
 
+                            foreach ($headers as $key => $header) {
+                                if ($header == "CPF") {
+                                    $data_familyGroup[$key_registration][$key_familyGroup][$header] = $cpf_candidate;
+    
+                                } elseif ($header == "FAMILIARCPF") {
+                                    $data_familyGroup[$key_registration][$key_familyGroup][$header] = str_replace(['.', '-'], '', $familyGroup->cpf);
+    
+                                } elseif ($header == "GRAUPARENTESCO") {
+                                    $data_familyGroup[$key_registration][$key_familyGroup][$header] = $familyGroup->relationship;
+    
+                                } else {
+                                    $data_familyGroup[$key_registration][$key_familyGroup][$header] = null;
+    
+                                }
+                            }
+    
+                        }
                     }
                 }
             }
