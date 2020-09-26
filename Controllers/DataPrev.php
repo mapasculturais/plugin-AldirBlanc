@@ -274,39 +274,45 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                     'Artesanato',
                     'Ópera',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
+                        $result = 1;
                     }
                 }
+
+                return $result;
             },
             "FLAG_ATUACAO_AUDIOVISUAL" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_AUDIOVISUAL"];
                 $options = [
                     'Audiovisual',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
+                        $result = 1;
+                    } 
                 }
+
+                return $result;
             },
             "FLAG_ATUACAO_MUSICA" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSICA"];
                 $options = [
                     'Música',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
+                        $result = 1;
                     }
                 }
+
+                return $result;
             },
             "FLAG_ATUACAO_ARTES_VISUAIS" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSICA"];
@@ -315,13 +321,15 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                     'Moda',
                     'Fotografia',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
+                        $result = 1;
                     }
                 }
+
+                return $result;
             },
             "FLAG_ATUACAO_PATRIMONIO_CULTURAL" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_PATRIMONIO_CULTURAL"];
@@ -330,39 +338,43 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                     'Gastronomia',
                     'Outros',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
+                        $result = 1;
                     }
                 }
+                return $result;
             },
             "FLAG_ATUACAO_MUSEUS_MEMORIA" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSEUS_MEMORIA"];
                 $options = [
                     'Museu',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
+                        $result = 1;
+                    } 
                 }
+                return $result;
             },
             "FLAG_ATUACAO_HUMANIDADES" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSEUS_MEMORIA"];
                 $options = [
                     'Literatura',
                 ];
-                foreach ($options as $key => $value) {
+
+                $result = 0;
+                foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
+                        $result = 1;
+                    } 
                 }
+
+                return $result;
             },
             "FAMILIARCPF" => function ($registrations) use ($csv_conf) {
                 return $csv_conf["FAMILIARCPF"];
