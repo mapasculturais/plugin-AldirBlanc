@@ -577,6 +577,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
             $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
         }
+
+        $opportunitiesInciso2 = [];
+        $registrationsInciso2 = [];
         
         if ($this->config['inciso2_enabled']) {
             $inciso2_ids = implode(',', $this->config['inciso2_opportunity_ids']);
