@@ -43,7 +43,6 @@ if (count($cidades) === 0) {
             if (count($registrationsInciso1) < $inciso1Limite && $inciso1_enabled) {
             ?>
                 <button onclick="location.href='<?= $this->controller->createUrl('individual') ?>'" clickable id="option3" class="informative-box lab-option">
-                    <!-- <button id="option3" class="informative-box lab-option"> -->
                     <div class="informative-box--icon">
                         <i class="fas fa-user"></i>
                     </div>
@@ -122,6 +121,27 @@ if (count($cidades) === 0) {
                 }
             }
             ?>
+
+            <button class="informative-box lab-option">
+                <div class="informative-box--icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+
+                <div class="informative-box--title">
+                    <h2>Editais, fomentos e oportunidades</h2>
+                    <i class="fas fa-minus"></i>
+                    <!-- <i class="far fa-check-circle"></i> -->
+                </div>
+
+                <div class="informative-box--content active" data-content="">
+                    <span class="more"> Mais informações </span>
+                    <span class="content">
+                        <i>
+                            Donec facilisis tortor ut augue lacinia, at viverra est semper. Sed sapien metus, scelerisque nec pharetra id, tempor a tortor. Pellentesque non dignissim neque. Ut porta viverra est, ut dignissim elit elementum ut. Nunc vel rhoncus nibh, ut tincidunt turpis. Integer ac enim pellent.
+                        </i>
+                    </span>
+                </div>
+            </button>
         </div>
 
     </div><!-- End .lab-item -->

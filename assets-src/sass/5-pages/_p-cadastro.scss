@@ -99,15 +99,7 @@ section.cadastro {
     .questions{
         text-align: center;
 
-        .select2-container {
-            max-width: 60%;
-
-            @include mobile {
-                max-width: 90%;
-            }
-        }
-
-        p{
+        p {
             font-family: $f_title;
         }
 
@@ -207,6 +199,99 @@ section.cadastro {
                 }
             }
         }
+
+        .select2-container {
+            max-width: 60%;
+
+            @include mobile {
+                max-width: 90%;
+            }
+        }
+
+        &.opportunity-listing {
+            .opportunities {
+                max-width: 60%;
+                margin: 0 auto;
+
+                @include mobile {
+                    max-width: 90%;
+                }
+
+                &--cards {
+                    .card {
+                        margin-bottom: 30px;
+
+                        &--title {
+                            text-align: left;
+                            display: block;
+                        }
+
+                        &--content, &--adicional-info {
+                            text-align: left;
+                            color: #666666;
+                            font-family: $f_body;
+                            font-size: 14px;
+                            letter-spacing: 0;
+                            line-height: 19px;
+                        }
+
+                        &--adicional-info {
+                            .taxonomies {
+                                display: grid;
+                                grid-template-columns: repeat(2, auto);
+                                margin-top: 20px;
+                            }
+                        }
+                    }
+                }
+
+                .pagination {
+                    display: flex;
+                    justify-content: center;
+                    margin: 60px 0;
+    
+                    a:first-child {
+                        font-size: 16px;
+                        letter-spacing: 0;
+                        line-height: 16px;
+                        text-align: center;
+                    }
+    
+                    a {
+                        color: #666666;
+                        font-family: $f_title;
+                        font-size: 16px;
+                        font-weight: bold;
+                        letter-spacing: 0;
+                        line-height: 19px;
+                        text-align: center;
+                        margin: 15px;
+    
+                        &.current-page {
+                            &:after {
+                                content: "";
+                                display: block;
+                                width: calc(100% + 15px);
+                                height: 4px;
+                                margin-left: -7.5px;
+                                margin-top: 5px;    
+                                background-color: #31AAC9;
+                            }
+                        }
+                    }
+    
+                    a:last-child {
+                        font-size: 16px;
+                        letter-spacing: 0;
+                        line-height: 16px;
+                        text-align: center;
+                    }
+                }
+            }
+
+            
+        }
+
     }
 }
 
