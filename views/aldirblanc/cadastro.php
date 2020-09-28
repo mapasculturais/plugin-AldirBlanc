@@ -8,6 +8,7 @@ $inciso1Limite = $this->controller->config['inciso1_limite'];
 $inciso2Limite = $this->controller->config['inciso2_limite'];
 $inciso2_enabled = $this->controller->config['inciso2_enabled'];
 $inciso1_enabled = $this->controller->config['inciso1_enabled'];
+$inciso3_enabled = $this->controller->config['inciso3_enabled'];
 
 $this->jsObject['opportunityId'] = null;
 $this->jsObject['opportunitiesInciso2'] = $opportunitiesInciso2;
@@ -120,8 +121,8 @@ if (count($cidades) === 0) {
                         break;
                 }
             }
+            if ($inciso3_enabled) {
             ?>
-
             <button class="informative-box lab-option">
                 <div class="informative-box--icon">
                     <i class="fas fa-file-alt"></i>
@@ -142,6 +143,8 @@ if (count($cidades) === 0) {
                     </span>
                 </div>
             </button>
+            <?php 
+            }?>
         </div>
 
     </div><!-- End .lab-item -->
