@@ -1,3 +1,28 @@
+<?php
+
+use Doctrine\Common\Util\Debug;
+use MapasCulturais\i;
+use MapasCulturais\Entities\Registration;
+
+$inciso1Limite = $this->controller->config['inciso1_limite'];
+$inciso2Limite = $this->controller->config['inciso2_limite'];
+$inciso2_enabled = $this->controller->config['inciso2_enabled'];
+$inciso1_enabled = $this->controller->config['inciso1_enabled'];
+
+$this->jsObject['opportunityId'] = null;
+$this->jsObject['opportunitiesInciso2'] = $opportunitiesInciso2;
+$this->jsObject['serverDate'] = new DateTime();
+
+if (count($cidades) === 0) {
+    $inciso2_enabled = false;
+} else if (count($cidades) === 1) {
+    /**
+     * Pega oportunidade/cidade default para cadastro do inciso II.
+     */
+    $this->jsObject['opportunityId'] = reset($cidades);
+}
+
+?>
 <section class="lab-main-content cadastro <?= $app->user->is('mediador') ? "mediador" : '' ?>">
     <header>
         <div class="intro-message">
