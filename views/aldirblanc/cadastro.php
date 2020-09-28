@@ -61,7 +61,7 @@ if (count($cidades) === 0) {
                     </div>
                 </button>
             <?php
-            } else if (!$inciso1_enabled && isset($this->controller->config['msg_inciso1_disabled'])) {
+            } else if ( !$inciso1_enabled && $this->controller->config['msg_inciso1_disabled'] != '' ) {
                 $mensagemInciso1Disabled = $this->controller->config['msg_inciso1_disabled'];
                 $this->part('aldirblanc/cadastro/inciso-disabled',  ['mensagem' => $mensagemInciso1Disabled, 'title' => $inciso1Title]);
             }
