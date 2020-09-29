@@ -8,7 +8,8 @@ use MapasCulturais\i;
 
 // @todo refatorar autoloader de plugins para resolver classes em pastas
 require_once 'Controllers/AldirBlanc.php';
-require_once 'Controllers/DataPrev.php';
+require_once 'Controllers/DataPrev_inciso2.php';
+require_once 'Controllers/DataPrev_inciso1.php';
 require_once 'vendor/autoload.php';
 
 class Plugin extends \MapasCulturais\Plugin
@@ -20,15 +21,15 @@ class Plugin extends \MapasCulturais\Plugin
         if ($app->view->subsite){
             $config = $app->view->subsite->aldir_blanc_config;
         }
-
+        
         $config += [
             'logotipo_central' => env('AB_LOGOTIPO_CENTRAL',''),
             'logotipo_instituicao' => env('AB_LOGOTIPO_INSTITUICAO',''),
             'inciso1_enabled' => env('AB_INCISO1_ENABLE',true),
             'inciso2_enabled' => env('AB_INCISO2_ENABLE',true),
-            'project_id' => env('AB_INCISO2_PROJECT_ID',null),
-            'inciso1_opportunity_id' => env('AB_INCISO1_OPPORTUNITY_ID', null),
-            'inciso2_opportunity_ids' => (array) json_decode(env('AB_INCISO2_OPPORTUNITY_IDS', '[]')),
+            'project_id' => 1,
+            'inciso1_opportunity_id' => 1,
+            'inciso2_opportunity_ids' => ['cidade_inciso_II' => 2],
             'inciso1' => (array) json_decode(env('AB_INCISO1', '[]')),
             'inciso2' => (array) json_decode(env('AB_INCISO2_CITIES', '[]')),
             'inciso2_default' => (array) json_decode(env('AB_INCISO2_DEFAULT', '[]')),
@@ -56,8 +57,9 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
             'csv_inciso1' => require_once env('AB_CSV_INCISO1', __DIR__ . '/config-csv-inciso1.php'),
+            'csv_inciso2' => require_once env('AB_CSV_INCISO2', __DIR__ . '/config-csv-inciso2.php'),
         ];
-
+     
         $skipConfig = false;
         
         $app->applyHookBoundTo($this, 'aldirblanc.config',[&$config,&$skipConfig]);
@@ -289,7 +291,8 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
-        $app->registerController('dataprev', 'AldirBlanc\Controllers\DataPrev');
+        $app->registerController('dataprev_inciso1', 'AldirBlanc\Controllers\DataPrev_inciso1');
+        $app->registerController('dataprev_inciso2', 'AldirBlanc\Controllers\DataPrev_inciso2');
 
         // registra o role para mediadores
         $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function($user){ return $user->is('admin'); });
