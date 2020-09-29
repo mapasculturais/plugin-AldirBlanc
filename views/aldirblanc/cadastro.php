@@ -123,7 +123,7 @@ if (count($cidades) === 0) {
             }
             if ($inciso3_enabled) {
             ?>
-            <button class="informative-box lab-option">
+            <button onclick="location.href='<?= $this->controller->createUrl('fomentos') ?>'" class="informative-box lab-option">
                 <div class="informative-box--icon">
                     <i class="fas fa-file-alt"></i>
                 </div>
