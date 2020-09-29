@@ -8,6 +8,7 @@ $inciso1Limite = $this->controller->config['inciso1_limite'];
 $inciso2Limite = $this->controller->config['inciso2_limite'];
 $inciso2_enabled = $this->controller->config['inciso2_enabled'];
 $inciso1_enabled = $this->controller->config['inciso1_enabled'];
+$inciso3_enabled = $this->controller->config['inciso3_enabled'];
 
 $this->jsObject['opportunityId'] = null;
 $this->jsObject['opportunitiesInciso2'] = $opportunitiesInciso2;
@@ -43,7 +44,6 @@ if (count($cidades) === 0) {
             if (count($registrationsInciso1) < $inciso1Limite && $inciso1_enabled) {
             ?>
                 <button onclick="location.href='<?= $this->controller->createUrl('individual') ?>'" clickable id="option3" class="informative-box lab-option">
-                    <!-- <button id="option3" class="informative-box lab-option"> -->
                     <div class="informative-box--icon">
                         <i class="fas fa-user"></i>
                     </div>
@@ -121,7 +121,30 @@ if (count($cidades) === 0) {
                         break;
                 }
             }
+            if ($inciso3_enabled) {
             ?>
+            <button onclick="location.href='<?= $this->controller->createUrl('fomentos') ?>'" class="informative-box lab-option">
+                <div class="informative-box--icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+
+                <div class="informative-box--title">
+                    <h2>Editais, fomentos e oportunidades</h2>
+                    <i class="fas fa-minus"></i>
+                    <!-- <i class="far fa-check-circle"></i> -->
+                </div>
+
+                <div class="informative-box--content active" data-content="">
+                    <span class="more"> Mais informações </span>
+                    <span class="content">
+                        <i>
+                            Donec facilisis tortor ut augue lacinia, at viverra est semper. Sed sapien metus, scelerisque nec pharetra id, tempor a tortor. Pellentesque non dignissim neque. Ut porta viverra est, ut dignissim elit elementum ut. Nunc vel rhoncus nibh, ut tincidunt turpis. Integer ac enim pellent.
+                        </i>
+                    </span>
+                </div>
+            </button>
+            <?php 
+            }?>
         </div>
 
     </div><!-- End .lab-item -->

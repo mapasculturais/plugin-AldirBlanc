@@ -135,6 +135,29 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return $opportunity;
     }
     /**
+     * Retorna a oportunidade do inciso III
+     *
+     * @return array
+     */
+    function getOpportunitiesInciso3()
+    {
+        $app = App::i();
+        $project = $app->repo('Project')->find($this->config['project_id']);
+        $projectsIds = $project->getChildrenIds();
+        $projectsIds[] = $project->id;
+        $opportunitiesByProject = $app->repo('ProjectOpportunity')->findBy(['ownerEntity' => $projectsIds ] );
+        $inciso1e2Ids = array_values(array_merge([$this->config['inciso1_opportunity_id']], $this->config['inciso2_opportunity_ids']));
+        $opportunitiesInciso3 = [];
+
+        foreach ($opportunitiesByProject as $opportunity){
+            if ( !in_array($opportunity->id, $inciso1e2Ids) ) {
+                $opportunitiesInciso3[] = $opportunity;
+            }
+        }        
+
+        return $opportunitiesInciso3;
+    }
+    /**
      * Retorna o array associativo com os numeros e nomes de status
      *
      * @return array
@@ -295,6 +318,22 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $app->redirect($this->createUrl('formulario', [$agent->aldirblanc_inciso1_registration]));
     }
+
+     /**
+     * Redireciona o usuário para as oportunidades do inciso 3
+     * 
+     * rota: /aldirblanc/inciso3/[?agent={agent_id}]
+     * 
+     * @return void
+     */
+    function GET_fomentos()
+    {               
+        $app = App::i();
+        $niceName = $app->user->profile->name;
+        $opportunities = $this->getOpportunitiesInciso3();
+        $this->requireAuthentication();
+        $this->render('fomentos', ['opportunities' => $opportunities, 'cidades' => $cidades = [], 'niceName' => $niceName]);
+    }   
 
     /**
      * Cria nova inscrição para o agente no inciso informado e redireciona para o formulário
@@ -577,6 +616,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
             $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
         }
+
+        $opportunitiesInciso2 = [];
+        $registrationsInciso2 = [];
         
         if ($this->config['inciso2_enabled']) {
             $inciso2_ids = implode(',', $this->config['inciso2_opportunity_ids']);
