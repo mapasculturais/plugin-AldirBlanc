@@ -160,6 +160,9 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
          * pega as configurações do CSV no arquivo config-csv-inciso2.php
          */
         $csv_conf = $this->config['csv_inciso2'];
+        $inscricoes = $this->config['csv_inciso2']['inscricoes_culturais'];
+        $atuacoes = $this->config['csv_inciso2']['atuacoes-culturais'];
+        $category = $this->config['csv_inciso2']['category'];
 
         /**
          * Mapeamento de fielsds_id pelo label do campo
@@ -275,10 +278,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
 
                 return $result;
             },
-            'FLAG_CAD_ESTADUAL' => function ($registrations) use ($fields_cpf) {
+            'FLAG_CAD_ESTADUAL' => function ($registrations) use ($fields_cpf, $inscricoes) {
                 $field_id = $fields_cpf["FLAG_CAD_ESTADUAL"];
 
-                $option = 'Cadastro Estadual de Cultura (Mapa Cultural)';
+                $option = $inscricoes['mapa-cultural'];
 
                 $result = 0;
 
@@ -297,10 +300,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'SISTEMA_CAD_ESTADUAL' => function ($registrations) use ($fields_cpf, $app) {
+            'SISTEMA_CAD_ESTADUAL' => function ($registrations) use ($fields_cpf, $app, $inscricoes) {
                 $field_id = $fields_cpf["FLAG_CAD_ESTADUAL"];
 
-                $option = 'Cadastro Estadual de Cultura (Mapa Cultural)';
+                $option = $inscricoes['mapa-cultural'];
 
                 $result = '';
 
@@ -319,10 +322,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'IDENTIFICADOR_CAD_ESTADUAL' => function ($registrations) use ($fields_cpf) {
+            'IDENTIFICADOR_CAD_ESTADUAL' => function ($registrations) use ($fields_cpf, $inscricoes) {
                 $field_id = $fields_cpf["FLAG_CAD_ESTADUAL"];
 
-                $option = 'Cadastro Estadual de Cultura (Mapa Cultural)';
+                $option = $inscricoes['mapa-cultural'];
 
                 $result = '';
 
@@ -341,10 +344,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'FLAG_CAD_MUNICIPAL' => function ($registrations) use ($fields_cpf) {
+            'FLAG_CAD_MUNICIPAL' => function ($registrations) use ($fields_cpf, $inscricoes) {
                 $field_id = $fields_cpf["FLAG_CAD_MUNICIPAL"];
 
-                $option = 'Cadastro Estadual de Cultura (Mapa Cultural)';
+                $option = $inscricoes['mapa-cultural'];
 
                 $result = 0;
 
@@ -363,10 +366,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'SISTEMA_CAD_MUNICIPAL' => function ($registrations) use ($fields_cpf, $app) {
+            'SISTEMA_CAD_MUNICIPAL' => function ($registrations) use ($fields_cpf, $app, $inscricoes) {
                 $field_id = $fields_cpf["FLAG_CAD_MUNICIPAL"];
 
-                $option = 'Cadastro Estadual de Cultura (Mapa Cultural)';
+                $option = $option = $inscricoes['mapa-cultural'];
 
                 $result = '';
 
@@ -385,10 +388,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'IDENTIFICADOR_CAD_MUNICIPAL' => function ($registrations) use ($fields_cpf) {
+            'IDENTIFICADOR_CAD_MUNICIPAL' => function ($registrations) use ($fields_cpf, $inscricoes) {
                 $field_id = $fields_cpf["FLAG_CAD_MUNICIPAL"];
 
-                $option = 'Cadastro Estadual de Cultura (Mapa Cultural)';
+                $option = $option = $inscricoes['mapa-cultural'];
 
                 $result = '';
 
@@ -449,10 +452,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
             'IDENTIFICADOR_CAD_ES_PONTOS_PONTOES' => function ($registrations) use ($fields_cpf) {
                 return $fields_cpf["FLAG_CAD_ES_PONTOS_PONTOES"] ? $fields_cpf["SISTEMA_CAD_ES_PONTOS_PONTOES"] : '';
             },
-            'FLAG_CAD_SNIIC' => function ($registrations) use ($fields_cpf) {
+            'FLAG_CAD_SNIIC' => function ($registrations) use ($fields_cpf, $inscricoes) {
                 $field_id = $fields_cpf["FLAG_CAD_SNIIC"];
 
-                $option = 'Sistema Nacional de Informações e Indicadores Culturais';
+                $option = $inscricoes['sniic'];
 
                 $result = 0;
 
@@ -471,11 +474,11 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'SISTEMA_CAD_SNIIC' => function ($registrations) use ($fields_cpf) {
+            'SISTEMA_CAD_SNIIC' => function ($registrations) use ($fields_cpf, $inscricoes) {
                 $field_temp = $fields_cpf["FLAG_CAD_SNIIC"];
                 $field_id = $fields_cpf["SISTEMA_CAD_SNIIC"];
 
-                $option = 'Sistema Nacional de Informações e Indicadores Culturais';
+                $option = $inscricoes['sniic'];
 
                 $result = "";
 
@@ -494,11 +497,11 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'IDENTIFICADOR_CAD_SNIIC' => function ($registrations) use ($fields_cpf) {
+            'IDENTIFICADOR_CAD_SNIIC' => function ($registrations) use ($fields_cpf, $inscricoes) {
                 $field_temp = $fields_cpf["FLAG_CAD_SNIIC"];
                 $field_id = $fields_cpf["SISTEMA_CAD_SNIIC"];
 
-                $option = 'Sistema Nacional de Informações e Indicadores Culturais';
+                $option = $inscricoes['sniic'];
 
                 $result = "";
 
@@ -516,10 +519,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
 
                 return $result;
             },
-            'FLAG_CAD_SALIC' => function ($registrations) use ($fields_cnpj) {
+            'FLAG_CAD_SALIC' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_SALIC"];
 
-                $option = 'Sistema de Apoio às Leis de incentivo à Cultura (Salic)';
+                $option = $inscricoes['salic'];
 
                 $result = 0;
 
@@ -537,10 +540,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
 
                 return $result;
             },
-            'FLAG_CAD_SICAB' => function ($registrations) use ($fields_cnpj) {
+            'FLAG_CAD_SICAB' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_SICAB"];
 
-                $option = 'Sistema de Informações Cadastrais do Artesanato Brasileiro';
+                $option = $inscricoes['sicab'];
 
                 $result = 0;
 
@@ -559,10 +562,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'FLAG_CAD_OUTROS' => function ($registrations) use ($fields_cnpj) {
+            'FLAG_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_OUTROS"];
 
-                $option = 'Outros cadastros referentes a atividades culturais';
+                $option = $inscricoes['outros'];
 
                 $result = 0;
 
@@ -581,11 +584,11 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'SISTEMA_CAD_OUTROS' => function ($registrations) use ($fields_cnpj) {
+            'SISTEMA_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_temp = $fields_cnpj["FLAG_CAD_OUTROS"];
                 $field_id = $fields_cnpj["SISTEMA_CAD_OUTROS"];
 
-                $option = 'Outros cadastros referentes a atividades culturais';
+                $option = $inscricoes['outros'];
 
                 $result = "";
 
@@ -604,11 +607,11 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'IDENTIFICADOR_CAD_OUTROS' => function ($registrations) use ($fields_cnpj) {
+            'IDENTIFICADOR_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_temp = $fields_cnpj["FLAG_CAD_OUTROS"];
                 $field_id = $fields_cnpj["SISTEMA_CAD_OUTROS"];
 
-                $option = 'Outros cadastros referentes a atividades culturais';
+                $option = $inscricoes['outros'];
 
                 $result = "";
 
@@ -627,240 +630,205 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'FLAG_ATUACAO_ARTES_CENICAS' => function ($registrations) use ($fields_cpf, $csv_conf) {
-                $field_temp = $fields_cpf['FLAG_ATUACAO_ARTES_CENICAS'];
+            'FLAG_ATUACAO_ARTES_CENICAS' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes, $category) {
+                $field_temp = $fields_cnpj['FLAG_ATUACAO_ARTES_CENICAS'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Artes Circenses',
-                    'Dança',
-                    'Teatro',
-                    'Artes Visuais',
-                    'Artesanato',
-                    'Ópera',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
+                $options = $atuacoes['artes-cenicas'];
+
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
 
                 return $result;
             },
-            'FLAG_ATUACAO_AUDIOVISUAL' => function ($registrations) use ($csv_conf, $fields_cpf) {
-                $field_temp = $fields_cpf['FLAG_ATUACAO_AUDIOVISUAL'];
+            'FLAG_ATUACAO_AUDIOVISUAL' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
+                $field_temp = $fields_cnpj['FLAG_ATUACAO_AUDIOVISUAL'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Audiovisual',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
+                $options = $atuacoes['audiovisual'];
+
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
+                        $result = 1;
+                    }
+                }
+
+                return $result;
+
+            },
+            'FLAG_ATUACAO_MUSICA' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
+                $field_temp = $fields_cnpj['FLAG_ATUACAO_MUSICA'];
+
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
+
+                        } else {
+                            $field_id = "";
+
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
+                }
+
+                $options = $atuacoes['musica'];
+
+                $result = 0;
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
 
                 return $result;
             },
-            'FLAG_ATUACAO_MUSICA' => function ($registrations) use ($csv_conf, $fields_cpf) {
-                $field_temp = $fields_cpf['FLAG_ATUACAO_MUSICA'];
+            'FLAG_ATUACAO_ARTES_VISUAIS' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
+                $field_temp = $fields_cnpj['FLAG_ATUACAO_ARTES_VISUAIS'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Música',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
+                $options = $atuacoes['artes-visuais'];
+
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
+                        $result = 1;
+                    }
+                }
+
+                return $result;
+
+            },
+            'FLAG_ATUACAO_PATRIMONIO_CULTURAL' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
+                $field_temp = $fields_cnpj['FLAG_ATUACAO_PATRIMONIO_CULTURAL'];
+
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
+
+                        } else {
+                            $field_id = "";
+
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
+                }
+
+                $options = $atuacoes['patrimonio-cultural'];
+
+                $result = 0;
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
 
                 return $result;
             },
-            'FLAG_ATUACAO_ARTES_VISUAIS' => function ($registrations) use ($csv_conf, $fields_cpf) {
-                $field_temp = $fields_cpf['FLAG_ATUACAO_ARTES_VISUAIS'];
+            'FLAG_ATUACAO_MUSEUS_MEMORIA' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
+                $field_temp = $fields_cnpj['FLAG_ATUACAO_MUSEUS_MEMORIA'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Design',
-                    'Moda',
-                    'Fotografia',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
+                $options = $atuacoes['museu-memoria'];
+
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
 
                 return $result;
             },
-            'FLAG_ATUACAO_PATRIMONIO_CULTURAL' => function ($registrations) use ($csv_conf, $fields_cpf) {
-                $field_temp = $fields_cpf['FLAG_ATUACAO_PATRIMONIO_CULTURAL'];
+            'FLAG_ATUACAO_HUMANIDADES' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
+                $field_temp = $fields_cnpj['FLAG_ATUACAO_HUMANIDADES'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Cultura Popular',
-                    'Gastronomia',
-                    'Outros',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
-                }
-
-                $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
-                        $result = 1;
+                        }
                     }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
-                return $result;
-            },
-            'FLAG_ATUACAO_MUSEUS_MEMORIA' => function ($registrations) use ($csv_conf, $fields_cpf) {
-                $field_temp = $fields_cpf['FLAG_ATUACAO_MUSEUS_MEMORIA'];
-
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
-
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
-
-                $options_3 = [
-                    'Museu',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
-                }
+                $options = $atuacoes['humanidades'];
 
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
-                        $result = 1;
-                    }
-                }
+                foreach ($options as $value) {
 
-                return $result;
-            },
-            'FLAG_ATUACAO_HUMANIDADES' => function ($registrations) use ($csv_conf, $fields_cpf) {
-                $field_temp = $fields_cpf['FLAG_ATUACAO_HUMANIDADES'];
-
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
-
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
-
-                $options_3 = [
-                    'Literatura',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
-                }
-
-                $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
@@ -888,10 +856,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 }
                 return str_replace(['.', '-', '/'], '', $registrations->$field_id);
 
-            }, 'FLAG_CAD_ESTADUAL' => function ($registrations) use ($fields_cnpj) {
+            }, 'FLAG_CAD_ESTADUAL' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_ESTADUAL"];
 
-                $option = 'Cadastro Estadual de Cultura (Mapa Cultural)';
+                $option = $option = $inscricoes['mapa-cultural'];
 
                 $result = 0;
 
@@ -909,10 +877,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'SISTEMA_CAD_ESTADUAL' => function ($registrations) use ($fields_cnpj, $app) {
+            'SISTEMA_CAD_ESTADUAL' => function ($registrations) use ($fields_cnpj, $app, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_ESTADUAL"];
 
-                $option = 'Cadastro Estadual de Cultura (Mapa Cultural)';
+                $option = $option = $inscricoes['mapa-cultural'];
 
                 $result = "";
 
@@ -930,10 +898,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'IDENTIFICADOR_CAD_ESTADUAL' => function ($registrations) use ($fields_cnpj) {
+            'IDENTIFICADOR_CAD_ESTADUAL' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_ESTADUAL"];
 
-                $option = 'Cadastro Estadual de Cultura (Mapa Cultural)';
+                $option = $option = $inscricoes['mapa-cultural'];
 
                 $result = "";
 
@@ -951,10 +919,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'FLAG_CAD_MUNICIPAL' => function ($registrations) use ($fields_cnpj) {
+            'FLAG_CAD_MUNICIPAL' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_MUNICIPAL"];
 
-                $option = 'Cadastros Municipais de Cultura';
+                $option = $inscricoes['cadastro-municipal'];
 
                 $result = 0;
 
@@ -972,10 +940,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'SISTEMA_CAD_MUNICIPAL' => function ($registrations) use ($fields_cnpj) {
+            'SISTEMA_CAD_MUNICIPAL' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_MUNICIPAL"];
 
-                $option = 'Cadastros Municipais de Cultura';
+                $option = $inscricoes['cadastro-municipal'];
 
                 $result = "";
 
@@ -993,10 +961,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'IDENTIFICADOR_CAD_MUNICIPAL' => function ($registrations) use ($fields_cnpj) {
+            'IDENTIFICADOR_CAD_MUNICIPAL' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_MUNICIPAL"];
 
-                $option = 'Cadastros Municipais de Cultura';
+                $option = $inscricoes['cadastro-municipal'];
 
                 $result = '';
 
@@ -1057,10 +1025,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
             'IDENTIFICADOR_CAD_ES_PONTOS_PONTOES' => function ($registrations) use ($fields_cnpj) {
                 return $fields_cnpj["IDENTIFICADOR_CAD_ES_PONTOS_PONTOES"];
             },
-            'FLAG_CAD_SNIIC' => function ($registrations) use ($fields_cnpj) {
+            'FLAG_CAD_SNIIC' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_SNIIC"];
 
-                $option = 'Sistema Nacional de Informações e Indicadores Culturais';
+                $option = $inscricoes['sniic'];
 
                 $result = 0;
 
@@ -1079,11 +1047,11 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'SISTEMA_CAD_SNIIC' => function ($registrations) use ($fields_cnpj) {
+            'SISTEMA_CAD_SNIIC' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_temp = $fields_cnpj["FLAG_CAD_SNIIC"];
                 $field_id = $fields_cnpj["SISTEMA_CAD_SNIIC"];
 
-                $option = 'Sistema Nacional de Informações e Indicadores Culturais';
+                $option = $inscricoes['sniic'];
 
                 $result = "";
 
@@ -1102,11 +1070,11 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'IDENTIFICADOR_CAD_SNIIC' => function ($registrations) use ($fields_cnpj) {
+            'IDENTIFICADOR_CAD_SNIIC' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_temp = $fields_cnpj["FLAG_CAD_SNIIC"];
                 $field_id = $fields_cnpj["SISTEMA_CAD_SNIIC"];
 
-                $option = 'Sistema Nacional de Informações e Indicadores Culturais';
+                $option = $inscricoes['sniic'];
 
                 $result = "";
 
@@ -1125,10 +1093,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'FLAG_CAD_SALIC' => function ($registrations) use ($fields_cnpj) {
+            'FLAG_CAD_SALIC' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_SALIC"];
 
-                $option = 'Sistema de Apoio às Leis de incentivo à Cultura (Salic)';
+                $option = $inscricoes['salic'];
 
                 $result = 0;
 
@@ -1146,10 +1114,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
 
                 return $result;
             },
-            'FLAG_CAD_SICAB' => function ($registrations) use ($fields_cnpj) {
+            'FLAG_CAD_SICAB' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_SICAB"];
 
-                $option = 'Sistema de Informações Cadastrais do Artesanato Brasileiro';
+                $option = $inscricoes['sicab'];
 
                 $result = 0;
 
@@ -1168,10 +1136,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'FLAG_CAD_OUTROS' => function ($registrations) use ($fields_cnpj) {
+            'FLAG_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_OUTROS"];
 
-                $option = 'Outros cadastros referentes a atividades culturais';
+                $option = $inscricoes['outros'];
 
                 $result = 0;
 
@@ -1190,11 +1158,11 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'SISTEMA_CAD_OUTROS' => function ($registrations) use ($fields_cnpj) {
+            'SISTEMA_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_temp = $fields_cnpj["FLAG_CAD_OUTROS"];
                 $field_id = $fields_cnpj["SISTEMA_CAD_OUTROS"];
 
-                $option = 'Outros cadastros referentes a atividades culturais';
+                $option = $inscricoes['outros'];
 
                 $result = "";
 
@@ -1213,11 +1181,11 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'IDENTIFICADOR_CAD_OUTROS' => function ($registrations) use ($fields_cnpj) {
+            'IDENTIFICADOR_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_temp = $fields_cnpj["FLAG_CAD_OUTROS"];
                 $field_id = $fields_cnpj["SISTEMA_CAD_OUTROS"];
 
-                $option = 'Outros cadastros referentes a atividades culturais';
+                $option = $inscricoes['outros'];
 
                 $result = "";
 
@@ -1236,241 +1204,205 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'FLAG_ATUACAO_ARTES_CENICAS' => function ($registrations) use ($csv_conf, $fields_cnpj) {
+            'FLAG_ATUACAO_ARTES_CENICAS' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes, $category) {
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_ARTES_CENICAS'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Artes Circenses',
-                    'Dança',
-                    'Teatro',
-                    'Artes Visuais',
-                    'Artesanato',
-                    'Ópera',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
+                $options = $atuacoes['artes-cenicas'];
+
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
 
                 return $result;
             },
-            'FLAG_ATUACAO_AUDIOVISUAL' => function ($registrations) use ($csv_conf, $fields_cnpj) {
+            'FLAG_ATUACAO_AUDIOVISUAL' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_AUDIOVISUAL'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Audiovisual',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
+                $options = $atuacoes['audiovisual'];
+
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
 
                 return $result;
+
             },
-            'FLAG_ATUACAO_MUSICA' => function ($registrations) use ($csv_conf, $fields_cnpj) {
+            'FLAG_ATUACAO_MUSICA' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_MUSICA'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Música',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
+                $options = $atuacoes['musica'];
+
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
 
                 return $result;
             },
-            'FLAG_ATUACAO_ARTES_VISUAIS' => function ($registrations) use ($csv_conf, $fields_cnpj) {
+            'FLAG_ATUACAO_ARTES_VISUAIS' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_ARTES_VISUAIS'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Design',
-                    'Moda',
-                    'Fotografia',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
+                $options = $atuacoes['artes-visuais'];
+
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
 
                 return $result;
+
             },
-            'FLAG_ATUACAO_PATRIMONIO_CULTURAL' => function ($registrations) use ($csv_conf, $fields_cnpj) {
+            'FLAG_ATUACAO_PATRIMONIO_CULTURAL' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_PATRIMONIO_CULTURAL'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Cultura Popular',
-                    'Gastronomia',
-                    'Outros',
-                    'Patrimônio Cultural',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
+                $options = $atuacoes['patrimonio-cultural'];
+
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
 
                 return $result;
             },
-            'FLAG_ATUACAO_MUSEUS_MEMORIA' => function ($registrations) use ($csv_conf, $fields_cnpj) {
+            'FLAG_ATUACAO_MUSEUS_MEMORIA' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_MUSEUS_MEMORIA'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Museu',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
+                $options = $atuacoes['museu-memoria'];
+
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
 
                 return $result;
             },
-            'FLAG_ATUACAO_HUMANIDADES' => function ($registrations) use ($csv_conf, $fields_cnpj) {
+            'FLAG_ATUACAO_HUMANIDADES' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes) {
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_HUMANIDADES'];
 
-                $options_1 = [
-                    'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-                ];
+                if (is_array($field_temp)) {
+                    foreach (array_filter($field_temp) as $key => $value) {
+                        if ($registrations->$value) {
+                            $field_id = $registrations->$value;
 
-                $options_2 = [
-                    'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-                    'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-                ];
+                        } else {
+                            $field_id = "";
 
-                $options_3 = [
-                    'Literatura',
-                ];
-
-                if (in_array($registrations->$field_temp, $options_1)) {
-                    $field_id = $csv_conf['category']['COM_ESPAÇO_FISICO'];
-
-                } elseif (in_array($registrations->$field_temp, $options_2)) {
-                    $field_id = $csv_conf['category']['SEM_ESPAÇO_FISICO'];
+                        }
+                    }
+                } else {
+                    $field_id = $registrations->$field_temp;
                 }
 
+                $options = $atuacoes['humanidades'];
+
                 $result = 0;
-                foreach ($options_3 as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                foreach ($options as $value) {
+
+                    if (in_array($value, $options)) {
                         $result = 1;
                     }
                 }
@@ -1541,7 +1473,13 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
         if ($type == 'cnpj') {
             $file_name = 'inciso2-CNPJ-' . md5(json_encode($data_candidate_cnpj)) . '.csv';
 
-            $patch = __DIR__ . '/../csvs_inciso2/cnpj/' . $file_name;
+            $dir = __DIR__ . '/../csvs_inciso2/cnpj/';
+
+            $patch = $dir . $file_name;
+
+            if (!is_dir($dir)) {
+                mkdir($dir, 0700, true);
+            }
 
             $stream = fopen($patch, 'w');
 
@@ -1569,7 +1507,13 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
         if ($type == 'cpf') {
             $file_name = 'inciso2-CPF-' . md5(json_encode($data_candidate_cpf)) . '.csv';
 
-            $patch = __DIR__ . '/../csvs_inciso2/cpf/' . $file_name;
+            $dir = __DIR__ . '/../csvs_inciso2/cpf/';
+
+            $patch = $dir . $file_name;
+
+            if (!is_dir($dir)) {
+                mkdir($dir, 0700, true);
+            }
 
             $stream = fopen($patch, 'w');
 
