@@ -62,7 +62,6 @@ class Plugin extends \MapasCulturais\Plugin
         $skipConfig = false;
         
         $app->applyHookBoundTo($this, 'aldirblanc.config',[&$config,&$skipConfig]);
-
         
         if (!$skipConfig) {
             $cache_id = __METHOD__ . ':' . 'config';
