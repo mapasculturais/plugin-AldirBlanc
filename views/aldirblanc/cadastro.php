@@ -121,7 +121,7 @@ if (count($cidades) === 0) {
                         break;
                 }
             }
-            if ($inciso3_enabled) {
+            if ($inciso3_enabled && count($opportunitiesInciso3) > 0 ) {
             ?>
             <button onclick="location.href='<?= $this->controller->createUrl('fomentos') ?>'" class="informative-box lab-option">
                 <div class="informative-box--icon">
