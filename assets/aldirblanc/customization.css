@@ -1,0 +1,36 @@
+:root {
+    /* LAYOUT PARTS */
+    /* Header */
+    --header-background: #ffffff;
+
+    /* Footer */
+    --footer-background: #ffffff;
+
+    /* COMPONENTS */
+    /* Button */
+    --primary-button-bg-color: #3275B6;
+    --secondary-button-bg-color: #666666;
+    --primary-button-txt-color: #ffffff;
+    --secondary-button-txt-color: #ffffff;
+
+    /* Status Cards */
+    --status-1-background: #9565D2;
+    --status-2-background: #cc0033;
+    --status-3-background: #cc0033;
+    --status-8-background: #666666;
+    --status-10-background: #B4BA00;
+
+    /* Informative boxes - check informative-box.scss for more info */
+    --box-status-1-background: #9565D2;
+    --box-status-2-background: #666666;
+    --box-status-3-background: #C60931;
+    --box-status-8-background: #666666;
+    --box-status-10-background: #B4BA00;
+
+    /* The "default" stands for non status boxes (hasn't status-% class) */
+    --box-default-background: #ffffff;
+    --box-default-icon-color: #3275B6;
+    --box-default-status-background: #3275B6;
+    --box-default-status-text: #ffffff;
+    
+}
