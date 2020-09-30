@@ -7,13 +7,13 @@
 
     @include border-radius(10px);
 
-    background-color: $brand-primary;
+    background-color: var(--primary-button-bg-color);
     border: 0;
     box-sizing: border-box;
-    color: $light;
+    color: var(--primary-button-txt-color);
     cursor: pointer;
     display: inline-block;
-    font-family: $headings-font-family;
+    font-family: $f_title;
     font-size: $font-size-base;
     font-weight: bold;
     height: auto;
@@ -27,7 +27,8 @@
     width: auto;
 
     &.secondary, &--secondary {
-        background-color: $brand-secondary;
+        background-color: var(--secondary-button-bg-color);
+        color: var(--secondary-button-txt-color)
     };
 
     &.tertiary,  &--tertiary {
