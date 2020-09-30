@@ -74,8 +74,13 @@ $(document).ready(function() {
                 modalTitle = "Atenção";
             }
         }
-
-        let selectedCityId = $('.js-select-cidade option:selected').val();
+        if ($("#select-cidade").length > 0 ){
+            selectedCityId = $('#select-cidade').val();
+        }
+        else{
+            selectedCityId = $('.js-select-cidade option:selected').val();
+        }
+        
         let cityObj = MapasCulturais.opportunitiesInciso2.filter(city => city.id == selectedCityId)[0]
         if (!(MapasCulturais.serverDate.date >= cityObj.registrationFrom.date && MapasCulturais.serverDate.date <= cityObj.registrationTo.date)) {
             modalTitle = cityObj.name;
