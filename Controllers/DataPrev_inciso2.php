@@ -1536,12 +1536,14 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
 
             }
         }
-       
+
         //Cria o CSV para pessoa jurídica
         if ($type == 'cnpj') {
             $file_name = 'inciso2-CNPJ-' . md5(json_encode($data_candidate_cnpj)) . '.csv';
 
-            $stream = fopen(__DIR__ . '/../csvs_inciso2/' . $file_name, 'a');
+            $patch = __DIR__ . '/../csvs_inciso2/cnpj/' . $file_name;
+
+            $stream = fopen($patch, 'w');
 
             $csv = Writer::createFromStream($stream);
 
@@ -1557,14 +1559,19 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 $csv->insertOne($csv_line);
             }
 
-            $csv->output($file_name);
+            header('Content-Type: application/csv');
+            header('Content-Disposition: attachment; filename=' . $file_name);
+            header('Pragma: no-cache');
+            readfile($patch);
         }
 
         //Cria o CSV para pessoa física
         if ($type == 'cpf') {
             $file_name = 'inciso2-CPF-' . md5(json_encode($data_candidate_cpf)) . '.csv';
 
-            $stream = fopen(__DIR__ . '/../csvs_inciso2/' . $file_name, 'a');
+            $patch = __DIR__ . '/../csvs_inciso2/cpf/' . $file_name;
+
+            $stream = fopen($patch, 'w');
 
             $csv = Writer::createFromStream($stream);
 
@@ -1580,7 +1587,10 @@ class DataPrev_inciso2 extends \MapasCulturais\Controllers\Registration
                 $csv->insertOne($csv_line);
             }
 
-            $csv->output($file_name);
+            header('Content-Type: application/csv');
+            header('Content-Disposition: attachment; filename=' . $file_name);
+            header('Pragma: no-cache');
+            readfile($patch);
         }
 
     }
