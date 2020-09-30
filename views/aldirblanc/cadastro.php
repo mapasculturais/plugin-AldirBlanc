@@ -27,7 +27,7 @@ if (count($cidades) === 0) {
 <section class="lab-main-content cadastro <?= $app->user->is('mediador') ? "mediador" : '' ?>">
     <header>
         <div class="intro-message">
-            <div class="name"> Olá, <?= $niceName ?>! </div>
+            <div class="name"> Olá <?= $niceName ? ", " . $niceName : "" ?>! </div>
         </div>
     </header>
 
@@ -210,8 +210,9 @@ if (count($cidades) === 0) {
                 <button class="btn btn-next js-next"><?php i::_e("Avançar"); ?></button>
             </div>
         </div>
-
-        <?php if (count($cidades) > 1) : ?>
+            
+        <?php 
+        if (count($cidades) > 1) : ?>
             <div id="select-cidade" class="js-questions-tab questions--tab lab-form-answer inactive">
                 <i class="questions--icon fas fa-university"></i>
                 <h4 class="questions--title"><?php i::_e('Selecione a cidade') ?></h4>
@@ -222,6 +223,12 @@ if (count($cidades) === 0) {
                     <button class="btn btn-next js-next"><?php i::_e("Avançar"); ?></button>
                 </div>
             </div>
+        <?php elseif (count($cidades) == 1) : ?>
+            
+            <?php foreach($cidades as $nome => $oportunidade): ?>
+                <input type="hidden" id="select-cidade" value="<?=$oportunidade?>">
+            <?php endforeach; ?>
+         
         <?php endif; ?>
     </div>
     <!-- End .js-questions -->
@@ -233,6 +240,8 @@ if (count($cidades) === 0) {
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2 class="modal-content--title js-title"></h2>
+            <strong>Atenção, você não poderá alterar essas opções após clicar em confirmar!</strong>
+            <br><br>
             <p id="modal-content-text" class="modal-content-text"></p>
             <button class="btn js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></button>        
         </div>

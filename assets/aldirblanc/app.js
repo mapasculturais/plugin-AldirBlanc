@@ -167,7 +167,12 @@ $(document).ready(function () {
       }
     }
 
-    var selectedCityId = $('.js-select-cidade option:selected').val();
+    if ($("#select-cidade").length > 0) {
+      selectedCityId = $('#select-cidade').val();
+    } else {
+      selectedCityId = $('.js-select-cidade option:selected').val();
+    }
+
     var cityObj = MapasCulturais.opportunitiesInciso2.filter(function (city) {
       return city.id == selectedCityId;
     })[0];
