@@ -5,7 +5,6 @@
 // </element>
 
 .status-card {
-
     @extend .card;
     background-color: $brand-primary;
     color: $light;
@@ -20,26 +19,30 @@
     &--primary,
     &.status-1 {
         @extend .status-card;
-        background-color: $theme-color-primary;
+        background-color: var(--status-1-background);
     }
 
     &--secondary,
     &.status-10 {
         @extend .status-card;
-        background-color: $theme-color-secondary;
+        background-color: var(--status-10-background);
     }
 
     &--tertiary,
-    &.status-2,
+    &.status-2{
+        @extend .status-card;
+        background-color: var(--status-2-background);
+    }
+
     &.status-3 {
         @extend .status-card;
-        background-color: $theme-color-tertiary;
+        background-color: var(--status-3-background);
     }
 
     &--quaternary,
     &.status-8 {
         @extend .status-card;
-        background-color: $theme-color-quaternary;
+        background-color: var(--status-8-background);
     }
 
     &--title {
@@ -54,7 +57,7 @@
     &--content {
         color: $light;
         font-size: 14px;
-        font-family: $font-family-base;
+        font-family: $f_body;
         line-height: 1.4;
         margin: 0;
         padding: 0;
