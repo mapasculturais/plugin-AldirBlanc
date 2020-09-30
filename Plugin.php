@@ -181,8 +181,11 @@ class Plugin extends \MapasCulturais\Plugin
             $this->part('aldirblanc/subsite-tab-content');
         });
 
-        $app->hook('template(site.index.home-search):end', function () {
-            $this->part('aldirblanc/home-search');
+        $app->hook('template(site.index.home-search):end', function () use ($plugin) {
+            $texto = $plugin->config['texto_home'];
+            $botao = $plugin->config['botao_home'];
+            $titulo = $plugin->config['titulo_home'];
+            $this->part('aldirblanc/home-search', ['texto' => $texto, 'botao' => $botao, 'titulo' => $titulo]);
         });
 
         /**
