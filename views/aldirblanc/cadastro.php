@@ -138,7 +138,7 @@ if (count($cidades) === 0) {
                     <span class="more"> Mais informações </span>
                     <span class="content">
                         <i>
-                            Donec facilisis tortor ut augue lacinia, at viverra est semper. Sed sapien metus, scelerisque nec pharetra id, tempor a tortor. Pellentesque non dignissim neque. Ut porta viverra est, ut dignissim elit elementum ut. Nunc vel rhoncus nibh, ut tincidunt turpis. Integer ac enim pellent.
+                            Os editais de premiação estão divididos em seis módulos para as diversas linguagens artísticas e dois específicos para o audiovisual. O objetivo é apoiar, fomentar e beneficiar técnicos culturais, artistas, coletivos, núcleos, grupos, produtores, agentes culturais e educadores culturais que auxiliam e realizam atividades voltadas às linguagens da dança, circo, teatro, música, hip hop, forró, literatura, artes visuais, culinária, artesanato, mestres de cultura e/ou guardiões da memória e da história oral, artistas de rua e demais linguagens artísticas, promovendo a cultura como principal agente de transformação social e difusor da cidadania cultural.
                         </i>
                     </span>
                 </div>
