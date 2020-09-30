@@ -23,7 +23,12 @@ header {
         height: auto;
         margin: 0 auto;
         padding-top: 5px;
-        width: 200px;
+        width: 310px;
+        
+        @include mobile {
+            width: 100%;
+        }
+    
     }
 
     .logout {
