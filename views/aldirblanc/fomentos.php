@@ -37,7 +37,7 @@
                     <hr>
                     
                     <div class="card--adicional-info">
-                        <?php if (isset($opportunity->registrationFrom) && isset($opportunity->registrationTo) ){
+                        <?php if ( (isset($opportunity->registrationFrom) && $opportunity->registrationFrom) &&  ( isset($opportunity->registrationTo) && $opportunity->registrationTo) ){
                             ?>
                         <div class="time">
                             <strong>Prazo:</strong> de <?=$opportunity->registrationFrom->format('d/m/Y')?> até <?=$opportunity->registrationTo->format('d/m/Y')?>
