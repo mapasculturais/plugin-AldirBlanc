@@ -375,8 +375,8 @@ $(document).ready(function () {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /app/assets-src/js/app.js */"./js/app.js");
-module.exports = __webpack_require__(/*! /app/assets-src/sass/app.scss */"./sass/app.scss");
+__webpack_require__(/*! /home/isaquemelo/Documents/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/js/app.js */"./js/app.js");
+module.exports = __webpack_require__(/*! /home/isaquemelo/Documents/mapasculturais-aldirblanc/plugins/AldirBlanc/assets-src/sass/app.scss */"./sass/app.scss");
 
 
 /***/ })

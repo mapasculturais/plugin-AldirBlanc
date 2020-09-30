@@ -856,41 +856,53 @@ i {
 
 header {
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 78px;
 }
 
 header#main-header {
   background-color: var(--header-background);
+  border-top: 0px;
 }
 
 header .logo-state {
-  display: none;
   height: auto;
-  margin: 0 auto;
   padding: 10px;
   width: 200px;
+  -webkit-filter: invert(1) brightness(10);
+          filter: invert(1) brightness(10);
   transition: all 0.3s ease-in-out;
   -webkit-transition: all 0.3s ease-in-out;
   -moz-transition: all 0.3s ease-in-out;
 }
 
-@media (min-width: 1025px) {
+@media (max-width: 1024px) {
   header .logo-state {
-    display: block;
-    left: 0;
-    position: absolute;
+    display: none;
   }
 }
 
 header .logo {
+  width: 360px;
   height: auto;
-  margin: 0 auto;
-  padding-top: 5px;
-  width: 310px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+  top: 0px;
 }
 
 @media (max-width: 829px) {
   header .logo {
-    width: 100%;
+    max-width: 100%;
+    position: unset;
+    transform: none;
+  }
+
+  header .logo img {
+    display: block;
+    margin: 0 auto;
   }
 }
 
@@ -907,7 +919,7 @@ header .logout i {
 }
 
 header .logout a {
-  color: #666666;
+  color: white;
   display: block;
   margin-top: 15px;
   text-align: center;
