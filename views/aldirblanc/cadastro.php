@@ -240,6 +240,8 @@ if (count($cidades) === 0) {
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2 class="modal-content--title js-title"></h2>
+            <strong>Atenção, você não poderá alterar essas opções após clicar em confirmar!</strong>
+            <br><br>
             <p id="modal-content-text" class="modal-content-text"></p>
             <button class="btn js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></button>        
         </div>
