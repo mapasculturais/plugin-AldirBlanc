@@ -28,13 +28,34 @@ return[
       'FLAG_CAD_OUTROS' => 'INSCRIÇÃO EM CADASTRO CULTURAL:',
       'SISTEMA_CAD_OUTROS' => 'Outros',
       'IDENTIFICADOR_CAD_OUTROS' => 'Outros',
-      'FLAG_ATUACAO_ARTES_CENICAS' => 'category',
-      'FLAG_ATUACAO_AUDIOVISUAL' => 'category',
-      'FLAG_ATUACAO_MUSICA' => 'category',
-      'FLAG_ATUACAO_ARTES_VISUAIS' => 'category',
-      'FLAG_ATUACAO_PATRIMONIO_CULTURAL' => 'category',
-      'FLAG_ATUACAO_MUSEUS_MEMORIA' => 'category',
-      'FLAG_ATUACAO_HUMANIDADES' => 'category',
+      'FLAG_ATUACAO_ARTES_CENICAS' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_AUDIOVISUAL' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_MUSICA' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_ARTES_VISUAIS' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_PATRIMONIO_CULTURAL' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_MUSEUS_MEMORIA' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_HUMANIDADES' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
 ],
    "fields_cnpj" => [
       'CNPJ' => [
@@ -62,16 +83,86 @@ return[
       'FLAG_CAD_OUTROS' => 'INSCRIÇÃO EM CADASTRO CULTURAL:',
       'SISTEMA_CAD_OUTROS' => 'dados vem da config',
       'IDENTIFICADOR_CAD_OUTROS' => 'dados vem da config',
-      'FLAG_ATUACAO_ARTES_CENICAS' => 'category',
-      'FLAG_ATUACAO_AUDIOVISUAL' => 'category',
-      'FLAG_ATUACAO_MUSICA' => 'category',
-      'FLAG_ATUACAO_ARTES_VISUAIS' => 'category',
-      'FLAG_ATUACAO_PATRIMONIO_CULTURAL' => 'category',
-      'FLAG_ATUACAO_MUSEUS_MEMORIA' => 'category',
-      'FLAG_ATUACAO_HUMANIDADES' => 'category',
+      'FLAG_ATUACAO_ARTES_CENICAS' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_AUDIOVISUAL' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_MUSICA' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_ARTES_VISUAIS' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_PATRIMONIO_CULTURAL' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_MUSEUS_MEMORIA' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+      'FLAG_ATUACAO_HUMANIDADES' => [
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+         'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
+      ],
+   ], 
+   "inscricoes_culturais" =>[
+      'mapa-cultural'=>'Cadastro Estadual de Cultura (Mapa Cultural)',
+      'cadastro-municipal'=>'Cadastros Municipais de Cultura',
+      'sniic' => 'Sistema Nacional de Informações e Indicadores Culturais',
+      'salic' => 'Sistema de Apoio às Leis de incentivo à Cultura (Salic)',
+      'sicab' => 'Sistema de Informações Cadastrais do Artesanato Brasileiro',
+      'outros' => 'Outros cadastros referentes a atividades culturais'
    ],
    "category" => [
-      'COM_ESPAÇO_FISICO' => 'field_406',
-      'SEM_ESPAÇO_FISICO' => 'field_379'
+      'com_espaco_fisico' => [
+         'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
+         'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO'
+      ],
+      'sem_espaco_fisico' => [
+         'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
+         'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO'
+      ]
+   ],
+   'atuacoes-culturais' => [
+
+      'artes-cenicas' => [
+         'Artes Circenses',
+         'Dança',
+         'Teatro',
+         'Artes Visuais',
+         'Artesanato',
+         'Ópera'
+      ],
+      'audiovisual' => [
+         'Audiovisual'
+      ],
+      'musica' => [
+         'Música'
+      ],
+      'artes-visuais' => [
+         'Design',
+         'Moda',
+         'Fotografia'
+      ],
+      'patrimonio-cultural' => [
+         'Cultura Popular',
+         'Gastronomia',
+         'Outros',
+         'Patrimônio Cultural'
+      ],
+      'museu-memoria' => [
+         'Museu'
+      ],
+      'humanidades' => [
+         'Literatura'
+      ]
+
    ]
 ];
