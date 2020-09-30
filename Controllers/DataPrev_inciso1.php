@@ -18,7 +18,7 @@ use MapasCulturais\i;
  *  @property-read \MapasCulturais\Entities\Registration $requestedEntity The Requested Entity
  */
 // class AldirBlanc extends \MapasCulturais\Controllers\EntityController {
-class DataPrev extends \MapasCulturais\Controllers\Registration
+class DataPrev_inciso1 extends \MapasCulturais\Controllers\Registration
 {
     protected $config = [];
 
@@ -34,10 +34,10 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
     }
 
     public function GET_export()
-    {   
+    {
         //Seta o timeout
         ini_set('max_execution_time', 0);
-        ini_set('memory_limit','768M');
+        ini_set('memory_limit', '768M');
 
         $this->requireAuthentication();
         $app = App::i();
@@ -48,19 +48,19 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         //Oportunidade que a query deve filtrar
         $opportunity_id = $this->config['inciso1_opportunity_id'];
 
-         //Data ínicial que a query deve filtrar
-         $startDate = new DateTime();
-         $startDate = $startDate->sub(new DateInterval('P7D'))->format('Y-m-d 00:00'); //Retorna o startDate a 7 dias atraz
+        //Data ínicial que a query deve filtrar
+        $startDate = new DateTime();
+        $startDate = $startDate->sub(new DateInterval('P7D'))->format('Y-m-d 00:00'); //Retorna o startDate a 7 dias atraz
 
-         //Data final que a query deve filtrar
-         $finishDate = new DateTime();
-         $finishDate = $finishDate->format('Y-m-d 23:59');
+        //Data final que a query deve filtrar
+        $finishDate = new DateTime();
+        $finishDate = $finishDate->format('Y-m-d 23:59');
 
-         //Satatus que a query deve filtrar
-         $status = 1;
+        //Satatus que a query deve filtrar
+        $status = 1;
 
-         //Inciso que a query deve filtrar
-         $inciso = 1;
+        //Inciso que a query deve filtrar
+        $inciso = 1;
 
         /**
          * Recebe e verifica os dados contidos no endpoint
@@ -98,7 +98,6 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
         }
 
-        
         $opportunity = $app->repo('Opportunity')->find($opportunity_id);
         $this->registerRegistrationMetadata($opportunity);
 
@@ -202,7 +201,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             },
             "SISTEMA_CAD_ESTADUAL" => function ($registrations) use ($csv_conf, $app) {
                 return $csv_conf['FLAG_CAD_ESTADUAL'] ? $app->view->dict('site: name', false) : '';
-                
+
             },
             "IDENTIFICADOR_CAD_ESTADUAL" => function ($registrations) use ($csv_conf) {
                 return $csv_conf['FLAG_CAD_ESTADUAL'] ? $registrations->number : '';
@@ -226,7 +225,6 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             },
             "SISTEMA_CAD_DISTRITAL" => function ($registrations) use ($csv_conf, $app) {
                 return $csv_conf['FLAG_CAD_DISTRITAL'] ? $app->view->dict('site: name', false) : '';
-
 
             },
             "IDENTIFICADOR_CAD_DISTRITAL" => function ($registrations) use ($csv_conf) {
@@ -294,7 +292,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
                         $result = 1;
-                    } 
+                    }
                 }
 
                 return $result;
@@ -357,7 +355,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
                         $result = 1;
-                    } 
+                    }
                 }
                 return $result;
             },
@@ -371,7 +369,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 foreach ($options as $value) {
                     if (in_array($value, $registrations->$field_id)) {
                         $result = 1;
-                    } 
+                    }
                 }
 
                 return $result;
@@ -415,29 +413,29 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 } else {
                     $data_candidate[$key_registration][$key_fields] = null;
                     $_field = $field($registrations);
-                    
-                    if(is_array($registration->$_field)) {
+
+                    if (is_array($registration->$_field)) {
                         foreach ($registration->$_field as $key_familyGroup => $familyGroup) {
-                            if(!isset($familyGroup->cpf) || !$familyGroup->relationship){
+                            if (!isset($familyGroup->cpf) || !$familyGroup->relationship) {
                                 continue;
                             }
 
                             foreach ($headers as $key => $header) {
                                 if ($header == "CPF") {
                                     $data_familyGroup[$key_registration][$key_familyGroup][$header] = $cpf_candidate;
-    
+
                                 } elseif ($header == "FAMILIARCPF") {
                                     $data_familyGroup[$key_registration][$key_familyGroup][$header] = str_replace(['.', '-'], '', $familyGroup->cpf);
-    
+
                                 } elseif ($header == "GRAUPARENTESCO") {
                                     $data_familyGroup[$key_registration][$key_familyGroup][$header] = $familyGroup->relationship;
-    
+
                                 } else {
                                     $data_familyGroup[$key_registration][$key_familyGroup][$header] = null;
-    
+
                                 }
                             }
-    
+
                         }
                     }
                 }
@@ -466,20 +464,36 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 }
             }
         }
-       
+
         /**
          * Cria o CSV
          */
-        $csv = Writer::createFromString("");
+        $file_name = 'inciso1-' . md5(json_encode($data)) . '.csv';
+
+        $dir = __DIR__ . '/../csvs_inciso1/';
+
+        $patch = $dir . $file_name;
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0700, true);
+        }
+
+        $stream = fopen($patch, 'w');
+
+        $csv = Writer::createFromStream($stream);
+
+        $field_temp = $csv_conf['fields_cpf'];
 
         $csv->insertOne($headers);
 
         foreach ($data as $key_csv => $csv_line) {
             $csv->insertOne($csv_line);
-
         }
 
-        $csv->output('inciso1-' . md5(json_encode($data)) . '.csv');
+        header('Content-Type: application/csv');
+        header('Content-Disposition: attachment; filename=' . $file_name);
+        header('Pragma: no-cache');
+        readfile($patch);
     }
 
 }
