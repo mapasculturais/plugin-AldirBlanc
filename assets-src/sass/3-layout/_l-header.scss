@@ -1,29 +1,45 @@
 header {
     position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 78px;
 
     &#main-header {
         background-color: var(--header-background);
+        border-top: 0px;
     }
 
     .logo-state {
-        display: none;
         height: auto;
-        margin: 0 auto;
         padding: 10px;
         width: 200px;
         @include transition(all, 0.3s, ease-in-out);
-        @include desktop {
-            display: block;
-            left: 0;
-            position: absolute;
+
+        @include tablet {
+            display: none;
         }
     }
 
     .logo {
+        width: 360px;
         height: auto;
-        margin: 0 auto;
-        padding-top: 5px;
-        width: 200px;
+        position: absolute;
+        left: 50%;
+        transform: translate(-50%);
+        top: -0px;
+        
+        @include mobile {
+            max-width: 100%;
+            position: unset;
+            transform: none;
+
+            img {
+                display: block;
+                margin: 0 auto;
+            }
+        }
+    
     }
 
     .logout {
@@ -32,11 +48,13 @@ header {
         position: absolute;
         right: 0;
         top: 0;
+
         i {
             width: 100%;
         }
+
         a {
-            color: $theme-color-quaternary;
+            color: white;
             display: block;
             margin-top: 15px;
             text-align: center;
@@ -47,5 +65,10 @@ header {
                 @include opacity(0.85);
             }
         }
+    }
+
+    .intro-message {
+        width: 100%;
+        text-align: center;
     }
 }
