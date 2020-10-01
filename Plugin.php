@@ -267,7 +267,10 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
             $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
             $requestedOpportunity = $this->requestedEntity;
-            if(!($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
+            $can_view = $requestedOpportunity->canUser('@control') || 
+                        $requestedOpportunity->canUser('viewEvaluations') || 
+                        $requestedOpportunity->canUser('evaluateRegistrations');
+            if(!$can_view && in_array($requestedOpportunity->id,$opportunities_ids) ) {
                 $url = $app->createUrl('aldirblanc', 'cadastro');
                 $app->redirect($url);
             }
@@ -277,7 +280,11 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
             $registration = $this->requestedEntity;
             $requestedOpportunity = $registration->opportunity;
-            if(!($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
+            $can_view = $requestedOpportunity->canUser('@control') || 
+                        $requestedOpportunity->canUser('viewEvaluations') || 
+                        $requestedOpportunity->canUser('evaluateRegistrations');
+
+            if(!$can_view && in_array($requestedOpportunity->id,$opportunities_ids) ) {
                 $url = $app->createUrl('aldirblanc', 'formulario',[$registration->id]);
                 $app->redirect($url);
             }
