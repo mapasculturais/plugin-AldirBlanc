@@ -5,8 +5,6 @@ namespace AldirBlanc\Controllers;
 use DateInterval;
 use DateTime;
 use Exception;
-use League\Csv\Reader;
-use League\Csv\Statement;
 use League\Csv\Writer;
 use MapasCulturais\App;
 use MapasCulturais\Entities\Registration;
@@ -61,18 +59,10 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         //Oportunidade que a query deve filtrar
         $opportunity_id = $this->config['inciso1_opportunity_id'];
 
-        $parameter = $this->config['csv_inciso1']['parameters_csv_defalt'];
-
-        //Data ínicial que a query deve filtrar
-        $startDate = new DateTime();
-        $startDate = $startDate->sub(new DateInterval('P7D'))->format('Y-m-d 00:00'); //Retorna o startDate a 7 dias atraz
-
-        //Data final que a query deve filtrar
-        $finishDate = new DateTime();
-        $finishDate = $finishDate->format('Y-m-d 23:59');
+        $parameter = $this->config['csv_inciso1']['parameters_csv_defalt'];       
 
         //Satatus que a query deve filtrar
-        $status = $parameter['status'];
+        $status = $parameter['status'];       
 
         /**
          * Recebe e verifica os dados contidos no endpoint
@@ -81,8 +71,10 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          * @var string $finishDate
          * @var \DateTime $date
          */
+
         if (!empty($this->data)) {
 
+            $getdata = false;
             if (isset($this->data['from']) && isset($this->data['to'])) {
 
                 if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
@@ -99,7 +91,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                     $finishDate = new DateTime($this->data['from']);
                     $finishDate = $finishDate->format('Y-m-d 23:59');
                 }
-
+                $getdata = true;
             }
 
             //Pega o status do endpoint
@@ -121,25 +113,45 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          * @var int $opportunity_id
          * @var array $key_registrations
          */
-        $dql = "
-        SELECT
-            e
-        FROM
-            MapasCulturais\Entities\Registration e
-        WHERE
-            e.sentTimestamp >=:startDate AND
-            e.sentTimestamp <= :finishDate AND
-            e.status = :status AND
-            e.opportunity = :opportunity_Id";
+        if ($getdata) { //caso existe data como parametro ele pega o range da data selecionada com satatus 1
+            $dql = "
+            SELECT
+                e
+            FROM
+                MapasCulturais\Entities\Registration e
+            WHERE
+                e.sentTimestamp >=:startDate AND
+                e.sentTimestamp <= :finishDate AND
+                e.status = :status AND
+                e.opportunity = :opportunity_Id";
 
-        $query = $app->em->createQuery($dql);
-        $query->setParameters([
-            'opportunity_Id' => $opportunity_id,
-            'startDate' => $startDate,
-            'finishDate' => $finishDate,
-            'status' => $status,
-        ]);
-        $registrations = $query->getResult();
+            $query = $app->em->createQuery($dql);
+
+            $conditions = $query->setParameters([
+                'opportunity_Id' => $opportunity_id,
+                'startDate' => $startDate,
+                'finishDate' => $finishDate,
+                'status' => $status,
+            ]);
+            $registrations = $query->getResult();
+        } else { //Se não exister data como parametro ele retorna todos os registros com status 1
+            $dql = "
+            SELECT
+                e
+            FROM
+                MapasCulturais\Entities\Registration e
+            WHERE
+                e.status = :status AND
+                e.opportunity = :opportunity_Id";
+
+            $query = $app->em->createQuery($dql);
+
+            $conditions = $query->setParameters([
+                'opportunity_Id' => $opportunity_id,
+                'status' => $status,
+            ]);
+            $registrations = $query->getResult();
+        }
 
         if (empty($registrations)) {
             echo "Não existe registros para o intervalo selecionado " . $startDate . " - " . $finishDate;
@@ -515,21 +527,13 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         }
 
         //Oportunidade que a query deve filtrar
-        $opportunity_id = $this->config['inciso2_opportunity_ids'];
-
-        //Data ínicial que a query deve filtrar
-        $startDate = new DateTime();
-        $startDate = $startDate->sub(new DateInterval('P7D'))->format('Y-m-d 00:00'); //Retorna o startDate a 7 dias atraz
-
-        //Data final que a query deve filtrar
-        $finishDate = new DateTime();
-        $finishDate = $finishDate->format('Y-m-d 23:59');
+        $opportunity_id = $this->config['inciso2_opportunity_ids']; 
 
         //Satatus que a query deve filtrar
         $status = 1;
 
         //Inciso que a query deve filtrar
-        $inciso = 1;
+        $inciso = 1;       
 
         /**
          * Recebe e verifica os dados contidos no endpoint
@@ -540,6 +544,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          */
         if (!empty($this->data)) {
 
+            $getData = false;
             if (isset($this->data['from']) && isset($this->data['to'])) {
 
                 if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
@@ -556,7 +561,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                     $finishDate = new DateTime($this->data['from']);
                     $finishDate = $finishDate->format('Y-m-d 23:59');
                 }
-
+                $getData = true;
             }
 
             //Pega o status do endpoint
@@ -599,25 +604,44 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          * @var int $opportunity_id
          * @var array $key_registrations
          */
-        $dql = "
-        SELECT
-            e
-        FROM
-            MapasCulturais\Entities\Registration e
-        WHERE
-            e.sentTimestamp >=:startDate AND
-            e.sentTimestamp <= :finishDate AND
-            e.status = :status AND
-            e.opportunity = :opportunity_Id";
+        if ($getdata) { //caso existe data como parametro ele pega o range da data selecionada com satatus 1
+            $dql = "
+            SELECT
+                e
+            FROM
+                MapasCulturais\Entities\Registration e
+            WHERE
+                e.sentTimestamp >=:startDate AND
+                e.sentTimestamp <= :finishDate AND
+                e.status = :status AND
+                e.opportunity = :opportunity_Id";
 
-        $query = $app->em->createQuery($dql);
-        $query->setParameters([
-            'opportunity_Id' => $opportunity_id,
-            'startDate' => $startDate,
-            'finishDate' => $finishDate,
-            'status' => $status,
-        ]);
-        $registrations = $query->getResult();
+            $query = $app->em->createQuery($dql);
+            $query->setParameters([
+                'opportunity_Id' => $opportunity_id,
+                'startDate' => $startDate,
+                'finishDate' => $finishDate,
+                'status' => $status,
+            ]);
+            $registrations = $query->getResult();
+
+        } else { //Se não exister data como parametro ele retorna todos os registros com status 1
+            $dql = "
+            SELECT
+                e
+            FROM
+                MapasCulturais\Entities\Registration e
+            WHERE
+                e.status = :status AND
+                e.opportunity = :opportunity_Id";
+
+            $query = $app->em->createQuery($dql);
+            $query->setParameters([
+                'opportunity_Id' => $opportunity_id,
+                'status' => $status,
+            ]);
+            $registrations = $query->getResult();
+        }
 
         if (empty($registrations)) {
             echo "Não existe registros para o intervalo selecionado " . $startDate . " - " . $finishDate;
