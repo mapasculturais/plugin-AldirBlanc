@@ -5,6 +5,8 @@ namespace AldirBlanc\Controllers;
 use DateInterval;
 use DateTime;
 use Exception;
+use League\Csv\Reader;
+use League\Csv\Statement;
 use League\Csv\Writer;
 use MapasCulturais\App;
 use MapasCulturais\Entities\Registration;
@@ -33,6 +35,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         $this->layout = 'aldirblanc';
     }
 
+    /**
+     * Exportador para o inciso 1
+     *
+     * Implementa o sistema de importação para a lei AldirBlanc no inciso 1
+     * http://localhost:8080/dataprev/export_inciso1/status:1/to:2020-01-01/from:2020-01-30
+     *
+     * Parametros to e from não são obrigatórios, caso nao informado retorna os últimos 7 dias de registros
+     *
+     * Paramentro status não é obrigatorio, caso não informado retorna todos com status 1
+     *
+     */
     public function GET_export_inciso1()
     {
         //Seta o timeout
@@ -48,6 +61,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         //Oportunidade que a query deve filtrar
         $opportunity_id = $this->config['inciso1_opportunity_id'];
 
+        $parameter = $this->config['csv_inciso1']['parameters_csv_defalt'];
+
         //Data ínicial que a query deve filtrar
         $startDate = new DateTime();
         $startDate = $startDate->sub(new DateInterval('P7D'))->format('Y-m-d 00:00'); //Retorna o startDate a 7 dias atraz
@@ -57,14 +72,11 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         $finishDate = $finishDate->format('Y-m-d 23:59');
 
         //Satatus que a query deve filtrar
-        $status = 1;
-
-        //Inciso que a query deve filtrar
-        $inciso = 1;
+        $status = $parameter['status'];
 
         /**
          * Recebe e verifica os dados contidos no endpoint
-         * https://localhost:8080/from:2020-09-01/to:2020-09-30/
+         * http://localhost:8080/dataprev/export_inciso1/status:1/to:2020-01-01/from:2020-01-30
          * @var string $startDate
          * @var string $finishDate
          * @var \DateTime $date
@@ -91,10 +103,10 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             }
 
             //Pega o status do endpoint
-            $status = isset($this->data['status']) && is_numeric($this->data['status']) ? $this->data['status'] : 1;
+            $status = isset($this->data['status']) && is_numeric($this->data['status']) ? $this->data['status'] : $parameter['status'];
 
             //Pega o inciso do endpoint
-            $inciso = isset($this->data['inciso']) && is_numeric($this->data['inciso']) ? $this->data['inciso'] : 1;
+            $inciso = isset($this->data['inciso']) && is_numeric($this->data['inciso']) ? $this->data['inciso'] : $parameter['status'];
 
         }
 
@@ -174,6 +186,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          * @var array $fields
          */
         $csv_conf = $this->config['csv_inciso1'];
+
         $fields = [
             "CPF" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["CPF"];
@@ -264,14 +277,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             },
             "FLAG_ATUACAO_ARTES_CENICAS" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_ARTES_CENICAS"];
-                $options = [
-                    'Artes Circenses',
-                    'Dança',
-                    'Teatro',
-                    'Artes Visuais',
-                    'Artesanato',
-                    'Ópera',
-                ];
+
+                $options = $csv_conf['atuacoes-culturais']['artes-cenicas'];
 
                 $result = 0;
                 foreach ($options as $value) {
@@ -284,9 +291,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             },
             "FLAG_ATUACAO_AUDIOVISUAL" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_AUDIOVISUAL"];
-                $options = [
-                    'Audiovisual',
-                ];
+
+                $options = $csv_conf['atuacoes-culturais']['audiovisual'];
 
                 $result = 0;
                 foreach ($options as $value) {
@@ -299,9 +305,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             },
             "FLAG_ATUACAO_MUSICA" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSICA"];
-                $options = [
-                    'Música',
-                ];
+
+                $options = $csv_conf['atuacoes-culturais']['musica'];
 
                 $result = 0;
                 foreach ($options as $value) {
@@ -314,11 +319,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             },
             "FLAG_ATUACAO_ARTES_VISUAIS" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSICA"];
-                $options = [
-                    'Design',
-                    'Moda',
-                    'Fotografia',
-                ];
+
+                $options = $csv_conf['atuacoes-culturais']['artes-visuais'];
 
                 $result = 0;
                 foreach ($options as $value) {
@@ -331,11 +333,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             },
             "FLAG_ATUACAO_PATRIMONIO_CULTURAL" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_PATRIMONIO_CULTURAL"];
-                $options = [
-                    'Cultura Popular',
-                    'Gastronomia',
-                    'Outros',
-                ];
+
+                $options = $csv_conf['atuacoes-culturais']['patrimonio-cultural'];
 
                 $result = 0;
                 foreach ($options as $value) {
@@ -347,9 +346,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             },
             "FLAG_ATUACAO_MUSEUS_MEMORIA" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSEUS_MEMORIA"];
-                $options = [
-                    'Museu',
-                ];
+
+                $options = $csv_conf['atuacoes-culturais']['museu-memoria'];
 
                 $result = 0;
                 foreach ($options as $value) {
@@ -361,9 +359,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             },
             "FLAG_ATUACAO_HUMANIDADES" => function ($registrations) use ($csv_conf) {
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSEUS_MEMORIA"];
-                $options = [
-                    'Literatura',
-                ];
+
+                $options = $csv_conf['atuacoes-culturais']['humanidades'];
 
                 $result = 0;
                 foreach ($options as $value) {
@@ -477,7 +474,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
         $stream = fopen($patch, 'w');
 
-        $csv = Writer::createFromStream($stream);        
+        $csv = Writer::createFromStream($stream);
 
         $csv->insertOne($headers);
 
@@ -491,6 +488,19 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         readfile($patch);
     }
 
+    /**
+     * Exportador para o inciso 2
+     *
+     * Implementa o sistema de importação para a lei AldirBlanc no inciso 2
+     * http://localhost:8080/dataprev/export_inciso2/opportunity:6/status:1/type:cpf/to:2020-01-01/from:2020-01-30
+     *
+     * Parametros to e from não são obrigatórios, caso nao informado retorna os últimos 7 dias de registros
+     *
+     * Paramentro type se alterna entre cpf e cnpj
+     *
+     * Paramentro status não é obrigatorio, caso não informado retorna todos com status 1
+     *
+     */
     public function GET_export_inciso2()
     {
 
