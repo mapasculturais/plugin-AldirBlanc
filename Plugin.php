@@ -149,6 +149,13 @@ class Plugin extends \MapasCulturais\Plugin
             $app->view->printStyles('aldirblanc');
         });
 
+        //Footer link de suporte
+        $app->hook('view.partial(footer):after', function () use ($plugin, $app) {
+            if ($app->view->controller->id == 'opportunity' || $app->view->controller->id == 'registration') {
+                $this->part('aldirblanc/support-link');
+            }
+        });
+
         //No cadastro da oportunidade (inciso2), adiciona os campos para bloqueio de edição/deleção
         $app->hook('opportunity.blockedFields', function ($entity) use ($app) {
             if(!$app->user->is('admin')) {
