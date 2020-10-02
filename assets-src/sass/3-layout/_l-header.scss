@@ -3,7 +3,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 78px;
+    height: 95px;
 
     &#main-header {
         background-color: var(--header-background);
@@ -12,7 +12,7 @@ header {
 
     .logo-state {
         height: auto;
-        padding: 10px;
+        padding: 15px 10px 10px 10px;
         width: 200px;
         @include transition(all, 0.3s, ease-in-out);
 
@@ -22,12 +22,12 @@ header {
     }
 
     .logo {
-        width: 360px;
+        width: 145px;
         height: auto;
         position: absolute;
         left: 50%;
         transform: translate(-50%);
-        top: -0px;
+        top: 3px;
         
         @include mobile {
             max-width: 100%;
@@ -54,7 +54,7 @@ header {
         }
 
         a {
-            color: white;
+            color: #333333;
             display: block;
             margin-top: 15px;
             text-align: center;

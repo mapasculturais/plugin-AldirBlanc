@@ -17,6 +17,8 @@ footer#main-footer {
         padding: 5px;
         @include transition(all, 0.3s, ease-in-out);
         width: auto;
+        padding-top: 0;
+        margin-top: -5px;
 
         @include mobile{
             width: 40%;

@@ -859,7 +859,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 78px;
+  height: 95px;
 }
 
 header#main-header {
@@ -869,7 +869,7 @@ header#main-header {
 
 header .logo-state {
   height: auto;
-  padding: 10px;
+  padding: 15px 10px 10px 10px;
   width: 200px;
   transition: all 0.3s ease-in-out;
   -webkit-transition: all 0.3s ease-in-out;
@@ -883,12 +883,12 @@ header .logo-state {
 }
 
 header .logo {
-  width: 360px;
+  width: 145px;
   height: auto;
   position: absolute;
   left: 50%;
   transform: translate(-50%);
-  top: 0px;
+  top: 3px;
 }
 
 @media (max-width: 829px) {
@@ -917,7 +917,7 @@ header .logout i {
 }
 
 header .logout a {
-  color: white;
+  color: #333333;
   display: block;
   margin-top: 15px;
   text-align: center;
@@ -963,6 +963,8 @@ footer#main-footer .logo-state {
   -webkit-transition: all 0.3s ease-in-out;
   -moz-transition: all 0.3s ease-in-out;
   width: auto;
+  padding-top: 0;
+  margin-top: -5px;
 }
 
 @media (max-width: 829px) {
@@ -8536,7 +8538,7 @@ article.registration .registration-fieldset,
   height: 100%;
   left: -1px;
   width: 40px;
-  background-color: #3275B6;
+  background-color: var(--primary-button-bg-color);
 }
 
 .term--input {
@@ -8679,7 +8681,7 @@ section.cadastro .cadastro-options .opcoes-inciso .draf-option .modal .modal-con
 }
 
 section.cadastro .selected {
-  background-color: #3275B6;
+  background-color: var(--box-selected-background);
   transition: all 0.2s ease-in-out;
   transform: scale(1.1);
 }

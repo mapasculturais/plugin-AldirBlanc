@@ -74,7 +74,7 @@ section.cadastro {
     }
 
     .selected {
-        background-color: $brand-primary;
+        background-color: var(--box-selected-background);
         transition: all 0.2s ease-in-out;
         transform: scale(1.1);
 
