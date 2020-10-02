@@ -5,7 +5,10 @@
 <section class="agentes">
     <header class="agentes--head">
         <i class="fas fa-users"></i>
-        <h3 class="agentes--title"><?php \MapasCulturais\i::_e("Selecione um agente para acompanhar a solicitação");?></h3>
+        <?php 
+        $texto =  !isset($agentOwner) && $inciso == 2 ? 'Selecione o responsável' : 'Selecione o beneficiário';
+        ?>
+        <h3 class="agentes--title"><?php \MapasCulturais\i::_e($texto);?></h3>
         <p class="agentes--summary"><?php \MapasCulturais\i::_e("O benefício é destinado aos trabalhadores e trabalhadoras da cultura que tiveram suas atividades interrompidas e se enquadram ao disposto no Art. 6º - Lei 14.017/2020.");?></p>
     </header>
     <div class="agentes--wrapper">
@@ -21,7 +24,7 @@
 
                 <div class="informative-box--title">
                     <h2><?=$agent->name?></h2>
-                    <i class="far fa-check-circle"></i>
+                    <i class="fas fa-minus"></i>
                 </div>
 
                 <div class="informative-box--content agentes-item" data-content="">
@@ -68,6 +71,9 @@
         });
 
         $('.agentes--item').on('click', function (event) {
+            $('.agentes--item').removeClass('active');
+            $(this).toggleClass('active');
+
             let agentRelated = '';
             let modal       = $('#modalAlert');
             let agentId     = $(this).attr('value');
@@ -78,7 +84,7 @@
             let agentOwner  = $(this).attr('agentOwner');
             if (agentOwner !== '') {
                 agentId = agentOwner;
-                agentRelated = this.value;
+                agentRelated = $(this).attr('value');
             }
 
             modal.css("display", "flex").hide().fadeIn(900);
@@ -88,7 +94,8 @@
             $('.modal-content').find('.text').html(msg);
 
             $('.close').on('click', function () {
-                modal.fadeOut('slow');
+                $('.agentes--item').removeClass('active');
+                modal.fadeOut('300');
             });
 
             $('#confirmar').on('click', function () {

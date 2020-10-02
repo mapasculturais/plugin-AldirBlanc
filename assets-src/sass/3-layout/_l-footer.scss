@@ -1,5 +1,5 @@
 footer#main-footer {
-    background-color: $light;
+    background-color: var(--footer-background);
     height: 60px;
     margin-top: 30px;
     padding: 20px;
@@ -17,10 +17,6 @@ footer#main-footer {
         padding: 5px;
         @include transition(all, 0.3s, ease-in-out);
         width: auto;
-
-        @include desktop {
-            display: none;
-        }
 
         @include mobile{
             width: 40%;

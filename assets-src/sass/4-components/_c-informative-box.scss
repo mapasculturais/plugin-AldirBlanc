@@ -20,7 +20,7 @@
 .informative-box {
     width: calc(100% - 23px);
     height: auto;
-    background-color: #FFFFFF;
+    background-color: var(--box-default-background);
     box-shadow: 0 2px 6px 0 rgba(0,0,0,0.3);
     border-radius: 10px;
     position: relative;
@@ -39,24 +39,24 @@
         opacity: 0.5;
     }
 
-    &.active, &:not(.disabled):hover {
-        background-color: $brand-primary;
+    &.active, &.selected, &:not(.disabled):hover {
+        background-color: var(--box-default-icon-color);
         transition: all 0.2s ease-in-out;
 
         .informative-box--icon {
             i {
-                color: white;
+                color: var(--box-default-background);
             }
 
             &:before, &:after, & {
-                background-color: $brand-primary;
+                background-color: var(--box-default-icon-color);
                 transition: all 0.2s ease-in-out;
             }
         }
 
         .informative-box--title, .informative-box--content {
             h2, i, .content, .more {
-                color: white;
+                color: var(--box-default-background);
             }
         }
 
@@ -80,10 +80,10 @@
     }
 
     &--status {
-        background-color: $brand-primary; 
+        background-color: var(--box-default-status-background); 
         padding: 9px 32px;
         text-align: left;
-        color: white;
+        color: var(--box-default-status-text);
         padding: 9px 32px;
         border-radius: 8px 8px 0 0;
         margin-bottom: 10px;
@@ -95,16 +95,22 @@
         left: -21.5px;
         width: 50px;
         height: 50px;
-        background: white;
+        background: var(--box-default-background);
         border-radius: 50%;
         display: flex;
         justify-content: center;
         align-items: center;
 
+        img.thumbnail {
+            z-index: 1;
+            border-radius: 50%;
+            border: 0px;
+        }
+
         i {
             z-index: 99;
             font-size: 20px;
-            color: $brand-primary;
+            color: var(--box-default-icon-color);
         }
 
         &:before {
@@ -127,7 +133,7 @@
             width: 39px;
             height: 67px;
             position: absolute;
-            background: white;
+            background: var(--box-default-background);
             z-index: 0;
             right: -11px;
         }
@@ -278,7 +284,7 @@
 
     &.status-1 {
         // Analise
-        background-color: $theme-color-primary;
+        background-color: var(--box-status-1-background);
 
         .informative-box--title {
             i.fa-check-circle {
@@ -300,53 +306,53 @@
         }
 
         .informative-box--status {
-            color: $theme-color-primary;
+            color: var(--box-status-1-background);
         }
 
         .informative-box--icon {
             &:before {
-                background-color: $theme-color-primary;
+                background-color: var(--box-status-1-background);
             }
 
             &:after {
-                background-color: $theme-color-primary;   
+                background-color: var(--box-status-1-background);   
             }
         }
 
     }
 
     &.status-10 {
-        background-color: $theme-color-secondary;
+        background-color: var(--box-status-10-background);
 
         .informative-box--status {
-            color: $theme-color-secondary;
+            color: var(--box-status-10-background);
         }
 
         .informative-box--icon {
             &:before {
-                background-color: $theme-color-secondary;
+                background-color: var(--box-status-10-background);
             }
 
             &:after {
-                background-color: $theme-color-secondary;   
+                background-color: var(--box-status-10-background);   
             }
         }
     }
 
     &.status-8 {
-        background-color: $theme-color-quaternary;
+        background-color: var(--box-status-8-background);
 
         .informative-box--status {
-            color: $theme-color-quaternary;
+            color: var(--box-status-8-background);
         }
 
         .informative-box--icon {
             &:before {
-                background-color: $theme-color-quaternary;
+                background-color: var(--box-status-8-background);
             }
 
             &:after {
-                background-color: $theme-color-quaternary;   
+                background-color: var(--box-status-8-background);   
             }
         }
 
@@ -371,10 +377,10 @@
     }
 
     &.status-3 {
-        background-color: $theme-color-tertiary;
+        background-color: var(--box-status-3-background);
 
         .informative-box--status {
-            color: $theme-color-tertiary;
+            color: var(--box-status-3-background);
         }
 
         .informative-box--title {
@@ -388,29 +394,29 @@
         .informative-box--icon {
 
             &:before {
-                background-color: $theme-color-tertiary;
+                background-color: var(--box-status-3-background);
             }
 
             &:after {
-                background-color: $theme-color-tertiary;   
+                background-color:  var(--box-status-3-background);   
             }
         }
     }
 
     &.status-2 {
-        background-color: $theme-color-quaternary;
+        background-color: var(--box-status-2-background);
 
         .informative-box--status {
-            color: $theme-color-quaternary;
+            color: var(--box-status-2-background);
         }
 
         .informative-box--icon {
             &:before {
-                background-color: $theme-color-quaternary;
+                background-color: var(--box-status-2-background);
             }
 
             &:after {
-                background-color: $theme-color-quaternary;   
+                background-color: var(--box-status-2-background);   
             }
         }
     }

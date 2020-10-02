@@ -1,10 +1,9 @@
-.agentes {
-
+.agentes, .espaco {
     h3 {
         text-align: center;
     }
 
-    i {
+    i:not(.fa-minus) {
         display: flex;
         justify-content: center;
         padding: 2%;
@@ -13,7 +12,7 @@
 
     &--summary {
         text-align: center;
-        font-family: $headings-font-family;
+        font-family: $f_title;
         max-width: 320px;
         margin: 0 auto;
         padding-bottom: 30px;
@@ -65,9 +64,9 @@
     }
 
     &--item {
-
         &.active,
         &:hover {
+            transform: scale(1.05);
             span {
                 color: white;
             }
@@ -78,5 +77,20 @@
     &--btn {
         display: flex;
         justify-content: center;
+    }
+
+    .informative-box--title {
+        i.fa-minus  {
+            border: 4px solid;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            padding: 0;
+            min-width: 36px;
+            font-size: 22px;
+        }
     }
 }

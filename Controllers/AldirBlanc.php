@@ -2,17 +2,22 @@
 
 namespace AldirBlanc\Controllers;
 
+use Exception;
 use MapasCulturais\App;
+use MapasCulturais\Entities\Agent;
 use MapasCulturais\i;
 use MapasCulturais\Entities\Registration;
 use MapasCulturais\Entities\RegistrationSpaceRelation as RegistrationSpaceRelationEntity;
+use MapasCulturais\Entities\User;
+use MapasCulturais\Exceptions\PermissionDenied;
 
 /**
  * Registration Controller
  *
  * By default this controller is registered with the id 'registration'.
  *
- *  @property-read \MapasCulturais\Entities\Registration $requestedEntity The Requested Entity
+ * @property-read \MapasCulturais\Entities\Registration $requestedEntity The Requested Entity
+ * @property-read mixed $config configuração do plugin
  */
 // class AldirBlanc extends \MapasCulturais\Controllers\EntityController {
 class AldirBlanc extends \MapasCulturais\Controllers\Registration
@@ -21,7 +26,14 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     const CATEGORY_ESPACO_NAO_FORMALIZADO = 1;
     const CATEGORY_COLETIVO_FORMALIZADO = 2;
     const CATEGORY_COLETIVO_NAO_FORMALIZADO = 3;
-    protected $config = [];
+    
+
+    /**
+     * Instância do plugin
+     *
+     * @var \AldirBlanc\Plugin
+     */
+    protected $plugin;
 
     function __construct()
     {
@@ -29,7 +41,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $app = App::i();
 
-        $this->config = $app->plugins['AldirBlanc']->config;
+        $this->plugin = $app->plugins['AldirBlanc'];
+
         $opportunitiesArrayInciso2 = $this->config['inciso2_opportunity_ids'];
         $opportunityInciso1 = $this->config['inciso1_opportunity_id'];
         if (array_unique($opportunitiesArrayInciso2) != $opportunitiesArrayInciso2 || in_array ($opportunityInciso1, array_values($opportunitiesArrayInciso2) )){
@@ -70,6 +83,11 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             throw new \Exception('Categoria não existe');
         }
     }
+
+    function getConfig() {
+        return $this->plugin->config;
+    }
+
     /**
      * Retorna a oportunidade do inciso I
      *
@@ -80,7 +98,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $opportunity_id = $this->config['inciso1_opportunity_id'];
 
         $app = App::i();
-
+        if (!isset($opportunity_id) || $opportunity_id == "") {
+            // @todo tratar esse erro
+            throw new \Exception();
+        }
         $opportunity = $app->repo('Opportunity')->find($opportunity_id);
 
         if(!$opportunity){
@@ -98,7 +119,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
      */
     function getOpportunityInciso2(string $opportunity_id)
     {
-        if (!in_array($opportunity_id, $this->config['inciso2_opportunity_ids'])){
+        if (!in_array($opportunity_id, $this->config['inciso2_opportunity_ids']) || $opportunity_id == "" ){
             // @todo tratar esse erro
             throw new \Exception();
         }
@@ -112,6 +133,29 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             throw new \Exception();
         }
         return $opportunity;
+    }
+    /**
+     * Retorna a oportunidade do inciso III
+     *
+     * @return array
+     */
+    function getOpportunitiesInciso3()
+    {
+        $app = App::i();
+        $project = $app->repo('Project')->find($this->config['project_id']);
+        $projectsIds = $project->getChildrenIds();
+        $projectsIds[] = $project->id;
+        $opportunitiesByProject = $app->repo('ProjectOpportunity')->findBy(['ownerEntity' => $projectsIds ] );
+        $inciso1e2Ids = array_values(array_merge([$this->config['inciso1_opportunity_id']], $this->config['inciso2_opportunity_ids']));
+        $opportunitiesInciso3 = [];
+
+        foreach ($opportunitiesByProject as $opportunity){
+            if ( !in_array($opportunity->id, $inciso1e2Ids) ) {
+                $opportunitiesInciso3[] = $opportunity;
+            }
+        }        
+
+        return $opportunitiesInciso3;
     }
     /**
      * Retorna o array associativo com os numeros e nomes de status
@@ -142,6 +186,33 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         parent::finish($data, $status, $isAjax);
     }
+
+    protected function createMediado() {
+        $app = App::i();
+
+        $owner_id = $this->config['mediados_owner'];
+        
+        if (!$owner_id) {
+            throw new Exception('Verifique a configuração `mediados_owner`.');
+        }
+        $owner = $app->repo('Agent')->find($owner_id);
+        
+        $app->disableAccessControl();
+        
+        $agent = new Agent($owner->user);
+        $agent->type = 1;
+        $agent->name = "";
+        $agent->shortDescription = "";
+
+        $agent->save(true);
+
+        $agent->createAgentRelation($app->user->profile, 'mediaror', true, true);
+
+        $app->disableAccessControl();
+
+        return $agent;
+    }
+
     /**
     * Redireciona o usuário para o formulário do inciso II
     *
@@ -154,7 +225,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $this->requireAuthentication();
         $app = App::i();
-        if (isset($this->data['agent'])) {
+
+        if ($app->user->is('mediador')) {
+            $agent = $this->createMediado();
+            $this->data = array_merge($this->data, ['agent' => $agent->id, 'inciso' => 2]);
+            $app->redirect($this->createUrl('nova_inscricao', $this->data ));
+            
+        } else if (isset($this->data['agent']) && $this->data['agent'] != "" ) {
             $agent = $app->repo('Agent')->find($this->data['agent']);
         } else {
             $agent = $app->user->profile;
@@ -200,7 +277,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
 
         $app = App::i();
-        if (isset($this->data['agent'])) {
+
+        if ($app->user->is('mediador')) {
+            $agent = $this->createMediado();
+
+            $app->redirect($this->createUrl('nova_inscricao', ['agent' => $agent->id, 'inciso' => 1]));
+            
+        } else if (isset($this->data['agent']) && $this->data['agent'] != "" ) {
             $agent = $app->repo('Agent')->find($this->data['agent']);
         } else {
             $agent = $app->user->profile;
@@ -236,12 +319,28 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $app->redirect($this->createUrl('formulario', [$agent->aldirblanc_inciso1_registration]));
     }
 
+     /**
+     * Redireciona o usuário para as oportunidades do inciso 3
+     * 
+     * rota: /aldirblanc/inciso3/[?agent={agent_id}]
+     * 
+     * @return void
+     */
+    function GET_fomentos()
+    {               
+        $app = App::i();
+        $niceName = $app->user->profile->name;
+        $opportunities = $this->getOpportunitiesInciso3();
+        $this->requireAuthentication();
+        $this->render('fomentos', ['opportunities' => $opportunities, 'cidades' => $cidades = [], 'niceName' => $niceName]);
+    }   
+
     /**
      * Cria nova inscrição para o agente no inciso informado e redireciona para o formulário
      * 
      */
     function GET_nova_inscricao()
-    {
+    {   
         $this->requireAuthentication();
         if (!isset($this->data['agent']) || !in_array(intval(@$this->data['inciso']), [1, 2])) {
             // @todo tratar esse erro
@@ -288,6 +387,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 ]);
                 
                 if(count($spaces_ids) == 1){
+                    if (!isset($spaces_ids[0]['id']) || $spaces_ids[0]['id'] == "" ) {
+                        // @todo tratar esse erro
+                        throw new \Exception();
+                    }
                     $space = $app->repo('space')->find($spaces_ids[0]['id']);
                 }
                 else if (count($spaces_ids) == 0) {
@@ -303,7 +406,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     $app->redirect($this->createUrl('selecionar_espaco', ['agent' => $agent->id, 'inciso' =>2, 'category' => $this->data['category'],'opportunity' => $this->data['opportunity']]) );
                 } 
                 // Pega dados da página de seleção de espaço e cria o objeto do espaço
-                if (isset($this->data['space']) && $this->data['space'] !=""){
+                if (isset($this->data['space']) && $this->data['space'] != "" ){
                     $space = $app->repo('space')->find($this->data['space']);  
 
                 }
@@ -318,16 +421,23 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     'type'=>'EQ(2)',
 
                 ]);
-
-                if(count($agentsQuery) == 1){
+                
+                if(count($agentsQuery) == 1 && !$app->user->is('mediador')){
+                    if (!isset($agentsQuery[0]['id']) || $agentsQuery[0]['id'] == "" ) {
+                        // @todo tratar esse erro
+                        throw new \Exception();
+                    }
                     $agentRelated = $app->repo('agent')->find($agentsQuery[0]['id']);
                 }
-                else if (count($agentsQuery) == 0) {
-                    $agentRelated = new \MapasCulturais\Entities\Agent($this->_getUser());
+                else if (count($agentsQuery) == 0 || $app->user->is('mediador') ) {
+                    $app->disableAccessControl();
+                    $agentRelated = new \MapasCulturais\Entities\Agent($agent->user);
                     //@TODO: confirmar nome e tipo do Agente coletivo
                     $agentRelated->name = ' ';
                     $agentRelated->type = 2;
+                    $agentRelated->parent = $agent;
                     $agentRelated->save(true);
+                    $app->enableAccessControl();
                 }                  
                 else if (count($agentsQuery) > 1 && (!isset($this->data['agentRelated']) || $this->data['agentRelated'] == '' )) {
 
@@ -444,8 +554,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $app = App::i();
 
-        if ($app->user->aldirblanc_tipo_usuario == 'assistente-social') {
-            $app->redirect($this->createUrl('assistenteSocial'));
+        if ($app->user->is('mediador')) {
+            $app->redirect($this->createUrl('cadastro'));
         } else if ($app->user->aldirblanc_tipo_usuario == 'solicitante') {
             $app->redirect($this->createUrl('cadastro'));
         } else {
@@ -457,6 +567,22 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
     }
 
+    function GET_fixregistrationinciso1() {
+        ini_set('max_execution_time', 0);
+        App::i()->disableAccessControl();
+        $op = App::i()->repo('Opportunity')->find($this->config['inciso1_opportunity_id']);
+        $registrations = App::i()->repo('Registration')->findBy(['opportunity' => $op]);
+
+        foreach ($registrations as $registration) {
+            if($registration->inciso == null) {
+                $registration->inciso = 1;
+                $registration->save();
+            } 
+        }
+        App::i()->em->flush();
+        App::i()->enableAccessControl();
+    }
+
     /**
      * Tela onde o usuário escolhe o inciso I ou II
      *
@@ -465,27 +591,72 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function GET_cadastro()
     {
         $this->requireAuthentication();
-        $app = App::i();
-        $inciso1 = $this->getOpportunityInciso1();
         
+        $app = App::i();
+
+        $controller = $app->controller('registration');
+
+        $registrationsInciso1 = [];
+        $registrationsInciso2 = [];
+
         $summaryStatusName = $this->getStatusNames();
-        $registrationsInciso1 = $app->repo('Registration')->findByOpportunityAndUser($inciso1, $app->user);
-        $opportunitiesIdsInciso2 = array_values($this->config['inciso2_opportunity_ids']);
-        $agentID = $app->user->profile->id;
-        $registrationsInciso2 = $app->repo('Registration')->findBy(['opportunity' => $opportunitiesIdsInciso2, 'owner' => $agentID]);
-        $name = $app->user->profile->name;
-        $this->render('cadastro', ['cidades' => $this->getCidades(), 'registrationsInciso1' => $registrationsInciso1, 'registrationsInciso2' => $registrationsInciso2, 'summaryStatusName'=>$summaryStatusName, 'niceName' => $name]);
+
+        $owner_id = $app->user->profile->id;
+        $owner_name = $app->user->profile->name;
+
+        $repo = $app->repo('Registration');
+        
+        if ($this->config['inciso1_enabled']) {
+            $inciso1 = $this->getOpportunityInciso1();
+            $registrations = $controller->apiQuery([
+                '@select' => 'id', 
+                'opportunity' => "EQ({$inciso1->id})", 
+                'status' => 'GTE(0)'
+            ]);
+            $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+            $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
+        }
+
+        $opportunitiesInciso2 = [];
+        $registrationsInciso2 = [];
+        
+        if ($this->config['inciso2_enabled']) {
+            $inciso2_ids = implode(',', $this->config['inciso2_opportunity_ids']);
+            $registrations = $controller->apiQuery([
+                '@select' => 'id', 
+                'opportunity' => "IN({$inciso2_ids})", 
+                'status' => 'GTE(0)'
+            ]);
+            $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+            $registrationsInciso2 = $repo->findBy(['id' => $registrations_ids]);
+            $opportunitiesIdsInciso2 = array_values($this->config['inciso2_opportunity_ids']);
+            $opportunitiesInciso2 = $app->repo('Opportunity')->findRegistrationDateByIds($opportunitiesIdsInciso2); 
+        }
+        $opportunitiesInciso3 = [];
+        if ($this->config['inciso2_enabled']) {
+            $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
+        }
+        $this->render('cadastro', [
+                'cidades' => $this->getCidades(), 
+                'registrationsInciso1' => $registrationsInciso1, 
+                'registrationsInciso2' => $registrationsInciso2, 
+                'summaryStatusName'=>$summaryStatusName, 
+                'niceName' => $owner_name,
+                'opportunitiesInciso2' => $opportunitiesInciso2,
+                'opportunitiesInciso3' => $opportunitiesInciso3
+            ]);
     }
 
     function GET_termos_e_condicoes()
     {
         $app = App::i();
-        $registration = $app->repo('Registration')->find($this->data['id']);
-        $this->requireAuthentication();
-        if (!isset($this->data['id'])) {
+        if (!isset($this->data['id']) || $this->data['id'] == "" ) {
             // @todo tratar esse erro
             throw new \Exception();
         }
+        $this->requireAuthentication();
+        $registration = $app->repo('Registration')->find($this->data['id']);
+        
         $this->render('termos-e-condicoes-inciso'.$registration->inciso, ['registration_id' => $this->data['id']]);
     }
     /**
@@ -517,7 +688,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $this->requireAuthentication();
         $app = App::i();
-        $user = $this->_getUser();
         $tipo = $this->data['tipo'];
         $agent_controller = $app->controller('agent');
         $agentsQuery = $agent_controller->apiQuery([
@@ -547,7 +717,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
 
         $app = App::i();
-        $user = $this->_getUser();
         $space_controller = $app->controller('space');
         $spacesQuery = $space_controller->apiQuery([
             '@select' => 'id,name,terms,agent_id',
@@ -591,20 +760,90 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->render('registration-confirmacao', $this->data);
     }
 
-    protected function _getUser(){
+
+    function GET_generateOpportunities() {
+        $this->requireAuthentication();
+
         $app = App::i();
-        $user = null;
-        if($app->user->is('admin') && key_exists('userId', $this->data)){
-            $user = $app->repo('User')->find($this->data['userId']);
 
-
-        }elseif($app->user->is('admin') && key_exists('agentId', $this->data)){
-            $agent = $app->repo('Agent')->find($this->data['agentId']);
-            $user = $agent->user;
+        if(!$app->user->is('admin')) {
+            $this->errorJson('Permissao negada', 403);
         }
-        if(!$user)
-            $user = $app->user;
+        
+        set_time_limit(0);
+        
+        $this->plugin->createOpportunityInciso1();
+        $this->plugin->createOpportunityInciso2();
 
-        return $user;
+        $this->json("Sucesso");
+    }
+
+    /* REPORTE */
+    function GET_reporte() {
+
+        $data = [
+            'inciso1' => null, 
+            'inciso2' => null
+        ];
+
+        if ($this->config['inciso1_enabled']) {
+            $data['inciso1'] = $this->getInciso1ReportData();
+        }
+        
+        if ($this->config['inciso2_enabled']) {
+            $data['inciso2'] = $this->getInciso2ReportData();
+        }
+        
+        $this->render('reporte', $data);
+    }
+
+    function getInciso1ReportData() {
+        if (!$this->config['inciso1_enabled']) return null;
+
+        $app = App::i();
+
+        $dql = "
+            SELECT 
+                COUNT(e.id) 
+            FROM 
+                MapasCulturais\Entities\Registration e 
+            WHERE 
+                e.status > 0 AND 
+                e.opportunity = :opportunityId";
+
+        $query = $app->em->createQuery($dql);
+
+        $query->setParameters([
+            'opportunityId' => $this->config['inciso1_opportunity_id']
+        ]);
+
+        return (object) [
+            'total' => $query->getSingleScalarResult()
+        ];
+    }
+
+    function getInciso2ReportData() {
+        if (!$this->config['inciso2_enabled']) return null;
+
+        $app = App::i();
+
+        $dql = "
+            SELECT 
+                COUNT(e.id) 
+            FROM 
+                MapasCulturais\Entities\Registration e 
+            WHERE 
+                e.status > 0 AND 
+                e.opportunity IN(:opportunities)";
+
+        $query = $app->em->createQuery($dql);
+
+        $query->setParameters([
+            'opportunities' => array_values($this->config['inciso2_opportunity_ids'])
+        ]);
+
+        return (object) [
+            'total' => $query->getSingleScalarResult()
+        ];
     }
 }

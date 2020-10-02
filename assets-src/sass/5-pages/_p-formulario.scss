@@ -2,8 +2,23 @@
 #editable-entity{
     border-left: none!important;
     background: transparent!important;
-    margin-top: 67px;
+    margin: 0 !important;
     box-shadow:none;
+
+    .alert {
+        margin-top: 50px;
+        margin-bottom: -50px;
+    }
+}
+
+h2.category {
+    font-size: 1em;
+    text-align: center;
+}
+
+h2.category {
+    font-size: 1em;
+    text-align: center;
 }
 
 article.registration {
@@ -25,6 +40,91 @@ article.registration {
         max-width: 300px;
         margin-left: auto;
         margin-right: auto;
+    }
+
+    .registration-fieldset  {
+        ul {
+            li {   
+                .relation-field-info, .icon-agent  {
+                    display: none;
+                }
+
+                > div {
+                    > span:first-of-type {
+                        display: flex;
+                        justify-content: space-between;
+                        
+                        span:last-of-type {
+                            color: #C60931;
+                            font-size: 11px;
+                            letter-spacing: 0;
+                            line-height: 15px;
+                            text-transform: lowercase;
+
+                            &:before {
+                                content: "*"
+                            }
+                        }
+                    }
+
+                }
+
+                .alert {
+                    padding: 0;
+                    padding-left: 40px;
+
+                    &:before {
+                        content: "\f071";
+                        font-weight: 600;
+                        font-family: "Font Awesome 5 Free";
+                    }
+                }
+
+                &.attachment-list-item-type-checkbox  {
+                    label  {
+                        display: grid;
+                        grid-template-columns: 25px auto;
+
+                        input {
+                            width: auto;
+                            margin-top: 5px;
+                        }
+                    }
+
+                    > div  {
+                        display: flex;
+                        flex-direction: column-reverse;
+                        align-items: flex-end;
+
+                        span:last-child {
+                            color: #C60931;
+                            font-size: 11px;
+                            letter-spacing: 0;
+                            line-height: 15px;
+                            text-transform: lowercase;
+                            margin-bottom: 15px;
+                        }
+                    }
+
+                    div.invalidField {
+                        border: 2px solid rgba(198, 9, 49, 1);
+                        padding: 14px;
+                        border-radius: 10px;
+                        background-color: rgba(198, 9, 49, 0.02);
+                        
+                    }
+                    
+                }
+
+                div.invalidField {
+                    input, select, textarea {
+                        border: 1px solid #C60931;
+                        border-radius: 2px;
+                        background-color: rgba(198, 9, 49, 0.02);
+                    }
+                }
+            }
+        }
     }
 
     .errors {
@@ -122,6 +222,7 @@ article.registration {
         }
 
         .alert.danger {
+            display: none!important;
             background: none;
             border: 0;
             margin-bottom: 0;
@@ -170,13 +271,19 @@ article.registration {
                     p {
                         display: grid;
                         grid-template-columns: repeat(2, 1fr);
+                        grid-row-gap: 15px;
+
+                        @include tablet {
+                            grid-template-columns: auto;
+                        }
 
                         label  {
                             display: flex;
-                            align-items: center;
+                            align-items: flex-start;
 
                             input[type="checkbox"] {
                                 margin-right: 5px;
+                                margin-top: 5px;
                                 width: auto;
                             }
                         }
@@ -215,6 +322,10 @@ article.registration {
 
                 input {
                     width: 100%;
+
+                    &[type='checkbox'] {
+                        width: auto;
+                    }
                 }
             }
             

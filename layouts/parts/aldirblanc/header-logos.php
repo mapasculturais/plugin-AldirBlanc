@@ -2,12 +2,25 @@
 /**
  * Exibe o logo no cabeçalho
  */
+$app = \MapasCulturais\App::i();
+$aldirBlancController = $app->controller('aldirblanc');
+$logotipo_instituicao = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldirBlancController->config['logotipo_instituicao'] : '';
+$logotipo_central = isset($aldirBlancController->config['logotipo_central']) ? $aldirBlancController->config['logotipo_central'] : '';
 ?>
 
-<div class="logo-state">
-    <img src="<?php $this->asset('aldirblanc/img/governo-para.png') ?>">
-</div>
+<?php if ($logotipo_instituicao){
+    ?>
+   <div class="logo-state">
+        <img src="<?= $logotipo_instituicao ?>">
+    </div>
+    <?php
+}?>
 
-<div class="logo">
-    <img src="<?php $this->asset('aldirblanc/img/logo-aldir-para.png') ?>">
-</div>
+<?php if ($logotipo_central){
+    ?>
+    <div class="logo">
+      <img src="<?= $logotipo_central ?>">
+    </div>
+    <?php
+}?>
+

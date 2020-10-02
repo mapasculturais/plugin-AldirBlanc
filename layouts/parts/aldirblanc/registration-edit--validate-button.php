@@ -1,8 +1,13 @@
+
+<div ng-controller="RegistrationFieldsController">
 <div class="registration-fieldset">
-    <a ng-click="validateRegistration()" class="btn btn-secondary btn-validate">Validar</a>
-    <div class="errors-header" ng-if="entityErrors">
+    <a ng-init="validateRegistration()" ng-click="validateRegistration()" class="btn btn-secondary btn-validate">Validar</a>
+    <div class="errors-header" ng-if="numFieldErrors() > 0">
         <p class="errors-header-title">O cadastro não foi enviado!</p>
-        <p>Corrija os campos e envie novamente</p>
+        <p>Corrija os campos listados abaixo e valide seu formulário utilizando o botão Validar.</p>
+    </div>
+    <div class="errors-header" ng-if="numFieldErrors() == 0">
+        <p class="errors-header-title">O cadastro ainda não foi enviado! Use o botão Validar para finalizar seu cadastro.</p>
     </div>
     <div class="errors" ng-repeat="field in data.fields" ng-if="entityErrors[field.fieldName]">
         <a ng-click="scrollTo('wrapper-' + field.fieldName, 130)">
@@ -29,3 +34,4 @@
         });
     });
 </script>
+</div>

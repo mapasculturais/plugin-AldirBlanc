@@ -1,4 +1,7 @@
 <?php
+
+use AldirBlanc\Controllers\AldirBlanc;
+
 $action = preg_replace("#^(\w+/)#", "", $this->template);
 
 $this->bodyProperties['ng-app'] = "entity.app";
@@ -23,6 +26,11 @@ $_params = [
     'opportunity' => $entity->opportunity
 ];
 
+
+$plugin = \MapasCulturais\App::i()->plugins['AldirBlanc'];
+if(false) $plugin = new \AldirBlanc\Plugin;
+
+$inciso2_categories = $plugin->config['inciso2_categories'];
 ?>
 
 <div id="editable-entity" class="clearfix sombra" >
@@ -31,20 +39,33 @@ $_params = [
         <?php if($entity->inciso == 1): ?> 
             <h1> Solicitação de trabalhadora ou trabalhador da cultura </h1>
         <?php else: ?> 
-            <h1> Cadastro de pessoa física </h1>
+            <h1> Espaços e organizações culturais </h1>
+            <h2 class="category"><?php echo $entity->category ?></h2>
+            <p>Solicitação de benefício para
+                <?php 
+                if ($entity->category == $inciso2_categories['espaco-formalizado']):
+                    echo $plugin->config['texto_categoria_espaco-formalizado'];
+                elseif ($entity->category == $inciso2_categories['espaco-nao-formalizado']): 
+                    echo $plugin->config['texto_categoria_espaco-nao-formalizado'];
+                elseif ($entity->category == $inciso2_categories['coletivo-formalizado']): 
+                    echo $plugin->config['texto_categoria_coletivo-formalizado'];
+                 elseif ($entity->category == $inciso2_categories['coletivo-nao-formalizado']): 
+                    echo $plugin->config['texto_categoria_coletivo-nao-formalizado'];
+                endif; ?>
+            </p>
         <?php endif; ?> 
         <?php $this->applyTemplateHook('form','begin'); ?>
         
         <?php $this->part('singles/registration-edit--header', $_params) ?>
         
-        <?php $this->part('singles/registration-edit--categories', $_params) ?>
-        
         <?php $this->part('singles/registration-edit--fields', $_params) ?>
+
+        <?php if($app->user->is('mediador')): ?>
+            <?php $this->part('aldirblanc/mediacao-fields', $_params) ?>
+        <?php endif; ?>
 
         <?php $this->part('aldirblanc/registration-edit--validate-button', $_params) ?>
         
         <?php $this->applyTemplateHook('form','end'); ?>
 
 </article>
-<?php $this->part('singles/registration--sidebar--left', $_params) ?>
-<?php $this->part('singles/registration--sidebar--right', $_params) ?>
