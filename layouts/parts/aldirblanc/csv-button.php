@@ -8,8 +8,8 @@ if ($inciso == 1){
     <?php
 }
 else if ($inciso ==2){
-    $routeCpf = MapasCulturais\App::i()->createUrl('dataprev', 'export_inciso1', ['status' => 1, 'type' =>'cpf', 'opportunity' =>$opportunity]);
-    $routeCnpj = MapasCulturais\App::i()->createUrl('dataprev', 'export_inciso1', ['status' => 1, 'type' =>'cnpj', 'opportunity' =>$opportunity]);
+    $routeCpf = MapasCulturais\App::i()->createUrl('dataprev', 'export_inciso2', ['status' => 1, 'type' =>'cpf', 'opportunity' =>$opportunity]);
+    $routeCnpj = MapasCulturais\App::i()->createUrl('dataprev', 'export_inciso2', ['status' => 1, 'type' =>'cnpj', 'opportunity' =>$opportunity]);
     ?>
     <a class="btn btn-primary" href="<?= $routeCpf ?>" target="_blank">
         Exportar csv CPF

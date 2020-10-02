@@ -71,10 +71,9 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          * @var string $finishDate
          * @var \DateTime $date
          */
-
-        if (!empty($this->data)) {
-
-            $getdata = false;
+        $getdata = false;
+        if (!empty($this->data)) {           
+            
             if (isset($this->data['from']) && isset($this->data['to'])) {
 
                 if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
@@ -542,9 +541,9 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          * @var string $finishDate
          * @var \DateTime $date
          */
+        $getData = false;
         if (!empty($this->data)) {
-
-            $getData = false;
+            
             if (isset($this->data['from']) && isset($this->data['to'])) {
 
                 if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
@@ -604,7 +603,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          * @var int $opportunity_id
          * @var array $key_registrations
          */
-        if ($getdata) { //caso existe data como parametro ele pega o range da data selecionada com satatus 1
+        if ($getData) { //caso existe data como parametro ele pega o range da data selecionada com satatus 1
             $dql = "
             SELECT
                 e
