@@ -424,7 +424,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                     if (is_array($registration->$_field)) {
                         foreach ($registration->$_field as $key_familyGroup => $familyGroup) {
-                            if (!isset($familyGroup->cpf) || !$familyGroup->relationship) {
+                            if (!isset($familyGroup->cpf) || !isset($familyGroup->relationship)) {
                                 continue;
                             }
 
