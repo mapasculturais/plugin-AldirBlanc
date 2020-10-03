@@ -1,7 +1,5 @@
 <?php 
-<<<<<<< HEAD
-$route = MapasCulturais\App::i()->createUrl('dataprev', 'export_inciso1');
-=======
+
 if ($inciso == 1){
     $route = MapasCulturais\App::i()->createUrl('dataprev', 'export_inciso1');    
     ?>
@@ -22,5 +20,5 @@ else if ($inciso ==2){
     </a>
     <?php
 }
->>>>>>> d41b73da3e95770e0bfbb9d4a29d54293411c672
+
 ?>

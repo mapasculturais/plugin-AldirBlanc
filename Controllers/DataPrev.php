@@ -71,16 +71,10 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          * @var string $finishDate
          * @var \DateTime $date
          */
-<<<<<<< HEAD
-
-        if (!empty($this->data)) {
-
-            $getdata = false;
-=======
+        
         $getdata = false;
         if (!empty($this->data)) {           
             
->>>>>>> d41b73da3e95770e0bfbb9d4a29d54293411c672
             if (isset($this->data['from']) && isset($this->data['to'])) {
 
                 if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
@@ -550,12 +544,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          */
         $getData = false;
         if (!empty($this->data)) {
-<<<<<<< HEAD
-
-            $getData = false;
-=======
             
->>>>>>> d41b73da3e95770e0bfbb9d4a29d54293411c672
             if (isset($this->data['from']) && isset($this->data['to'])) {
 
                 if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
@@ -615,11 +604,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          * @var int $opportunity_id
          * @var array $key_registrations
          */
-<<<<<<< HEAD
-        if ($getdata) { //caso existe data como parametro ele pega o range da data selecionada com satatus 1
-=======
         if ($getData) { //caso existe data como parametro ele pega o range da data selecionada com satatus 1
->>>>>>> d41b73da3e95770e0bfbb9d4a29d54293411c672
             $dql = "
             SELECT
                 e
