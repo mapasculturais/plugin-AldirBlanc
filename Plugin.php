@@ -146,12 +146,20 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
         //botao de export csv
-        $app->hook('template(opportunity.single.header-content):after', function () use($plugin, $app){
-            $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
-            $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
+        $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
+            $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
+            $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
+            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids);
             $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
+            $opportunity = $requestedOpportunity->id;
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
-                $this->part('aldirblanc/csv-button');
+                if (in_array($requestedOpportunity->id, $inciso1Ids)){
+                    $inciso = 1;
+                }
+                else if (in_array($requestedOpportunity->id, $inciso2Ids)){
+                    $inciso = 2;
+                }
+                $this->part('aldirblanc/csv-button', ['inciso' => $inciso, 'opportunity' =>$opportunity]);
             }
          });
 
