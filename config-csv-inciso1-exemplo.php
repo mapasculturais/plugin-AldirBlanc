@@ -20,4 +20,42 @@ return [
     "FLAG_ATUACAO_HUMANIDADES" => "field_10",
     "FAMILIARCPF" => 'field_5',
     "GRAUPARENTESCO" => 'field_5',
+    "parameters_csv_defalt" => [
+        "status" => 1
+    ],
+    'atuacoes-culturais' => [ // Opções para área de atuações culturais
+
+        'artes-cenicas' => [
+            'Artes Circenses',
+            'Dança',
+            'Teatro',
+            'Artes Visuais',
+            'Artesanato',
+            'Ópera',
+        ],
+        'audiovisual' => [
+            'Audiovisual',
+        ],
+        'musica' => [
+            'Música',
+        ],
+        'artes-visuais' => [
+            'Design',
+            'Moda',
+            'Fotografia',
+        ],
+        'patrimonio-cultural' => [
+            'Cultura Popular',
+            'Gastronomia',
+            'Outros',
+            'Patrimônio Cultural',
+        ],
+        'museu-memoria' => [
+            'Museu',
+        ],
+        'humanidades' => [
+            'Literatura',
+        ],
+
+    ],
 ];
