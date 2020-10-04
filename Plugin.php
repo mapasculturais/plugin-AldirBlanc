@@ -144,12 +144,11 @@ class Plugin extends \MapasCulturais\Plugin
             }
             $this->part('aldirblanc/generate-opportunities-button');
         });
-
+        
         //botao de export csv
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
-            $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
-            $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
-            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids);
+            $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
+            $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
             $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
             $opportunity = $requestedOpportunity->id;
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
