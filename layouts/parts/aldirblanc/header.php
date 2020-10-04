@@ -37,6 +37,8 @@ if ($title = $this->getTitle()) {
     <?php $this->bodyBegin(); ?>
     <header id="main-header" class="clearfix" ng-class="{'sombra':data.global.viewMode !== 'list'}">
         <?php $this->part('aldirblanc/header-logos') ?>
-        <?php $this->part('aldirblanc/header-logout') ?>
+        <?php if($app->auth->isUserAuthenticated()): ?>
+            <?php $this->part('aldirblanc/header-logout') ?>
+        <?php endif; ?>
     </header>
     <section id="main-section" class="clearfix">
