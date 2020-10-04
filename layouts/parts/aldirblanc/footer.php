@@ -35,14 +35,15 @@ $logotipo = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldi
 
     <div class="credits">
         <a href="https://github.com/mapasculturais/mapasculturais" target="_blank">
-            Mapas Culturais
+        Software livre Mapas Culturais
         </a> 
-        <span> e </span> 
+        <span> por </span> 
 
-        <a href="https://hacklab.com.br/" class="hacklab" target="_blank">
+        <a href="https://hacklab.com.br/" class="hacklab" target="_blank" style="white-space: nowrap;">
             hacklab <span>/</span>
         </a>
-        <!-- <img alt="Mapas Culturais e hacklab/" src="<?php $this->asset('aldirblanc/img/mapas-culturais-hacklab.png') ?>"> -->
+
+        <span> e comunidade </span>
     </div>
 
 </footer>
