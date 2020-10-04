@@ -6,162 +6,166 @@
 
 ?>
 <section class="termos" >
-    <p class="termos--summay"><?php \MapasCulturais\i::_e("De acordo com os critérios da LEI Nº 14.017 com sanção presidencial em 29 DE JUNHO DE 2020. Para ter acesso ao Auxílio Emergencial Cultural, você deve cumprir os seguintes requisitos:");?> </p>
+    <p class="termos--summay">De acordo com os critérios da LEI Nº 14.017 com sanção presidencial em 29 DE JUNHO DE 2020. Para ter acesso ao Auxílio Emergencial Cultural, você deve cumprir os seguintes requisitos: </p>
 
     <h2>
-        <?php \MapasCulturais\i::_e("Termos e Condições: Inciso I");?><br/>
-        <?php \MapasCulturais\i::_e("Trabalhadoras e trabalhadores");?><br/>
+        Termos e Condições: Inciso I<br/>
+        Trabalhadoras e trabalhadores<br/>
         
     </h2>
 
     <div class="termos--list">
         <div class="term">
             <span class="term--box"></span>
-            <label for="one" class="term--label">
-                <input type="checkbox" class="term--input" id="one" />
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro atuação no setor cultural e fonte de renda, conforme lei nº 14.017, de
-                    29 de junho de 2020, que dispõe sobre ações emergenciais destinadas ao setor
-                    cultural a serem adotadas durante o estado de calamidade pública.");?>
-            </span>
-            </label>
-        </div>
-        <div class="term">
-            <span class="term--box"></span>
-            <label for="two" class="term--label">
-                <input type="checkbox" class="term--input" id="two" />
-                <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que atuei social ou profissionalmente nas áreas artística e cultural
-                    nos 24 (vinte e quatro) meses imediatamente anteriores à 29 de junho de 2020,
-                    conforme inciso i do art. 6º da lei nº 14.017.");?>
-            </span>
-            </label>
-        </div>
-        <div class="term">
-            <span class="term--box"></span>
-            <label for="three" class="term--label">
-                <input type="checkbox" class="term--input" id="three" />
-                <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que não possuo emprego formal ativo com contrato de trabalho
-                    formalizado nos termos da consolidação das leis do trabalho, conforme o art.
-                    4º do decreto nº 10.646 e o inciso ii do art. 6º da lei nº 14.017.");?>
-            </span>
-            </label>
-        </div>
-        <div class="term">
-            <span class="term--box"></span>
-            <label for="four" class="term--label">
-                <input type="checkbox" class="term--input" id="four" />
-                <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que não sou titular de benefício previdenciário ou assistencial do
-                    governo federal, exceto do programa bolsa família, conforme inciso iii do art.
-                    6º da lei nº 14.017.");?>
-            </span>
-            </label>
-        </div>
-        <div class="term">
-            <span class="term--box"></span>
-            <label for="five" class="term--label">
-                <input type="checkbox" class="term--input" id="five" />
-                <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que não estou recebendo benefício do seguro desemprego ou
-                    programa de transferência de renda federal, exceto do programa bolsa família,
-                    conforme inciso iii do art. 6º da lei nº 14.017.");?>
-            </span>
-            </label>
-        </div>
-        <div class="term">
-            <span class="term--box"></span>
-            <label for="six" class="term--label">
-                <input type="checkbox" class="term--input" id="six" />
-                <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro renda familiar per capita de até meio salário mínimo ou renda familiar
-                    total de até três salários mínimos, conforme inciso iv do art. 6º da lei nº 14.017.");?>
-            </span>
-            </label>
-        </div>
-        <div class="term">
-            <span class="term--box"></span>
-            <label for="seven" class="term--label">
-                <input type="checkbox" class="term--input" id="seven" />
-                <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que não recebi, no ano de 2018, rendimentos tributáveis acima de R$
-                        28.559,70 (vinte e oito mil, quinhentos e cinquenta e nove reais e setenta
-                        centavos), conforme inciso v do art. 6º da lei nº 14.017.");?>
+                    DECLARO SER TRABALHADOR(A) DA CULTURA COM ATIVIDADES INTERROMPIDAS, CONFORME LEI Nº 14.017, DE 29 DE JUNHO DE 2020, QUE DISPÕE SOBRE AÇÕES EMERGENCIAIS DESTINADAS AO SETOR CULTURAL, A SEREM ADOTADAS DURANTE O ESTADO DE CALAMIDADE PÚBLICA.
                 </span>
             </label>
         </div>
         <div class="term">
             <span class="term--box"></span>
-            <label for="eight" class="term--label">
-                <input type="checkbox" class="term--input" id="eight" />
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro não ser beneficiário(a) do auxílio emergencial previsto na lei nº 13.982,
-                    de 2 de abril de 2020, e em conformidade com o inciso vii do art. 6º da lei nº 14.017.");?>
-            </span>
+                    DECLARO QUE ATUEI SOCIAL OU PROFISSIONALMENTE NAS ÁREAS ARTÍSTICA E CULTURAL, NOS 24 (VINTE E QUATRO) MESES IMEDIATAMENTE ANTERIORES A 29 DE JUNHO DE 2020, CONFORME INCISO I DO ART. 6º DA LEI Nº 14.017/2020.
+                </span>
             </label>
         </div>
         <div class="term">
             <span class="term--box"></span>
-            <label for="nine" class="term--label">
-                <input type="checkbox" class="term--input" id="nine" />
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que não sou agente público, independentemente da relação jurídica,
-                        inclusive ocupante de cargo ou função temporário ou de cargo em comissão de
-                        livre nomeação e exoneração ou, ainda, titular de mandato eletivo, conforme
-                        art. 4º do decreto nº 10.646.");?>
-            </span>
+                    DECLARO QUE NÃO POSSUO EMPREGO FORMAL ATIVO COM CONTRATO DE TRABALHO FORMALIZADO NOS TERMOS DA CONSOLIDAÇÃO DAS LEIS DO TRABALHO, CONFORME O ART. 4º DO DECRETO Nº 10.464 E O INCISO II DO ART. 6º DA LEI Nº 14.017.
+                </span>
             </label>
         </div>
         <div class="term">
             <span class="term--box"></span>
-            <label for="ten" class="term--label">
-                <input type="checkbox" class="term--input" id="ten" />
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que estou ciente de que, em caso de utilização de qualquer meio ilícito,
-                    imoral ou declaração falsa para a participação deste credenciamento, incorro
-                    nas penalidades previstas nos artigos 171 e 299 do decreto lei nº 2.848, de 07 de
-                    dezembro de 1940 (código penal).");?>
-            </span>
+                    DECLARO QUE NÃO SOU TITULAR DE BENEFÍCIO PREVIDENCIÁRIO OU ASSISTENCIAL DO GOVERNO FEDERAL, EXCETO DO PROGRAMA BOLSA FAMÍLIA, CONFORME INCISO III DO ART. 6º DA LEI Nº 14.017.
+                </span>
             </label>
         </div>
         <div class="term">
             <span class="term--box"></span>
-            <label for="eleven" class="term--label">
-                <input type="checkbox" class="term--input" id="eleven" />
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que estou ciente da concessão das informações por mim declaradas
-                    neste formulário para validação em outras bases de dados oficiais.");?>
-            </span>
+                    DECLARO QUE NÃO ESTOU RECEBENDO BENEFÍCIO DO SEGURO DESEMPREGO OU PROGRAMA DE TRANSFERÊNCIA DE RENDA FEDERAL, EXCETO DO PROGRAMA BOLSA FAMÍLIA, CONFORME INCISO III DO ART. 6º DA LEI Nº 14.017.
+                </span>
             </label>
         </div>
         <div class="term">
             <span class="term--box"></span>
-            <label for="twelve" class="term--label">
-                <input type="checkbox" class="term--input" id="twelve" />
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Concordo com a inclusão das informações por mim declaradas neste
-                    formulário na base de dados na plataforma ").$app->view->dict('site: name').".";?>
-            </span>
+                    DECLARO RENDA FAMILIAR PER CAPITA DE ATÉ MEIO SALÁRIO MÍNIMO OU RENDA FAMILIAR TOTAL DE ATÉ TRÊS SALÁRIOS MÍNIMOS, CONFORME INCISO IV DO ART. 6º DA LEI Nº 14.017/2020.
+                </span>
             </label>
         </div>
         <div class="term">
             <span class="term--box"></span>
-            <label for="thirteen" class="term--label">
-                <input type="checkbox" class="term--input" id="thirteen" />
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
                 <span class="termos--text">
-                <?php \MapasCulturais\i::_e("Declaro que a presente inscrição para acesso ao auxílio emergencial, de que
-                    trata a lei a lei 14.017/2020, é autodeclarada e única em todo o território
-                    brasileiro.");?>
-            </span>
+                    DECLARO QUE NÃO RECEBI, NO ANO DE 2018, RENDIMENTOS TRIBUTÁVEIS ACIMA DE R$ 28.559,70 (VINTE E OITO MIL, QUINHENTOS E CINQUENTA E NOVE REAIS E SETENTA CENTAVOS), CONFORME INCISO V DO ART. 6º DA LEI Nº 14.017.
+                </span>
+            </label>
+        </div>
+        <div class="term">
+            <span class="term--box"></span>
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
+                <span class="termos--text">
+                    DECLARO NÃO SER BENEFICIÁRIO(A) DO AUXÍLIO EMERGENCIAL PREVISTO NA LEI Nº 13.982, DE 2 DE ABRIL DE 2020, E EM CONFORMIDADE COM O INCISO VII DO ART. 6º DA LEI Nº 14.017.
+                </span>
+            </label>
+        </div>
+        <div class="term">
+            <span class="term--box"></span>
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
+                <span class="termos--text">
+                    DECLARO QUE NÃO SOU AGENTE PÚBLICO, INDEPENDENTEMENTE DA RELAÇÃO JURÍDICA, INCLUSIVE OCUPANTE DE CARGO OU FUNÇÃO TEMPORÁRIO OU DE CARGO EM COMISSÃO DE LIVRE NOMEAÇÃO E EXONERAÇÃO OU, AINDA, TITULAR DE MANDATO ELETIVO, CONFORME ART. 4º DO DECRETO Nº 10.464.
+                </span>
+            </label>
+        </div>
+        <div class="term">
+            <span class="term--box"></span>
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
+                <span class="termos--text">
+                    DECLARO QUE ESTOU CIENTE DE QUE, EM CASO DE UTILIZAÇÃO DE QUALQUER MEIO ILÍCITO, IMORAL OU DECLARAÇÃO FALSA PARA A PARTICIPAÇÃO DESTE CREDENCIAMENTO, INCORRO NAS PENALIDADES PREVISTAS NOS ARTIGOS 171 E 299 DO DECRETO LEI Nº 2.848, DE 07 DE DEZEMBRO DE 1940 (CÓDIGO PENAL).
+                </span>
+            </label>
+        </div>
+        <div class="term">
+            <span class="term--box"></span>
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
+                <span class="termos--text">
+                    DECLARO QUE ESTOU CIENTE DA CONCESSÃO DAS INFORMAÇÕES POR MIM DECLARADAS NESTE FORMULÁRIO PARA VALIDAÇÃO EM OUTRAS BASES DE DADOS OFICIAIS. 
+                </span>
+            </label>
+        </div>
+        <div class="term">
+            <span class="term--box"></span>
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
+                <span class="termos--text">
+                    CONCORDO COM A INCLUSÃO DAS INFORMAÇÕES POR MIM DECLARADAS NESTE FORMULÁRIO NA BASE DE DADOS DA PLATAFORMA MAPA CULTURAL DO ESPÍRITO SANTO.
+                </span>
+            </label>
+        </div>
+        <div class="term">
+            <span class="term--box"></span>
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
+                <span class="termos--text">
+                    DECLARO QUE A PRESENTE INSCRIÇÃO PARA ACESSO AO AUXÍLIO EMERGENCIAL, DE QUE TRATA A LEI 14.017/2020, É AUTODECLARADA E ÚNICA EM TODO O TERRITÓRIO BRASILEIRO.
+                </span>
             </label>
         </div>
 
+        <div class="term">
+            <span class="term--box"></span>
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
+                <span class="termos--text">
+                    DECLARO QUE ESTOU CIENTE DE QUE SE A CONTA BANCÁRIA INFORMADA NÃO TIVER COMO TITULAR O MEU CPF OU OS DADOS NÃO FOREM CORRETOS, O PAGAMENTO DO AUXÍLIO NÃO PODERÁ SER EFETUADO.
+                </span>
+            </label>
+        </div>
 
+        <div class="term">
+            <span class="term--box"></span>
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
+                <span class="termos--text">
+                    DECLARO QUE ESTOU CIENTE DE QUE AO OPTAR PELA MODALIDADE ORDEM DE PAGAMENTO POSSO RECEBER O BENEFÍCIO DO AUXÍLIO NAS AGÊNCIAS DO BANCO DO BRASIL, PESSOALMENTE, APRESENTANDO MEU RG E CPF, SEM NENHUM CUSTO.
+                </span>
+            </label>
+        </div>
+
+        <div class="term">
+            <span class="term--box"></span>
+            <label class="term--label">
+                <input type="checkbox" class="term--input" />
+                <span class="termos--text">
+                DECLARO QUE ESTOU CIENTE DOS PRAZOS DE COMPENSAÇÃO DAS TRANSAÇÕES DO MEU BANCO, QUE PODEM DURAR ATÉ 03 (TRÊS) DIAS ÚTEIS.
+                </span>
+            </label>
+        </div>
     </div>
 
     <nav class="termos--nav-terms">
-        <button class="btn btn-large btn-lab js-btn">  <?php \MapasCulturais\i::_e("Continuar");?></button>
+        <button class="btn btn-large btn-lab js-btn">Continuar</button>
     </nav>
 
     <div id="modalAlert" class="modal">
@@ -170,7 +174,7 @@
             <span class="close">&times;</span>
             <h2 class="modal-content--title title-modal">Atenção!</h2>
             <p>
-                <?php \MapasCulturais\i::_e("Você precisa aceitar todos os termos para continuar com a inscrição no auxílio emergencial da cultura.");?>
+                Você precisa aceitar todos os termos para continuar com a inscrição no auxílio emergencial da cultura.
             </p>
             <button id="btn-close" class="btn">OK</button>
         </div>
