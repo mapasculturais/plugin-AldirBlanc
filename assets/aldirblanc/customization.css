@@ -2,9 +2,11 @@
     /* LAYOUT PARTS */
     /* Header */
     --header-background: #202047;
+    --header-color: #ffffff;
 
     /* Footer */
-    --footer-background: #ffffff;
+    --footer-background: #202047;
+    --footer-color: #ffffff;
 
     /* COMPONENTS */
     /* Button */
