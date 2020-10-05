@@ -19,7 +19,7 @@ $logotipo_central = isset($aldirBlancController->config['logotipo_central']) ? $
 <?php if ($logotipo_central){
     ?>
     <div class="logo">
-      <img src="<?= $logotipo_central ?>">
+      <a href="<?= $app->createUrl('aldirblanc', 'cadastro') ?>"> <img src="<?= $logotipo_central ?>"></a>
     </div>
     <?php
 }?>
