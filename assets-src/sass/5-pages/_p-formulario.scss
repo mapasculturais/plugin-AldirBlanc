@@ -48,7 +48,11 @@ article.registration {
                 .relation-field-info, .icon-agent  {
                     display: none;
                 }
-
+                #field_31, #field_30{
+                    > span:first-of-type {
+                        width: 100%;
+                    }
+                }
                 > div {
                     > span:first-of-type {
                         display: flex;
