@@ -633,7 +633,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $opportunitiesInciso2 = $app->repo('Opportunity')->findRegistrationDateByIds($opportunitiesIdsInciso2); 
         }
         $opportunitiesInciso3 = [];
-        if ($this->config['inciso2_enabled']) {
+        if ($this->config['inciso3_enabled']) {
             $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
         $this->render('cadastro', [
