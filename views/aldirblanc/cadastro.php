@@ -57,7 +57,7 @@ if (count($cidades) === 0) {
                     <div class="informative-box--content active" data-content="">
                         <span class="more"> Mais informações </span>
                         <span class="content"><i>
-                        Renda emergencial destinada aos trabalhadores e trabalhadoras da cultura que tiveram suas atividades interrompidas e se enquadram ao disposto no Art. 6º - Lei 14.017/2020. Prevê o pagamento de três parcelas de R$ 600,00 (seiscentos reais), podendo ser prorrogado conforme Art 5º - Lei 14.017/2020.</i></span>
+                        Renda emergencial destinada aos trabalhadores e trabalhadoras da cultura que tiveram suas atividades interrompidas e se enquadram ao disposto no Art. 6º - Lei 14.017/2020. </i></span>
                     </div>
                 </button>
             <?php
