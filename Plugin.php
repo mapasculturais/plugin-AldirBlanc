@@ -170,8 +170,14 @@ class Plugin extends \MapasCulturais\Plugin
 
         //Footer link de suporte
         $app->hook('view.partial(footer):after', function () use ($plugin, $app) {
-            if ($app->view->controller->id == 'opportunity' || $app->view->controller->id == 'registration') {
+            $requestedEntity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
+            $opportunitiesInciso3 = $app->controller('AldirBlanc')->getOpportunitiesInciso3();
+            if ($app->view->controller->id == 'opportunity' && in_array($requestedEntity,$opportunitiesInciso3)) 
+            {
                 $this->part('aldirblanc/support-link');
+            } elseif ( $app->view->controller->id == 'registration' && in_array($requestedEntity->opportunity,$opportunitiesInciso3) ) 
+            {
+                $this->part('aldirblanc/support-link');  
             }
         });
 
