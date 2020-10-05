@@ -1,31 +1,53 @@
 footer#main-footer {
     background-color: var(--footer-background);
     color: var(--footer-color);
-    height: 60px;
+    height: 70px;
     margin-top: 30px;
-    padding: 10px 20px 10px 10px;
+    padding: 5px 20px 5px 5px;
     position: relative;
     @include box-shadow(0, 0, 5px, #999);
+
+    @media (max-width: 400px) {
+        height: auto;
+        padding: 5px;
+    }
 
     a {
         color: var(--footer-color);
         display: inline-block;
 
         &.terms-conditions {
-            margin-top: 20px;
+            @media (min-width: 777px) and (max-width: 998px) {
+                float: right;
+                margin-top: 9px;
+                margin-left: auto;
+            }
+            @media (max-width: 776px) {
+                display: none;
+            }
         }
+
     }
 
     .logo-state {
         float: left;
         height: auto;
         margin: 0 auto;
-        max-width: 200px;
+        max-width: 250px;
         @include transition(all, 0.3s, ease-in-out);
         width: auto;
 
-        @include mobile{
+        img {
+            max-height: 68px;
+        }
+
+        @include mobile {
             width: 40%;
+        }
+
+        @media (max-width: 400px) {
+            float: none;
+            margin-top: 10px
         }
     }
     .credits {
@@ -38,7 +60,7 @@ footer#main-footer {
         line-height: 19px;
         text-align: right;
         max-width: 220px;
-        margin-top: 9px;
+        margin-top: 17px;
 
         a {
             text-decoration: none;
@@ -50,6 +72,20 @@ footer#main-footer {
                 color: #DD4B39;
             }
         }
+
+        @media (min-width: 777px) and (max-width: 998px) {
+            margin-top: 5px;
+            max-width: 60%;
+        }
+
+        @media (max-width: 400px) {
+            font-size: 12px;
+            margin-top: 5px;
+            max-width: 100%;
+            text-align: center;
+            width: 100%;
+        }
+
     }
 
 }
@@ -72,10 +108,6 @@ footer#main-footer {
 .terms-conditions{
     margin-top: 22px;
     margin-left: 11%;
-
-    @include mobile {
-        display: none;
-    }
 }
 
 /* Fixed footer */
