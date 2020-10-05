@@ -1,5 +1,5 @@
 <?php
-return [
+return [ //Configurações dos campos para o exportador
     "CPF" => '',
     "SEXO" => '',
     "FLAG_CAD_ESTADUAL" => '',
@@ -18,6 +18,17 @@ return [
     "FLAG_ATUACAO_PATRIMONIO_CULTURAL" => '',
     "FLAG_ATUACAO_MUSEUS_MEMORIA" => '',
     "FLAG_ATUACAO_HUMANIDADES" => '',
-    "FAMILIARCPF" => 'field_5',
-    "GRAUPARENTESCO" => 'field_5',
+    "FAMILIARCPF" => '',
+    "GRAUPARENTESCO" => '',
+    "parameters_csv_defalt" => [],
+    'atuacoes-culturais' => [ // Opções para área de atuações culturais
+        'artes-cenicas' => [],
+        'audiovisual' => [],
+        'musica' => [],
+        'artes-visuais' => [],
+        'patrimonio-cultural' => [],
+        'museu-memoria' => [],
+        'humanidades' => [],
+
+    ],
 ];
