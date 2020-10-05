@@ -2,19 +2,24 @@ footer#main-footer {
     background-color: var(--footer-background);
     height: 60px;
     margin-top: 30px;
-    padding: 20px;
+    padding: 10px 20px 10px 10px;
     position: relative;
     @include box-shadow(0, 0, 5px, #999);
 
     a {
         color: black;
+        display: inline-block;
+
+        &.terms-conditions {
+            margin-top: 20px;
+        }
     }
 
     .logo-state {
         float: left;
         height: auto;
         margin: 0 auto;
-        padding: 5px;
+        max-width: 200px;
         @include transition(all, 0.3s, ease-in-out);
         width: auto;
 
