@@ -143,25 +143,6 @@
             </label>
         </div>
 
-        <div class="term">
-            <span class="term--box"></span>
-            <label class="term--label">
-                <input type="checkbox" class="term--input" />
-                <span class="termos--text">
-                    DECLARO QUE ESTOU CIENTE DE QUE AO OPTAR PELA MODALIDADE ORDEM DE PAGAMENTO POSSO RECEBER O BENEFÍCIO DO AUXÍLIO NAS AGÊNCIAS DO BANCO DO BRASIL, PESSOALMENTE, APRESENTANDO MEU RG E CPF, SEM NENHUM CUSTO.
-                </span>
-            </label>
-        </div>
-
-        <div class="term">
-            <span class="term--box"></span>
-            <label class="term--label">
-                <input type="checkbox" class="term--input" />
-                <span class="termos--text">
-                DECLARO QUE ESTOU CIENTE DOS PRAZOS DE COMPENSAÇÃO DAS TRANSAÇÕES DO MEU BANCO, QUE PODEM DURAR ATÉ 03 (TRÊS) DIAS ÚTEIS.
-                </span>
-            </label>
-        </div>
     </div>
 
     <nav class="termos--nav-terms">
