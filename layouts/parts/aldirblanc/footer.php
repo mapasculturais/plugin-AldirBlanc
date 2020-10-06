@@ -41,7 +41,7 @@ $logotipo = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldi
         </a> 
         <span> por </span> 
 
-        <a href="https://hacklab.com.br/" class="hacklab" target="_blank">
+        <a href="https://hacklab.com.br/" class="hacklab" target="_blank" style="white-space: nowrap;">
             hacklab <span>/</span>
         </a>
 
