@@ -246,6 +246,4 @@ if (count($cidades) === 0) {
             <button class="btn js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></button>        
         </div>
     </div>
-
 </section>
-

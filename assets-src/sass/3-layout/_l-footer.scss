@@ -31,8 +31,12 @@ footer#main-footer {
         letter-spacing: 0;
         line-height: 19px;
         text-align: right;
-        max-width: 114px;
+        max-width: 300px;
         margin-top: 9px;
+
+        @include tablet {
+            max-width: 160px;
+        }
 
         a {
             text-decoration: none;

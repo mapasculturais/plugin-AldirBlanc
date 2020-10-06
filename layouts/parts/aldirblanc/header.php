@@ -25,6 +25,41 @@ if ($title = $this->getTitle()) {
     <title><?php echo $title == $site_name ? $title : "{$site_name} - {$title}"; ?></title>
     <link rel="profile" href="http://gmpg.org/xfn/11" />
     <link rel="shortcut icon" href="<?php $this->asset('img/favicon.ico') ?>" />
+
+    <?php 
+    $meta_description = "A Lei de Emergência Cultural Aldir Blanc surgiu com o objetivo de ajudar trabalhadoras e trabalhadores da Cultura bem como espaços culturais brasileiros no período de isolamento social,
+    ocasionado pela pandemia da COVID-19. Solicite seu benefício!";
+
+    foreach($this->documentMeta as $i => &$meta) {
+        // Redefine description metas
+        // Using name key
+        if(@$meta['name'] && strpos($meta['name'], 'description') !== false){
+            $meta['content'] = $meta_description;
+        }
+
+        // Using property key (this is used for facebook)
+        if(@$meta['property'] && strpos($meta['property'], 'description') !== false ) {
+            $meta['content'] = $meta_description;
+        }
+
+        // Image metas
+        // Using name key
+        if(@$meta['name'] && strpos($meta['name'], 'image') !== false){
+            $meta['content'] = $this->asset('aldirblanc/img/thumb.png', false);;
+        }
+
+        // Using property key
+        if(@$meta['property'] && strpos($meta['property'], 'image') !== false ) {
+            $meta['content'] = $this->asset('aldirblanc/img/thumb.png', false);;
+        }
+
+        // Using itemprop key
+        if(@$meta['itemprop'] && strpos($meta['itemprop'], 'image') !== false ) {
+            $meta['content'] = $this->asset('aldirblanc/img/thumb.png', false);;
+        }
+    }    
+    ?>
+
     <?php $this->head(); ?>
     <!--[if lt IE 9]>
         <script src="<?php $this->asset('js/html5.js'); ?>" type="text/javascript"></script>

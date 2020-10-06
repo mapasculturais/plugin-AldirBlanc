@@ -50,6 +50,7 @@ section.cadastro {
                 a {
                     text-decoration: none;
                 }
+
                 div.btn  {
                     width: 80%;
                     margin: 0 auto;
@@ -292,6 +293,18 @@ section.cadastro {
             
         }
 
+    }
+}
+
+.help-section {
+    max-width: 58%;
+    margin: 0 auto;
+    text-align: center;
+    margin-top: 80px;
+    margin-bottom: 40px;
+
+    @include tablet {
+        max-width: calc(100% - 30px);
     }
 }
 

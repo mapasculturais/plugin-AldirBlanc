@@ -11,6 +11,7 @@ header {
         margin: 0 auto;
         padding: 10px;
         width: 200px;
+
         @include transition(all, 0.3s, ease-in-out);
         @include desktop {
             display: block;
@@ -24,6 +25,10 @@ header {
         margin: 0 auto;
         padding-top: 5px;
         width: 200px;
+
+        @include tablet {
+            width: 136px;
+        }
     }
 
     .logout {

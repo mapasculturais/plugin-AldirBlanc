@@ -269,10 +269,4 @@ $(document).ready(function() {
         $('#local-atividade').fadeIn('fast');
         returning = false;
     });
-
-    $('select#opportunity-type').select2({
-        placeholder: 'Selecione uma opção',
-        width: '100%',
-        height: '100px'
-    });
 });

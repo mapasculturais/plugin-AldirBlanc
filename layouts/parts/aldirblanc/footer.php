@@ -9,8 +9,8 @@ $logotipo = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldi
 
 <?php if ($linkSuporte){
     ?>
-    <div class="support">
-        Precisa de ajuda? <a target="_blank" class="link" href="<?= $linkSuporte; ?> ">Clique aqui</a>
+    <div class="help-section">
+        Precisa de ajuda? <a href="https://bit.ly/3hOQfBz" target="_blank"> Clique aqui </a> para falar com nossa equipe de suporte por chat. Ou envie um email para <a href="mailto:suportemapaculturalpa@gmail.com" target="_blank"> suportemapaculturalpa@gmail.com </a>
     </div>
     <?php
 }?>
@@ -20,7 +20,9 @@ $logotipo = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldi
     <?php if ($logotipo){
         ?>
        <div class="logo-state">
-            <img src="<?= $logotipo ?>">
+            <a href="http://www.secult.pa.gov.br/" target="_blank">
+                <img src="<?= $logotipo ?>">
+            </a>
         </div>
         <?php
     }?>
@@ -35,13 +37,15 @@ $logotipo = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldi
 
     <div class="credits">
         <a href="https://github.com/mapasculturais/mapasculturais" target="_blank">
-            Mapas Culturais
+        Software livre Mapas Culturais
         </a> 
-        <span> e </span> 
+        <span> por </span> 
 
         <a href="https://hacklab.com.br/" class="hacklab" target="_blank">
             hacklab <span>/</span>
         </a>
+
+        <span> e comunidade </span>
         <!-- <img alt="Mapas Culturais e hacklab/" src="<?php $this->asset('aldirblanc/img/mapas-culturais-hacklab.png') ?>"> -->
     </div>
 

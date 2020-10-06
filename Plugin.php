@@ -20,13 +20,12 @@ class Plugin extends \MapasCulturais\Plugin
         if ($app->view->subsite){
             $config = $app->view->subsite->aldir_blanc_config;
         }
-
         $config += [
+            'logotipo_central' => env('AB_LOGOTIPO_CENTRAL','https://mapacultural.pa.gov.br/assets/mapacultural.pa.gov.br/img/logo-aldir-para.png'),
+            'logotipo_instituicao' => env('AB_LOGOTIPO_INSTITUICAO','https://mapacultural.pa.gov.br/assets/mapacultural.pa.gov.br/img/secult-para.png'),
             'texto_home'=> env('AB_TEXTO_HOME','A Lei Aldir Blanc é fruto de forte mobilização social do campo artístico e cultural brasileiro, resultado de construção coletiva, a partir de webconferências nacionais e estaduais como plataformas políticas na formulação, articulação, tramitação e sanção presidencial.<br/><br/> Ela prevê o uso de 3 bilhões de reais para o auxílio de agentes da cultura atingidos pela pandemia da COVID-19. Investimentos para assegurar a preservação de toda a estrutura profissional e dinâmica de produção, criação, participação, preservação, formação e circulação dos bens e serviços culturais.<br/><br/> Clique no link abaixo para solicitar a renda emergencial como trabalhadora e trabalhador da cultura ou o subsídio para a manutenção de espaços artísticos e organizações culturais que tiveram as suas atividades interrompidas por força das medidas de isolamento social.'),
             'botao_home'=> env('AB_BOTAO_HOME','Solicite seu auxilio'),
             'titulo_home'=> env('AB_TITULO_HOME','Lei Aldir Blanc'),
-            'logotipo_central' => env('AB_LOGOTIPO_CENTRAL',''),
-            'logotipo_instituicao' => env('AB_LOGOTIPO_INSTITUICAO',''),
             'inciso1_enabled' => env('AB_INCISO1_ENABLE',true),
             'inciso2_enabled' => env('AB_INCISO2_ENABLE',true),
             'inciso3_enabled' => env('AB_INCISO3_ENABLE',false),
@@ -46,8 +45,9 @@ class Plugin extends \MapasCulturais\Plugin
             ],
             'msg_inciso1_disabled' => env('AB_INCISO1_DISABLE_MESSAGE','Em breve!'),
             'msg_inciso2_disabled' => env('AB_INCISO2_DISABLE_MESSAGE','A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!'),
-            'link_suporte' => env('AB_LINK_SUPORTE',null),
-            'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS',null),
+            'link_suporte' => env('AB_LINK_SUPORTE','https://bit.ly/3hOQfBz'),
+            'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS','https://mapacultural.pa.gov.br/files/subsite/2/termos-e-politica.pdf'),
+
             'mediados_owner' => env('AB_MEDIADOS_OWNER',''),
             'lista_mediadores' =>  (array) json_decode(env('AB_LISTA_MEDIADORES', '[]')),
             'texto_categoria_espaco-formalizado' => env('AB_TXT_CAT_ESPACO_FORMALIZADO', '<strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.' ),
