@@ -2,7 +2,6 @@
 
 namespace AldirBlanc\Controllers;
 
-use DateInterval;
 use DateTime;
 use Exception;
 use League\Csv\Writer;
@@ -36,15 +35,15 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
     /**
      * Exportador para o inciso 1
      *
-     * Implementa o sistema de importação para a lei AldirBlanc no inciso 1
-     * http://localhost:8080/dataprev/export_inciso1/status:1/to:2020-01-01/from:2020-01-30
+     * Implementa o sistema de exportação para a lei AldirBlanc no inciso 1
+     * http://localhost:8080/dataprev/export_inciso1/status:1/from:2020-01-01/to:2020-01-30
      *
      * Parametros to e from não são obrigatórios, caso nao informado retorna os últimos 7 dias de registros
      *
      * Paramentro status não é obrigatorio, caso não informado retorna todos com status 1
      *
      */
-    public function GET_export_inciso1()
+    public function ALL_export_inciso1()
     {
         //Seta o timeout
         ini_set('max_execution_time', 0);
@@ -59,38 +58,42 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         //Oportunidade que a query deve filtrar
         $opportunity_id = $this->config['inciso1_opportunity_id'];
 
-        $parameter = $this->config['csv_inciso1']['parameters_csv_defalt'];       
+        $parameter = $this->config['csv_inciso1']['parameters_csv_defalt'];
 
         //Satatus que a query deve filtrar
-        $status = $parameter['status'];       
+        $status = $parameter['status'];
 
         /**
          * Recebe e verifica os dados contidos no endpoint
-         * http://localhost:8080/dataprev/export_inciso1/status:1/to:2020-01-01/from:2020-01-30
+         * http://localhost:8080/dataprev/export_inciso1/status:1/from:2020-01-01/to:2020-01-30
          * @var string $startDate
          * @var string $finishDate
          * @var \DateTime $date
          */
         $getdata = false;
-        if (!empty($this->data)) {           
-            
+        if (!empty($this->data)) {
+
             if (isset($this->data['from']) && isset($this->data['to'])) {
 
-                if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
-                    !preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['to'])) {
+                if (!empty($this->data['from']) && !empty($this->data['to'])) {
+                    if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
+                        !preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['to'])) {
 
-                    throw new \Exception("O formato da data é inválido.");
+                        throw new \Exception("O formato da data é inválido.");
 
-                } else {
-                    //Data ínicial
-                    $startDate = new DateTime($this->data['to']);
-                    $startDate = $startDate->format('Y-m-d 00:00');
+                    } else {
+                        //Data ínicial
+                        $startDate = new DateTime($this->data['from']);
+                        $startDate = $startDate->format('Y-m-d 00:00');
 
-                    //Data final
-                    $finishDate = new DateTime($this->data['from']);
-                    $finishDate = $finishDate->format('Y-m-d 23:59');
+                        //Data final
+                        $finishDate = new DateTime($this->data['to']);
+                        $finishDate = $finishDate->format('Y-m-d 23:59');
+                    }
+
+                    $getdata = true;
                 }
-                $getdata = true;
+
             }
 
             //Pega o status do endpoint
@@ -424,7 +427,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                     if (is_array($registration->$_field)) {
                         foreach ($registration->$_field as $key_familyGroup => $familyGroup) {
-                            if (!isset($familyGroup->cpf) || !$familyGroup->relationship) {
+                            if (!isset($familyGroup->cpf) || !isset($familyGroup->relationship)) {
                                 continue;
                             }
 
@@ -502,8 +505,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
     /**
      * Exportador para o inciso 2
      *
-     * Implementa o sistema de importação para a lei AldirBlanc no inciso 2
-     * http://localhost:8080/dataprev/export_inciso2/opportunity:6/status:1/type:cpf/to:2020-01-01/from:2020-01-30
+     * Implementa o sistema de exportação para a lei AldirBlanc no inciso 2
+     * http://localhost:8080/dataprev/export_inciso2/opportunity:6/status:1/type:cpf/from:2020-01-01/to:2020-01-30
      *
      * Parametros to e from não são obrigatórios, caso nao informado retorna os últimos 7 dias de registros
      *
@@ -512,7 +515,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
      * Paramentro status não é obrigatorio, caso não informado retorna todos com status 1
      *
      */
-    public function GET_export_inciso2()
+    public function ALL_export_inciso2()
     {
 
         //Seta o timeout
@@ -526,13 +529,13 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         }
 
         //Oportunidade que a query deve filtrar
-        $opportunity_id = $this->config['inciso2_opportunity_ids']; 
+        $opportunity_id = $this->config['inciso2_opportunity_ids'];
 
         //Satatus que a query deve filtrar
         $status = 1;
 
         //Inciso que a query deve filtrar
-        $inciso = 1;       
+        $inciso = 1;
 
         /**
          * Recebe e verifica os dados contidos no endpoint
@@ -543,24 +546,27 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          */
         $getData = false;
         if (!empty($this->data)) {
-            
+
             if (isset($this->data['from']) && isset($this->data['to'])) {
 
-                if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
-                    !preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['to'])) {
+                if (!empty($this->data['from']) && !empty($this->data['to'])) {
+                    if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
+                        !preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['to'])) {
 
-                    throw new \Exception("O formato da data é inválido.");
+                        throw new \Exception("O formato da data é inválido.");
 
-                } else {
-                    //Data ínicial
-                    $startDate = new DateTime($this->data['to']);
-                    $startDate = $startDate->format('Y-m-d 00:00');
+                    } else {
+                        //Data ínicial
+                        $startDate = new DateTime($this->data['from']);
+                        $startDate = $startDate->format('Y-m-d 00:00');
 
-                    //Data final
-                    $finishDate = new DateTime($this->data['from']);
-                    $finishDate = $finishDate->format('Y-m-d 23:59');
+                        //Data final
+                        $finishDate = new DateTime($this->data['to']);
+                        $finishDate = $finishDate->format('Y-m-d 23:59');
+                    }
+                    $getData = true;
                 }
-                $getData = true;
+
             }
 
             //Pega o status do endpoint
