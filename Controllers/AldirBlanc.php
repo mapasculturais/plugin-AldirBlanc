@@ -350,6 +350,18 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $app = App::i();
         $agent = $app->repo('Agent')->find($this->data['agent']);
         //verifica se existe e se o agente owner é individual
+          //se é coletivo cria um agente individual
+        if ($agent->type->id == 2){
+            unset($agent);
+            $app->disableAccessControl();
+            $agent = new \MapasCulturais\Entities\Agent($agent->user);
+            //@TODO: confirmar nome e tipo do Agente coletivo
+            $agent->name = ' ';
+            $agent->type = 1;
+            $agent->save(true);
+            $app->enableAccessControl();
+        }
+       
         if(!$agent || $agent->type->id != 1){
             // @todo tratar esse erro
             throw new \Exception();
