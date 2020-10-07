@@ -85,7 +85,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                         //Data ínicial
                         $startDate = new DateTime($this->data['from']);
                         $startDate = $startDate->format('Y-m-d 00:00');
-
+                                                
                         //Data final
                         $finishDate = new DateTime($this->data['to']);
                         $finishDate = $finishDate->format('Y-m-d 23:59');
