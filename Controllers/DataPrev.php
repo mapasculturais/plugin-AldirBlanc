@@ -51,9 +51,6 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
         $this->requireAuthentication();
         $app = App::i();
-        if (!$app->user->is("admin")) {
-            throw new Exception("Não autorizado");
-        }
 
         //Oportunidade que a query deve filtrar
         $opportunity_id = $this->config['inciso1_opportunity_id'];
@@ -106,6 +103,10 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
         $opportunity = $app->repo('Opportunity')->find($opportunity_id);
         $this->registerRegistrationMetadata($opportunity);
+
+        if (!$opportunity->canUser('@control')) {
+            throw new Exception("Não autorizado");
+        }
 
         /**
          * Busca os registros no banco de dados         *
@@ -524,9 +525,6 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
         $this->requireAuthentication();
         $app = App::i();
-        if (!$app->user->is("admin")) {
-            throw new Exception("Não autorizado");
-        }
 
         //Oportunidade que a query deve filtrar
         $opportunity_id = $this->config['inciso2_opportunity_ids'];
@@ -600,6 +598,10 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          */
         $opportunity = $app->repo('Opportunity')->find($opportunity_id);
         $this->registerRegistrationMetadata($opportunity);
+
+        if (!$opportunity->canUser('@control')) {
+            throw new Exception("Não autorizado");
+        }
 
         /**
          * Busca os registros no banco de dados
