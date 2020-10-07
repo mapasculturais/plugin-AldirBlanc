@@ -2035,4 +2035,201 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         }
     }
 
+    /**
+     * Importador para o inciso 1
+     *
+     * Implementa o sistema de importação dos dados da dataprev para a lei AldirBlanc no inciso 1
+     * http://localhost:8080/dataprev/import_inciso1/
+     *
+     * Parametros to e from não são obrigatórios, caso nao informado retorna os últimos 7 dias de registros
+     *
+     * Paramentro type se alterna entre cpf e cnpj
+     *
+     * Paramentro status não é obrigatorio, caso não informado retorna todos com status 1
+     *
+     */
+    public function ALL_import_inciso1()
+    {
+
+        /**
+         * Seta o timeout e limite de memoria
+         */
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '768M');
+
+        //Verifica se o usuário esta autenticado como ADMIN
+        $this->requireAuthentication();
+        $app = App::i();
+        if (!$app->user->is("admin")) {
+            throw new Exception("Não autorizado");
+        }
+
+        // Pega as configurações no arquivo config-csv-inciso1.php
+        $conf_csv = $this->config['csv_inciso1'];
+
+        //Nome do arquivo enviado
+        $file_name = "ResultadoConsultaAuxilio_2020-10-3.csv";
+
+        //Define o diretório onde o arquivo será armazenado
+        $dir = __DIR__ . '/../csv/';
+
+        //verifica se o mesmo esta no servidor
+        if (!file_exists($dir . $file_name)) {
+            throw new Exception("Erro ao processar o arquivo.");
+        }
+
+        //Abre o arquivo em modo de leitura
+        $stream = fopen($dir . $file_name, "r");
+
+        //Faz a leitura do arquivo
+        $csv = Reader::createFromStream($stream);
+
+        //Define o limitador do arqivo (, ou ;)
+        $csv->setDelimiter(";");
+
+        //Seta em que linha deve se iniciar a leitura
+        $header_temp = $csv->setHeaderOffset(0);
+
+        //Faz o processamento dos dados
+        $stmt = (new Statement());
+        $results = $stmt->process($csv);
+
+        //Verifica a extenção do arquivo
+        $ext = pathinfo($dir . $file_name, PATHINFO_EXTENSION);
+
+        if ($ext != "csv") {
+            throw new Exception("Arquivo não permitido.");
+        }
+
+        //Verifica se o arquivo esta dentro layout
+        foreach ($header_temp as $key => $value) {
+            $header_file[] = $value;
+            break;
+
+        }
+
+        foreach ($header_file[0] as $key => $value) {
+            $header_line_csv[] = $key;
+
+        }
+
+        //Verifica se o layout do arquivo esta nos padroes enviados pela dataprev
+        $herder_layout = $conf_csv['herder_layout'];
+
+       
+        if ($error_layout = array_diff_assoc($herder_layout, $header_line_csv)) {
+            throw new Exception("os campos " . json_encode($error_layout) . " estão divergentes do layout necessário.");
+
+        }
+
+        //Inicia a verificação dos dados do requerente
+        $evaluation = [];
+        $parameters = $conf_csv['acceptance_parameters'];
+        foreach ($results as $results_key => $result) {
+
+            $candidate = $result;
+            foreach ($candidate as $key_candidate => $value) {
+                if ($key_candidate == 'IDENTIF_CAD_ESTAD_CULT') {
+                    $evaluation[$results_key]['DADOS_DO_REQUERENTE']['N_INSCRICAO'] = $value;
+                }
+
+                if ($key_candidate == 'REQUERENTE_CPF') {
+                    $evaluation[$results_key]['DADOS_DO_REQUERENTE']['CPF'] = $value;
+                }
+
+                $field = isset($parameters[$key_candidate]) ? $parameters[$key_candidate] : "";
+                if (is_array($field)) {
+
+                    if ($key_candidate == "REQUERENTE_DATA_NASCIMENTO") {
+                        $date = explode("/", $value);
+                        $date = new DateTime($date[2] . '-' . $date[1] . '-' . $date[0]);
+                        $idade = $date->diff(new DateTime(date('Y-m-d')));
+
+                        if ($idade->format('%Y') >= $field['positive'][0]) {
+                            $evaluation[$results_key]['VALIDATION'][$key_candidate] = true;
+
+                        } else {
+                            $evaluation[$results_key]['VALIDATION'][$key_candidate] = $field['response'];
+                        }
+
+                    }elseif ($key_candidate == "SITUACAO_CADASTRO") {
+
+                        if (in_array(trim($value), $field['positive'])) {
+                            $evaluation[$results_key]['VALIDATION']['SITUACAO_CADASTRO'] = true;
+
+                        } elseif (in_array(trim($value), $field['negative'])) {
+                            if(is_array($field['response'])){
+                                $evaluation[$results_key]['VALIDATION']['SITUACAO_CADASTRO'] = $field['response'][$value];
+
+                            }else{
+                                $evaluation[$results_key]['VALIDATION']['SITUACAO_CADASTRO'] = $field['response'];
+                                
+                            }
+                            
+
+                        }
+
+                    }elseif (in_array($key_candidate,  $conf_csv['validation_cad_cultural'] )){
+                        
+                        if (in_array(trim($value), $field['positive'])) {
+                            $evaluation[$results_key]['VALIDATION']['VALIDA_CAD_CULTURAL'] = true;
+
+                        } elseif (in_array(trim($value), $field['negative'])) {
+                            $evaluation[$results_key]['VALIDATION']['VALIDA_CAD_CULTURAL'] = $field['response'];
+
+                        }
+                      
+                    }else {
+
+                        if (in_array(trim($value), $field['positive'])) {
+                            $evaluation[$results_key]['VALIDATION'][$key_candidate] = true;
+
+                        } elseif (in_array(trim($value), $field['negative'])) {
+                            $evaluation[$results_key]['VALIDATION'][$key_candidate] = $field['response'];
+
+                        }
+
+                    }
+
+                } else {
+
+                    if ($field) {
+                        if ($value === $field) {
+                            $evaluation[$results_key]['VALIDATION'][$key_candidate] = true;
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+        
+        //Define se o requerente esta apto ou inapto levando em consideração as diretrizes de negocio
+        $result_aptUnfit = [];       
+        foreach ($evaluation as $key_evaluetion => $value) {
+            $result_validation = array_diff($value['VALIDATION'], $conf_csv['validation_reference']);
+            if (!$result_validation) {
+                $result_aptUnfit[$key_evaluetion] = $value['DADOS_DO_REQUERENTE'];
+                $result_aptUnfit[$key_evaluetion]['ACCEPT'] = true;
+            } else {
+                $result_aptUnfit[$key_evaluetion] = $value['DADOS_DO_REQUERENTE'];                
+                $result_aptUnfit[$key_evaluetion]['ACCEPT'] = false;
+                foreach ($value['VALIDATION'] as $value) {
+                    if (is_string($value)) {
+                        $result_aptUnfit[$key_evaluetion]['REASONS'][] = $value;
+                    }
+                }
+            }
+
+        }
+
+        var_dump($result_aptUnfit);
+        exit();
+
+       
+
+    }
+
 }
