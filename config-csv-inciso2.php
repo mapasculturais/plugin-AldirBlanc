@@ -1,6 +1,6 @@
 <?php
 return [
-    "fields_cpf" => [
+    "fields_cpf" => [ // Campos para CPF
         'CPF' => '',
         'SEXO' => '',
         'NOME_ESPACO_CULTURAL' => [],
@@ -33,7 +33,7 @@ return [
         'FLAG_ATUACAO_MUSEUS_MEMORIA' => [],
         'FLAG_ATUACAO_HUMANIDADES' => [],
     ],
-    "fields_cnpj" => [
+    "fields_cnpj" => [ // Campos para CNPJ
         'CNPJ' => [],
         'FLAG_CAD_ESTADUAL' => '',
         'SISTEMA_CAD_ESTADUAL' => '',
@@ -64,7 +64,7 @@ return [
         'FLAG_ATUACAO_MUSEUS_MEMORIA' => [],
         'FLAG_ATUACAO_HUMANIDADES' => [],
     ],
-    "inscricoes_culturais" => [
+    "inscricoes_culturais" => [ // Opções para incrições culturais
         'mapa-cultural' => '',
         'cadastro-municipal' => '',
         'sniic' => '',
@@ -72,7 +72,7 @@ return [
         'sicab' => '',
         'outros' => '',
     ],
-    "category" => [
+    "category" => [ // Categorias
         'com_espaco_fisico' => [],
         'sem_espaco_fisico' => [],
     ],
