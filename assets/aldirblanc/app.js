@@ -167,8 +167,8 @@ $(document).ready(function () {
       }
     }
 
-    if ($("#select-cidade").length > 0) {
-      selectedCityId = $('#select-cidade').val();
+    if ($("#input-cidade").length > 0) {
+      selectedCityId = $('#input-cidade').val();
     } else {
       selectedCityId = $('.js-select-cidade option:selected').val();
     }
