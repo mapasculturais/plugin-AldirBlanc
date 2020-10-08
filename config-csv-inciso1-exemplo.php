@@ -21,17 +21,42 @@ return [
     "FLAG_ATUACAO_HUMANIDADES" => "field_10",
     "FAMILIARCPF" => 'field_5',
     "GRAUPARENTESCO" => 'field_5',
-    "parameters_csv_defalt" => [
+    "parameters_csv_default" => [
         "status" => 1,
     ],
     'atuacoes-culturais' => [ // Opções para área de atuações culturais
-        'artes-cenicas' => [],
-        'audiovisual' => [],
-        'musica' => [],
-        'artes-visuais' => [],
-        'patrimonio-cultural' => [],
-        'museu-memoria' => [],
-        'humanidades' => [],
+
+        'artes-cenicas' => [
+            'Artes Circenses',
+            'Dança',
+            'Teatro',
+            'Ópera',
+        ],
+        'artes-visuais' => [
+            'Artes Visuais',
+            'Artesanato',
+            'Design',
+            'Fotografia',
+            'Moda',
+        ],
+        'audiovisual' => [
+            'Audiovisual',
+        ],
+        'humanidades' => [
+            'Literatura',
+        ],
+        'museu-memoria' => [
+            'Museu',
+        ],
+        'musica' => [
+            'Música',
+        ],
+        'patrimonio-cultural' => [
+            'Cultura Popular',
+            'Gastronomia',
+            'Outros',
+            'Patrimônio Cultural',
+        ],
 
     ],
     'herder_layout' => [ // Header padronizado segundo instruções do documento dataprev
@@ -102,14 +127,14 @@ return [
         'CPF_OUTRO_REQUERENTE_CONJUGE_INFORMADO',
         'DATA_REPROCESSAMENTO',
     ],
-    'acceptance_parameters' => [ // Parametros de aceitação planilha 
+    'acceptance_parameters' => [ // Parametros de aceitação planilha
 
         'REQUERENTE_DATA_NASCIMENTO' => [
             'positive' => [
                 18, //No arquivo DataPrev.php é validado se o requerente é maior ou igual a 18 anos de idade
             ],
             'response' => 'O(A) requerente é menor de 18 anos',
-            'impediment' => true
+            'impediment' => true,
         ],
         'REQUERENTE_CPF_SITUACAO' => [
             'positive' => [
@@ -124,7 +149,7 @@ return [
                 9,
             ],
             'response' => 'O requerente não está com o CPF regular perante à Secretaria da Receita Federal do Brasil - SRFB',
-            'impediment' => true
+            'impediment' => true,
         ],
         'IN_CAD_ESTAD_CULT' => [
             'positive' => [
@@ -134,8 +159,8 @@ return [
                 'Não',
             ],
             'response' => 'O requerente não comprova homologação em nenhum dos cadastros previstos no § 1º do art. 7º da Lei nº 14.017, de 2020.',
-            'impediment' => true
-            
+            'impediment' => true,
+
         ],
         'IN_SICAB' => [
             'positive' => [
@@ -145,7 +170,7 @@ return [
                 'Não',
             ],
             'response' => 'O requerente não comprova homologação em nenhum dos cadastros previstos no § 1º do art. 7º da Lei nº 14.017, de 2020.',
-            'impediment' => true
+            'impediment' => true,
 
         ],
         'IN_SALIC' => [
@@ -156,7 +181,7 @@ return [
                 'Não',
             ],
             'response' => 'O requerente não comprova homologação em nenhum dos cadastros previstos no § 1º do art. 7º da Lei nº 14.017, de 2020.',
-            'impediment' => true
+            'impediment' => true,
 
         ],
         'IN_OBITO' => [
@@ -167,7 +192,7 @@ return [
                 'Sim',
             ],
             'response' => 'O requerente encontra-se inscrito no Sistema de Controle de Óbitos (SISOBI).',
-            'impediment' => true
+            'impediment' => true,
 
         ],
         'IN_BRASILEIRO_NO_EXTERIOR' => [
@@ -178,7 +203,7 @@ return [
                 'Sim',
             ],
             'response' => 'O requerente não reside e nem está domiciliado no território nacional, conforme determina o § 2º do Art. 2º do Decreto nº 10.464/2020.',
-            'impediment' => true
+            'impediment' => true,
 
         ],
         'IN_DETENTO_REG_FECHADO' => [
@@ -189,7 +214,7 @@ return [
                 'Sim',
             ],
             'response' => 'O requerente possui impedimento legal para o recebimento deste benefício (Cód.190dt).',
-            'impediment' => true
+            'impediment' => true,
         ],
         'IN_PROCURADO_MJ' => [
             'positive' => [
@@ -199,7 +224,7 @@ return [
                 'Sim',
             ],
             'response' => 'O requerente possui impedimento legal para o recebimento deste benefício. (Cód.190pr).',
-            'impediment' => true
+            'impediment' => true,
         ],
         'SITUACAO_CADASTRO' => [
             'positive' => [
@@ -223,7 +248,7 @@ return [
                 7 => 'Prestação de Contas Confirmada',
                 8 => 'Retido para avaliação',
             ],
-            'impediment' => true
+            'impediment' => true,
         ],
         'IN_EMPREGO_FORMAL_ATIVO' => [
             'positive' => [
@@ -233,7 +258,7 @@ return [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso II do Art. 6º da Lei nº 14.017/2020, e ao Inciso II do Art. 4º do Decreto 10.464/2020 conforme respectivo § 2º.',
-            'impediment' => true
+            'impediment' => true,
 
         ],
         'IN_MANDATO_ELETIVO' => [
@@ -244,8 +269,8 @@ return [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso II do Art. 4º do Decreto 10.464/2020 conforme respectivo § 2º. ',
-            'impediment' => true
-        
+            'impediment' => true,
+
         ],
         'IN_SD' => [
             'positive' => [
@@ -255,8 +280,8 @@ return [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso III do Art. 6º da Lei nº 14.017/2020, e ao Inciso III do Art. 4º do Decreto 10.464/2020.',
-            'impediment' => true
-        
+            'impediment' => true,
+
         ],
         'IN_BENEF_INSS' => [
             'positive' => [
@@ -266,8 +291,8 @@ return [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso III do Art. 6º da Lei nº 14.017/2020, e ao Inciso III do Art. 4º do Decreto 10.464/2020.',
-            'impediment' => true
-        
+            'impediment' => true,
+
         ],
         'IN_AUX_BEM' => [
             'positive' => [
@@ -277,8 +302,8 @@ return [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso III do Art. 6º da Lei nº 14.017/2020, ao Inciso III do Art. 4º do Decreto 10.464/2020 e em seu Caput.',
-            'impediment' => true
-        
+            'impediment' => true,
+
         ],
         'IN_RENDA_GRUPO_FAMILIAR' => [
             'positive' => [
@@ -288,8 +313,8 @@ return [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso IV do Art. 6º da Lei nº 14.017/2020, e ao Inciso IV do Art. 4º do Decreto 10.464/2020.',
-            'impediment' => true
-        
+            'impediment' => true,
+
         ],
         'IN_RENDIM_TRIBUT_ACIMA_TETO' => [
             'positive' => [
@@ -299,76 +324,76 @@ return [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso V do Art. 6º da Lei nº 14.017/2020, e ao Inciso V do Art. 4º do Decreto 10.464/2020.',
-            'impediment' => true
-        
+            'impediment' => true,
+
         ],
         'IN_AUX_EMERG_CIDAD' => [
             'positive' => [
                 'Não',
-                'Bloqueado'
+                'Bloqueado',
             ],
             'negative' => [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso VII do Art. 6º da Lei nº 14.017/2020, e ao Inciso VII do Art. 4º do Decreto 10.464/2020. No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso III do Art. 6º da Lei nº 14.017/2020, e ao Inciso III do Art. 4º do Decreto 10.464/2020.',
-            'impediment' => true
-        
+            'impediment' => true,
+
         ],
         'IN_FAM_RECEB_AUXILIO' => [
             'positive' => [
-                'Não'                
+                'Não',
             ],
             'negative' => [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao § 1º do Inciso VII do Art. 6º da Lei nº 14.017/2020, e ao Inciso I do Art. 3º do Decreto nº 10.464/2020. ',
-            'impediment' => true
-        
+            'impediment' => true,
+
         ],
         'IN_MULH_PROV_MONOPARENT' => [
             'positive' => [
-                'Não'                
+                'Não',
             ],
             'negative' => [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao § 2º do Art. 6º da Lei 14.017/2020 e ao Inciso II do Art. 3º do Decreto nº 10.464/2020.',
-            'impediment' => true
-        
+            'impediment' => true,
+
         ],
         'IND_MONOPARENTAL_OUTRO_REQUERIMENTO' => [
             'positive' => [
-                'Não'                
+                'Não',
             ],
             'negative' => [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao § 2º do Art. 6º da Lei 14.017/2020 e ao Inciso II do Art. 3º do Decreto nº 10.464/2020.',
-            'impediment' => true
-        
+            'impediment' => true,
+
         ],
         'CPF_OUTRO_REQUERENTE_CONJUGE_INFORMADO' => [
             'positive' => [
-                'Não'                
+                'Não',
             ],
             'negative' => [
                 'Sim',
             ],
             'response' => 'No preenchimento do Formulário de Inscrição, o requerente não atendeu ao § 2º do Art. 6º da Lei 14.017/2020 e ao Inciso II do Art. 3º do Decreto nº 10.464/2020.',
-            'impediment' => true
-        
+            'impediment' => true,
+
         ],
         'IN_POLITICAMENTE_EXPOSTO' => [
             'positive' => [
-                'Não'                
+                'Não',
             ],
             'negative' => [
                 'Sim',
             ],
             'response' => '',
-            'impediment' => true
-            
-        ]
+            'impediment' => true,
+
+        ],
     ],
     'validation_reference' => [ // Array de comparação que se é esperado após a verificação dos dados
         'REQUERENTE_DATA_NASCIMENTO' => true,
@@ -391,8 +416,7 @@ return [
         'IN_MULH_PROV_MONOPARENT' => true,
         'IND_MONOPARENTAL_OUTRO_REQUERIMENTO' => true,
         'CPF_OUTRO_REQUERENTE_CONJUGE_INFORMADO' => true,
-        'IN_POLITICAMENTE_EXPOSTO' => true
-
+        'IN_POLITICAMENTE_EXPOSTO' => true,
 
     ],
     'validation_cad_cultural' => [ //Faz a verificação se o requerente esta incrito em um dos cadastros culturais listados nesse array
@@ -404,7 +428,7 @@ return [
         'IN_INSCRIC_HOMOLOG_SICAB',
         'IN_INSCRIC_HOMOLOG_SALIC',
         'IN_SICAB',
-        'IN_SALIC'
-    ]
+        'IN_SALIC',
+    ],
 
 ];
