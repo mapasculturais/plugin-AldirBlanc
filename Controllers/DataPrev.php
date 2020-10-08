@@ -38,9 +38,9 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
      * Implementa o sistema de exportação para a lei AldirBlanc no inciso 1
      * http://localhost:8080/dataprev/export_inciso1/status:1/from:2020-01-01/to:2020-01-30
      *
-     * Parametros to e from não são obrigatórios, caso nao informado retorna os últimos 7 dias de registros
+     * Parâmetros to e from não são obrigatórios, caso não informado retorna todos os registros no status de pendentes
      *
-     * Paramentro status não é obrigatorio, caso não informado retorna todos com status 1
+     * Parâmetro status não é obrigatório, caso não informado retorna todos com status 1
      *
      */
     public function ALL_export_inciso1()
@@ -50,15 +50,12 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         ini_set('memory_limit', '768M');
 
         $this->requireAuthentication();
-        $app = App::i();
-        if (!$app->user->is("admin")) {
-            throw new Exception("Não autorizado");
-        }
+        $app = App::i();        
 
         //Oportunidade que a query deve filtrar
         $opportunity_id = $this->config['inciso1_opportunity_id'];
 
-        $parameter = $this->config['csv_inciso1']['parameters_csv_defalt'];
+        $parameter = $this->config['csv_inciso1']['parameters_csv_default'];
 
         //Satatus que a query deve filtrar
         $status = $parameter['status'];
@@ -85,7 +82,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                         //Data ínicial
                         $startDate = new DateTime($this->data['from']);
                         $startDate = $startDate->format('Y-m-d 00:00');
-                                                
+
                         //Data final
                         $finishDate = new DateTime($this->data['to']);
                         $finishDate = $finishDate->format('Y-m-d 23:59');
@@ -107,6 +104,10 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         $opportunity = $app->repo('Opportunity')->find($opportunity_id);
         $this->registerRegistrationMetadata($opportunity);
 
+        if (!$opportunity->canUser('@control')) {
+            throw new Exception("Não autorizado.");
+        }
+
         /**
          * Busca os registros no banco de dados         *
          * @var string $startDate
@@ -115,7 +116,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
          * @var int $opportunity_id
          * @var array $key_registrations
          */
-        if ($getdata) { //caso existe data como parametro ele pega o range da data selecionada com satatus 1
+        if ($getdata) { //caso existe data como parâmetro, ele pega os registros do range de data selecionada com satatus 1
             $dql = "
             SELECT
                 e
@@ -136,7 +137,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 'status' => $status,
             ]);
             $registrations = $query->getResult();
-        } else { //Se não exister data como parametro ele retorna todos os registros com status 1
+        } else { //Se não exister data como parâmetro, ele retorna todos os registros com status 1
             $dql = "
             SELECT
                 e
@@ -156,8 +157,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         }
 
         if (empty($registrations)) {
-            echo "Não existe registros para o intervalo selecionado " . $startDate . " - " . $finishDate;
-            die();
+            throw new Exception("Não foi encontrado registros.");
         }
 
         /**
@@ -293,10 +293,11 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_id = $csv_conf["FLAG_ATUACAO_ARTES_CENICAS"];
 
                 $options = $csv_conf['atuacoes-culturais']['artes-cenicas'];
+                $temp = (array) $registrations->$field_id;
 
                 $result = 0;
                 foreach ($options as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                    if (in_array($value, $temp)) {
                         $result = 1;
                     }
                 }
@@ -307,10 +308,11 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_id = $csv_conf["FLAG_ATUACAO_AUDIOVISUAL"];
 
                 $options = $csv_conf['atuacoes-culturais']['audiovisual'];
+                $temp = (array) $registrations->$field_id;
 
                 $result = 0;
                 foreach ($options as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                    if (in_array($value, $temp)) {
                         $result = 1;
                     }
                 }
@@ -321,10 +323,11 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSICA"];
 
                 $options = $csv_conf['atuacoes-culturais']['musica'];
+                $temp = (array) $registrations->$field_id;
 
                 $result = 0;
                 foreach ($options as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                    if (in_array($value, $temp)) {
                         $result = 1;
                     }
                 }
@@ -335,10 +338,11 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSICA"];
 
                 $options = $csv_conf['atuacoes-culturais']['artes-visuais'];
+                $temp = (array) $registrations->$field_id;
 
                 $result = 0;
                 foreach ($options as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                    if (in_array($value, $temp)) {
                         $result = 1;
                     }
                 }
@@ -349,10 +353,11 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_id = $csv_conf["FLAG_ATUACAO_PATRIMONIO_CULTURAL"];
 
                 $options = $csv_conf['atuacoes-culturais']['patrimonio-cultural'];
+                $temp = (array) $registrations->$field_id;
 
                 $result = 0;
                 foreach ($options as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                    if (in_array($value, $temp)) {
                         $result = 1;
                     }
                 }
@@ -362,10 +367,11 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSEUS_MEMORIA"];
 
                 $options = $csv_conf['atuacoes-culturais']['museu-memoria'];
+                $temp = (array) $registrations->$field_id;
 
                 $result = 0;
                 foreach ($options as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                    if (in_array($value, $temp)) {
                         $result = 1;
                     }
                 }
@@ -375,10 +381,11 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_id = $csv_conf["FLAG_ATUACAO_MUSEUS_MEMORIA"];
 
                 $options = $csv_conf['atuacoes-culturais']['humanidades'];
+                $temp = (array) $registrations->$field_id;
 
                 $result = 0;
                 foreach ($options as $value) {
-                    if (in_array($value, $registrations->$field_id)) {
+                    if (in_array($value, $temp)) {
                         $result = 1;
                     }
                 }
@@ -508,11 +515,11 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
      * Implementa o sistema de exportação para a lei AldirBlanc no inciso 2
      * http://localhost:8080/dataprev/export_inciso2/opportunity:6/status:1/type:cpf/from:2020-01-01/to:2020-01-30
      *
-     * Parametros to e from não são obrigatórios, caso nao informado retorna os últimos 7 dias de registros
+     * Parâmetros to e from não são obrigatórios, caso nao informado retorna todos os registros no status de pendentes
      *
-     * Paramentro type se alterna entre cpf e cnpj
+     * Parâmetro type se alterna entre cpf e cnpj
      *
-     * Paramentro status não é obrigatorio, caso não informado retorna todos com status 1
+     * Parâmetro status não é obrigatório, caso não informado retorna todos com status 1
      *
      */
     public function ALL_export_inciso2()
@@ -524,10 +531,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
         $this->requireAuthentication();
         $app = App::i();
-        if (!$app->user->is("admin")) {
-            throw new Exception("Não autorizado");
-        }
-
+        
         //Oportunidade que a query deve filtrar
         $opportunity_id = $this->config['inciso2_opportunity_ids'];
 
@@ -601,6 +605,10 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         $opportunity = $app->repo('Opportunity')->find($opportunity_id);
         $this->registerRegistrationMetadata($opportunity);
 
+        if (!$opportunity->canUser('@control')) {
+            throw new Exception("Não autorizado");
+        }
+
         /**
          * Busca os registros no banco de dados
          * @var string $startDate
@@ -649,8 +657,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         }
 
         if (empty($registrations)) {
-            echo "Não existe registros para o intervalo selecionado " . $startDate . " - " . $finishDate;
-            die();
+            throw new Exception("Não foi encontrado registros.");
         }
 
         /**
@@ -1131,13 +1138,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_ARTES_CENICAS'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1149,7 +1160,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1160,13 +1171,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_AUDIOVISUAL'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1178,7 +1193,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1190,13 +1205,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_MUSICA'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1208,7 +1227,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1219,13 +1238,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_ARTES_VISUAIS'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1237,7 +1260,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1249,13 +1272,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_PATRIMONIO_CULTURAL'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1267,7 +1294,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1278,13 +1305,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_MUSEUS_MEMORIA'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1296,7 +1327,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1307,13 +1338,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_HUMANIDADES'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1325,7 +1360,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1437,7 +1472,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 return $result;
 
             },
-            'SISTEMA_CAD_MUNICIPAL' => function ($registrations) use ($fields_cnpj, $inscricoes) {
+            'SISTEMA_CAD_MUNICIPAL' => function ($registrations) use ($fields_cnpj, $inscricoes, $app) {
                 $field_id = $fields_cnpj["FLAG_CAD_MUNICIPAL"];
 
                 $option = $inscricoes['cadastro-municipal'];
@@ -1705,13 +1740,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_ARTES_CENICAS'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1723,7 +1762,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1734,13 +1773,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_AUDIOVISUAL'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1752,7 +1795,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1764,13 +1807,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_MUSICA'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1782,7 +1829,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1793,13 +1840,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_ARTES_VISUAIS'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1811,7 +1862,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1823,13 +1874,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_PATRIMONIO_CULTURAL'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1841,7 +1896,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1852,13 +1907,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_MUSEUS_MEMORIA'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1870,7 +1929,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
@@ -1881,13 +1940,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $field_temp = $fields_cnpj['FLAG_ATUACAO_HUMANIDADES'];
 
                 if (is_array($field_temp)) {
+
+                    $field_id = "";
                     foreach (array_filter($field_temp) as $key => $value) {
-                        if ($registrations->$value) {
-                            $field_id = $registrations->$value;
+                        if (!$field_id) {
+                            if ($registrations->$value) {
+                                $field_id = $registrations->$value;
 
-                        } else {
-                            $field_id = "";
+                            } else {
+                                $field_id = "";
 
+                            }
                         }
                     }
                 } else {
@@ -1899,7 +1962,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
                 $result = 0;
                 foreach ($options as $value) {
 
-                    if (in_array($value, $options)) {
+                    if (in_array($value, $field_id)) {
                         $result = 1;
                     }
                 }
