@@ -668,7 +668,17 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $this->requireAuthentication();
         $registration = $app->repo('Registration')->find($this->data['id']);
-        
+        $opportunityId = $registration->opportunity->id;
+
+        if (!isset($registration->inciso) || $registration->inciso == ''){
+            if ($opportunityId == $this->config['inciso1_opportunity_id'] ){
+                $registration->inciso = 1;
+            } else if (in_array($opportunityId, $this->config['inciso2_opportunity_ids']) ){
+                $registration->inciso = 2;
+            }
+            $registration->save(true);
+        }
+
         $this->render('termos-e-condicoes-inciso'.$registration->inciso, ['registration_id' => $this->data['id']]);
     }
     /**
