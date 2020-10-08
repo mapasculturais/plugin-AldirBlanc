@@ -75,14 +75,40 @@ return [
     "category" => [ // Categorias
         'com_espaco_fisico' => [],
         'sem_espaco_fisico' => [],
+
     ],
     'atuacoes-culturais' => [ // Opções para área de atuações culturais
-        'artes-cenicas' => [],
-        'artes-visuais' => [],
-        'audiovisual' => [],
-        'humanidades' => [],
-        'museu-memoria' => [],
-        'musica' => [],
-        'patrimonio-cultural' => [],
+        'artes-cenicas' => [
+            'Artes Circenses',
+            'Dança',
+            'Teatro',
+            'Ópera',
+        ],
+        'artes-visuais' => [
+            'Artes Visuais',
+            'Artesanato',
+            'Design',
+            'Fotografia',
+            'Moda',
+        ],
+        'audiovisual' => [
+            'Audiovisual',
+        ],
+        'humanidades' => [
+            'Literatura',
+        ],
+        'museu-memoria' => [
+            'Museu',
+        ],
+        'musica' => [
+            'Música',
+        ],
+        'patrimonio-cultural' => [
+            'Cultura Popular',
+            'Gastronomia',
+            'Outros',
+            'Patrimônio Cultural',
+        ],
+
     ],
 ];

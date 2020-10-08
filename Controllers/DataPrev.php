@@ -1139,14 +1139,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1172,14 +1172,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1206,14 +1206,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1239,14 +1239,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1273,14 +1273,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1306,14 +1306,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1339,14 +1339,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1741,14 +1741,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1774,14 +1774,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1808,14 +1808,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1841,14 +1841,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1875,14 +1875,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1908,14 +1908,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
@@ -1941,14 +1941,14 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
                 if (is_array($field_temp)) {
 
-                    $field_id = "";
+                    $field_id = [];
                     foreach (array_filter($field_temp) as $key => $value) {
                         if (!$field_id) {
                             if ($registrations->$value) {
                                 $field_id = $registrations->$value;
 
                             } else {
-                                $field_id = "";
+                                $field_id = [];
 
                             }
                         }
