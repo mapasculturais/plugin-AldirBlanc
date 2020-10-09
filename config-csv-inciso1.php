@@ -68,7 +68,6 @@ return [ //Configuração dos campos
         "status" => ''
     ],
     'atuacoes-culturais' => [ // Opções para área de atuações culturais
-
         'artes-cenicas' => [],
         'audiovisual' => [],
         'musica' => [],
