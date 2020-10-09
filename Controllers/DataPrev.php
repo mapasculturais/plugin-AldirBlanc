@@ -105,7 +105,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         $this->registerRegistrationMetadata($opportunity);
 
         if (!$opportunity->canUser('@control')) {
-            throw new Exception("Não autorizado.");
+            echo "Não autorizado";
+            die();
         }
 
         /**
@@ -157,7 +158,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         }
 
         if (empty($registrations)) {
-            throw new Exception("Não foi encontrado registros.");
+            echo "Não foram encontrados registros.";
+            die();
         }
 
         /**
@@ -606,7 +608,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         $this->registerRegistrationMetadata($opportunity);
 
         if (!$opportunity->canUser('@control')) {
-            throw new Exception("Não autorizado");
+            echo "Não autorizado";
+            die();
         }
 
         /**
@@ -657,7 +660,8 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
         }
 
         if (empty($registrations)) {
-            throw new Exception("Não foi encontrado registros.");
+            echo "Não foram encontrados registros.";
+            die();
         }
 
         /**
@@ -784,146 +788,53 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             },
             'FLAG_CAD_ESTADUAL' => function ($registrations) use ($fields_cpf, $inscricoes) {
                 $field_id = $fields_cpf["FLAG_CAD_ESTADUAL"];
-
-                $option = $inscricoes['mapa-cultural'];
-
-                $result = 0;
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = 1;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = 1;
-                    }
-
+                
+                if($field_id){
+                    return 1;
+                }else{
+                    return 0;
                 }
-
-                return $result;
-
             },
             'SISTEMA_CAD_ESTADUAL' => function ($registrations) use ($fields_cpf, $app, $inscricoes) {
-                $field_id = $fields_cpf["FLAG_CAD_ESTADUAL"];
-
-                $option = $inscricoes['mapa-cultural'];
-
-                $result = '';
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = $app->view->dict('site: name', false);
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = $app->view->dict('site: name', false);
-                    }
-
-                }
-
-                return $result;
-
+                return $fields_cpf['FLAG_CAD_ESTADUAL'] ? $app->view->dict('site: name', false) : '';
             },
             'IDENTIFICADOR_CAD_ESTADUAL' => function ($registrations) use ($fields_cpf, $inscricoes) {
-                $field_id = $fields_cpf["FLAG_CAD_ESTADUAL"];
-
-                $option = $inscricoes['mapa-cultural'];
-
-                $result = '';
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = $registrations->number;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = $registrations->number;
-                    }
-
-                }
-
-                return $result;
+                return $fields_cpf['FLAG_CAD_ESTADUAL'] ? $registrations->number : '';
 
             },
             'FLAG_CAD_MUNICIPAL' => function ($registrations) use ($fields_cpf, $inscricoes) {
                 $field_id = $fields_cpf["FLAG_CAD_MUNICIPAL"];
-
-                $option = $inscricoes['mapa-cultural'];
-
-                $result = 0;
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = 1;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = 1;
-                    }
-
+                
+                if($field_id){
+                    return 1;
+                }else{
+                    return 0;
                 }
-
-                return $result;
-
+                
             },
-            'SISTEMA_CAD_MUNICIPAL' => function ($registrations) use ($fields_cpf, $app, $inscricoes) {
-                $field_id = $fields_cpf["FLAG_CAD_MUNICIPAL"];
-
-                $option = $option = $inscricoes['mapa-cultural'];
-
-                $result = '';
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = $app->view->dict('site: name', false);
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = $app->view->dict('site: name', false);
-                    }
-
-                }
-
-                return $result;
+            'SISTEMA_CAD_MUNICIPAL' => function ($registrations) use ($fields_cpf, $app, $inscricoes) {                
+                return $fields_cpf['FLAG_CAD_MUNICIPAL'] ? $app->view->dict('site: name', false) : '';
 
             },
             'IDENTIFICADOR_CAD_MUNICIPAL' => function ($registrations) use ($fields_cpf, $inscricoes) {
-                $field_id = $fields_cpf["FLAG_CAD_MUNICIPAL"];
-
-                $option = $option = $inscricoes['mapa-cultural'];
-
-                $result = '';
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = $registrations->number;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = $registrations->number;
-                    }
-
-                }
-
-                return $result;
-
+                return $fields_cpf['FLAG_CAD_MUNICIPAL'] ? $registrations->number : '';
             },
             'FLAG_CAD_DISTRITAL' => function ($registrations) use ($fields_cpf) {
-                return $fields_cpf['FLAG_CAD_DISTRITAL'] ? $fields_cpf['FLAG_CAD_DISTRITAL'] : 0;
+                $field_id = $fields_cpf["FLAG_CAD_DISTRITAL"];
+                
+                if($field_id){
+                    return 1;
+                }else{
+                    return 0;
+                }
 
             },
             'SISTEMA_CAD_DISTRITAL' => function ($registrations) use ($fields_cpf, $app) {
-                return $fields_cpf['FLAG_CAD_DISTRITAL'] ? $fields_cpf['SISTEMA_CAD_DISTRITAL'] : '';
+                return $fields_cpf['FLAG_CAD_DISTRITAL'] ? $app->view->dict('site: name', false) : '';
 
             },
             'IDENTIFICADOR_CAD_DISTRITAL' => function ($registrations) use ($fields_cpf) {
-                return $fields_cpf['FLAG_CAD_DISTRITAL'] ? $fields_cpf['SISTEMA_CAD_DISTRITAL'] : '';
+                return $fields_cpf['FLAG_CAD_DISTRITAL'] ? $registrations->number : '';
 
             },
             'FLAG_CAD_NA_PONTOS_PONTOES' => function ($registrations) use ($fields_cnpj) {
@@ -948,80 +859,31 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
             },
             'FLAG_CAD_ES_PONTOS_PONTOES' => function ($registrations) use ($fields_cpf) {
-                return $fields_cpf["FLAG_CAD_ES_PONTOS_PONTOES"] ? $fields_cpf["FLAG_CAD_ES_PONTOS_PONTOES"] : 0;
+                return 0;
             },
             'SISTEMA_CAD_ES_PONTOS_PONTOES' => function ($registrations) use ($fields_cpf) {
-                return $fields_cpf["FLAG_CAD_ES_PONTOS_PONTOES"] ? $fields_cpf["SISTEMA_CAD_ES_PONTOS_PONTOES"] : '';
+                return 0;
             },
             'IDENTIFICADOR_CAD_ES_PONTOS_PONTOES' => function ($registrations) use ($fields_cpf) {
-                return $fields_cpf["FLAG_CAD_ES_PONTOS_PONTOES"] ? $fields_cpf["SISTEMA_CAD_ES_PONTOS_PONTOES"] : '';
+                return 0;
             },
             'FLAG_CAD_SNIIC' => function ($registrations) use ($fields_cpf, $inscricoes) {
                 $field_id = $fields_cpf["FLAG_CAD_SNIIC"];
-
-                $option = $inscricoes['sniic'];
-
-                $result = 0;
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = 1;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = 1;
-                    }
-
+                
+                if($field_id){
+                    return 1;
+                }else{
+                    return 0;
                 }
 
-                return $result;
 
             },
-            'SISTEMA_CAD_SNIIC' => function ($registrations) use ($fields_cpf, $inscricoes) {
-                $field_temp = $fields_cpf["FLAG_CAD_SNIIC"];
-                $field_id = $fields_cpf["SISTEMA_CAD_SNIIC"];
-
-                $option = $inscricoes['sniic'];
-
-                $result = "";
-
-                if (is_array($registrations->$field_temp)) {
-                    if ($field_temp && in_array($option, $registrations->$field_temp)) {
-                        $result = $field_id;
-                    }
-
-                } else {
-                    if ($field_temp && $registrations->$field_temp == $option) {
-                        $result = $field_id;
-                    }
-
-                }
-
-                return $result;
+            'SISTEMA_CAD_SNIIC' => function ($registrations) use ($fields_cpf, $inscricoes, $app) {
+                return $fields_cpf['FLAG_CAD_SNIIC'] ? $app->view->dict('site: name', false) : '';
 
             },
             'IDENTIFICADOR_CAD_SNIIC' => function ($registrations) use ($fields_cpf, $inscricoes) {
-                $field_temp = $fields_cpf["FLAG_CAD_SNIIC"];
-                $field_id = $fields_cpf["SISTEMA_CAD_SNIIC"];
-
-                $option = $inscricoes['sniic'];
-
-                $result = "";
-
-                if (is_array($registrations->$field_temp)) {
-                    if ($field_temp && in_array($option, $registrations->$field_temp)) {
-                        $result = $field_id;
-                    }
-
-                } else {
-                    if ($field_temp && $registrations->$field_temp == $option) {
-                        $result = $field_id;
-                    }
-
-                }
-
-                return $result;
+                return $fields_cpf['FLAG_CAD_SNIIC'] ? $registrations->number : '';
             },
             'FLAG_CAD_SALIC' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_SALIC"];
@@ -1067,71 +929,15 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
             },
             'FLAG_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
-                $field_id = $fields_cnpj["FLAG_CAD_OUTROS"];
-
-                $option = $inscricoes['outros'];
-
-                $result = 0;
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = 1;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = 1;
-                    }
-
-                }
-
-                return $result;
+                return 0;
 
             },
             'SISTEMA_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
-                $field_temp = $fields_cnpj["FLAG_CAD_OUTROS"];
-                $field_id = $fields_cnpj["SISTEMA_CAD_OUTROS"];
-
-                $option = $inscricoes['outros'];
-
-                $result = "";
-
-                if (is_array($registrations->$field_temp)) {
-                    if ($field_temp && in_array($option, $registrations->$field_temp)) {
-                        $result = $field_id;
-                    }
-
-                } else {
-                    if ($field_temp && $registrations->$field_temp == $option) {
-                        $result = $field_id;
-                    }
-
-                }
-
-                return $result;
+                return "";
 
             },
             'IDENTIFICADOR_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
-                $field_temp = $fields_cnpj["FLAG_CAD_OUTROS"];
-                $field_id = $fields_cnpj["SISTEMA_CAD_OUTROS"];
-
-                $option = $inscricoes['outros'];
-
-                $result = "";
-
-                if (is_array($registrations->$field_temp)) {
-                    if ($field_temp && in_array($option, $registrations->$field_temp)) {
-                        $result = $field_id;
-                    }
-
-                } else {
-                    if ($field_temp && $registrations->$field_temp == $option) {
-                        $result = $field_id;
-                    }
-
-                }
-
-                return $result;
+                return "";
 
             },
             'FLAG_ATUACAO_ARTES_CENICAS' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes, $category) {
@@ -1390,133 +1196,47 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
             }, 'FLAG_CAD_ESTADUAL' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_ESTADUAL"];
-
-                $option = $option = $inscricoes['mapa-cultural'];
-
-                $result = 0;
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = 1;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = 1;
-                    }
-
+                
+                if($field_id){
+                    return 1;
+                }else{
+                    return 0;
                 }
-                return $result;
 
             },
             'SISTEMA_CAD_ESTADUAL' => function ($registrations) use ($fields_cnpj, $app, $inscricoes) {
-                $field_id = $fields_cnpj["FLAG_CAD_ESTADUAL"];
-
-                $option = $option = $inscricoes['mapa-cultural'];
-
-                $result = "";
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = $app->view->dict('site: name', false);
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = $app->view->dict('site: name', false);
-                    }
-
-                }
-                return $result;
-
+                return $fields_cnpj['FLAG_CAD_ESTADUAL'] ? $app->view->dict('site: name', false) : '';
             },
             'IDENTIFICADOR_CAD_ESTADUAL' => function ($registrations) use ($fields_cnpj, $inscricoes) {
-                $field_id = $fields_cnpj["FLAG_CAD_ESTADUAL"];
-
-                $option = $option = $inscricoes['mapa-cultural'];
-
-                $result = "";
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = $registrations->number;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = $registrations->number;
-                    }
-
-                }
-                return $result;
+                return $fields_cnpj['FLAG_CAD_ESTADUAL'] ? $registrations->number : '';
 
             },
             'FLAG_CAD_MUNICIPAL' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_MUNICIPAL"];
-
-                $option = $inscricoes['cadastro-municipal'];
-
-                $result = 0;
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = 1;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = 1;
-                    }
-
+                
+                if($field_id){
+                    return 1;
+                }else{
+                    return 0;
                 }
-                return $result;
 
             },
             'SISTEMA_CAD_MUNICIPAL' => function ($registrations) use ($fields_cnpj, $inscricoes, $app) {
-                $field_id = $fields_cnpj["FLAG_CAD_MUNICIPAL"];
-
-                $option = $inscricoes['cadastro-municipal'];
-
-                $result = "";
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = $app->view->dict('site: name', false);
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = $app->view->dict('site: name', false);
-                    }
-
-                }
-                return $result;
+                return $fields_cnpj['FLAG_CAD_MUNICIPAL'] ? $app->view->dict('site: name', false) : '';
 
             },
             'IDENTIFICADOR_CAD_MUNICIPAL' => function ($registrations) use ($fields_cnpj, $inscricoes) {
-                $field_id = $fields_cnpj["FLAG_CAD_MUNICIPAL"];
-
-                $option = $inscricoes['cadastro-municipal'];
-
-                $result = '';
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = $registrations->number;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = $registrations->number;
-                    }
-
-                }
-                return $result;
+                return $fields_cnpj['FLAG_CAD_MUNICIPAL'] ? $registrations->number : '';
 
             },
             'FLAG_CAD_DISTRITAL' => function ($registrations) use ($fields_cnpj) {
                 $field_id = $fields_cnpj["FLAG_CAD_DISTRITAL"];
-                return $field_id;
+                
+                if($field_id){
+                    return 1;
+                }else{
+                    return 0;
+                }
 
             },
             'SISTEMA_CAD_DISTRITAL' => function ($registrations) use ($fields_cnpj, $app) {
@@ -1549,80 +1269,30 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
             },
             'FLAG_CAD_ES_PONTOS_PONTOES' => function ($registrations) use ($fields_cnpj) {
-                return $fields_cnpj["FLAG_CAD_ES_PONTOS_PONTOES"];
+                return 0;
             },
             'SISTEMA_CAD_ES_PONTOS_PONTOES' => function ($registrations) use ($fields_cnpj) {
-                return $fields_cnpj["SISTEMA_CAD_ES_PONTOS_PONTOES"];
+                return "";
             },
             'IDENTIFICADOR_CAD_ES_PONTOS_PONTOES' => function ($registrations) use ($fields_cnpj) {
-                return $fields_cnpj["IDENTIFICADOR_CAD_ES_PONTOS_PONTOES"];
+                return "";
             },
             'FLAG_CAD_SNIIC' => function ($registrations) use ($fields_cnpj, $inscricoes) {
                 $field_id = $fields_cnpj["FLAG_CAD_SNIIC"];
-
-                $option = $inscricoes['sniic'];
-
-                $result = 0;
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = 1;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = 1;
-                    }
-
+                
+                if($field_id){
+                    return 1;
+                }else{
+                    return 0;
                 }
-
-                return $result;
 
             },
-            'SISTEMA_CAD_SNIIC' => function ($registrations) use ($fields_cnpj, $inscricoes) {
-                $field_temp = $fields_cnpj["FLAG_CAD_SNIIC"];
-                $field_id = $fields_cnpj["SISTEMA_CAD_SNIIC"];
-
-                $option = $inscricoes['sniic'];
-
-                $result = "";
-
-                if (is_array($registrations->$field_temp)) {
-                    if ($field_temp && in_array($option, $registrations->$field_temp)) {
-                        $result = $field_id;
-                    }
-
-                } else {
-                    if ($field_temp && $registrations->$field_temp == $option) {
-                        $result = $field_id;
-                    }
-
-                }
-
-                return $result;
+            'SISTEMA_CAD_SNIIC' => function ($registrations) use ($fields_cnpj, $inscricoes, $app) {
+                return $fields_cnpj['FLAG_CAD_SNIIC'] ? $app->view->dict('site: name', false) : '';
 
             },
             'IDENTIFICADOR_CAD_SNIIC' => function ($registrations) use ($fields_cnpj, $inscricoes) {
-                $field_temp = $fields_cnpj["FLAG_CAD_SNIIC"];
-                $field_id = $fields_cnpj["SISTEMA_CAD_SNIIC"];
-
-                $option = $inscricoes['sniic'];
-
-                $result = "";
-
-                if (is_array($registrations->$field_temp)) {
-                    if ($field_temp && in_array($option, $registrations->$field_temp)) {
-                        $result = $field_id;
-                    }
-
-                } else {
-                    if ($field_temp && $registrations->$field_temp == $option) {
-                        $result = $field_id;
-                    }
-
-                }
-
-                return $result;
+                return $fields_cnpj['FLAG_CAD_SNIIC'] ? $registrations->number : '';
 
             },
             'FLAG_CAD_SALIC' => function ($registrations) use ($fields_cnpj, $inscricoes) {
@@ -1669,71 +1339,16 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
 
             },
             'FLAG_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
-                $field_id = $fields_cnpj["FLAG_CAD_OUTROS"];
-
-                $option = $inscricoes['outros'];
-
-                $result = 0;
-
-                if (is_array($registrations->$field_id)) {
-                    if ($field_id && in_array($option, $registrations->$field_id)) {
-                        $result = 1;
-                    }
-
-                } else {
-                    if ($field_id && $registrations->$field_id == $option) {
-                        $result = 1;
-                    }
-
-                }
-
-                return $result;
+                
+                return 0;
 
             },
             'SISTEMA_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
-                $field_temp = $fields_cnpj["FLAG_CAD_OUTROS"];
-                $field_id = $fields_cnpj["SISTEMA_CAD_OUTROS"];
-
-                $option = $inscricoes['outros'];
-
-                $result = "";
-
-                if (is_array($registrations->$field_temp)) {
-                    if ($field_temp && in_array($option, $registrations->$field_temp)) {
-                        $result = $field_id;
-                    }
-
-                } else {
-                    if ($field_temp && $registrations->$field_temp == $option) {
-                        $result = $field_id;
-                    }
-
-                }
-
-                return $result;
+                return "";
 
             },
             'IDENTIFICADOR_CAD_OUTROS' => function ($registrations) use ($fields_cnpj, $inscricoes) {
-                $field_temp = $fields_cnpj["FLAG_CAD_OUTROS"];
-                $field_id = $fields_cnpj["SISTEMA_CAD_OUTROS"];
-
-                $option = $inscricoes['outros'];
-
-                $result = "";
-
-                if (is_array($registrations->$field_temp)) {
-                    if ($field_temp && in_array($option, $registrations->$field_temp)) {
-                        $result = $field_id;
-                    }
-
-                } else {
-                    if ($field_temp && $registrations->$field_temp == $option) {
-                        $result = $field_id;
-                    }
-
-                }
-
-                return $result;
+                return "";
 
             },
             'FLAG_ATUACAO_ARTES_CENICAS' => function ($registrations) use ($csv_conf, $fields_cnpj, $atuacoes, $category) {
