@@ -10,7 +10,7 @@ $logotipo = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldi
 <?php if ($linkSuporte){
     ?>
     <div class="support">
-        Precisa de ajuda? <a target="_blank" class="link" href="<?= $linkSuporte; ?> ">Clique aqui</a>
+        Precisa de ajuda? Envie um e-mail para: <a target="_blank" class="link" href="mailto:<?= $linkSuporte; ?> ">$linkSuporte</a>
     </div>
     <?php
 }?>
