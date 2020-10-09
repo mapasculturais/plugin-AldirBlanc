@@ -1,4 +1,50 @@
 <?php
+/**
+ * Arquivo de configuração para o exportador dataprev no inciso 2
+ * 
+ * O Exportador do inciso 2 utiliza o nome dos campos para fazer a busca dos valores na base de dados na maiora dos casos, 
+ * exeto para os capos abaixo. 
+ * 
+ * Apenas marque 1 nos capos que lhe se enquadrem na sua situação. lembramos que a base Mapas Culturais é uma mase homologada 
+ * e pode ser usada para esse caso. Para isso marque 1 em FLAG_CAD_ESTADUAL
+ * 
+ * FLAG_CAD_ESTADUAL
+ * FLAG_CAD_MUNICIPAL
+ * FLAG_CAD_DISTRITAL
+ * FLAG_CAD_SNIIC
+ * 
+ * Caso so capos acima sejam flegados como 1, os respectivos campos abaixo se preenchem automáticamente como nos exemplos.
+ * Então basta deixalos como null aqui no arquivo de configuração.
+ * 
+ * SISTEMA_CAD_ESTADUAL = Nome do site ex.: (Mapa Cultural de São Paulo)
+ * IDENTIFICADOR_CAD_ESTADUAL =  Numero da inscrição ex.: xx-47267711
+ * 
+ * SISTEMA_CAD_MUNICIPAL Nome do site ex.: (Mapa Cultural de São Paulo)
+ * IDENTIFICADOR_CAD_MUNICIPAL Numero da inscrição ex.: xx-47267711
+ * 
+ * SISTEMA_CAD_DISTRITAL Nome do site ex.: (Mapa Cultural de São Paulo)
+ * IDENTIFICADOR_CAD_DISTRITAL Numero da inscrição ex.: xx-47267711
+ * 
+ * INFORMAÇÕES IMPORTANTES
+ * 
+ * 1) No array (catergory), deve conter as categorias contidas no formulário do inciso 2, separadas em 2 em 2 chaves com_espaco_fisico
+ * e sem_espaco_fisico
+ * 
+ * 2) No array (inscricoes_culturais), deve conter Os valores do campo INSCRIÇÃO EM CADASTRO CULTURAL do formilário. Caso esse não seja
+ * o nome do campo, procure o campo que contenha os orgãos de cadastros culturais homologados e pegue as opções de respostas desse campo.
+ * 
+ * 3) O array (atuacoes-culturais) deve conter todos os valores das açoes culturais existentes no formulário separadas entre as categorias abaixo
+ * - artes-cenicas
+ * - artes-visuais
+ * - audiovisual
+ * - humanidades
+ * - museu-memoria
+ * - musica
+ * - patrimonio-cultural
+ * 
+ * 4) Em caso de um determinado registro ser oriundo de vários campos com nomes diferentes, todos os campos que possam conter o valor devem 
+ * ser colocados em um array, como por exemplo no campo NOME_ESPACO_CULTURAL citados nesse arquivo.
+ */
 return [
     "fields_cpf" => [
         'CPF' => 'CPF DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
@@ -120,48 +166,20 @@ return [
         'sicab' => 'Sistema de Informações Cadastrais do Artesanato Brasileiro',
         'outros' => 'Outros cadastros referentes a atividades culturais',
     ],
-    "category" => [
-        'com_espaco_fisico' => [
-            'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
-            'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-        ],
-        'sem_espaco_fisico' => [
-            'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO',
-            'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO',
-        ],
+    "category" => [ // Categorias
+        'com_espaco_fisico' => [],
+        'sem_espaco_fisico' => [],
     ],
     'atuacoes-culturais' => [ // Opções para área de atuações culturais
-        'artes-cenicas' => [
-            'Artes Circenses',
-            'Dança',
-            'Teatro',
-            'Ópera',
-        ],
-        'artes-visuais' => [
-            'Artes Visuais',
-            'Artesanato',
-            'Design',
-            'Fotografia',
-            'Moda',
-        ],
+        'artes-cenicas' => [],
+        'artes-visuais' => [],
         'audiovisual' => [
             'Audiovisual',
         ],
-        'humanidades' => [
-            'Literatura',
-        ],
-        'museu-memoria' => [
-            'Museu',
-        ],
-        'musica' => [
-            'Música',
-        ],
-        'patrimonio-cultural' => [
-            'Cultura Popular',
-            'Gastronomia',
-            'Outros',
-            'Patrimônio Cultural',
-        ],
+        'humanidades' => [],
+        'museu-memoria' => [],
+        'musica' => [],
+        'patrimonio-cultural' => [],
 
     ],
 ];
