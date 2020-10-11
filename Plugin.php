@@ -156,6 +156,7 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunity = $requestedOpportunity->id;
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
+                $selected = false;
                 if (in_array($requestedOpportunity->id, $inciso1Ids)){
                     $inciso = 1;
                 }
@@ -168,8 +169,7 @@ class Plugin extends \MapasCulturais\Plugin
                         'status' => 10
                     ]);
                     
-                    //Flag que define se o botão do exportador genérico deve aparecer ou não
-                    $selected = false;
+                    //Flag que define se o botão do exportador genérico deve aparecer ou não                   
                     if($registrationSelected){
                         $selected = true;
                     }
