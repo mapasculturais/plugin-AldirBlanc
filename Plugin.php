@@ -9,6 +9,7 @@ use MapasCulturais\i;
 // @todo refatorar autoloader de plugins para resolver classes em pastas
 require_once 'Controllers/AldirBlanc.php';
 require_once 'Controllers/DataPrev.php';
+require_once 'Controllers/Remessas.php';
 require_once 'vendor/autoload.php';
 
 class Plugin extends \MapasCulturais\Plugin
@@ -59,7 +60,8 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
             'csv_inciso1' => require_once env('AB_CSV_INCISO1', __DIR__ . '/config-csv-inciso1.php'),
-            'csv_inciso2' => require_once env('AB_CSV_INCISO2', __DIR__ . '/config-csv-inciso2.php')
+            'csv_inciso2' => require_once env('AB_CSV_INCISO2', __DIR__ . '/config-csv-inciso2.php'),
+            'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO1', __DIR__ . '/config-csv-generic-inciso2.php')
         ];
 
         $skipConfig = false;
@@ -159,8 +161,21 @@ class Plugin extends \MapasCulturais\Plugin
                 }
                 else if (in_array($requestedOpportunity->id, $inciso2Ids)){
                     $inciso = 2;
+
+                    //Busca as inscrições selecionadas (ststus 10)
+                    $registrationSelected = $app->repo("Registration")->findBy([
+                        'opportunity' => $requestedOpportunity->id,
+                        'status' => 10
+                    ]);
+                    
+                    //Flag que define se o botão do exportador genérico deve aparecer ou não
+                    $selected = false;
+                    if($registrationSelected){
+                        $selected = true;
+                    }
+                    
                 }
-                $this->part('aldirblanc/csv-button', ['inciso' => $inciso, 'opportunity' =>$opportunity]);
+                $this->part('aldirblanc/csv-button', ['inciso' => $inciso, 'opportunity' =>$opportunity, 'qtdSelected' => $selected]);
             }
          });
 
@@ -324,6 +339,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
         $app->registerController('dataprev', 'AldirBlanc\Controllers\DataPrev');
+        $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
 
         // registra o role para mediadores
         $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function($user){ return $user->is('admin'); });
