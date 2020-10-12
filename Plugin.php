@@ -58,7 +58,7 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
             
-            'homolog_requer_validacao' => ['dataprev'],// (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '[]')),
+            'homolog_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev"]')),
         ];
 
         $skipConfig = false;
