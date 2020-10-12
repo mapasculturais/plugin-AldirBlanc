@@ -226,7 +226,7 @@ if (count($cidades) === 0) {
         <?php elseif (count($cidades) == 1) : ?>
             
             <?php foreach($cidades as $nome => $oportunidade): ?>
-                <input type="hidden" id="select-cidade" value="<?=$oportunidade?>">
+                <input type="hidden" id="input-cidade" value="<?=$oportunidade?>">
             <?php endforeach; ?>
          
         <?php endif; ?>
