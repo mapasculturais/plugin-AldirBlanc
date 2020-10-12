@@ -57,6 +57,8 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
+            
+            'homolog_requer_validacao' => ['dataprev'],// (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '[]')),
         ];
 
         $skipConfig = false;
@@ -134,6 +136,65 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
         
         $plugin = $this;
+
+        /**
+         * só consolida as avaliações para "selecionado" se tiver acontecido as validações (dataprev, etc)
+         * 
+         * @TODO: implementar para método de avaliaçào documental
+         */
+        $app->hook('entity(Registration).consolidateResult', function(&$result, $caller) use($plugin, $app) {
+            // eval(\psy\sh());
+            // só aplica o hook para as oportunidades do inciso I e II
+            $ids = [];
+            if ($plugin->config['inciso2_enabled']) {
+                $ids = $plugin->config['inciso2_opportunity_ids'];
+            }
+            
+            if ($plugin->config['inciso1_enabled']) {
+                $ids[] = $plugin->config['inciso1_opportunity_id'];
+            }
+
+            if (!in_array($this->opportunity->id, $ids)) {
+                return;
+            }
+
+            // só aplica o hook para usuários homologadores
+            if ($caller->user->aldirblanc_validador) {
+                return;
+            }
+
+            // se a consolidação é para inválida pode aplicar
+            if ($result == '2') {
+                return;
+            } 
+
+            $can_consolidate = true;
+
+            $evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $this, 'status' => 1]);
+
+            /**
+             * Se a consolidação requer validações, verifica se existe alguma
+             * avaliação dos usuários validadores
+             */
+            if ($validacoes = $plugin->config['homolog_requer_validacao']) {
+                foreach($validacoes as $slug) {
+                    $can = false;
+                    foreach ($evaluations as $eval) {
+                        if ($eval->user->aldirblanc_validador == $slug) {
+                            $can = true;
+                        }
+                    }
+
+                    if (!$can) {
+                        $can_consolidate = false;
+                    }
+                }
+            }
+
+            if (!$can_consolidate) {
+                $result = '';
+            }
+        });
 
         $app->hook('template(panel.opportunities.panel-header):end', function () use($app){
             if(!$app->user->is('admin')) {
