@@ -100,8 +100,6 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
                 $result = '';
             }
 
-            eval(\psy\sh());
-
         });
 
         $app->hook('GET(opportunity.single):before', function () use ($app, $plugin) {
