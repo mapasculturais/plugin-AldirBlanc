@@ -61,7 +61,8 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
             'csv_inciso1' => require_once env('AB_CSV_INCISO1', __DIR__ . '/config-csv-inciso1.php'),
             'csv_inciso2' => require_once env('AB_CSV_INCISO2', __DIR__ . '/config-csv-inciso2.php'),
-            'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO1', __DIR__ . '/config-csv-generic-inciso2.php')
+            'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO1', __DIR__ . '/config-csv-generic-inciso2.php'),
+            'config-cnab240-inciso1' => require_once env('AB_CONFIG-CNAB240-INCISO1', __DIR__ . '/config-cnab240-inciso1.php')
         ];
 
         $skipConfig = false;
@@ -156,6 +157,7 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunity = $requestedOpportunity->id;
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
+                $selected = false;
                 if (in_array($requestedOpportunity->id, $inciso1Ids)){
                     $inciso = 1;
                 }
@@ -168,8 +170,7 @@ class Plugin extends \MapasCulturais\Plugin
                         'status' => 10
                     ]);
                     
-                    //Flag que define se o botão do exportador genérico deve aparecer ou não
-                    $selected = false;
+                    //Flag que define se o botão do exportador genérico deve aparecer ou não                   
                     if($registrationSelected){
                         $selected = true;
                     }
