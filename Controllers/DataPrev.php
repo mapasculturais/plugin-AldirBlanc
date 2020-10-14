@@ -840,7 +840,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             'FLAG_CAD_NA_PONTOS_PONTOES' => function ($registrations) use ($fields_cnpj) {
                 $field_id = $fields_cnpj["FLAG_CAD_NA_PONTOS_PONTOES"];
 
-                $option = 'Cadastro Nacional de Pontos e Pontões de Cultura';
+                $option = $inscricoes['pontoes'];
 
                 $result = 0;
 
@@ -1250,7 +1250,7 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             'FLAG_CAD_NA_PONTOS_PONTOES' => function ($registrations) use ($fields_cnpj) {
                 $field_id = $fields_cnpj["FLAG_CAD_NA_PONTOS_PONTOES"];
 
-                $option = 'Cadastro Nacional de Pontos e Pontões de Cultura';
+                $option = $inscricoes['pontoes'];
 
                 $result = 0;
 

@@ -102,20 +102,20 @@ return [
             'NÚMERO DE INSCRIÇÃO EM CADASTRO NACIONAL DE PESSOA JURÍDICA – CNPJ:',
             'NÚMERO DE INSCRIÇÃO EM CADASTRO NACIONAL DE PESSOA JURÍDICA – CNPJ:',
         ],
-        'FLAG_CAD_ESTADUAL' => 'INSCRIÇÃO EM CADASTRO CULTURAL:',
+        'FLAG_CAD_ESTADUAL' => 1,
         'SISTEMA_CAD_ESTADUAL' => null,
         'IDENTIFICADOR_CAD_ESTADUAL' => null,
-        'FLAG_CAD_MUNICIPAL' => 'INSCRIÇÃO EM CADASTRO CULTURAL:',
+        'FLAG_CAD_MUNICIPAL' => 0,
         'SISTEMA_CAD_MUNICIPAL' => null,
         'IDENTIFICADOR_CAD_MUNICIPAL' => null,
-        'FLAG_CAD_DISTRITAL' => null,
+        'FLAG_CAD_DISTRITAL' => 0,
         'SISTEMA_CAD_DISTRITAL' => null,
         'IDENTIFICADOR_CAD_DISTRITAL' => null,
         'FLAG_CAD_NA_PONTOS_PONTOES' => 'INSCRIÇÃO EM CADASTRO CULTURAL:',
-        'FLAG_CAD_ES_PONTOS_PONTOES' => null,
+        'FLAG_CAD_ES_PONTOS_PONTOES' => 0,
         'SISTEMA_CAD_ES_PONTOS_PONTOES' => null,
         'IDENTIFICADOR_CAD_ES_PONTOS_PONTOES' => null,
-        'FLAG_CAD_SNIIC' => 'INSCRIÇÃO EM CADASTRO CULTURAL:',
+        'FLAG_CAD_SNIIC' => 0,
         'SISTEMA_CAD_SNIIC' => null,
         'IDENTIFICADOR_CAD_SNIIC' => null,
         'FLAG_CAD_SALIC' => 'INSCRIÇÃO EM CADASTRO CULTURAL:',
@@ -124,32 +124,25 @@ return [
         'SISTEMA_CAD_OUTROS' => null,
         'IDENTIFICADOR_CAD_OUTROS' => null,
         'FLAG_ATUACAO_ARTES_CENICAS' => [
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
         ],
         'FLAG_ATUACAO_AUDIOVISUAL' => [
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
         ],
         'FLAG_ATUACAO_MUSICA' => [
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
         ],
         'FLAG_ATUACAO_ARTES_VISUAIS' => [
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
         ],
         'FLAG_ATUACAO_PATRIMONIO_CULTURAL' => [
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
         ],
         'FLAG_ATUACAO_MUSEUS_MEMORIA' => [
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
         ],
         'FLAG_ATUACAO_HUMANIDADES' => [
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
-            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:',
+            'ÁREA CULTURAL DE ATUAÇÃO PRINCIPAL DO BENEFICIÁRIO DO SUBSÍDIO:'
         ],
     ],
     "inscricoes_culturais" => [ // Opções inscrições culturais
@@ -159,6 +152,7 @@ return [
         'salic' => 'Sistema de Apoio às Leis de incentivo à Cultura (Salic)',
         'sicab' => 'Sistema de Informações Cadastrais do Artesanato Brasileiro',
         'outros' => 'Outros cadastros referentes a atividades culturais',
+        'pontoes' => 'Cadastro Nacional de Pontos e Pontões de Cultura'
     ],
     "category" => [ // Opções para categorias
         'com_espaco_fisico' => [

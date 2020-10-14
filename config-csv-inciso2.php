@@ -117,6 +117,7 @@ return [
         'salic' => '',
         'sicab' => '',
         'outros' => '',
+        'pontoes' => '',
     ],
     "category" => [ // Categorias
         'com_espaco_fisico' => [],
