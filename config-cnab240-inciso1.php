@@ -2,139 +2,139 @@
 
 return [
     'HEADER1' => [
-        'BANCO' => [
+        'BANCO' => [ // Banco da entidade pagadora, por default 001 = Banco do Brasil
             'length' => 3,
-            'default' => null,
+            'default' => '001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'LOTE' => [
+        'LOTE' => [ // Valor default segundo planilha = 0000
             'length' => 4,
-            'default' => 'bbbb',
+            'default' => '0000',
             'field_id' => null,
             'type' => 'int',
         ],
-        'REGISTRO' => [
+        'REGISTRO' => [ //Valor default segundo planilha = 0
             'length' => 1,
-            'default' => 'c',
+            'default' => '0',
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_12' => [
+        'USO_BANCO_12' => [// Inserido 9 espaçõs vazios
             'length' => 9,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'INSCRICAO_TIPO' => [
+        'INSCRICAO_TIPO' => [ // CPF ou CNPJ da entidade pagadora (1 = CPF ou 2 = CNPJ)
             'length' => 1,
-            'default' => 1,
+            'default' => 2,
             'field_id' => null,
             'type' => 'int',
         ],
-        'CPF_FONTE_PAG' => [
+        'CPF_CNPJ_FONTE_PAG' => [ //CPF ou CNPJ da fonte pagadora, colocar com base no que foi informado no campo INSCRICAO_TIPO
             'length' => 14,
-            'default' => 32159551805,
+            'default' => '92.418.062/0001-36',
             'field_id' => null,
             'type' => 'int',
         ],
-        'CONVENIO' => [
+        'CONVENIO' => [ //Dados bancarios da instituição em questão nesse caso e o tipo de convênio que a instituição tem com BB
             'length' => 20,
-            'default' => null,
+            'default' => 'DADOS BANCARIOS',
             'field_id' => null,
             'type' => 'string',
         ],
-        'AGENCIA' => [
+        'AGENCIA' => [ //Agência bancária da instituição em questão
             'length' => 5,
             'default' => '0927',
             'field_id' => null,
             'type' => 'int',
         ],
-        'AGENCIA_DIGITO' => [
+        'AGENCIA_DIGITO' => [ //Gidito da agência bancária da instituição em questão
             'length' => 1,
             'default' => '3',
             'field_id' => null,
             'type' => 'string',
         ],
-        'CONTA' => [
+        'CONTA' => [ //Conta bancária da instituição em questão
             'length' => 12,
             'default' => '0073015',
             'field_id' => null,
             'type' => 'int',
         ],
-        'CONTA_DIGITO' => [
+        'CONTA_DIGITO' => [ //Digito da conta bancária da instituição em questão
             'length' => 1,
             'default' => '7',
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_20' => [
+        'USO_BANCO_20' => [ //Não usar, uso exclusivo do banco
             'length' => 1,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'NOME_EMPRESA' => [
+        'NOME_EMPRESA' => [ //Nome da empresa ou instituição em questão
             'length' => 30,
-            'default' => 'Elza e Pedro Henrique Entregas Expressas ME',
+            'default' => 'Elza e Pedro Henrique M.E',
             'field_id' => null,
             'type' => 'string',
         ],
-        'NOME_BANCO' => [
+        'NOME_BANCO' => [ //Agência bancária da instituição em questão
             'length' => 30,
             'default' => 'Banco do Brasil',
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_23' => [
+        'USO_BANCO_23' => [ //Não usar, uso exclusivo do banco
             'length' => 10,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'CODIGO_REMESSA' => [
+        'CODIGO_REMESSA' => [ // Por default fomos orientado a deixar sempre 1
             'length' => 1,
             'default' => '1',
             'field_id' => null,
             'type' => 'int',
         ],
-        'DATA_GER_ARQUIVO' => [
+        'DATA_GER_ARQUIVO' => [ // Data de geração do arqiovo
             'length' => 8,
-            'default' => '11102020',
-            'field_id' => null,
+            'default' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
-        'HORA_GER_ARQUIVO' => [
+        'HORA_GER_ARQUIVO' => [ //Horario de geração do arquivo
             'length' => 6,
-            'default' => '131233',
-            'field_id' => null,
+            'default' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
-        'NUM_SERQUNCIAL_ARQUIVO' => [
+        'NUM_SERQUNCIAL_ARQUIVO' => [ //Número sequancial autoincremente. Esse numero e o número sequencial do documento segundo registro da empresa ou entidade
             'length' => 6,
             'default' => '000001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'LAYOUT_ARQUIVO' => [
+        'LAYOUT_ARQUIVO' => [ // Por Default sempre iremos preencher com 030
             'length' => 3,
             'default' => '030',
             'field_id' => null,
             'type' => 'int',
         ],
-        'DENCIDADE_GER_ARQUIVO' => [
+        'DENCIDADE_GER_ARQUIVO' => [ // Por Default sempre iremos preencher com 5 numeros zero
             'length' => 5,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_30' => [
+        'USO_BANCO_30' => [ //Não usar, uso exclusivo do banco
             'length' => 54,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_31' => [
+        'USO_BANCO_31' => [ //Não usar, uso exclusivo do banco
             'length' => 15,
             'default' => null,
             'field_id' => null,
@@ -142,9 +142,9 @@ return [
         ],
     ],
     'HEADER2' => [
-        'BANCO' => [
+        'BANCO' => [ // Numero do banco que sera usado para debitos dos montantes
             'length' => 3,
-            'default' => null,
+            'default' => '001',
             'field_id' => null,
             'type' => 'int',
         ],
@@ -166,7 +166,7 @@ return [
             'field_id' => null,
             'type' => 'string',
         ],
-        'SERVICO' => [
+        'SERVICO' => [ // para secretarias estaduais sempre deve ser 98 caso seja municípios deve ser confirmardo com banco
             'length' => 2,
             'default' => 98,
             'field_id' => null,
@@ -178,13 +178,13 @@ return [
             'field_id' => null,
             'type' => 'int',
         ],
-        'LAYOUT_LOTE' => [
+        'LAYOUT_LOTE' => [ // Por default fomos orientados a deichar sempre 020
             'length' => 3,
             'default' => '020',
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_43' => [
+        'USO_BANCO_43' => [ //Não usar, uso exclusivo do banco
             'length' => 1,
             'default' => null,
             'field_id' => null,
@@ -208,91 +208,91 @@ return [
             'field_id' => null,
             'type' => 'string',
         ],
-        'AGENCIA' => [
+        'AGENCIA' => [ //Agẽncia bancária da instituição ou empresa em questão
             'length' => 5,
-            'default' => '25256',
+            'default' => '0927',
             'field_id' => null,
             'type' => 'int',
         ],
-        'AGENCIA_DIGITO' => [
+        'AGENCIA_DIGITO' => [ //Digito da agẽncia bancária da instituição ou empresa em questão
             'length' => 1,
-            'default' => '1',
+            'default' => '3',
             'field_id' => null,
             'type' => 'string',
         ],
-        'CONTA' => [
+        'CONTA' => [ //COnta da instituição ou empresa em questão
             'length' => 12,
-            'default' => '1651',
+            'default' => '0073015',
             'field_id' => null,
             'type' => 'int',
         ],
-        'CONTA_DIGITO' => [
+        'CONTA_DIGITO' => [ //Digito conta da instituição ou empresa em questão
             'length' => 1,
-            'default' => '1651',
+            'default' => '7',
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_51' => [
+        'USO_BANCO_51' => [ //Não usar, uso exclusivo do banco
             'length' => 1,
-            'default' => '1651',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'NOME_EMPRESA' => [
             'length' => 30,
-            'default' => 'Elza e Pedro Henrique Entregas Expressas ME',
+            'default' => 'Elza e Pedro Henrique ME',
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_40' => [
+        'USO_BANCO_40' => [ //Não usar, uso exclusivo do banco
             'length' => 40,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'LOGRADOURO' => [
+        'LOGRADOURO' => [ // Logradouro do endereço da instituição ou empresa em questão
             'length' => 30,
-            'default' => null,
+            'default' => 'Avenida Lídio Mei',
             'field_id' => null,
             'type' => 'string',
         ],
-        'NUMERO' => [
+        'NUMERO' => [ // Número do endereço da instituição ou empresa em questão
             'length' => 5,
-            'default' => null,
+            'default' => '38',
             'field_id' => null,
             'type' => 'int',
         ],
-        'COMPLEMENTO' => [
+        'COMPLEMENTO' => [ // Complemento do endereço da instituição ou empresa em questão
             'length' => 15,
-            'default' => null,
+            'default' => 'Proximo a ao lago da fé',
             'field_id' => null,
             'type' => 'string',
         ],
-        'CIDADE' => [
+        'CIDADE' => [ // Cidade do endereço da instituição ou empresa em questão
             'length' => 20,
-            'default' => null,
+            'default' => 'Campinas',
             'field_id' => null,
             'type' => 'string',
         ],
-        'CEP' => [
+        'CEP' => [  // CEP do endereço da instituição ou empresa em questão
             'length' => 8,
-            'default' => null,
+            'default' => '13098-380',
             'field_id' => null,
             'type' => 'int',
         ],
-        'ESTADO' => [
+        'ESTADO' => [  // Estado do endereço da instituição ou empresa em questão
             'length' => 2,
-            'default' => null,
+            'default' => 'SP',
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_60' => [
+        'USO_BANCO_60' => [  //Não usar, uso exclusivo do banco
             'length' => 8,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_61' => [
+        'USO_BANCO_61' => [  //Não usar, uso exclusivo do banco
             'length' => 10,
             'default' => null,
             'field_id' => null,
@@ -314,7 +314,7 @@ return [
         ],
         'REGISTRO' => [
             'length' => 1,
-            'default' => '3',
+            'default' => '',
             'field_id' => null,
             'type' => 'int',
         ],
@@ -351,7 +351,7 @@ return [
         'BEN_CODIGO_BANCO' => [
             'length' => 3,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'field_8',
             'type' => 'int',
         ],
         'BEN_AGENCIA' => [
@@ -399,7 +399,7 @@ return [
         'DATA_PAGAMENTO' => [
             'length' => 8,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'TIPO_MOEDA' => [

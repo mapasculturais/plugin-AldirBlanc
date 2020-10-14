@@ -1,9 +1,10 @@
 <?php
 
 namespace AldirBlanc\Controllers;
-
+use DateTime;
 use Exception;
 use Normalizer;
+use DateInterval;
 use MapasCulturais\i;
 use League\Csv\Writer;
 use MapasCulturais\App;
@@ -365,8 +366,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'status' => $status,
         ]);
 
-        $registrations = $query->getResult();
-
+        $registrations = $query->getResult(); 
+        
         if (empty($registrations)) {
             echo "Não foram encontrados registros.";
             die();
@@ -378,7 +379,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'REGISTRO' => '',
             'USO_BANCO_12' => '',
             'INSCRICAO_TIPO' => '',
-            'CPF_FONTE_PAG' => '',
+            'CPF_CNPJ_FONTE_PAG' => '',
             'CONVENIO' => '',
             'AGENCIA' => '',
             'AGENCIA_DIGITO' => '',
@@ -389,8 +390,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'NOME_BANCO' => '',
             'USO_BANCO_23' => '',
             'CODIGO_REMESSA' => '',
-            'DATA_GER_ARQUIVO' => '',
-            'HORA_GER_ARQUIVO' => '',
+            'DATA_GER_ARQUIVO' => function($registrations) use ($detahe1){
+                $date = new DateTime();                
+                return $date->format('d/m/Y');
+            },
+            'HORA_GER_ARQUIVO' => function($registrations) use ($detahe1){
+                $date = new DateTime();                
+                return $date->format('H:i:s');
+            },
             'NUM_SERQUNCIAL_ARQUIVO' => '',
             'LAYOUT_ARQUIVO' => '',
             'DENCIDADE_GER_ARQUIVO' => '',
@@ -436,7 +443,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'TIPO_MOVIMENTO' => '',
             'CODIGO_MOVIMENTO' => '',
             'CAMARA_CENTRALIZADORA' => '',
-            'BEN_CODIGO_BANCO' => '',
+            'BEN_CODIGO_BANCO' =>  function($registrations) use ($detahe1){
+                $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                return $this->numberBank($registrations->$field_id);
+            },
             'BEN_AGENCIA' => function($registrations) use ($detahe1){
                 $field_id = $detahe1['BEN_AGENCIA']['field_id'];
                 return $registrations->$field_id;
@@ -459,7 +469,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 return $registrations->$field_id;
             },
             'BEN_DOC_ATRIB_EMPRESA_82' => '',
-            'DATA_PAGAMENTO' => '',
+            'DATA_PAGAMENTO' => function($registrations) use ($detahe1){
+                $date = new DateTime();                
+                return $date->format('d/m/Y');
+            },
             'TIPO_MOEDA' => '',
             'USO_BANCO_85' => '',
             'VALOR_INTEIRO' => '',
@@ -518,6 +531,29 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'USO_BANCO_145' => '',
         ];
 
+        /**
+         * Separa os registros em 3 categorias
+         * $recordsBBPolpanca =  Contas polpança BB
+         * $recordsBBCorrente = Contas corrente BB
+         * $recordsOthers = Contas outros bancos
+         */
+        $recordsBBPolpanca = [];
+        $recordsBBCorrente = [];
+        $recordsOthers = [];
+
+        foreach($registrations as $value){
+            if($this->numberBank($value->field_8) == "001"){
+                if($value->field_4=="Conta corrente"){
+                    $recordsBBCorrente[] = $value;
+                }else{
+                    $recordsBBPolpanca[] = $value;
+                }
+                
+            }else{
+                $recordsOthers[] = $value;
+            }
+        }
+
        
 
         /**
@@ -526,22 +562,27 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          *
          */
         $txt_data = "";
-        //$txt_data = $this->mountTxt($header1,$mappedHeader1, $txt_data); // Monta o header 1
-
-        //$txt_data.= "\n"; //Acrescenta uma quebra de linha
-
-        //$txt_data = $this->mountTxt($header2,$mappedHeader2, $txt_data); // Monta o header 2
-
-        //$txt_data.= "\n"; //Acrescenta uma quebra de linha
-        foreach ($registrations as $key_registrations => $registration) {
-
-            $txt_data = $this->mountTxt($detahe1,$mappedDeletalhe1, $txt_data, $registration); // Monta o detalhe 1
-
-            $txt_data.= "\n"; //Acrescenta uma quebra de linha
-
-            $txt_data = $this->mountTxt($detahe2,$mappedDeletalhe2, $txt_data, $registration); // Monta o detalhe 2
-            $txt_data.= "\n"; //Acrescenta uma quebra de linha
         
+        
+       
+
+        $txt_data = $this->mountTxt($header1,$mappedHeader1, $txt_data, null ); // Monta o header 1
+        $txt_data.= "\n"; //Acrescenta uma quebra de linha
+
+        for($i=0; $i<1; $i++){            
+           
+            $txt_data = $this->mountTxt($header2,$mappedHeader2, $txt_data, null); // Monta o header 2
+
+            foreach ($recordsBBCorrente as $key_records => $records) {
+
+                $txt_data = $this->mountTxt($detahe1,$mappedDeletalhe1, $txt_data, $records); // Monta o detalhe 1
+
+                $txt_data.= "\n"; //Acrescenta uma quebra de linha
+
+                $txt_data = $this->mountTxt($detahe2,$mappedDeletalhe2, $txt_data, $records); // Monta o detalhe 2
+                $txt_data.= "\n"; //Acrescenta uma quebra de linha
+            
+            }
         }
         //$txt_data.= "\n"; //Acrescenta uma quebra de linha
 
@@ -554,7 +595,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         
         
-      
+      header('Content-type: text/utf-8');
+      echo $txt_data;
+      exit();
 
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
@@ -599,12 +642,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
 
         $value['default'] = Normalizer::normalize( $value['default'], Normalizer::FORM_D );
-        $value['default'] = preg_replace('/[^a-z0-9]/i', '', $value['default']);
+        $value['default'] = preg_replace('/[^a-z0-9 ]/i', '', $value['default']);
 
         if ($type === 'int') {
             $data .=  str_pad($value['default'], $length, '0', STR_PAD_LEFT);
         } else {
-            $data .= str_pad($value['default'], $length, " ", STR_PAD_BOTH);
+            $data .= str_pad($value['default'], $length, " ");
         } 
         
         return substr($data, 0, $length);
@@ -640,11 +683,18 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'Itaú Unibanco S.A' => '341',
             'Bco Safra S.A' => '422',
             'Banco Pan' => '623',
+            'BR Partners BI' => '666'
         ];
+        $bankName = Normalizer::normalize( $bankName, Normalizer::FORM_D );
+        $bankName = preg_replace('/[^a-z0-9 ]/i', '', $bankName);
 
         $return = "";
         foreach ($bankList as $key => $value) {
-            if ($key == ucwords(strtolower($bankName))) {
+            
+            $temp = Normalizer::normalize( $key, Normalizer::FORM_D );
+            $temp = preg_replace('/[^a-z0-9 ]/i', '', $temp);
+
+            if (strtolower($bankName) == strtolower($temp)) {
                 $return = $value;
             }
         }
@@ -685,5 +735,4 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         
         
     }
-
 }
