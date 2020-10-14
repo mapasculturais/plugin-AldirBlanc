@@ -24,7 +24,7 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
         $slug = $this->getSlug();
         $config += [
             'consolidacao_requer_homologacao' => true,
-            'consolidacao_requer_validacoes' => [] //(array) json_decode(env(strtoupper($slug) . '_CONSOLIDACAO_REQ_VALIDACOES', '[]')),
+            'consolidacao_requer_validacoes' => (array) json_decode(env(strtoupper($slug) . '_CONSOLIDACAO_REQ_VALIDACOES', '[]')),
         ];
 
         parent::__construct($config);
