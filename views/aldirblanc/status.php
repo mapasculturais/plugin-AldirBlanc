@@ -67,10 +67,9 @@ $_messages = [
         <?php $this->part('aldirblanc/registration-single--header', $_params) ?>
         <?php $this->part('singles/registration-single--fields', $_params) ?>
 
-        <!-- <div class="wrap-button">
-            <a href="" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar"); ?></a>
-        </div> -->
-        <!-- .wrap-button -->
+        <div class="wrap-button">
+            <a href="<?php echo $app->createUrl('aldirblanc', 'cadastro'); ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar para os Cadastros"); ?></a>
+        </div><!-- /.wrap-button -->
 
     </article>
 
