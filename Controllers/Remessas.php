@@ -4,10 +4,11 @@ namespace AldirBlanc\Controllers;
 
 use DateTime;
 use Exception;
+use Normalizer;
+use MapasCulturais\i;
 use League\Csv\Writer;
 use MapasCulturais\App;
 use MapasCulturais\Entities\Registration;
-use MapasCulturais\i;
 
 /**
  * Registration Controller
@@ -157,7 +158,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'NOME_SOCIAL' => function ($registrations) use ($fieldsID, $categories){
                 if(in_array($registrations->category, $categories['CPF'])){
                     $field_id = $fieldsID['NOME_SOCIAL'];
-                    return  $registrations->$field_id;
+                    return  $this->nomalizeString($registrations->$field_id);
                 }else{
                     return "";
                 }
@@ -172,7 +173,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                 $result = str_replace(['.', '-','/'], '', $registrations->$value);
                             }
                         }
-                        return $result;
+                        return $this->nomalizeString($result);
                     }else{
                         return str_replace(['.', '-','/'], '', $registrations->$field_id);
                     }
@@ -190,9 +191,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                 $result = $registrations->$value;
                             }
                         }
-                        return $result;
+                        return $this->nomalizeString($result);
                     }else{
-                        return  $registrations->$field_id;
+                        return  $this->nomalizeString($registrations->$field_id);
                     }
                 }
                 else{
@@ -201,7 +202,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
               },
              'LOGRADOURO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['LOGRADOURO'];
-                return  $registrations->$field_id['En_Nome_Logradouro'];
+                return  $this->nomalizeString($registrations->$field_id['En_Nome_Logradouro']);
              },
              'NUMERO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['NUMERO'];
@@ -209,15 +210,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },
              'COMPLEMENTO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['COMPLEMENTO'];
-                return  $registrations->$field_id['En_Complemento'];
+                return  $this->nomalizeString($registrations->$field_id['En_Complemento']);
              },
              'BAIRRO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['BAIRRO'];
-                return  $registrations->$field_id['En_Bairro'];
+                return  $this->nomalizeString($registrations->$field_id['En_Bairro']);
              },
              'MUNICIPIO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['MUNICIPIO'];
-                return  $registrations->$field_id['En_Municipio'];
+                return  $this->nomalizeString($registrations->$field_id['En_Municipio']);
              },             
              'CEP' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['CEP'];
@@ -225,7 +226,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },
              'ESTADO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['ESTADO'];
-                return  $registrations->$field_id['En_Estado'];
+                return  $this->nomalizeString($registrations->$field_id['En_Estado']);
              },
              'NUM_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['NUM_BANCO'];                
@@ -233,7 +234,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },
              'TIPO_CONTA_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['TIPO_CONTA_BANCO'];
-                return  $registrations->$field_id;
+                return  $this->nomalizeString($registrations->$field_id);
              },
              'AGENCIA_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['AGENCIA_BANCO'];
@@ -254,7 +255,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
              'INCISO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['INCISO'];
-                return $field_id;
+                return $this->nomalizeString($field_id);
             }
            
         ];
@@ -302,6 +303,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         $csv = Writer::createFromStream($stream);
 
+        $csv->setDelimiter(';');
+        
         $csv->insertOne($header);
 
         foreach ($csv_data as $key_csv => $csv_line) {
@@ -355,5 +358,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         
     }
 
+    private function nomalizeString(string $valor) : string
+    {
+        $valor = Normalizer::normalize( $valor, Normalizer::FORM_D );
+        return preg_replace('/[^A-Za-z0-9 ]/i', '', $valor);
+    }
     
 }
