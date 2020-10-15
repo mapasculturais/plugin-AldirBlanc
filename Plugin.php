@@ -346,8 +346,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app->registerFileGroup('aldirblanc', $def_autorizacao);
         $app->registerFileGroup('aldirblanc', $def_documento);
 
-        /* registrinado metadados do usuário */
-
+        // registrinado metadados do usuário
         $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_contato_tipo', [
             'label' => i::__('Tipo de contato da mediação'),
             'type' => 'select',
@@ -362,6 +361,13 @@ class Plugin extends \MapasCulturais\Plugin
         $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_contato', [
             'label' => i::__('Número telefônico do contato'),
             'type' => 'text',
+            'private' => true
+        ]);
+
+        // mediação senha
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_senha', [
+            'label'   => i::__('Senha'),
+            'type'    => 'text',
             'private' => true
         ]);
 
