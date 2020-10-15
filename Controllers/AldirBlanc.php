@@ -489,6 +489,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $registration->checkPermission('modify');
         
         if (!$registration->termos_aceitos) {
+            if ($app->user->is('mediador')) {
+                $this->GET_aceitar_termos();
+            }
             $app->redirect($this->createUrl('termos_e_condicoes', [$registration->id]));
         }
         //@todo verificar se funciona isso 
@@ -708,6 +711,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $app->redirect($this->createUrl('status', [$registration->id]));
         }
         if (!$registration->termos_aceitos) {
+            if ($app->user->is('mediador')) {
+                $this->GET_aceitar_termos();
+            }
             $app->redirect($this->createUrl('termos_e_condicoes', [$registration->id]));
         }
         $registration->checkPermission('control');
