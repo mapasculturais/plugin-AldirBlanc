@@ -183,7 +183,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $agent->save(true);
 
-        $agent->createAgentRelation($app->user->profile, 'mediaror', true, true);
+        $agent->createAgentRelation($app->user->profile, 'mediador', true, true);
 
         $app->disableAccessControl();
 
