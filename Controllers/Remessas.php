@@ -158,7 +158,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'NOME_SOCIAL' => function ($registrations) use ($fieldsID, $categories){
                 if(in_array($registrations->category, $categories['CPF'])){
                     $field_id = $fieldsID['NOME_SOCIAL'];
-                    return  $this->nomalizeString($registrations->$field_id);
+                    return  $this->normalizeString($registrations->$field_id);
                 }else{
                     return "";
                 }
@@ -173,7 +173,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                 $result = str_replace(['.', '-','/'], '', $registrations->$value);
                             }
                         }
-                        return $this->nomalizeString($result);
+                        return $this->normalizeString($result);
                     }else{
                         return str_replace(['.', '-','/'], '', $registrations->$field_id);
                     }
@@ -191,9 +191,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                 $result = $registrations->$value;
                             }
                         }
-                        return $this->nomalizeString($result);
+                        return $this->normalizeString($result);
                     }else{
-                        return  $this->nomalizeString($registrations->$field_id);
+                        return  $this->normalizeString($registrations->$field_id);
                     }
                 }
                 else{
@@ -202,7 +202,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
               },
              'LOGRADOURO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['LOGRADOURO'];
-                return  $this->nomalizeString($registrations->$field_id['En_Nome_Logradouro']);
+                return  $this->normalizeString($registrations->$field_id['En_Nome_Logradouro']);
              },
              'NUMERO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['NUMERO'];
@@ -210,15 +210,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },
              'COMPLEMENTO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['COMPLEMENTO'];
-                return  $this->nomalizeString($registrations->$field_id['En_Complemento']);
+                return  $this->normalizeString($registrations->$field_id['En_Complemento']);
              },
              'BAIRRO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['BAIRRO'];
-                return  $this->nomalizeString($registrations->$field_id['En_Bairro']);
+                return  $this->normalizeString($registrations->$field_id['En_Bairro']);
              },
              'MUNICIPIO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['MUNICIPIO'];
-                return  $this->nomalizeString($registrations->$field_id['En_Municipio']);
+                return  $this->normalizeString($registrations->$field_id['En_Municipio']);
              },             
              'CEP' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['CEP'];
@@ -226,7 +226,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },
              'ESTADO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['ESTADO'];
-                return  $this->nomalizeString($registrations->$field_id['En_Estado']);
+                return  $this->normalizeString($registrations->$field_id['En_Estado']);
              },
              'NUM_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['NUM_BANCO'];                
@@ -234,7 +234,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },
              'TIPO_CONTA_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['TIPO_CONTA_BANCO'];
-                return  $this->nomalizeString($registrations->$field_id);
+                return  $this->normalizeString($registrations->$field_id);
              },
              'AGENCIA_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['AGENCIA_BANCO'];
@@ -255,7 +255,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
              'INCISO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['INCISO'];
-                return $this->nomalizeString($field_id);
+                return $this->normalizeString($field_id);
             }
            
         ];
@@ -358,7 +358,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         
     }
 
-    private function nomalizeString(string $valor) : string
+    private function normalizeString(string $valor) : string
     {
         $valor = Normalizer::normalize( $valor, Normalizer::FORM_D );
         return preg_replace('/[^A-Za-z0-9 ]/i', '', $valor);
