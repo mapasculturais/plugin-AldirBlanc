@@ -74,8 +74,13 @@ $(document).ready(function() {
                 modalTitle = "Atenção";
             }
         }
-
-        let selectedCityId = $('.js-select-cidade option:selected').val();
+        if ($("#input-cidade").length > 0 ){
+            selectedCityId = $('#input-cidade').val();
+        }
+        else{
+            selectedCityId = $('.js-select-cidade option:selected').val();
+        }
+        
         let cityObj = MapasCulturais.opportunitiesInciso2.filter(city => city.id == selectedCityId)[0]
         if (!(MapasCulturais.serverDate.date >= cityObj.registrationFrom.date && MapasCulturais.serverDate.date <= cityObj.registrationTo.date)) {
             modalTitle = cityObj.name;
@@ -264,4 +269,17 @@ $(document).ready(function() {
         $('#local-atividade').fadeIn('fast');
         returning = false;
     });
+
+    $('select#opportunity-type').select2({
+        placeholder: 'Selecione uma opção',
+        width: '100%',
+        height: '100px'
+    });
+
+    /**
+     * Devolve o formulario dos exportadores ao estado inicial
+     */
+    $('.form-export-clear').on('click', function() {                      
+        $('.form-export-dataprev').trigger("reset");
+     });
 });

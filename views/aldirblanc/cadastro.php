@@ -8,6 +8,7 @@ $inciso1Limite = $this->controller->config['inciso1_limite'];
 $inciso2Limite = $this->controller->config['inciso2_limite'];
 $inciso2_enabled = $this->controller->config['inciso2_enabled'];
 $inciso1_enabled = $this->controller->config['inciso1_enabled'];
+$inciso3_enabled = $this->controller->config['inciso3_enabled'];
 
 $this->jsObject['opportunityId'] = null;
 $this->jsObject['opportunitiesInciso2'] = $opportunitiesInciso2;
@@ -26,7 +27,7 @@ if (count($cidades) === 0) {
 <section class="lab-main-content cadastro <?= $app->user->is('mediador') ? "mediador" : '' ?>">
     <header>
         <div class="intro-message">
-            <div class="name"> Olá, <?= $niceName ?>! </div>
+            <div class="name"> Olá <?= $niceName ? ", " . $niceName : "" ?>! </div>
         </div>
     </header>
 
@@ -43,7 +44,6 @@ if (count($cidades) === 0) {
             if (count($registrationsInciso1) < $inciso1Limite && $inciso1_enabled) {
             ?>
                 <button onclick="location.href='<?= $this->controller->createUrl('individual') ?>'" clickable id="option3" class="informative-box lab-option">
-                    <!-- <button id="option3" class="informative-box lab-option"> -->
                     <div class="informative-box--icon">
                         <i class="fas fa-user"></i>
                     </div>
@@ -61,7 +61,7 @@ if (count($cidades) === 0) {
                     </div>
                 </button>
             <?php
-            } else if (!$inciso1_enabled && isset($this->controller->config['msg_inciso1_disabled'])) {
+            } else if ( !$inciso1_enabled && $this->controller->config['msg_inciso1_disabled'] != '' ) {
                 $mensagemInciso1Disabled = $this->controller->config['msg_inciso1_disabled'];
                 $this->part('aldirblanc/cadastro/inciso-disabled',  ['mensagem' => $mensagemInciso1Disabled, 'title' => $inciso1Title]);
             }
@@ -121,7 +121,30 @@ if (count($cidades) === 0) {
                         break;
                 }
             }
+            if ($inciso3_enabled && count($opportunitiesInciso3) > 0 ) {
             ?>
+            <button onclick="location.href='<?= $this->controller->createUrl('fomentos') ?>'" class="informative-box lab-option">
+                <div class="informative-box--icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+
+                <div class="informative-box--title">
+                    <h2>Editais, fomentos e oportunidades</h2>
+                    <i class="fas fa-minus"></i>
+                    <!-- <i class="far fa-check-circle"></i> -->
+                </div>
+
+                <div class="informative-box--content active" data-content="">
+                    <span class="more"> Mais informações </span>
+                    <span class="content">
+                        <i>
+                            Donec facilisis tortor ut augue lacinia, at viverra est semper. Sed sapien metus, scelerisque nec pharetra id, tempor a tortor. Pellentesque non dignissim neque. Ut porta viverra est, ut dignissim elit elementum ut. Nunc vel rhoncus nibh, ut tincidunt turpis. Integer ac enim pellent.
+                        </i>
+                    </span>
+                </div>
+            </button>
+            <?php 
+            }?>
         </div>
 
     </div><!-- End .lab-item -->
@@ -137,7 +160,7 @@ if (count($cidades) === 0) {
             <div class="questions--options ">
                 <label class="informative-box">
                     <div class="informative-box--title">
-                        <h2 class="js-text"><?php i::_e('Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado;') ?></h2>
+                        <h2 class="js-text"><?php echo $this->controller->config['texto_cadastro_espaco'] ?></h2>
                         <i class="fas fa-minus"></i>
                         <!-- <i class="far fa-check-circle"></i> -->
                     </div>
@@ -145,7 +168,7 @@ if (count($cidades) === 0) {
                 </label>
                 <label class="informative-box">
                     <div class="informative-box--title">
-                        <h2 class="js-text"><?php i::_e('Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.') ?></h2>
+                        <h2 class="js-text"><?php echo $this->controller->config['texto_cadastro_coletivo'] ?></h2>
                         <i class="fas fa-minus"></i>
                         <!-- <i class="far fa-check-circle"></i> -->
                     </div>
@@ -164,7 +187,7 @@ if (count($cidades) === 0) {
             <div class="questions--options">
                 <label class="informative-box">
                     <div class="informative-box--title">
-                        <h2 class="js-text"><?php i::_e('Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.') ?></h2>
+                        <h2 class="js-text"><?php echo $this->controller->config['texto_cadastro_cnpj'] ?></h2>
                         <i class="fas fa-minus"></i>
                         <!-- <i class="far fa-check-circle"></i> -->
                     </div>
@@ -172,7 +195,7 @@ if (count($cidades) === 0) {
                 </label>
                 <label class="informative-box">
                     <div class="informative-box--title">
-                        <h2 class="js-text"><?php i::_e('Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico') ?></h2>
+                        <h2 class="js-text"><?php echo $this->controller->config['texto_cadastro_cpf'] ?></h2>
                         <i class="fas fa-minus"></i>
                         <!-- <i class="far fa-check-circle"></i> -->
                     </div>
@@ -187,8 +210,9 @@ if (count($cidades) === 0) {
                 <button class="btn btn-next js-next"><?php i::_e("Avançar"); ?></button>
             </div>
         </div>
-
-        <?php if (count($cidades) > 1) : ?>
+            
+        <?php 
+        if (count($cidades) > 1) : ?>
             <div id="select-cidade" class="js-questions-tab questions--tab lab-form-answer inactive">
                 <i class="questions--icon fas fa-university"></i>
                 <h4 class="questions--title"><?php i::_e('Selecione a cidade') ?></h4>
@@ -199,6 +223,12 @@ if (count($cidades) === 0) {
                     <button class="btn btn-next js-next"><?php i::_e("Avançar"); ?></button>
                 </div>
             </div>
+        <?php elseif (count($cidades) == 1) : ?>
+            
+            <?php foreach($cidades as $nome => $oportunidade): ?>
+                <input type="hidden" id="input-cidade" value="<?=$oportunidade?>">
+            <?php endforeach; ?>
+         
         <?php endif; ?>
     </div>
     <!-- End .js-questions -->
@@ -210,6 +240,8 @@ if (count($cidades) === 0) {
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2 class="modal-content--title js-title"></h2>
+            <strong>Atenção, você não poderá alterar essas opções após clicar em confirmar!</strong>
+            <br><br>
             <p id="modal-content-text" class="modal-content-text"></p>
             <button class="btn js-confirmar"><?php \MapasCulturais\i::_e("Confirmar"); ?></button>        
         </div>

@@ -135,6 +135,29 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return $opportunity;
     }
     /**
+     * Retorna a oportunidade do inciso III
+     *
+     * @return array
+     */
+    function getOpportunitiesInciso3()
+    {
+        $app = App::i();
+        $project = $app->repo('Project')->find($this->config['project_id']);
+        $projectsIds = $project->getChildrenIds();
+        $projectsIds[] = $project->id;
+        $opportunitiesByProject = $app->repo('ProjectOpportunity')->findBy(['ownerEntity' => $projectsIds ] );
+        $inciso1e2Ids = array_values(array_merge([$this->config['inciso1_opportunity_id']], $this->config['inciso2_opportunity_ids']));
+        $opportunitiesInciso3 = [];
+
+        foreach ($opportunitiesByProject as $opportunity){
+            if ( !in_array($opportunity->id, $inciso1e2Ids) ) {
+                $opportunitiesInciso3[] = $opportunity;
+            }
+        }        
+
+        return $opportunitiesInciso3;
+    }
+    /**
      * Retorna o array associativo com os numeros e nomes de status
      *
      * @return array
@@ -296,6 +319,22 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $app->redirect($this->createUrl('formulario', [$agent->aldirblanc_inciso1_registration]));
     }
 
+     /**
+     * Redireciona o usuário para as oportunidades do inciso 3
+     * 
+     * rota: /aldirblanc/inciso3/[?agent={agent_id}]
+     * 
+     * @return void
+     */
+    function GET_fomentos()
+    {               
+        $app = App::i();
+        $niceName = $app->user->profile->name;
+        $opportunities = $this->getOpportunitiesInciso3();
+        $this->requireAuthentication();
+        $this->render('fomentos', ['opportunities' => $opportunities, 'cidades' => $cidades = [], 'niceName' => $niceName]);
+    }   
+
     /**
      * Cria nova inscrição para o agente no inciso informado e redireciona para o formulário
      * 
@@ -311,6 +350,18 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $app = App::i();
         $agent = $app->repo('Agent')->find($this->data['agent']);
         //verifica se existe e se o agente owner é individual
+          //se é coletivo cria um agente individual
+        if ($agent->type->id == 2){
+            unset($agent);
+            $app->disableAccessControl();
+            $agent = new \MapasCulturais\Entities\Agent($agent->user);
+            //@TODO: confirmar nome e tipo do Agente coletivo
+            $agent->name = ' ';
+            $agent->type = 1;
+            $agent->save(true);
+            $app->enableAccessControl();
+        }
+       
         if(!$agent || $agent->type->id != 1){
             // @todo tratar esse erro
             throw new \Exception();
@@ -580,6 +631,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
             $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
         }
+
+        $opportunitiesInciso2 = [];
+        $registrationsInciso2 = [];
         
         if ($this->config['inciso2_enabled']) {
             $inciso2_ids = implode(',', $this->config['inciso2_opportunity_ids']);
@@ -592,16 +646,19 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $registrationsInciso2 = $repo->findBy(['id' => $registrations_ids]);
             $opportunitiesIdsInciso2 = array_values($this->config['inciso2_opportunity_ids']);
             $opportunitiesInciso2 = $app->repo('Opportunity')->findRegistrationDateByIds($opportunitiesIdsInciso2); 
-
         }
-        
+        $opportunitiesInciso3 = [];
+        if ($this->config['inciso3_enabled']) {
+            $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
+        }
         $this->render('cadastro', [
                 'cidades' => $this->getCidades(), 
                 'registrationsInciso1' => $registrationsInciso1, 
                 'registrationsInciso2' => $registrationsInciso2, 
                 'summaryStatusName'=>$summaryStatusName, 
                 'niceName' => $owner_name,
-                'opportunitiesInciso2' => $opportunitiesInciso2
+                'opportunitiesInciso2' => $opportunitiesInciso2,
+                'opportunitiesInciso3' => $opportunitiesInciso3
             ]);
     }
 
@@ -614,7 +671,17 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $this->requireAuthentication();
         $registration = $app->repo('Registration')->find($this->data['id']);
-        
+        $opportunityId = $registration->opportunity->id;
+
+        if (!isset($registration->inciso) || $registration->inciso == ''){
+            if ($opportunityId == $this->config['inciso1_opportunity_id'] ){
+                $registration->inciso = 1;
+            } else if (in_array($opportunityId, $this->config['inciso2_opportunity_ids']) ){
+                $registration->inciso = 2;
+            }
+            $registration->save(true);
+        }
+
         $this->render('termos-e-condicoes-inciso'.$registration->inciso, ['registration_id' => $this->data['id']]);
     }
     /**

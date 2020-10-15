@@ -63,7 +63,7 @@
             $(this).toggleClass('active');
 
             let modal       = $('#modalAlert');
-            let space       = $(this).attr('space');
+            let space       = $(this).attr('value');
             let spaceName   = $(this).attr('name');
             let agent       = $(this).attr('agent');
             let inciso      = $(this).attr('inciso');
