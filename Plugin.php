@@ -59,6 +59,7 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
             
             'homolog_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev"]')),
+            'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | ') 
         ];
 
         $skipConfig = false;
@@ -555,7 +556,8 @@ class Plugin extends \MapasCulturais\Plugin
                 'registrationFrom' => $aldirblancSettings['registrationFrom'],
                 'registrationTo' => $aldirblancSettings['registrationTo'],
                 'shortDescription' => $aldirblancSettings['shortDescription'],
-                'name' => $aldirblancSettings['name'],
+                'opportunity_name' => $aldirblancSettings['name'],
+                'project_name' => $aldirblancSettings['name'],
                 'owner' => $owner,
                 'avatar' => $aldirblancSettings['avatar'],
                 'seal' => $aldirblancSettings['seal'],
@@ -619,6 +621,7 @@ class Plugin extends \MapasCulturais\Plugin
             $default = array_merge($cityDefault, $inciso2DefaultConfigs);
             $city = array_merge($default, $city);
 
+            $city['project_name'] = ($city['name'] === 'NOME PADRÃO') ? $this->config['prefix_project'] . "{$city['city']}" : $city['name'];
             $city['name'] = ($city['name'] === 'NOME PADRÃO') ? "Lei Aldir Blanc - Inciso II | {$city['city']}" : $city['name'];
             
             if(isset($city['registrationTo']) ) {
@@ -650,7 +653,8 @@ class Plugin extends \MapasCulturais\Plugin
                     'registrationFrom' => $city['registrationFrom'],
                     'registrationTo' => $city['registrationTo'],
                     'shortDescription' => $city['shortDescription'],
-                    'name' => $city['name'],
+                    'opportunity_name' => $city['name'],
+                    'project_name' => $city['project_name'],
                     'owner' => $owner,
                     'avatar' => $city['avatar'],
                     'seal' => $city['seal'],
@@ -694,12 +698,12 @@ class Plugin extends \MapasCulturais\Plugin
         $opportunityProject = $project;
 
         if($inciso == 2) {
-            $app->log->debug( "Criando projeto {$params['name']}");
+            $app->log->debug( "Criando projeto {$params['project_name']}");
             $opportunityProject = new \MapasCulturais\Entities\Project();
             $opportunityProject->parent = $project;
             $opportunityProject->shortDescription = $params['shortDescription'];
             $opportunityProject->area=30;
-            $opportunityProject->name = $params['name'];
+            $opportunityProject->name = $params['project_name'];
             $opportunityProject->status = 1;
             $opportunityProject->type = $project->type->id;
             $opportunityProject->save(true);
@@ -712,9 +716,9 @@ class Plugin extends \MapasCulturais\Plugin
                 $this->setAvatarToEntity($params['avatar'] , $opportunityProject);
             }
         }
-        $app->log->debug( "Criando oportunidade {$params['name']}");
+        $app->log->debug( "Criando oportunidade {$params['opportunity_name']}");
         $opportunity = new \MapasCulturais\Entities\ProjectOpportunity();
-        $opportunity->name = $params['name'];
+        $opportunity->name = $params['opportunity_name'];
         $opportunity->status = $params['status'];
         $opportunity->shortDescription = $params['shortDescription'];
         $opportunity->registrationFrom = new \Datetime($params['registrationFrom']);
@@ -741,7 +745,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->em->flush();
 
-        $app->log->debug( "Importando campos da oportunidade {$params['name']}");
+        $app->log->debug( "Importando campos da oportunidade {$params['opportunity_name']}");
         $this->importFields($opportunity->id, $inciso);
 
         if($inciso == 2) {
@@ -764,7 +768,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app->enableAccessControl();
         $app->em->flush();
 
-        $app->log->debug( "finalizada oportunidade {$params['name']}\n\n\n");
+        $app->log->debug( "finalizada oportunidade {$params['opportunity_name']}\n\n\n");
     }
 
     //importa de um .txt dos campos de cadastro que cada opportunidade deve ter
