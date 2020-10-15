@@ -73,4 +73,8 @@ function __mediacao_file($file) {
     <label> Número de telefone <br>
         <input ng-model="entity.mediacao_contato" ng-blur="saveField({fieldName: 'mediacao_contato'}, entity.mediacao_contato)" js-mask="(99) 999999999" placeholder="(__) _________" />
     </label>
+
+    <label> Senha <br>
+        <input ng-model="entity.mediacao_senha" ng-blur="saveField({fieldName: 'mediacao_senha'}, entity.mediacao_senha)"/>
+    </label>
 </div>
