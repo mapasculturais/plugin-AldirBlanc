@@ -772,11 +772,17 @@ class DataPrev extends \MapasCulturais\Controllers\Registration
             },
             'NOME_ESPACO_CULTURAL' => function ($registrations) use ($fields_cpf) {
                 $field_id = $fields_cpf['NOME_ESPACO_CULTURAL'];
-
+                
                 $result = "";
+                
+                
                 if (is_array($field_id)) {
                     foreach ($field_id as $value) {
+                       if($registrations->$value){
                         $result = $registrations->$value;
+                        break;
+                       }
+                        
 
                     }
                 } else {
