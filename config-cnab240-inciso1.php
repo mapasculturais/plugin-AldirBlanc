@@ -1,8 +1,33 @@
 <?php
-
+/**
+ * Explicação da estrutura de cada campo
+ * 1) - length = A quantidade de caracteres que esse registro deve ter no TXT. 
+ *      Caso seja um registro do tipo numérico e esse registro tenha uma quantidade menor que a quantidade de caracteres exigida, deve se completar com zeros a esquerda
+ *      Caso Sejaum registro do tipo texto esse registro tenha uma quantidade menor que a quantidade de caracteres exigida, deve se completar com espaços em branco a direita.
+ * 
+ * 
+ * 2) - default = (Um valor fixo, que será exibido diretamente no TXT)
+ * 
+ * 
+ * 3) - field_id = Caso um registro estaja na base de dados, deve informar aqui o field_id onde se deve buscar os registros. 
+ *      OBS.: Caso use o field_id, favor setar como null o campo default
+ * 
+ * 
+ * 4) - type = tipo de dado que sera inserido. 
+ *      int = a numérico 
+ *      string = texto
+ * 
+ * OBSERVAÇÕES
+ * - Os campos textos, não deve conter quaqlquer tipo de caracter especial ou acentuação. 
+ *   Já está sendo feito um tratamento para isso, porem sempre se atentar no arquivo TXT para que o mesmo nao seja recusado pelo banco
+ * 
+ * - O Fromato de data e hora, deve ser na sequência
+ *   dia/mes/ano = 01/01/2020. => No arquivo a formatação não deve conter caracteres especiais.
+ *   hora : minutos : segundos = 00:00:00 => No arquivo a formatação não deve conter caracteres especiais.
+ */
 return [
     'HEADER1' => [
-        'BANCO' => [ // Banco da entidade pagadora, por default 001 = Banco do Brasil
+        'BANCO' => [ // Numero do banco da entidade pagadora, deve ser confirmado de qual banco sairá o recurso, casso seja Banco Do Brasil seria 001
             'length' => 3,
             'default' => '001',
             'field_id' => null,
@@ -26,7 +51,7 @@ return [
             'field_id' => null,
             'type' => 'string',
         ],
-        'INSCRICAO_TIPO' => [ // CPF ou CNPJ da entidade pagadora (1 = CPF ou 2 = CNPJ)
+        'INSCRICAO_TIPO' => [ // CPF ou CNPJ da entidade pagadora (1 = CPF ou 2 = CNPJ) deve ser perguntado ao banco
             'length' => 1,
             'default' => 2,
             'field_id' => null,
@@ -174,8 +199,8 @@ return [
         ],
         'FORMA_LANCAMENTO' => [
             'length' => 2,
-            'default' => 03,
-            'field_id' => null,
+            'default' => '01',
+            'field_id' =>  null,
             'type' => 'int',
         ],
         'LAYOUT_LOTE' => [ // Por default fomos orientados a deichar sempre 020
@@ -264,7 +289,7 @@ return [
         ],
         'COMPLEMENTO' => [ // Complemento do endereço da instituição ou empresa em questão
             'length' => 15,
-            'default' => 'Proximo a ao lago da fé',
+            'default' => 'Casa fundos',
             'field_id' => null,
             'type' => 'string',
         ],
@@ -300,7 +325,7 @@ return [
         ],
     ],    
     'DETALHE1' => [
-        'BANCO' => [
+        'BANCO' => [ // Informação 
             'length' => 3,
             'default' => '001',
             'field_id' => null,
@@ -351,31 +376,31 @@ return [
         'BEN_CODIGO_BANCO' => [
             'length' => 3,
             'default' => null,
-            'field_id' => 'field_8',
+            'field_id' => 'field_6',
             'type' => 'int',
         ],
         'BEN_AGENCIA' => [
             'length' => 5,
             'default' => null,
-            'field_id' => 'field_3',
+            'field_id' => 'field_1',
             'type' => 'int',
         ],
         'BEN_AGENCIA_DIGITO' => [
             'length' => 1,
             'default' => null,
-            'field_id' => 'field_3',
+            'field_id' => 'field_1',
             'type' => 'string',
         ],
         'BEN_CONTA' => [
             'length' => 12,
             'default' => null,
-            'field_id' => 'field_7',
+            'field_id' => 'field_5',
             'type' => 'int',
         ],
         'BEN_CONTA_DIGITO' => [
             'length' => 1,
             'default' => null,
-            'field_id' => 'field_7',
+            'field_id' => 'field_5',
             'type' => 'string',
         ],
         'BEN_DIGITO_CONTA_AGENCIA_80' => [
@@ -387,7 +412,7 @@ return [
         'BEN_NOME' => [
             'length' => 30,
             'default' => null,
-            'field_id' => 'field_25',
+            'field_id' => 'field_23',
             'type' => 'string',
         ],
         'BEN_DOC_ATRIB_EMPRESA_82' => [
@@ -415,23 +440,11 @@ return [
             'type' => 'int',
         ],
         'VALOR_INTEIRO' => [
-            'length' => 13,
+            'length' => 15,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
-        ],
-        'VALOR_DECIMAL' => [
-            'length' => 2,
-            'default' => null,
-            'field_id' => null,
-            'type' => 'int',
-        ],
-        'VALOR_DECIMAL' => [
-            'length' => 2,
-            'default' => null,
-            'field_id' => null,
-            'type' => 'int',
-        ],
+        ],        
         'USO_BANCO_88' => [
             'length' => 20,
             'default' => null,
@@ -453,7 +466,7 @@ return [
         'CODIGO_FINALIDADE_TED' => [
             'length' => 5,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'string',
         ],
         'USO_BANCO_92' => [
@@ -468,6 +481,12 @@ return [
             'field_id' => null,
             'type' => 'int',
         ],
+        'TIPO_CONTA' => [
+            'length' => 11,
+            'default' => null,
+            'field_id' => 'field_2',
+            'type' => 'int',
+        ]
         
 
     ],
@@ -523,43 +542,43 @@ return [
         'BEN_ENDERECO_LOGRADOURO' => [
             'length' => 30,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'field_22',
             'type' => 'string',
         ],
         'BEN_ENDERECO_NUMERO' => [
             'length' => 5,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'field_22',
             'type' => 'int',
         ],
         'BEN_ENDERECO_COMPLEMENTO' => [
             'length' => 15,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'field_22',
             'type' => 'string',
         ],        
         'BEN_ENDERECO_BAIRRO' => [
             'length' => 15,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'field_22',
             'type' => 'string',
         ],        
         'BEN_ENDERECO_CIDADE' => [
             'length' => 20,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'field_22',
             'type' => 'string',
         ],
         'BEN_ENDERECO_CEP' => [
             'length' => 8,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'field_22',
             'type' => 'int',
         ],
         'BEN_ENDERECO_ESTADO' => [
             'length' => 2,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'field_22',
             'type' => 'string',
         ],
         'USO_BANCO_114' => [
@@ -699,7 +718,26 @@ return [
             'type' => 'string',
         ]       
     ],
-    "parameters_default" => [
-        "status" => 10,
+    'parameters_default' => [
+        'status' => 10,
+        'typesAccount' => [
+            'corrente' => 'Conta corrente',
+            'poupanca' => 'Conta poupança',
+        ],
+        'savingsDigit' => [
+            '1' => '4',
+            '2' => '5',
+            '3' => '6',
+            '4' => '7',
+            '5' => '8',
+            '6' => '9',
+            '7' => 'X',
+            '8' => '1',
+            '9' => '2',
+            'X' => '3'
+        ],
+        'field_conta' => 'field_5',
+        'field_banco' => 'field_6'
     ],
+    
 ];
