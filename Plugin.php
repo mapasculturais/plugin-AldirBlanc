@@ -57,9 +57,11 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
-            
-            'homolog_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev"]')),
-            'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | ') 
+            'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
+
+            // só consolida a a homologaćão se todos as validaćões já tiverem sido feitas
+            'consolidacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev", "financeiro"]')),
+
         ];
 
         $skipConfig = false;
@@ -164,8 +166,8 @@ class Plugin extends \MapasCulturais\Plugin
                 return;
             }
 
-            // se a consolidação é para inválida pode aplicar
-            if ($result == '2') {
+            // se a consolidação não é para selecionada (statu = 10) pode continuar
+            if ($result != '10') {
                 return;
             } 
 
@@ -177,7 +179,7 @@ class Plugin extends \MapasCulturais\Plugin
              * Se a consolidação requer validações, verifica se existe alguma
              * avaliação dos usuários validadores
              */
-            if ($validacoes = $plugin->config['homolog_requer_validacao']) {
+            if ($validacoes = $plugin->config['consolidacao_requer_validacao']) {
                 foreach($validacoes as $slug) {
                     $can = false;
                     foreach ($evaluations as $eval) {
