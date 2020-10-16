@@ -54,10 +54,10 @@ return [
             'Nome do coletivo',
             'Nome do Espaço Cultural',
         ],
-        'FLAG_CAD_ESTADUAL' => 1,
+        'FLAG_CAD_ESTADUAL' => 0,
         'SISTEMA_CAD_ESTADUAL' => null,
         'IDENTIFICADOR_CAD_ESTADUAL' => null,
-        'FLAG_CAD_MUNICIPAL' => 0,
+        'FLAG_CAD_MUNICIPAL' => 1,
         'SISTEMA_CAD_MUNICIPAL' => null,
         'IDENTIFICADOR_CAD_MUNICIPAL' => null,
         'FLAG_CAD_DISTRITAL' => 0,
@@ -76,24 +76,31 @@ return [
         'SISTEMA_CAD_OUTROS' => null,
         'IDENTIFICADOR_CAD_OUTROS' => null,
         'FLAG_ATUACAO_ARTES_CENICAS' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
         'FLAG_ATUACAO_AUDIOVISUAL' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
         'FLAG_ATUACAO_MUSICA' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
         'FLAG_ATUACAO_ARTES_VISUAIS' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
         'FLAG_ATUACAO_PATRIMONIO_CULTURAL' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
         'FLAG_ATUACAO_MUSEUS_MEMORIA' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
         'FLAG_ATUACAO_HUMANIDADES' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
     ],
@@ -124,21 +131,27 @@ return [
         'SISTEMA_CAD_OUTROS' => null,
         'IDENTIFICADOR_CAD_OUTROS' => null,
         'FLAG_ATUACAO_AUDIOVISUAL' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
         'FLAG_ATUACAO_MUSICA' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
         'FLAG_ATUACAO_ARTES_VISUAIS' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
         'FLAG_ATUACAO_PATRIMONIO_CULTURAL' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
         'FLAG_ATUACAO_MUSEUS_MEMORIA' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
         'FLAG_ATUACAO_HUMANIDADES' => [
+            'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
         ],
     ],
