@@ -158,7 +158,7 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
 
         $this->registerUserMetadata('aldirblanc_validador', [
             'label' => 'É o usuário um validador da Aldir Blanc?',
-            'type' => 'boolean',
+            'type' => 'string',
             'private' => false,
             'default_value' => false
         ]);
