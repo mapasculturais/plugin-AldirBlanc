@@ -55,6 +55,7 @@ $_messages = [
 <section id="lab-status" class="lab-main-content">
 
     <article class="main-content registration" ng-controller="OpportunityController">
+        
         <?php $status = $registration->status; ?>
         <?php if(isset($status)) : ?>
             <div class="status-card status-<?= $registration->status ?>">
@@ -63,6 +64,9 @@ $_messages = [
             </div><!-- /.status-card -->
 
         <?php endif; ?>
+        <div class="wrap-button">
+            <a href="<?php echo $app->createUrl('aldirblanc', 'cadastro'); ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar para os Cadastros"); ?></a>
+        </div><!-- /.wrap-button -->
 
         <h4 class="title-subsection">Edital <span class="underline">Inciso <?= $registration->inciso ?></span></h4>
 
