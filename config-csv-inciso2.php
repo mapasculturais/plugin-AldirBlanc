@@ -109,10 +109,10 @@ return [
             'CNPJ',
             'CNPJ',
         ],
-        'FLAG_CAD_ESTADUAL' => 1,
+        'FLAG_CAD_ESTADUAL' => 0,
         'SISTEMA_CAD_ESTADUAL' => null,
         'IDENTIFICADOR_CAD_ESTADUAL' => null,
-        'FLAG_CAD_MUNICIPAL' => 0,
+        'FLAG_CAD_MUNICIPAL' => 1,
         'SISTEMA_CAD_MUNICIPAL' => null,
         'IDENTIFICADOR_CAD_MUNICIPAL' => null,
         'FLAG_CAD_DISTRITAL' => 0,
@@ -130,6 +130,10 @@ return [
         'FLAG_CAD_OUTROS' => 'Inscrição em cadastro cultural',
         'SISTEMA_CAD_OUTROS' => null,
         'IDENTIFICADOR_CAD_OUTROS' => null,
+        'FLAG_ATUACAO_ARTES_CENICAS' => [
+            'Área de atuação do espaço cultural',
+            'Área(s) culturai(s) de atuação do beneficiário do subsídio'
+        ],
         'FLAG_ATUACAO_AUDIOVISUAL' => [
             'Área de atuação do espaço cultural',
             'Área(s) culturai(s) de atuação do beneficiário do subsídio'
@@ -196,6 +200,7 @@ return [
         ],
         'museu-memoria' => [
             'Museu',
+            'Museu e Memória'
         ],
         'musica' => [
             'Música',
