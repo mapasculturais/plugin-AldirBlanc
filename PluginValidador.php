@@ -96,8 +96,21 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
                 }
             }
 
-            if(!$can_consolidate) {
-                $result = '';
+            // se não pode consolidar, coloca string 'validado por {nome}' ou 'invalidado por {nome}'
+            if (!$can_consolidate) {
+                $nome = $plugin->getName();
+                if($result == '10'){
+                    $string = "validado por {$nome}";
+                } else {
+                    $string = "invalidado por {$nome}";
+                }
+                if (!$this->consolidatedResult) {
+                    $result = $string;
+                } else if (strpos($this->consolidatedResult, $nome) === false) {
+                    $result = "{$this->consolidatedResult}, {$string}";
+                } else {
+                    $result = $this->consolidatedResult;
+                }            
             }
 
         });
