@@ -43,6 +43,10 @@ $_messages = [
     '8' => [
         'title'   => 'Sua solicitação foi validada.',
         'message' => 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.',
+    ],
+    '0' => [
+        'title'   => 'Sua solicitação segue em análise.',
+        'message' => 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail.',
     ]
 ];
 
