@@ -150,7 +150,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CPF' => function ($registrations) use ($fieldsID, $categories){
                 if(in_array($registrations->category, $categories['CPF'])){
                     $field_id = $fieldsID['CPF'];
-                    return str_replace(['.', '-'], '', $registrations->$field_id);
+                    return $this->normalizeString($registrations->$field_id);
                 }else{
                     return 0;
                 }              
@@ -175,7 +175,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         }
                         return $this->normalizeString($result);
                     }else{
-                        return str_replace(['.', '-','/'], '', $registrations->$field_id);
+                        return $this->normalizeString($registrations->$field_id);
                     }
                 }else{
                     return 0;
@@ -222,7 +222,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },             
              'CEP' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['CEP'];
-                return  preg_replace("/[^0-9]/", "",$registrations->$field_id['En_CEP']);
+                return  $this->normalizeString($registrations->$field_id['En_CEP']);
              },
              'ESTADO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['ESTADO'];
@@ -230,7 +230,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },
              'NUM_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['NUM_BANCO'];                
-                return  $this->numberBank($registrations->$field_id);                
+                return  $this->normalizeString($this->numberBank($registrations->$field_id));                
              },
              'TIPO_CONTA_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['TIPO_CONTA_BANCO'];
@@ -238,19 +238,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },
              'AGENCIA_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['AGENCIA_BANCO'];
-                return  preg_replace("/[^0-9]/", "",$registrations->$field_id);
+                return  $this->normalizeString($registrations->$field_id);
              },
              'CONTA_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['CONTA_BANCO'];
-                return  preg_replace("/[^0-9]/", "",$registrations->$field_id);
+                return  $this->normalizeString($registrations->$field_id);
              },            
              'OPERACAO_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['OPERACAO_BANCO'];
-                return  preg_replace("/[^0-9]/", "",$registrations->$field_id);
+                return $this->normalizeString($registrations->$field_id);
              },             
              'VALOR' => $fieldsID['VALOR'],
              'INSCRICAO_ID' => function ($registrations) use ($fieldsID) {
-                return preg_replace("/[^0-9]/", "", $registrations->number);
+                return $this->normalizeString($registrations->number);
 
             },
              'INCISO' => function ($registrations) use ($fieldsID) {
@@ -349,7 +349,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         
         $return = "";
         foreach($bankList as $key => $value){
-            if($key==ucwords(strtolower($bankName))){
+            if(strtolower($key) == strtolower($bankName)){
                 $return = $value;            
             }
         }
@@ -358,7 +358,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         
     }
 
-    private function normalizeString(string $valor) : string
+    private function normalizeString($valor) : string
     {
         $valor = Normalizer::normalize( $valor, Normalizer::FORM_D );
         return preg_replace('/[^A-Za-z0-9 ]/i', '', $valor);
