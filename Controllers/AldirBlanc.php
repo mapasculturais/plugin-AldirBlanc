@@ -145,7 +145,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $project = $app->repo('Project')->find($this->config['project_id']);
         $projectsIds = $project->getChildrenIds();
         $projectsIds[] = $project->id;
-        $opportunitiesByProject = $app->repo('ProjectOpportunity')->findBy(['ownerEntity' => $projectsIds ] );
+        $opportunitiesByProject = $app->repo('ProjectOpportunity')->findBy(['ownerEntity' => $projectsIds, 'status' => 1 ] );
         $inciso1e2Ids = array_values(array_merge([$this->config['inciso1_opportunity_id']], $this->config['inciso2_opportunity_ids']));
         $opportunitiesInciso3 = [];
 
