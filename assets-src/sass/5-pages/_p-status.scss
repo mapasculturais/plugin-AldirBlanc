@@ -74,4 +74,69 @@ body.controller-aldirblanc.action-status {
             text-align: center;
         }
     }
+
+    .registration-fieldset-moderator {
+        @extend .card;
+        text-align: left;
+
+        .each-line {
+            display: block;
+            margin-bottom: 15px;
+            overflow: hidden;
+            width: 100%;
+
+            span {
+                color: #666666;
+                font-size: 1rem;
+
+                &.label {
+                    color: #333;
+                    display: block;
+                    font-weight: bold;
+                    margin-bottom: 5px;
+                    width: 100%;
+                }
+            }
+
+            .description {
+                display: block;
+                color: #333;
+                font-family: "Open Sans";
+                font-size: 11px;
+                line-height: 1.5rem;
+                margin: 0 0 10px;
+                width: 100%;
+            }
+
+            a.attachment-title {
+                color: #666666;
+                font-size: 1rem;
+                font-weight: normal;
+                text-decoration: none;
+                word-wrap: break-word;
+
+                &::before {
+                    color: #666666;
+                    display: inline-block;
+                    font-size: 1rem;
+                    font-family: "Font Awesome 5 Free";
+                    content: "\F1C1";
+                    font-style: normal;
+                    font-weight: normal;
+                    font-variant: normal;
+                    margin-right: 3px;
+                    text-transform: none;
+                    vertical-align: top
+                }
+            }
+
+            &:nth-last-child(1) {
+                margin-bottom: 0;
+            }
+
+        }
+
+    }
+
+    // .registration-fieldset-moderator
 }
