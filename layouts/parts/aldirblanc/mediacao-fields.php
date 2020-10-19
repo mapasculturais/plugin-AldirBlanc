@@ -13,51 +13,53 @@ function __mediacao_file($file)
 }
 ?>
 <div class="registration-fieldset registration-fieldset-moderator" ng-controller="RegistrationFieldsController">
-    <p>
-        <strong>Documentação para a mediação </strong>
-    </p>
 
-    <div style="display: inline-block; width: 49%;">
-        <div id="mediacao-autorizacao">
-            <?php __mediacao_file($entity->getFile('mediacao-autorizacao')) ?>
-        </div>
-        <a class="btn btn-default send js-open-editbox" data-target="#editbox-upload-autorizacao" href="#">Enviar autorização</a>
-
-        <div id="editbox-upload-autorizacao" class="js-editbox mc-left" title="Enviar autorização" data-submit-label="Enviar">
-            <?php $this->ajaxUploader($entity, 'mediacao-autorizacao', 'set-content', '#mediacao-autorizacao', '
-                <div id="file-{{id}}">
-                    <a href="{{url}}" rel="noopener noreferrer">{{name}}</a> 
-                    <div class="botoes">
-                        <a data-href="{{deleteUrl}}" data-target="#file-{{id}}" data-configm-message="Remover este arquivo?" class="icon icon-close hltip js-remove-item" data-hltip-classes="hltip-ajuda" title="Excluir arquivo" rel="noopener noreferrer"></a>
-                    </div>
-                </div>', '', true, false, false) ?>
-        </div>
+    <div class="each-line">
+        <span class="label">Documentação para a mediação</span>
     </div>
 
-    <div style="display: inline-block; width: 49%;">
-        <div id="mediacao-documento">
-            <?php __mediacao_file($entity->getFile('mediacao-documento')) ?>
-        </div>
-        <a class="btn btn-default send js-open-editbox" data-target="#editbox-upload-document" href="#">Enviar foto do RG</a>
+    <div class="each-line">
+        <div class="buttons">
+            <a class="btn btn-default send js-open-editbox" data-target="#editbox-upload-autorizacao" href="#">Enviar autorização</a>
+            <div id="mediacao-autorizacao">
+                <?php __mediacao_file($entity->getFile('mediacao-autorizacao')) ?>
+            </div>
 
-        <div id="editbox-upload-document" class="js-editbox mc-left" title="Enviar documento" data-submit-label="Enviar">
-            <?php $this->ajaxUploader($entity, 'mediacao-documento', 'set-content', '#mediacao-documento', '
-                <div id="file-{{id}}">
-                    <a href="{{url}}" rel="noopener noreferrer">{{name}}</a> 
-                    <div class="botoes">
-                        <a data-href="{{deleteUrl}}" data-target="#file-{{id}}" data-configm-message="Remover este arquivo?" class="icon icon-close hltip js-remove-item" data-hltip-classes="hltip-ajuda" title="Excluir arquivo" rel="noopener noreferrer"></a>
-                    </div>
-                </div>', '', true, false, false) ?>
+            <div id="editbox-upload-autorizacao" class="js-editbox mc-left" title="Enviar autorização" data-submit-label="Enviar">
+                <?php $this->ajaxUploader($entity, 'mediacao-autorizacao', 'set-content', '#mediacao-autorizacao', '
+                    <div id="file-{{id}}">
+                        <a href="{{url}}" rel="noopener noreferrer">{{name}}</a> 
+                        <div class="botoes">
+                            <a data-href="{{deleteUrl}}" data-target="#file-{{id}}" data-configm-message="Remover este arquivo?" class="icon icon-close hltip js-remove-item" data-hltip-classes="hltip-ajuda" title="Excluir arquivo" rel="noopener noreferrer"></a>
+                        </div>
+                    </div>', '', true, false, false) ?>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <a class="btn btn-default send js-open-editbox" data-target="#editbox-upload-document" href="#">Enviar foto do RG</a>
+            <div id="mediacao-documento">
+                <?php __mediacao_file($entity->getFile('mediacao-documento')) ?>
+            </div>
+
+            <div id="editbox-upload-document" class="js-editbox mc-left" title="Enviar documento" data-submit-label="Enviar">
+                <?php $this->ajaxUploader($entity, 'mediacao-documento', 'set-content', '#mediacao-documento', '
+                    <div id="file-{{id}}">
+                        <a href="{{url}}" rel="noopener noreferrer">{{name}}</a> 
+                        <div class="botoes">
+                            <a data-href="{{deleteUrl}}" data-target="#file-{{id}}" data-configm-message="Remover este arquivo?" class="icon icon-close hltip js-remove-item" data-hltip-classes="hltip-ajuda" title="Excluir arquivo" rel="noopener noreferrer"></a>
+                        </div>
+                    </div>', '', true, false, false) ?>
+            </div>
         </div>
     </div>
-
 
     {{::(entity.mediacao_contato_tipo = "<?= $entity->mediacao_contato_tipo ?>") ? '' : null}}
     {{::(entity.mediacao_contato = "<?= $entity->mediacao_contato ?>") ? '' : null}}
     {{::(entity.mediacao_senha = "<?= $entity->mediacao_senha ?>") ? '' : null}}
 
-    <p class="mt-30">
-        <strong>O contato será por</strong><br>
+    <div class="each-line">
+        <span class="label">O contato será por</span>
         <label class="mr-10">
             <input type=radio ng-model="entity.mediacao_contato_tipo" ng-change="saveField({fieldName: 'mediacao_contato_tipo'}, entity.mediacao_contato_tipo)" value="telefone-fixo" />
             Telefone fixo
@@ -70,19 +72,21 @@ function __mediacao_file($file)
             <input type=radio ng-model="entity.mediacao_contato_tipo" ng-change="saveField({fieldName: 'mediacao_contato_tipo'}, entity.mediacao_contato_tipo)" value="SMS" />
             SMS
         </label>
-    </p>
+    </div>
 
-    <p class="mt-30">
-        <div class="field-phone">
-            <label>Número de telefone</label>
-            <input ng-model="entity.mediacao_contato" ng-blur="saveField({fieldName: 'mediacao_contato'}, entity.mediacao_contato)" js-mask="(99) 999999999" placeholder="(__) _________" />
-        </div>
+    <div class="each-line">
+        <span class="label">Número de telefone</span>
+        <label>
+            <input class="input-text" ng-model="entity.mediacao_contato" ng-blur="saveField({fieldName: 'mediacao_contato'}, entity.mediacao_contato)" js-mask="(99) 999999999" placeholder="(__) _________" />
+        </label>
+    </div>
 
-        <div class="field-password">
-            <label>Senha</label>
-            <input ng-model="entity.mediacao_senha" ng-blur="saveField({fieldName: 'mediacao_senha'}, entity.mediacao_senha)" />
-            <span class="descriptio">Essa senha será utilizada pelo inscrito, junto com o CPF, para acompanhar a sua inscrição.</span>
-        </div>
-    </p>
+    <div class="each-line">
+        <span class="label">Senha</span>
+        <span class="description">Essa senha será utilizada pelo inscrito, junto com o CPF, para acompanhar a sua inscrição.</span>
+        <label>
+            <input class="input-text" ng-model="entity.mediacao_senha" ng-blur="saveField({fieldName: 'mediacao_senha'}, entity.mediacao_senha)" />
+        </label>
+    </div>
 
 </div>
