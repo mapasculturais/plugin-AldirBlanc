@@ -133,16 +133,22 @@ article.registration {
                 overflow: hidden;
                 width: 100%;
 
-                .label {
-                    display: block;
-                    font-weight: bold;
-                    margin-bottom: 5px;
-                    width: 100%;
+                span {
+                    color: #666666;
+                    font-size: 1rem;
+
+                    &.label {
+                        color: #333;
+                        display: block;
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                        width: 100%;
+                    }
                 }
 
                 .description {
                     display: block;
-                    color: #111111;
+                    color: #333;
                     font-family: "Open Sans";
                     font-size: 11px;
                     line-height: 1.5rem;
