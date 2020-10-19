@@ -75,6 +75,10 @@ $_messages = [
         <?php $this->part('aldirblanc/registration-single--header', $_params) ?>
         <?php $this->part('singles/registration-single--fields', $_params) ?>
 
+        <?php if ($app->user->is('mediador') || $app->user->is('admin')) {
+            $this->part('aldirblanc/registration-mediacao', $_params);
+        } ?>
+
         <div class="wrap-button">
             <a href="<?php echo $app->createUrl('aldirblanc', 'cadastro'); ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar para os Cadastros"); ?></a>
         </div><!-- /.wrap-button -->
