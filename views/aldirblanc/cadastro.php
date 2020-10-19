@@ -138,7 +138,7 @@ if (count($cidades) === 0) {
                     <span class="more"> Mais informações </span>
                     <span class="content">
                         <i>
-                            Donec facilisis tortor ut augue lacinia, at viverra est semper. Sed sapien metus, scelerisque nec pharetra id, tempor a tortor. Pellentesque non dignissim neque. Ut porta viverra est, ut dignissim elit elementum ut. Nunc vel rhoncus nibh, ut tincidunt turpis. Integer ac enim pellent.
+                            Clique e conheça os editais abertos.
                         </i>
                     </span>
                 </div>
