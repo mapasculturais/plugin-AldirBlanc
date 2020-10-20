@@ -370,13 +370,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
-<<<<<<< HEAD
         
-=======
-        $app->registerController('dataprev', 'AldirBlanc\Controllers\DataPrev');
-        $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
-
->>>>>>> develop
         // registra o role para mediadores
         $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function($user){ return $user->is('admin'); });
         $app->registerRole($role_definition);
