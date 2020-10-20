@@ -8,8 +8,6 @@ use MapasCulturais\i;
 
 // @todo refatorar autoloader de plugins para resolver classes em pastas
 require_once 'Controllers/AldirBlanc.php';
-require_once 'Controllers/DataPrev.php';
-require_once 'Controllers/Remessas.php';
 require_once 'vendor/autoload.php';
 
 class Plugin extends \MapasCulturais\Plugin
@@ -59,8 +57,8 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
-            'csv_inciso1' => require_once env('AB_CSV_INCISO1', __DIR__ . '/config-csv-inciso1.php'),
-            'csv_inciso2' => require_once env('AB_CSV_INCISO2', __DIR__ . '/config-csv-inciso2.php'),
+            
+            'homolog_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev"]')),
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO1', __DIR__ . '/config-csv-generic-inciso2.php'),
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | ') 
         ];
@@ -141,6 +139,65 @@ class Plugin extends \MapasCulturais\Plugin
         
         $plugin = $this;
 
+        /**
+         * só consolida as avaliações para "selecionado" se tiver acontecido as validações (dataprev, etc)
+         * 
+         * @TODO: implementar para método de avaliaçào documental
+         */
+        $app->hook('entity(Registration).consolidateResult', function(&$result, $caller) use($plugin, $app) {
+            // eval(\psy\sh());
+            // só aplica o hook para as oportunidades do inciso I e II
+            $ids = [];
+            if ($plugin->config['inciso2_enabled']) {
+                $ids = $plugin->config['inciso2_opportunity_ids'];
+            }
+            
+            if ($plugin->config['inciso1_enabled']) {
+                $ids[] = $plugin->config['inciso1_opportunity_id'];
+            }
+
+            if (!in_array($this->opportunity->id, $ids)) {
+                return;
+            }
+
+            // só aplica o hook para usuários homologadores
+            if ($caller->user->aldirblanc_validador) {
+                return;
+            }
+
+            // se a consolidação é para inválida pode aplicar
+            if ($result == '2') {
+                return;
+            } 
+
+            $can_consolidate = true;
+
+            $evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $this, 'status' => 1]);
+
+            /**
+             * Se a consolidação requer validações, verifica se existe alguma
+             * avaliação dos usuários validadores
+             */
+            if ($validacoes = $plugin->config['homolog_requer_validacao']) {
+                foreach($validacoes as $slug) {
+                    $can = false;
+                    foreach ($evaluations as $eval) {
+                        if ($eval->user->aldirblanc_validador == $slug) {
+                            $can = true;
+                        }
+                    }
+
+                    if (!$can) {
+                        $can_consolidate = false;
+                    }
+                }
+            }
+
+            if (!$can_consolidate) {
+                $result = '';
+            }
+        });
+
         $app->hook('template(panel.opportunities.panel-header):end', function () use($app){
             if(!$app->user->is('admin')) {
                 return;
@@ -148,38 +205,6 @@ class Plugin extends \MapasCulturais\Plugin
             $this->part('aldirblanc/generate-opportunities-button');
         });
         
-        //botao de export csv
-        $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
-            $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
-            $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
-            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids);
-            $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
-            $opportunity = $requestedOpportunity->id;
-            if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
-                $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
-                $selected = false;
-                if (in_array($requestedOpportunity->id, $inciso1Ids)){
-                    $inciso = 1;
-                }
-                else if (in_array($requestedOpportunity->id, $inciso2Ids)){
-                    $inciso = 2;
-
-                    //Busca as inscrições selecionadas (ststus 10)
-                    $registrationSelected = $app->repo("Registration")->findBy([
-                        'opportunity' => $requestedOpportunity->id,
-                        'status' => 10
-                    ]);
-                    
-                    //Flag que define se o botão do exportador genérico deve aparecer ou não                   
-                    if($registrationSelected){
-                        $selected = true;
-                    }
-                    
-                }
-                $this->part('aldirblanc/csv-button', ['inciso' => $inciso, 'opportunity' =>$opportunity, 'qtdSelected' => $selected]);
-            }
-         });
-
         // add hooks
         $app->hook('mapasculturais.styles', function () use ($app) {
             $app->view->printStyles('aldirblanc');
@@ -303,6 +328,9 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
             $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
             $requestedOpportunity = $this->requestedEntity;
+            if (!$requestedOpportunity) {
+                return;
+            }
             $can_view = $requestedOpportunity->canUser('@control') || 
                         $requestedOpportunity->canUser('viewEvaluations') || 
                         $requestedOpportunity->canUser('evaluateRegistrations');
@@ -316,6 +344,9 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
             $registration = $this->requestedEntity;
             $requestedOpportunity = $registration->opportunity;
+            if (!$requestedOpportunity) {
+                return;
+            }
             $can_view = $requestedOpportunity->canUser('@control') || 
                         $requestedOpportunity->canUser('viewEvaluations') || 
                         $requestedOpportunity->canUser('evaluateRegistrations');
@@ -339,9 +370,13 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
+<<<<<<< HEAD
+        
+=======
         $app->registerController('dataprev', 'AldirBlanc\Controllers\DataPrev');
         $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
 
+>>>>>>> develop
         // registra o role para mediadores
         $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function($user){ return $user->is('admin'); });
         $app->registerRole($role_definition);
