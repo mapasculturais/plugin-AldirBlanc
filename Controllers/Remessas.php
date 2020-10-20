@@ -160,14 +160,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $field_id = $fieldsID['NOME_SOCIAL'];
                     return  $this->normalizeString($registrations->$field_id);
                 }else{
-                    return "";
+                    return 0;
                 }
              },
              'CNPJ' => function ($registrations) use ($fieldsID, $categories){
                 if(in_array($registrations->category, $categories['CNPJ'])){ 
                     $field_id = $fieldsID['CNPJ'];   
                     if(is_array($field_id)){
-                        $result = "";
+                        $result = 0;
                         foreach($field_id as $key => $value){
                             if($registrations->$value){
                                 $result = str_replace(['.', '-','/'], '', $registrations->$value);
@@ -185,7 +185,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 if(in_array($registrations->category, $categories['CNPJ'])){ 
                     $field_id = $fieldsID['RAZAO_SOCIAL'];
                     if(is_array($field_id)){
-                        $result = "";
+                        $result = 0;
                         foreach($field_id as $key => $value){
                             if($registrations->$value){
                                 $result = $registrations->$value;
@@ -197,7 +197,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }
                 }
                 else{
-                    return ""; 
+                    return 0; 
                 }
               },
              'LOGRADOURO' => function ($registrations) use ($fieldsID){
@@ -206,7 +206,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },
              'NUMERO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['NUMERO'];
-                return  preg_replace("/[^0-9]/", "",$registrations->$field_id['En_Num']);
+                return $this->normalizeString($registrations->$field_id['En_Num']);
              },
              'COMPLEMENTO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['COMPLEMENTO'];
@@ -227,6 +227,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              'ESTADO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['ESTADO'];
                 return  $this->normalizeString($registrations->$field_id['En_Estado']);
+             },
+             'TELEFONE' => function ($registrations) use ($fieldsID){
+                $field_id = $fieldsID['TELEFONE'];
+                foreach($field_id as $valor){
+                    if($registrations->$valor){
+                        $result = $this->normalizeString($registrations->$valor);
+                        break;
+                    }
+                }                
+                return  $this->normalizeString(preg_replace('/[^0-9]/i', '',$result));
              },
              'NUM_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['NUM_BANCO'];                
@@ -347,7 +357,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'Banco Pan' => '623'
         ];
         
-        $return = "";
+        $return = 0;
         foreach($bankList as $key => $value){
             if(strtolower($key) == strtolower($bankName)){
                 $return = $value;            
