@@ -235,13 +235,13 @@ return [
         ],
         'INSCRICAO_TIPO' => [
             'length' => 1,
-            'default' => '25256',
+            'default' => '2',
             'field_id' => null,
             'type' => 'int',
         ],
         'INSCRICAO_NUMERO' => [
             'length' => 14,
-            'default' => '25256',
+            'default' => '92.418.062/0001-36',
             'field_id' => null,
             'type' => 'int',
         ],        

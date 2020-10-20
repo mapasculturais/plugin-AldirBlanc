@@ -233,15 +233,15 @@ return [
             'field_id' => null,
             'type' => 'string',
         ],
-        'INSCRICAO_TIPO' => [
+        'INSCRICAO_TIPO' => [ // CPF ou CNPJ da entidade pagadora (1 = CPF ou 2 = CNPJ) deve ser perguntado ao banco 
             'length' => 1,
-            'default' => '25256',
+            'default' => '2',
             'field_id' => null,
             'type' => 'int',
         ],
-        'INSCRICAO_NUMERO' => [
+        'INSCRICAO_NUMERO' => [ //CPF ou CNPJ da fonte pagadora, colocar com base no que foi informado no campo INSCRICAO_TIPO
             'length' => 14,
-            'default' => '25256',
+            'default' => '92.418.062/0001-36',
             'field_id' => null,
             'type' => 'int',
         ],        

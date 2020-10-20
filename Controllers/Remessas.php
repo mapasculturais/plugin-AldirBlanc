@@ -1096,7 +1096,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $registrations = $query->getResult();
 
         }
-
+        
         if (empty($registrations)) {
             echo "Não foram encontrados registros.";
             die();
@@ -1273,7 +1273,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'TIPO_MOEDA' => '',
             'USO_BANCO_85' => '',
             'VALOR_INTEIRO' => function ($registrations) use ($detahe1) {
-                $valor = '100,50';
+                $valor = '100,98';
                 $valor = preg_replace('/[^0-9]/i', '', $valor);
 
                 return $valor;
@@ -1578,6 +1578,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         ];
 
         $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement);
+
+        // header('Content-type: text/utf-8');
+        // echo $txt_data;
+        // exit();
 
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
