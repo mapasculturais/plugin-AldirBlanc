@@ -330,6 +330,33 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
         $app = App::i();
 
+        $getData = false;
+        if (!empty($this->data)) {
+
+            if (isset($this->data['from']) && isset($this->data['to'])) {
+
+                if (!empty($this->data['from']) && !empty($this->data['to'])) {
+                    if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
+                        !preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['to'])) {
+
+                        throw new \Exception("O formato da data é inválido.");
+
+                    } else {
+                        //Data ínicial
+                        $startDate = new DateTime($this->data['from']);
+                        $startDate = $startDate->format('Y-m-d 00:00');
+
+                        //Data final
+                        $finishDate = new DateTime($this->data['to']);
+                        $finishDate = $finishDate->format('Y-m-d 23:59');
+                    }
+
+                    $getData = true;
+                }
+
+            }
+        }
+
         //Pega a oportunidade no array de config
         $opportunity_id = $this->config['inciso1_opportunity_id'];
 
@@ -360,15 +387,37 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         /**
          * Busca as inscrições com status 10 (Selecionada)
          */
-        $dql = "SELECT e FROM MapasCulturais\Entities\Registration e WHERE e.status = :status AND e.opportunity = :opportunity_Id";
+         if ($getData) {
+            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
+            WHERE e.status = :status AND
+            e.opportunity = :opportunity_Id AND
+            e.sentTimestamp >=:startDate AND
+            e.sentTimestamp <= :finishDate";
 
-        $query = $app->em->createQuery($dql);
-        $query->setParameters([
-            'opportunity_Id' => $opportunity_id,
-            'status' => $status,
-        ]);
+            $query = $app->em->createQuery($dql);
+            $query->setParameters([
+                'opportunity_Id' => $opportunity_id,
+                'status' => $status,
+                'startDate' => $startDate,
+                'finishDate' => $finishDate,
+            ]);
 
-        $registrations = $query->getResult();
+            $registrations = $query->getResult();
+
+        } else {
+            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
+            WHERE e.status = :status AND
+            e.opportunity = :opportunity_Id";
+
+            $query = $app->em->createQuery($dql);
+            $query->setParameters([
+                'opportunity_Id' => $opportunity_id,
+                'status' => $status,
+            ]);
+
+            $registrations = $query->getResult();
+
+        }
 
         if (empty($registrations)) {
             echo "Não foram encontrados registros.";
@@ -382,7 +431,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'USO_BANCO_12' => '',
             'INSCRICAO_TIPO' => '',
             'CPF_CNPJ_FONTE_PAG' => '',
-            'CONVENIO' => '',
+            'CONVENIO_BB1' => '',
+            'CONVENIO_BB2' => '',
+            'CONVENIO_BB3' => '',
+            'CONVENIO_BB4' => '',
             'AGENCIA' => '',
             'AGENCIA_DIGITO' => '',
             'CONTA' => '',
@@ -418,7 +470,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'USO_BANCO_43' => '',
             'INSCRICAO_TIPO' => '',
             'INSCRICAO_NUMERO' => '',
-            'CONVENIO' => '',
+            'CONVENIO_BB1' => '',
+            'CONVENIO_BB2' => '',
+            'CONVENIO_BB3' => '',
+            'CONVENIO_BB4' => '',
             'AGENCIA' => '',
             'AGENCIA_DIGITO' => '',
             'CONTA' => '',
@@ -667,12 +722,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          *
          */
         $txt_data = "";
-
+        $numLote = 0;
         $totaLotes = 0;
         $totalRegistros = 0;
 
         $complement = [];
         $txt_data = $this->mountTxt($header1, $mappedHeader1, $txt_data, null, null);
+        $totalRegistros += 1;
 
         $txt_data .= "\r\n";
 
@@ -683,15 +739,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if ($recordsBBCorrente) {
             // Header 2
             $complement = [];
-
+            $numLote++;
             $complement = [
                 'FORMA_LANCAMENTO' => 01,
+                'LOTE' => $numLote,
             ];
 
             $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
             $txt_data .= "\r\n";
 
-            $lotBBCorrente = 1;
+            $lotBBCorrente += 1;
 
             $_SESSION['valor'] = 0;
 
@@ -700,29 +757,32 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //Detalhes 1 e 2
 
             foreach ($recordsBBCorrente as $key_records => $records) {
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, null);
+                $complement = [
+                    'LOTE' => $numLote,
+                ];
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, null);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
                 $txt_data .= "\r\n";
 
                 $lotBBCorrente += 2;
 
             }
 
-            $totalRegistros += $lotBBCorrente;
-
             //treiller 1
+            $lotBBCorrente + 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
             $valor = explode(".", $_SESSION['valor']);
             $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
             $complement = [
-                'QUANTIDADE_REGISTROS_127' => ($lotBBCorrente + 1),
+                'QUANTIDADE_REGISTROS_127' => $lotBBCorrente,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
+
             ];
 
             $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
             $txt_data .= "\r\n";
-
+            $totalRegistros += $lotBBCorrente;
         }
 
         /**
@@ -732,14 +792,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if ($recordsBBPoupanca) {
             // Header 2
             $complement = [];
-
+            $numLote++;
             $complement = [
                 'FORMA_LANCAMENTO' => 5,
+                'LOTE' => $numLote,
             ];
             $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
             $txt_data .= "\r\n";
 
-            $lotBBPoupanca = 1;
+            $lotBBPoupanca += 1;
 
             $_SESSION['valor'] = 0;
 
@@ -748,28 +809,34 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //Detalhes 1 e 2
 
             foreach ($recordsBBPoupanca as $key_records => $records) {
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, null);
+                $complement = [
+                    'LOTE' => $numLote,
+                ];
+
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, null);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
                 $txt_data .= "\r\n";
 
                 $lotBBPoupanca += 2;
 
             }
 
-            $totalRegistros += $lotBBPoupanca;
-
             //treiller 1
+            $lotBBPoupanca += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
             $valor = explode(".", $_SESSION['valor']);
             $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
             $complement = [
-                'QUANTIDADE_REGISTROS_127' => ($lotBBPoupanca + 1),
+                'QUANTIDADE_REGISTROS_127' => $lotBBPoupanca,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
+                'LOTE' => $numLote,
             ];
 
             $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
             $txt_data .= "\r\n";
+
+            $totalRegistros += $lotBBPoupanca;
         }
 
         /**
@@ -779,16 +846,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if ($recordsOthers) {
             //Header 2
             $complement = [];
-
+            $numLote++;
             $complement = [
                 'FORMA_LANCAMENTO' => 03,
+                'LOTE' => $numLote,
             ];
 
             $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
 
             $txt_data .= "\r\n";
 
-            $lotOthers = 1;
+            $lotOthers += 1;
 
             $_SESSION['valor'] = 0;
 
@@ -797,34 +865,40 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //Detalhes 1 e 2
 
             foreach ($recordsOthers as $key_records => $records) {
-
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, null);
+                $complement = [
+                    'LOTE' => $numLote,
+                ];
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
 
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, null);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
                 $txt_data .= "\r\n";
                 $lotOthers += 2;
 
             }
 
-            $totalRegistros += $lotOthers;
-
             //treiller 1
+            $lotOthers += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
+            $valor = explode(".", $_SESSION['valor']);
+            $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
             $complement = [
-                'QUANTIDADE_REGISTROS_127' => ($lotOthers + 1),
+                'QUANTIDADE_REGISTROS_127' => $lotOthers,
+                'VALOR_TOTAL_DOC_INTEIRO' => $valor,
+                'LOTE' => $numLote,
             ];
             $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
             $txt_data .= "\r\n";
-
+            $totalRegistros += $lotOthers;
         }
 
         //treiller do arquivo
-        $totalRegistros += $lotOthers;
+        $totalRegistros += 1; // Adiciona 1 para obedecer a regra de somar o treiller
         $complement = [
             'QUANTIDADE_LOTES-ARQUIVO' => $totaLotes,
-            'QUANTIDADE_REGISTROS_ARQUIVOS' => $totalRegistros + 1,
+            'QUANTIDADE_REGISTROS_ARQUIVOS' => $totalRegistros,
         ];
+
         $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement);
 
         // header('Content-type: text/utf-8');
@@ -834,11 +908,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
          */
-        $file_name = 'inciso1-cnab240-' . md5(json_encode($txt_data)) . '.txt';
-        
+        $file_name = 'inciso1-cnab240-' . md5(json_encode($txt_data)) . '.txt';        
 
-        //$dir = PRIVATE_FILES_PATH . 'aldirblanc/inciso1/remessas/cnab240/';
-        $dir = __DIR__ . '/../txt/';
+        $dir = PRIVATE_FILES_PATH . 'aldirblanc/inciso1/remessas/cnab240/';   
 
         $patch = $dir . $file_name;
 
@@ -852,6 +924,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         fclose($stream);
 
+        header('Content-Type: application/csv');
+        header('Content-Disposition: attachment; filename=' . $file_name);
+        header('Pragma: no-cache');
+        readfile($patch);
+
     }
 
     /**
@@ -859,7 +936,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      *
      *
      */
-    public function ALL_exportCnab240Insico2()
+    public function ALL_exportCnab240Inciso2()
     {
         /**
          * Verifica se o usuário está autenticado
@@ -867,14 +944,62 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
         $app = App::i();
 
-        //Pega a oportunidade no array de config
-        $opportunity_id = $this->config['inciso1_opportunity_id'];
+        $getData = false;
+        if (!empty($this->data)) {
+
+            if (isset($this->data['from']) && isset($this->data['to'])) {
+
+                if (!empty($this->data['from']) && !empty($this->data['to'])) {
+                    if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
+                        !preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['to'])) {
+
+                        throw new \Exception("O formato da data é inválido.");
+
+                    } else {
+                        //Data ínicial
+                        $startDate = new DateTime($this->data['from']);
+                        $startDate = $startDate->format('Y-m-d 00:00');
+
+                        //Data final
+                        $finishDate = new DateTime($this->data['to']);
+                        $finishDate = $finishDate->format('Y-m-d 23:59');
+                    }
+
+                    $getData = true;
+                }
+
+            }
+
+            //Pega a oportunidade do endpoint
+            if (!isset($this->data['opportunity']) || empty($this->data['opportunity'])) {
+                throw new Exception("Informe a oportunidade! Ex.: opportunity:2");
+
+            } elseif (!is_numeric($this->data['opportunity']) || !in_array($this->data['opportunity'], $this->config['inciso2_opportunity_ids'])) {
+                throw new Exception("Oportunidade inválida");
+
+            } else {
+                $opportunity_id = $this->data['opportunity'];
+            }
+
+        } else {
+            throw new Exception("Informe a oportunidade! Ex.: opportunity:2");
+
+        }
 
         /**
          * Pega informações da oportunidade
          */
         $opportunity = $app->repo('Opportunity')->find($opportunity_id);
         $this->registerRegistrationMetadata($opportunity);
+
+         /**
+         * Mapeamento de fielsds_id pelo label do campo
+         */
+        foreach ($opportunity->registrationFieldConfigurations as $field) {
+            $field_labelMap["field_" . $field->id] = trim($field->title);
+
+        }
+
 
         if (!$opportunity->canUser('@control')) {
             echo "Não autorizado";
@@ -884,7 +1009,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         /**
          * Pega os dados das configurações
          */
-        $txt_config = $this->config['config-cnab240-inciso1'];
+        $txt_config = $this->config['config-cnab240-inciso2'];
         $default = $txt_config['parameters_default'];
         $status = $default['status'];
         $header1 = $txt_config['HEADER1'];
@@ -894,18 +1019,83 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $trailer1 = $txt_config['TRAILER1'];
         $trailer2 = $txt_config['TRAILER2'];
 
+        foreach($header1 as $key_config => $value){ 
+            if(is_string($value['field_id']) && strlen($value['field_id'])>0 && $value['field_id'] != 'mapped'){
+                $field_id = array_search(trim($value['field_id']), $field_labelMap);
+                $header1[$key_config]['field_id'] = $field_id;                
+            }
+        }
+
+        foreach($header2 as $key_config => $value){ 
+            if(is_string($value['field_id']) && strlen($value['field_id'])>0 && $value['field_id'] != 'mapped'){
+                $field_id = array_search(trim($value['field_id']), $field_labelMap);
+                $header2[$key_config]['field_id'] = $field_id;                
+            }
+        }
+
+        foreach($detahe1 as $key_config => $value){ 
+            if(is_string($value['field_id']) && strlen($value['field_id'])>0 && $value['field_id'] != 'mapped'){
+                $field_id = array_search(trim($value['field_id']), $field_labelMap);
+                $detahe1[$key_config]['field_id'] = $field_id;                
+            }
+        }
+
+        foreach($detahe2 as $key_config => $value){ 
+            if(is_string($value['field_id']) && strlen($value['field_id'])>0 && $value['field_id'] != 'mapped'){
+                $field_id = array_search(trim($value['field_id']), $field_labelMap);
+                $detahe2[$key_config]['field_id'] = $field_id;                
+            }
+        }
+
+        foreach($trailer1 as $key_config => $value){ 
+            if(is_string($value['field_id']) && strlen($value['field_id'])>0 && $value['field_id'] != 'mapped'){
+                $field_id = array_search(trim($value['field_id']), $field_labelMap);
+                $trailer1[$key_config]['field_id'] = $field_id;                
+            }
+        }
+
+        foreach($trailer2 as $key_config => $value){ 
+            if(is_string($value['field_id']) && strlen($value['field_id'])>0 && $value['field_id'] != 'mapped'){
+                $field_id = array_search(trim($value['field_id']), $field_labelMap);
+                $trailer2[$key_config]['field_id'] = $field_id;                
+            }
+        }        
+        
+
         /**
          * Busca as inscrições com status 10 (Selecionada)
          */
-        $dql = "SELECT e FROM MapasCulturais\Entities\Registration e WHERE e.status = :status AND e.opportunity = :opportunity_Id";
+        if ($getData) {
+            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
+            WHERE e.status = :status AND
+            e.opportunity = :opportunity_Id AND
+            e.sentTimestamp >=:startDate AND
+            e.sentTimestamp <= :finishDate";
 
-        $query = $app->em->createQuery($dql);
-        $query->setParameters([
-            'opportunity_Id' => $opportunity_id,
-            'status' => $status,
-        ]);
+            $query = $app->em->createQuery($dql);
+            $query->setParameters([
+                'opportunity_Id' => $opportunity_id,
+                'status' => $status,
+                'startDate' => $startDate,
+                'finishDate' => $finishDate,
+            ]);
 
-        $registrations = $query->getResult();
+            $registrations = $query->getResult();
+
+        } else {
+            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
+            WHERE e.status = :status AND
+            e.opportunity = :opportunity_Id";
+
+            $query = $app->em->createQuery($dql);
+            $query->setParameters([
+                'opportunity_Id' => $opportunity_id,
+                'status' => $status,
+            ]);
+
+            $registrations = $query->getResult();
+
+        }
 
         if (empty($registrations)) {
             echo "Não foram encontrados registros.";
@@ -919,7 +1109,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'USO_BANCO_12' => '',
             'INSCRICAO_TIPO' => '',
             'CPF_CNPJ_FONTE_PAG' => '',
-            'CONVENIO' => '',
+            'CONVENIO_BB1' => '',
+            'CONVENIO_BB2' => '',
+            'CONVENIO_BB3' => '',
+            'CONVENIO_BB4' => '',
             'AGENCIA' => '',
             'AGENCIA_DIGITO' => '',
             'CONTA' => '',
@@ -955,7 +1148,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'USO_BANCO_43' => '',
             'INSCRICAO_TIPO' => '',
             'INSCRICAO_NUMERO' => '',
-            'CONVENIO' => '',
+            'CONVENIO_BB1' => '',
+            'CONVENIO_BB2' => '',
+            'CONVENIO_BB3' => '',
+            'CONVENIO_BB4' => '',
             'AGENCIA' => '',
             'AGENCIA_DIGITO' => '',
             'CONTA' => '',
@@ -1182,8 +1378,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $recordsBBPoupanca = [];
         $recordsBBCorrente = [];
         $recordsOthers = [];
-        $field_conta = $default['field_conta'];
-        $field_banco = $default['field_banco'];
+        $field_conta = array_search(trim($default['field_conta']), $field_labelMap);
+        $field_banco = array_search(trim($default['field_banco']), $field_labelMap);
         foreach ($registrations as $value) {
             if ($this->numberBank($value->$field_banco) == "001") {
 
@@ -1204,12 +1400,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          *
          */
         $txt_data = "";
-
+        $numLote = 0;
         $totaLotes = 0;
         $totalRegistros = 0;
 
         $complement = [];
         $txt_data = $this->mountTxt($header1, $mappedHeader1, $txt_data, null, null);
+        $totalRegistros += 1;
 
         $txt_data .= "\r\n";
 
@@ -1220,15 +1417,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if ($recordsBBCorrente) {
             // Header 2
             $complement = [];
-
+            $numLote++;
             $complement = [
                 'FORMA_LANCAMENTO' => 01,
+                'LOTE' => $numLote,
             ];
 
             $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
             $txt_data .= "\r\n";
 
-            $lotBBCorrente = 1;
+            $lotBBCorrente += 1;
 
             $_SESSION['valor'] = 0;
 
@@ -1237,29 +1435,32 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //Detalhes 1 e 2
 
             foreach ($recordsBBCorrente as $key_records => $records) {
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, null);
+                $complement = [
+                    'LOTE' => $numLote,
+                ];
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, null);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
                 $txt_data .= "\r\n";
 
                 $lotBBCorrente += 2;
 
             }
 
-            $totalRegistros += $lotBBCorrente;
-
             //treiller 1
+            $lotBBCorrente + 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
             $valor = explode(".", $_SESSION['valor']);
             $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
             $complement = [
-                'QUANTIDADE_REGISTROS_127' => ($lotBBCorrente + 1),
+                'QUANTIDADE_REGISTROS_127' => $lotBBCorrente,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
+
             ];
 
             $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
             $txt_data .= "\r\n";
-
+            $totalRegistros += $lotBBCorrente;
         }
 
         /**
@@ -1269,14 +1470,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if ($recordsBBPoupanca) {
             // Header 2
             $complement = [];
-
+            $numLote++;
             $complement = [
                 'FORMA_LANCAMENTO' => 5,
+                'LOTE' => $numLote,
             ];
             $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
             $txt_data .= "\r\n";
 
-            $lotBBPoupanca = 1;
+            $lotBBPoupanca += 1;
 
             $_SESSION['valor'] = 0;
 
@@ -1285,28 +1487,34 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //Detalhes 1 e 2
 
             foreach ($recordsBBPoupanca as $key_records => $records) {
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, null);
+                $complement = [
+                    'LOTE' => $numLote,
+                ];
+
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, null);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
                 $txt_data .= "\r\n";
 
                 $lotBBPoupanca += 2;
 
             }
 
-            $totalRegistros += $lotBBPoupanca;
-
             //treiller 1
+            $lotBBPoupanca += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
             $valor = explode(".", $_SESSION['valor']);
             $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
             $complement = [
-                'QUANTIDADE_REGISTROS_127' => ($lotBBPoupanca + 1),
+                'QUANTIDADE_REGISTROS_127' => $lotBBPoupanca,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
+                'LOTE' => $numLote,
             ];
 
             $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
             $txt_data .= "\r\n";
+
+            $totalRegistros += $lotBBPoupanca;
         }
 
         /**
@@ -1316,16 +1524,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if ($recordsOthers) {
             //Header 2
             $complement = [];
-
+            $numLote++;
             $complement = [
                 'FORMA_LANCAMENTO' => 03,
+                'LOTE' => $numLote,
             ];
 
             $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
 
             $txt_data .= "\r\n";
 
-            $lotOthers = 1;
+            $lotOthers += 1;
 
             $_SESSION['valor'] = 0;
 
@@ -1334,48 +1543,48 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //Detalhes 1 e 2
 
             foreach ($recordsOthers as $key_records => $records) {
-
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, null);
+                $complement = [
+                    'LOTE' => $numLote,
+                ];
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
 
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, null);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
                 $txt_data .= "\r\n";
                 $lotOthers += 2;
 
             }
 
-            $totalRegistros += $lotOthers;
-
             //treiller 1
+            $lotOthers += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
+            $valor = explode(".", $_SESSION['valor']);
+            $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
             $complement = [
-                'QUANTIDADE_REGISTROS_127' => ($lotOthers + 1),
+                'QUANTIDADE_REGISTROS_127' => $lotOthers,
+                'VALOR_TOTAL_DOC_INTEIRO' => $valor,
+                'LOTE' => $numLote,
             ];
             $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
             $txt_data .= "\r\n";
-
+            $totalRegistros += $lotOthers;
         }
 
         //treiller do arquivo
-        $totalRegistros += $lotOthers;
+        $totalRegistros += 1; // Adiciona 1 para obedecer a regra de somar o treiller
         $complement = [
             'QUANTIDADE_LOTES-ARQUIVO' => $totaLotes,
-            'QUANTIDADE_REGISTROS_ARQUIVOS' => $totalRegistros + 1,
+            'QUANTIDADE_REGISTROS_ARQUIVOS' => $totalRegistros,
         ];
-        $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement);
 
-        header('Content-type: text/utf-8');
-        echo $txt_data;
-        exit();
+        $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement);
 
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
          */
-        //$file_name = 'inciso1-cnab240-' . md5(json_encode($txt_data)) . '.txt';
-        $file_name = 'inciso1-cnab240-.txt';
+        $file_name = 'inciso2-cnab240-' . md5(json_encode($txt_data)) . '.txt';      
 
-        //$dir = PRIVATE_FILES_PATH . 'aldirblanc/inciso1/remessas/cnab240/';
-        $dir = __DIR__ . '/../txt/';
+        $dir = PRIVATE_FILES_PATH . 'aldirblanc/inciso1/remessas/cnab240/';        
 
         $patch = $dir . $file_name;
 
@@ -1388,6 +1597,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         fwrite($stream, $txt_data);
 
         fclose($stream);
+
+        header('Content-Type: application/csv');
+        header('Content-Disposition: attachment; filename=' . $file_name);
+        header('Pragma: no-cache');
+        readfile($patch);
 
     }
 
@@ -1497,20 +1711,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $value['default'] = null;
                     $value['field_id'] = $value['field_id'];
 
-                    if ($key == "VALOR_INTEIRO" || $key == "VALOR_DECIMAL") {
+                    if ($key == "VALOR_INTEIRO") {
                         $inteiro = 0;
-                        $decimal = 0;
+
                         if ($key == "VALOR_INTEIRO") {
                             $inteiro = $data($register);
                         }
 
-                        if ($key == "VALOR_DECIMAL") {
-                            $decimal = $data($register);
-                        }
+                        $valor = $inteiro;
 
-                        $valor = $inteiro . "." . $decimal;
-
-                        $_SESSION['valor'] = $_SESSION['valor'] + (float) $valor;
+                        $_SESSION['valor'] = $_SESSION['valor'] + $valor;
                     }
 
                 }

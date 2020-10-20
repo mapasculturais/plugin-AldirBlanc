@@ -412,31 +412,31 @@ return [
         'BEN_CODIGO_BANCO' => [
             'length' => 3,
             'default' => null,
-            'field_id' => 'field_6',
+            'field_id' => 'BANCO:',
             'type' => 'int',
         ],
         'BEN_AGENCIA' => [
             'length' => 5,
             'default' => null,
-            'field_id' => 'field_1',
+            'field_id' => 'AGÊNCIA',
             'type' => 'int',
         ],
         'BEN_AGENCIA_DIGITO' => [
             'length' => 1,
             'default' => null,
-            'field_id' => 'field_1',
+            'field_id' => 'AGÊNCIA',
             'type' => 'string',
         ],
         'BEN_CONTA' => [
             'length' => 12,
             'default' => null,
-            'field_id' => 'field_5',
+            'field_id' => 'NÚMERO DA CONTA:',
             'type' => 'int',
         ],
         'BEN_CONTA_DIGITO' => [
             'length' => 1,
             'default' => null,
-            'field_id' => 'field_5',
+            'field_id' => 'NÚMERO DA CONTA:',
             'type' => 'string',
         ],
         'BEN_DIGITO_CONTA_AGENCIA_80' => [
@@ -448,7 +448,7 @@ return [
         'BEN_NOME' => [
             'length' => 30,
             'default' => null,
-            'field_id' => 'field_23',
+            'field_id' => 'NOME COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
             'type' => 'string',
         ],
         'BEN_DOC_ATRIB_EMPRESA_82' => [
@@ -520,7 +520,7 @@ return [
         'TIPO_CONTA' => [
             'length' => 11,
             'default' => null,
-            'field_id' => 'field_2',
+            'field_id' => 'TIPO DE CONTA BANCÁRIA:',
             'type' => 'int',
         ]
         
@@ -578,43 +578,43 @@ return [
         'BEN_ENDERECO_LOGRADOURO' => [
             'length' => 30,
             'default' => null,
-            'field_id' => 'field_22',
+            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
             'type' => 'string',
         ],
         'BEN_ENDERECO_NUMERO' => [
             'length' => 5,
             'default' => null,
-            'field_id' => 'field_22',
+            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
             'type' => 'int',
         ],
         'BEN_ENDERECO_COMPLEMENTO' => [
             'length' => 15,
             'default' => null,
-            'field_id' => 'field_22',
+            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
             'type' => 'string',
         ],        
         'BEN_ENDERECO_BAIRRO' => [
             'length' => 15,
             'default' => null,
-            'field_id' => 'field_22',
+            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
             'type' => 'string',
         ],        
         'BEN_ENDERECO_CIDADE' => [
             'length' => 20,
             'default' => null,
-            'field_id' => 'field_22',
+            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
             'type' => 'string',
         ],
         'BEN_ENDERECO_CEP' => [
             'length' => 8,
             'default' => null,
-            'field_id' => 'field_22',
+            'field_id' => 'fENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
             'type' => 'int',
         ],
         'BEN_ENDERECO_ESTADO' => [
             'length' => 2,
             'default' => null,
-            'field_id' => 'field_22',
+            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
             'type' => 'string',
         ],
         'USO_BANCO_114' => [
@@ -713,13 +713,13 @@ return [
         ],
         'LOTE' => [
             'length' => 4,
-            'default' => '9999',
+            'default' => '0001',
             'field_id' => null,
             'type' => 'int',
         ],
         'REGISTRO' => [
             'length' => 1,
-            'default' => '9',
+            'default' => '5',
             'field_id' => null,
             'type' => 'int',
         ],
@@ -772,8 +772,8 @@ return [
             '9' => '2',
             'X' => '3'
         ],
-        'field_conta' => 'field_5',
-        'field_banco' => 'field_6'
+        'field_conta' => 'NÚMERO DA CONTA:',
+        'field_banco' => 'BANCO:'
     ],
     
 ];
