@@ -51,6 +51,7 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
         });
 
         $plugin = $this;
+        
 
         /**
          * @TODO: implementar para metodo de avaliação documental
@@ -105,6 +106,7 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
             // se não pode consolidar, coloca string 'validado por {nome}' ou 'invalidado por {nome}'
             if (!$can_consolidate) {
                 $nome = $plugin->getName();
+                $string = "";
                 if($result == '10'){
                     $string = "validado por {$nome}";
                 } else if($result == '2') {
