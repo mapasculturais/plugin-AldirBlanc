@@ -145,7 +145,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $project = $app->repo('Project')->find($this->config['project_id']);
         $projectsIds = $project->getChildrenIds();
         $projectsIds[] = $project->id;
-        $opportunitiesByProject = $app->repo('ProjectOpportunity')->findBy(['ownerEntity' => $projectsIds ] );
+        $opportunitiesByProject = $app->repo('ProjectOpportunity')->findBy(['ownerEntity' => $projectsIds, 'status' => 1 ] );
         $inciso1e2Ids = array_values(array_merge([$this->config['inciso1_opportunity_id']], $this->config['inciso2_opportunity_ids']));
         $opportunitiesInciso3 = [];
 
@@ -350,6 +350,18 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $app = App::i();
         $agent = $app->repo('Agent')->find($this->data['agent']);
         //verifica se existe e se o agente owner é individual
+          //se é coletivo cria um agente individual
+        if ($agent->type->id == 2){
+            unset($agent);
+            $app->disableAccessControl();
+            $agent = new \MapasCulturais\Entities\Agent($agent->user);
+            //@TODO: confirmar nome e tipo do Agente coletivo
+            $agent->name = ' ';
+            $agent->type = 1;
+            $agent->save(true);
+            $app->enableAccessControl();
+        }
+       
         if(!$agent || $agent->type->id != 1){
             // @todo tratar esse erro
             throw new \Exception();
@@ -656,7 +668,17 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $this->requireAuthentication();
         $registration = $app->repo('Registration')->find($this->data['id']);
-        
+        $opportunityId = $registration->opportunity->id;
+
+        if (!isset($registration->inciso) || $registration->inciso == ''){
+            if ($opportunityId == $this->config['inciso1_opportunity_id'] ){
+                $registration->inciso = 1;
+            } else if (in_array($opportunityId, $this->config['inciso2_opportunity_ids']) ){
+                $registration->inciso = 2;
+            }
+            $registration->save(true);
+        }
+
         $this->render('termos-e-condicoes-inciso'.$registration->inciso, ['registration_id' => $this->data['id']]);
     }
     /**
