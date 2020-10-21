@@ -58,9 +58,14 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
             
-            'homolog_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev"]')),
-            'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO1', __DIR__ . '/config-csv-generic-inciso2.php'),
-            'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | ') 
+            'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
+                        
+            // só libera para os homologadores as inscrićões que já tenham sido validadas pelos validadores configurados
+            'homologacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '[]')),
+
+            // só consolida a a homologaćão se todos as validaćões já tiverem sido feitas
+            'consolidacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev", "financeiro"]')),
+
         ];
 
         $skipConfig = false;
@@ -165,8 +170,8 @@ class Plugin extends \MapasCulturais\Plugin
                 return;
             }
 
-            // se a consolidação é para inválida pode aplicar
-            if ($result == '2') {
+            // se a consolidação não é para selecionada (statu = 10) pode continuar
+            if ($result != '10') {
                 return;
             } 
 
@@ -178,7 +183,7 @@ class Plugin extends \MapasCulturais\Plugin
              * Se a consolidação requer validações, verifica se existe alguma
              * avaliação dos usuários validadores
              */
-            if ($validacoes = $plugin->config['homolog_requer_validacao']) {
+            if ($validacoes = $plugin->config['consolidacao_requer_validacao']) {
                 foreach($validacoes as $slug) {
                     $can = false;
                     foreach ($evaluations as $eval) {
@@ -193,10 +198,64 @@ class Plugin extends \MapasCulturais\Plugin
                 }
             }
 
+            // se não pode consolidar, coloca a string 'homologado'
             if (!$can_consolidate) {
-                $result = '';
+                if (!$this->consolidatedResult) {
+                    $result = 'homologado';
+                } else if (strpos($this->consolidatedResult, 'homologado') === false) {
+                    $result = "{$this->consolidatedResult}, homologado";
+                } else {
+                    $result = $this->consolidatedResult;
+                }
             }
         });
+
+
+        if($this->_config['homologacao_requer_validacao']){
+            /**
+             * para o caso das instalaćões que homologarão depois do retorno do Dataprev,
+             * só dá permissão para o usuário avaliar depois das validaćões configuradas
+             */
+            $app->hook('entity(Registration).canUser(<<evaluate|viewUserEvaluation>>)', function($user, &$can) use($plugin, $app) {
+                $ids = [];
+                if ($plugin->config['inciso2_enabled']) {
+                    $ids = $plugin->config['inciso2_opportunity_ids'];
+                }
+                
+                if ($plugin->config['inciso1_enabled']) {
+                    $ids[] = $plugin->config['inciso1_opportunity_id'];
+                }
+    
+                if (!in_array($this->opportunity->id, $ids)) {
+                    return;
+                }
+
+                if($user->is('guest')) {
+                    return;
+                }
+    
+                if ($user->aldirblanc_validador) {
+                    return;
+                }
+
+                if ($can) {
+                    $evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $this, 'status' => 1]);
+                    foreach ($plugin->config['homologacao_requer_validacao'] as $validador) {
+                        $ok = false;
+                        foreach ($evaluations as $evaluation) {
+                            if($evaluation->user->aldirblanc_validador == $validador && $evaluation->result == '10'){
+                                $ok = true;
+                            }
+                        }
+
+                        if(!$ok) {
+                            $can = false;
+                        }
+                    }
+                }
+                
+            });
+        }
 
         $app->hook('template(panel.opportunities.panel-header):end', function () use($app){
             if(!$app->user->is('admin')) {

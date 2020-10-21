@@ -9,6 +9,13 @@ use MapasCulturais\Entities\EvaluationMethodConfigurationAgentRelation;
 use MapasCulturais\Entities\Opportunity;
 use MapasCulturais\Entities\Registration;
 
+/**
+ * @property-read \MapasCulturais\Entities\User $user
+ * @property-read string $slug
+ * @property-read string $name
+ * 
+ * @package AldirBlanc
+ */
 abstract class PluginValidador extends \MapasCulturais\Plugin
 {
 
@@ -24,9 +31,8 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
         $slug = $this->getSlug();
         $config += [
             'consolidacao_requer_homologacao' => true,
-            'consolidacao_requer_validacoes' => [] //(array) json_decode(env(strtoupper($slug) . '_CONSOLIDACAO_REQ_VALIDACOES', '[]')),
+            'consolidacao_requer_validacoes' => (array) json_decode(env(strtoupper($slug) . '_CONSOLIDACAO_REQ_VALIDACOES', '[]')),
         ];
-
         parent::__construct($config);
     }
 
@@ -96,8 +102,25 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
                 }
             }
 
-            if(!$can_consolidate) {
-                $result = '';
+            // se não pode consolidar, coloca string 'validado por {nome}' ou 'invalidado por {nome}'
+            if (!$can_consolidate) {
+                $nome = $plugin->getName();
+                if($result == '10'){
+                    $string = "validado por {$nome}";
+                } else if($result == '2') {
+                    $string = "invalidado por {$nome}";
+                } else if($result == '3') {
+                    $string = "não selecionado por {$nome}";
+                } else if($result == '8') {
+                    $string = "suplente por {$nome}";
+                }
+                if (!$this->consolidatedResult) {
+                    $result = $string;
+                } else if (strpos($this->consolidatedResult, $nome) === false) {
+                    $result = "{$this->consolidatedResult}, {$string}";
+                } else {
+                    $result = $this->consolidatedResult;
+                }            
             }
 
         });
@@ -145,7 +168,7 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
 
         $this->registerUserMetadata('aldirblanc_validador', [
             'label' => 'É o usuário um validador da Aldir Blanc?',
-            'type' => 'boolean',
+            'type' => 'string',
             'private' => false,
             'default_value' => false
         ]);
