@@ -41,9 +41,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * O Parâmetro opportunity e identificado e incluido no endpiont automáricamente
      * 
      */
-    public function ALL_genericExportInciso2(){
-        
-         /**
+    public function ALL_genericExportInciso2()
+    {
+         //Seta o timeout
+         ini_set('max_execution_time', 0);
+         ini_set('memory_limit', '768M');
+         
+        /**
          * Verifica se o usuário está autenticado
          */
         $this->requireAuthentication();
@@ -152,7 +156,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $field_id = $fieldsID['CPF'];
                     return $this->normalizeString($registrations->$field_id);
                 }else{
-                    return 0;
+                    return " ";
                 }              
             },
             'NOME_SOCIAL' => function ($registrations) use ($fieldsID, $categories){
@@ -160,14 +164,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $field_id = $fieldsID['NOME_SOCIAL'];
                     return  $this->normalizeString($registrations->$field_id);
                 }else{
-                    return 0;
+                    return " ";
                 }
              },
              'CNPJ' => function ($registrations) use ($fieldsID, $categories){
                 if(in_array($registrations->category, $categories['CNPJ'])){ 
                     $field_id = $fieldsID['CNPJ'];   
                     if(is_array($field_id)){
-                        $result = 0;
+                        $result = " ";
                         foreach($field_id as $key => $value){
                             if($registrations->$value){
                                 $result = str_replace(['.', '-','/'], '', $registrations->$value);
@@ -178,14 +182,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         return $this->normalizeString($registrations->$field_id);
                     }
                 }else{
-                    return 0;
+                    return " ";
                 }               
              },
              'RAZAO_SOCIAL' => function ($registrations) use ($fieldsID, $categories){
                 if(in_array($registrations->category, $categories['CNPJ'])){ 
                     $field_id = $fieldsID['RAZAO_SOCIAL'];
                     if(is_array($field_id)){
-                        $result = 0;
+                        $result = " ";
                         foreach($field_id as $key => $value){
                             if($registrations->$value){
                                 $result = $registrations->$value;
@@ -197,7 +201,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }
                 }
                 else{
-                    return 0; 
+                    return " "; 
                 }
               },
              'LOGRADOURO' => function ($registrations) use ($fieldsID){
@@ -240,15 +244,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },
              'NUM_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['NUM_BANCO'];                
-                return  $this->normalizeString($this->numberBank($registrations->$field_id));                
+                return  $this->numberBank($registrations->$field_id);                
              },
              'TIPO_CONTA_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['TIPO_CONTA_BANCO'];
-                return  $this->normalizeString($registrations->$field_id);
+                if($field_id){
+                    return  $this->normalizeString($registrations->$field_id);
+                }else{
+                    return " ";
+                }
+               
              },
              'AGENCIA_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['AGENCIA_BANCO'];
-                return  $this->normalizeString($registrations->$field_id);
+                return  $this->normalizeString(substr($registrations->$field_id, 0, 4));
              },
              'CONTA_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['CONTA_BANCO'];
@@ -256,7 +265,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },            
              'OPERACAO_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['OPERACAO_BANCO'];
+                if($field_id){
                 return $this->normalizeString($registrations->$field_id);
+                }else{
+                    return " ";
+                }
              },             
              'VALOR' => $fieldsID['VALOR'],
              'INSCRICAO_ID' => function ($registrations) use ($fieldsID) {
@@ -294,7 +307,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
             }
         }     
-
+       
         /**
          * Salva o arquivo no servidor e faz o dispatch dele em um formato CSV
          * O arquivo e salvo no deretório docker-data/private-files/aldirblanc/inciso2/remessas
@@ -336,30 +349,30 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     private function numberBank($bankName){
 
         $bankList = [
-            'Bco Do Brasil S.A' => '001' , 
-            'Bco Da Amazonia S.A' => '003', 
-            'Bco Do Nordeste Do Brasil S.A' => '004', 
-            'Bco Banestes S.A' => '021', 
-            'Bco Santander (Brasil) S.A' => '033', 
-            'Bco Do Est. Do Pa S.A' => '037',  
-            'Bco Do Estado Do Rs S.A' => '041', 
-            'Bco Do Est. De Se S.A' => '047',  
-            'Brb - Bco De Brasilia S.A' => '070', 
-            'Banco Inter' => '077',
-            'Bco Da China Brasil S.A' => '083', 
-            'Caixa Economica Federal' => '104',
-            'Banco Btg Pactual S.A' => '208', 
-            'Banco Original' => '212', 
-            'Bco Bradesco S.A ' => '237',
-            'Bco Bmg S.A' => '318', 
-            'Itaú Unibanco S.A' => '341',
-            'Bco Safra S.A' => '422',
-            'Banco Pan' => '623'
+            '001 Bco Do Brasil S.A' => '001',	
+            '003 Bco Da Amazonia S.A' => '003',
+            '004 Bco Do Nordeste Do Brasil S.A' => '004',	
+            '021 Bco Banestes S.A' => '021',
+            '033 Bco Santander (Brasil) S.A' => '033',
+            '037 Bco Do Est. Do Pa S.A' => '037',	
+            '041 Bco Do Estado Do Rs S.A' => '041',
+            '047 Bco Do Est. De Se S.A' => '047',	
+            '070 Brb - Bco De Brasilia S.A' => '070',
+            '077 Banco Inter' => '077',
+            '083 Bco Da China Brasil S.A' => '083',
+            '104 Caixa Economica Federal' => '104',
+            '208 Banco Btg Pactual S.A' => '208',
+            '212 Banco Original' => '212',	
+            '237 Bco Bradesco S.A' => '237',	
+            '318 Bco Bmg S.A' => '318',	
+            '341 Itaú Unibanco S.A' => '341',
+            '422 Bco Safra S.A' => '422',
+            '623 Banco Pan' => '623'
         ];
         
         $return = 0;
         foreach($bankList as $key => $value){
-            if(strtolower($key) == strtolower($bankName)){
+            if($this->normalizeString(strtolower($key)) === $this->normalizeString(strtolower($bankName))){
                 $return = $value;            
             }
         }
