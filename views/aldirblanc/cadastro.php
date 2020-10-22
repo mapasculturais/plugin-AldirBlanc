@@ -39,8 +39,8 @@ if (count($cidades) === 0) {
 
         <div class="lab-form-filter opcoes-inciso">
             <?php
-            $inciso1Title = 'Trabalhadoras e trabalhadores da Cultura';
-            $inciso2Title = 'Espaços e organizações culturais';
+            $inciso1Title = 'Inciso I: Trabalhadoras e trabalhadores da Cultura';
+            $inciso2Title = 'Inciso II: Espaços e organizações culturais';
             if (count($registrationsInciso1) < $inciso1Limite && $inciso1_enabled) {
             ?>
                 <button onclick="location.href='<?= $this->controller->createUrl('individual') ?>'" clickable id="option3" class="informative-box lab-option">
@@ -129,7 +129,7 @@ if (count($cidades) === 0) {
                 </div>
 
                 <div class="informative-box--title">
-                    <h2>Editais, fomentos e oportunidades</h2>
+                    <h2>Inciso III: Editais, fomentos e oportunidades</h2>
                     <i class="fas fa-minus"></i>
                     <!-- <i class="far fa-check-circle"></i> -->
                 </div>
