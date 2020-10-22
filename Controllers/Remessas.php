@@ -901,10 +901,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement);
 
-        // header('Content-type: text/utf-8');
-        // echo $txt_data;
-        // exit();
-
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
          */
@@ -924,7 +920,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         fclose($stream);
 
-        header('Content-Type: application/csv');
+        header('Content-Type: application/txt');
         header('Content-Disposition: attachment; filename=' . $file_name);
         header('Pragma: no-cache');
         readfile($patch);
@@ -1578,11 +1574,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         ];
 
         $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement);
-
-        // header('Content-type: text/utf-8');
-        // echo $txt_data;
-        // exit();
-
+        
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
          */
@@ -1602,10 +1594,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         fclose($stream);
 
-        header('Content-Type: application/csv');
+        header('Content-Type: application/txt');
         header('Content-Disposition: attachment; filename=' . $file_name);
         header('Pragma: no-cache');
         readfile($patch);
+
+    }
+
+    /**
+     * Implementa o exportador TXT no modelo CNAB 240, para envio de remessas ao banco do Brasil Inciso 3
+     *
+     *
+     */
+    public function ALL_exportCnab240Inciso3()
+    {
 
     }
 
