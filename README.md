@@ -19,7 +19,7 @@ Neste exemplo de configuração, primeiro ocorre a homologação e depois ocorre
     - validação Dataprev
     - validação SCGE (Validador Genérico)
 
-```+PHP
+```PHP
 
     'plugins' => [
         
@@ -91,7 +91,7 @@ Neste exemplo de configuração, primeiro ocorre a validação pelo Dataprev, de
     - homologação
         - validação SCGE (Validador Genérico)
 
-```+PHP
+```PHP
 
     'plugins' => [
         
