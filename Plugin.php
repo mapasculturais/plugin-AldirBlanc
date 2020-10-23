@@ -62,7 +62,20 @@ class Plugin extends \MapasCulturais\Plugin
             'csv_inciso1' => require_once env('AB_CSV_INCISO1', __DIR__ . '/config-csv-inciso1.php'),
             'csv_inciso2' => require_once env('AB_CSV_INCISO2', __DIR__ . '/config-csv-inciso2.php'),
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO1', __DIR__ . '/config-csv-generic-inciso2.php'),
-            'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | ') 
+            'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
+
+            'evaluation_result_invalid_enabled' => env('AB_EVALUATION_RESULT_INVALID_ENABLE', false),
+            'evaluation_result_notapproved_enabled' => env('AB_EVALUATION_RESULT_NOTAPPROVED_ENABLE', false),
+            'evaluation_result_approved_enabled' => env('AB_EVALUATION_RESULT_APPROVED_ENABLE', false),
+
+            'msg_status_invalid' => env('AB_STATUS_INVALID_MESSAGE', 'Não atendeu aos requisitos necessários ou os recursos disponíveis foram esgotados, conforme Incisos/Artº da Lei/Regulamentações: No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso V do Art. 6º da Lei nº 14.017/2020, e ao Inciso V do Art. 4º do Decreto 10.464/2020.'), // STATUS_INVALID = 2
+            'msg_status_approved' => env('AB_STATUS_APPROVED_MESSAGE', '<p>Caso tenha optado por transação bancária, brevemente seu benefício será disponibilizado na conta informada.</p>
+        <p>Caso tenha optado por ordem de pagamento, quando disponibilizado o recurso, você poderá realizar o saque diretamente em qualquer agência do Banco do Brasil pessoalmente - apresentando RG e CPF, sem nenhum custo.</p>
+        <p>Em virtude da pandemia da covid-19, algumas agências do Banco do Brasil podem estar operando com restrições e horários diferenciados de funcionamento, conforme determinação do poder público.</p>'), // STATUS_APPROVED = 10
+            'msg_status_notapproved' => env('AB_STATUS_NOTAPPROVED_MESSAGE', 'Não atendeu aos requisitos necessários. Caso não concorde com o resultado, você poderá enviar um novo formulário de solicitação ao benefício - fique atento ao preenchimento dos campos.'), // STATUS_NOTAPPROVED = 3
+
+            'msg_recourse' => env('AB_MESSAGE_RECOURSE', ''),
+            'email_recourse' => env('AB_EMAIL_RECURSO', '')
         ];
 
         $skipConfig = false;
