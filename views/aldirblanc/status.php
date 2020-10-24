@@ -20,33 +20,34 @@ $_params = [
 
     <article class="main-content registration" ng-controller="OpportunityController">
 
-        <?php if (isset($registrationStatusMessage)) : ?>
-            <div class="status-card status-<?= $registration->status ?>">
-                <h2 class="status-card--title"><?= $registrationStatusMessage['title'] ?? ''; ?></h2>
+        <div class="status-card status-<?= $registration->status ?>">
+            <h2 class="status-card--title"><?= $registrationStatusMessage['title'] ?? ''; ?></h2>
 
-                <?php if (!empty($justificativaAvaliacao) && sizeof($justificativaAvaliacao) != 0) : ?>
-                    <?php foreach ($justificativaAvaliacao as $message) : ?>
+            <?php if (!empty($justificativaAvaliacao) && sizeof($justificativaAvaliacao) != 0) : ?>
+                <?php foreach ($justificativaAvaliacao as $message) : ?>
+                    <?php if (is_array($message) && $this->controller->config['exibir_resultado_padrao']) : ?>
+                        <p class="status-card--content"><?= $message['message']; ?></p>
+                        <hr>
+                    <?php else : ?>
                         <p class="status-card--content"><?= $message; ?></p>
                         <hr>
-                    <?php endforeach; ?>
-                <?php else : ?>
-                    <p class="status-card--content"><?= $registrationStatusMessage['message']; ?></p>
-                    <hr>
-                <?php endif; ?>
-
-                <?php if (($registration->status == 3 || $registration->status == 2) && !empty($this->controller->config['msg_recourse'])) : ?>
-                    
-                    <hr>
-                    <h2 class="status-card--title">Você pode entrar com recurso</h2>
-                    <p class="status-card--content"><?= $this->controller->config['msg_recourse']; ?></p>
-
-                    <?php if (!empty($this->controller->config['email_recourse'])) : ?>
-                        <br>
-                        <p class="status-card--content">Caso queira solicitar recurso envie um email para <a href="mailto:<?php echo $this->controller->config['email_recourse']; ?>"><?php echo $this->controller->config['email_recourse']; ?></a></p>
                     <?php endif; ?>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <hr>
+            <?php endif; ?>
+
+            <?php if (($registration->status == 3 || $registration->status == 2) && !empty($this->controller->config['msg_recourse'])) : ?>
+                <hr>
+                <h2 class="status-card--title">Você pode entrar com recurso</h2>
+                <p class="status-card--content"><?= $this->controller->config['msg_recourse']; ?></p>
+
+                <?php if (!empty($this->controller->config['email_recourse'])) : ?>
+                    <br>
+                    <p class="status-card--content">Caso queira solicitar recurso envie um email para <a href="mailto:<?php echo $this->controller->config['email_recourse']; ?>"><?php echo $this->controller->config['email_recourse']; ?></a></p>
                 <?php endif; ?>
-            </div><!-- /.status-card -->
-        <?php endif; ?>
+            <?php endif; ?>
+        </div><!-- /.status-card -->
 
         <h4 class="title-subsection">Edital <span class="underline">Inciso <?= $registration->inciso ?></span></h4>
 

@@ -183,9 +183,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             //STATUS_SENT = 1 - Em análise
             '1' => [
                 'title'   => 'Sua solicitação segue em análise.',
-                'message' => 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail.',
+                'message'  => $this->config['msg_status_sent']
             ],
-            //STATUS_INVALID = 2;
+            //STATUS_INVALID = 2 - Inválida
             '2' => [
                 'title'    => 'Sua solicitação não foi aprovada.',
                 'message'  => $this->config['msg_status_invalid']
@@ -203,7 +203,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             //STATUS_WAITLIST = 8 - Recursos Exauridos
             '8' => [
                 'title'   => 'Sua solicitação foi validada.',
-                'message' => 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.',
+                'message' => $this->config['msg_status_waitlist']
             ]
         ];
         return $summaryStatusMessages;
@@ -549,8 +549,32 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $getStatusMessages = $this->getStatusMessages();
         $registrationStatusMessage = $getStatusMessages[$registration->status];
 
-        // @todo substituir pela justificativa enviada pelo avaliador
+        // retorna as avaliações da avaliação
+        $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
+        
+        // monta array de mensagens
         $justificativaAvaliacao = [];
+        foreach ($evaluations as $evaluation) {
+
+            if ($evaluation->getResult() == $registration->status) {
+                
+                if ($evaluation->user->id == $this->config['avaliador_dataprev_user_id'] && $this->config['exibir_resultado_dataprev']) {
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                } elseif ($evaluation->user->id == $this->config['avaliador_generico_user_id'] && $this->config['exibir_resultado_generico']) {
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                } 
+                
+                if ($this->config['exibir_resultado_avaliadores']) {
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                }
+
+            }
+            
+        }
+
+        if ($this->config['exibir_resultado_padrao']) {
+            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
+        }
 
         $this->render('status', ['registration' => $registration, 'registrationStatusMessage' => $registrationStatusMessage, 'justificativaAvaliacao' => $justificativaAvaliacao]);
     }

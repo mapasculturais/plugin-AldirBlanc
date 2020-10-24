@@ -64,18 +64,28 @@ class Plugin extends \MapasCulturais\Plugin
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO1', __DIR__ . '/config-csv-generic-inciso2.php'),
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
 
-            'evaluation_result_invalid_enabled' => env('AB_EVALUATION_RESULT_INVALID_ENABLE', false),
-            'evaluation_result_notapproved_enabled' => env('AB_EVALUATION_RESULT_NOTAPPROVED_ENABLE', false),
-            'evaluation_result_approved_enabled' => env('AB_EVALUATION_RESULT_APPROVED_ENABLE', false),
+            // define o id para dataprev e avaliador generico
+            'avaliador_dataprev_user_id' => env('AB_AVALIADOR_DATAPREV_USER_ID', '1585'),
+            'avaliador_generico_user_id' => env('AB_AVALIADOR_GENERICO_USER_ID', ''),
+            
+            // define a exibição do resultado das avaliações no status
+            'exibir_resultado_padrao' => env('AB_EXIBIR_RESULTADO_PADRAO', false),
+            'exibir_resultado_dataprev' => env('AB_EXIBIR_RESULTADO_DATAPREV', true),
+            'exibir_resultado_generico' => env('AB_EXIBIR_RESULTADO_GENERICO', false),
+            'exibir_resultado_avaliadores' => env('AB_EXIBIR_RESULTADO_AVALIADORES', false),
 
+            // mensagens de status padrao
+            'msg_status_sent' => env('AB_STATUS_SENT_MESSAGE', 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail.'), // STATUS_SENT = 1
             'msg_status_invalid' => env('AB_STATUS_INVALID_MESSAGE', 'Não atendeu aos requisitos necessários ou os recursos disponíveis foram esgotados, conforme Incisos/Artº da Lei/Regulamentações: No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso V do Art. 6º da Lei nº 14.017/2020, e ao Inciso V do Art. 4º do Decreto 10.464/2020.'), // STATUS_INVALID = 2
             'msg_status_approved' => env('AB_STATUS_APPROVED_MESSAGE', '<p>Caso tenha optado por transação bancária, brevemente seu benefício será disponibilizado na conta informada.</p>
         <p>Caso tenha optado por ordem de pagamento, quando disponibilizado o recurso, você poderá realizar o saque diretamente em qualquer agência do Banco do Brasil pessoalmente - apresentando RG e CPF, sem nenhum custo.</p>
         <p>Em virtude da pandemia da covid-19, algumas agências do Banco do Brasil podem estar operando com restrições e horários diferenciados de funcionamento, conforme determinação do poder público.</p>'), // STATUS_APPROVED = 10
             'msg_status_notapproved' => env('AB_STATUS_NOTAPPROVED_MESSAGE', 'Não atendeu aos requisitos necessários. Caso não concorde com o resultado, você poderá enviar um novo formulário de solicitação ao benefício - fique atento ao preenchimento dos campos.'), // STATUS_NOTAPPROVED = 3
+            'msg_status_waitlist' => env('AB_STATUS_WAITLIST_MESSAGE', 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.'), //STATUS_WAITLIST = 8
 
+            // informacoes para recurso das inscrições com status 2 e 3
+            'email_recourse' => env('AB_EMAIL_RECURSO', ''),
             'msg_recourse' => env('AB_MESSAGE_RECOURSE', ''),
-            'email_recourse' => env('AB_EMAIL_RECURSO', '')
         ];
 
         $skipConfig = false;
