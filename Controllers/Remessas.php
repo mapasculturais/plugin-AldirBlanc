@@ -6,8 +6,10 @@ use DateTime;
 use Exception;
 use Normalizer;
 use MapasCulturais\i;
+use League\Csv\Reader;
 use League\Csv\Writer;
 use MapasCulturais\App;
+use League\Csv\Statement;
 use MapasCulturais\Entities\Registration;
 
 /**
@@ -157,7 +159,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     return $this->normalizeString($registrations->$field_id);
                 }else{
                     return " ";
-                }              
+                }    
+                       
             },
             'NOME_SOCIAL' => function ($registrations) use ($fieldsID, $categories){
                 if(in_array($registrations->category, $categories['CPF'])){
@@ -175,6 +178,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         foreach($field_id as $key => $value){
                             if($registrations->$value){
                                 $result = str_replace(['.', '-','/'], '', $registrations->$value);
+                                break;
                             }
                         }
                         return $this->normalizeString($result);
@@ -214,7 +218,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              },
              'COMPLEMENTO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['COMPLEMENTO'];
-                return  $this->normalizeString($registrations->$field_id['En_Complemento']);
+                return $registrations->$field_id['En_Complemento'] ? substr($this->normalizeString($registrations->$field_id['En_Complemento']), 0, 20) : " ";
              },
              'BAIRRO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['BAIRRO'];
@@ -266,7 +270,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              'OPERACAO_BANCO' => function ($registrations) use ($fieldsID){
                 $field_id = $fieldsID['OPERACAO_BANCO'];
                 if($field_id){
-                return $this->normalizeString($registrations->$field_id);
+                return $registrations->$field_id ? $this->normalizeString($registrations->$field_id) : " ";
                 }else{
                     return " ";
                 }

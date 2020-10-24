@@ -26,7 +26,10 @@ return [
     'fields' => [        
         'CPF' => 'CPF',
         'NOME_SOCIAL' => 'Nome completo', 
-        'CNPJ' => 'CNPJ',
+        'CNPJ' => [
+            'CNPJ',
+            'CNPJ'
+            ],
         'RAZAO_SOCIAL' => [
             'Razão social',
             'Razão Social'
@@ -56,7 +59,7 @@ return [
     'categories' => [
         'CPF' => [
             'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-            'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO'
+            'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO'
         ],
         'CNPJ' => [
             'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
