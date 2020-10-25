@@ -515,7 +515,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 break;
             }
         }
-
         $this->render('status', ['registration' => $registration, 'registrationStatusName'=> $registrationStatusName]);
     }
 
@@ -806,6 +805,111 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->json("Sucesso");
     }
 
+
+    /**
+     * Tela para login dos mediados
+     * 
+     * rota: /aldirblanc/mediados
+     * 
+     * @return void
+     */
+    function ALL_mediados()
+    {
+        $app = APP::i();
+        if (!count ($this->data) > 0){
+            $this->render('mediados-login', ['errors'=>[], 'data' => $this->data]);
+            return;
+        }
+        $cpf = ($this->data['cpf'] ?? '');
+        $pass = ($this->data['password'] ?? '');
+        $errors = [];
+        if (!$cpf){
+            $errors['user'] = "CPF não informado.";
+        }
+        if (!$pass){
+            $errors['pass'] = "Senha não informada.";
+        }
+        if ($cpf){
+            $cpf = $this->mask($cpf,'###.###.###-##');
+            $agentMeta = $app->repo("AgentMeta")->findOneBy(array('key' => 'documento', 'value' => $cpf));
+            if ($agentMeta){
+                $agent = $agentMeta->owner;
+            }
+            else{
+                $errors['inexistente'] = "CPF não cadastrado";
+            }
+        }
+        if(count($errors) > 0 ){
+            $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
+           return;
+        }
+        $registrations = $app->repo('registration')->findBy(['owner' => $agent]);
+        $app->disableAccessControl();
+
+        $registrationsFiltered = array_map(function($r) { 
+            if ($r->mediacao_senha){
+                return $r;
+            }
+        }, $registrations);
+        $app->enableAccessControl();
+        if(count($registrationsFiltered) < 1){
+            $errors['inexistente'] = "CPF não cadastrado";
+            $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
+            
+        }
+
+        $summaryStatusName = $this->getStatusNames();
+        // Caso só tenha um registro no cpf
+        if (count($registrations) == 1){
+            $app->disableAccessControl();
+            $passDb = $registrations[0]->mediacao_senha;
+            $app->enableAccessControl();
+
+            if($passDb){
+                if ($pass == $passDb){
+                    $registrationStatusName = "";
+                    foreach($summaryStatusName as $key => $value) {
+                        if($key == $registrationsFiltered[0]->status) {
+                            $registrationStatusName = $value;
+                            break;
+                        }
+                    }    
+                    
+                    $this->render('status', ['registration' => $registrationsFiltered[0], 'registrationStatusName'=> $registrationStatusName]);
+                    
+                    return;
+                }
+                else{
+                    $errors['senha_errada'] = "A senha digitada não esta correta.";
+                    $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
+                    return;
+                }
+            }
+            else{
+                $errors['inexistente'] = "Nenhuma inscrição feita por mediadores para este documento";
+                $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
+                return;
+            }
+
+        }
+        else{
+            foreach ($registrationsFiltered as $registration) {
+                $registrationStatusName = "";
+                foreach($summaryStatusName as $key => $value) {
+                    if($key == $registration->status) {
+                        $registration->statusName = $value;
+                        break;
+                    }
+                }        
+            }
+            $this->render('lista-mediado', ['registrations' => $registrationsFiltered, 'registrationStatusName'=> $registrationStatusName]);
+        } 
+        $app->enableAccessControl();
+
+    }
+    
+ 
+
     /* REPORTE */
     function GET_reporte() {
 
@@ -873,5 +977,20 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return (object) [
             'total' => $query->getSingleScalarResult()
         ];
+    }
+    function mask($val, $mask) {
+        if (strlen($val) == strlen($mask)) return $val;
+        $maskared = '';
+        $k = 0;
+        for($i = 0; $i<=strlen($mask)-1; $i++) {
+            if($mask[$i] == '#') {
+                if(isset($val[$k]))
+                    $maskared .= $val[$k++];
+            } else {
+                if(isset($mask[$i]))
+                    $maskared .= $mask[$i];
+            }
+        }
+        return $maskared;
     }
 }
