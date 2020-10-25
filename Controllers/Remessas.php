@@ -435,10 +435,37 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CONVENIO_BB2' => '',
             'CONVENIO_BB3' => '',
             'CONVENIO_BB4' => '',
-            'AGENCIA' => '',
-            'AGENCIA_DIGITO' => '',
-            'CONTA' => '',
-            'CONTA_DIGITO' => '',
+            'AGENCIA' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['AGENCIA'];
+                $value = $this->normalizeString($field_id['default']);
+                return substr($value, 0, 4);                
+
+            },
+            'AGENCIA_DIGITO' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['AGENCIA_DIGITO'];
+                $value = $this->normalizeString($field_id['default']);
+                $result = is_string($value) ? strtoupper($value) : $value;
+                return $result;
+
+            },    
+            'CONTA' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['CONTA'];
+                $value = $this->normalizeString($field_id['default']);
+                return substr($value, 0, 12);
+                exit();
+
+            },
+            'CONTA_DIGITO' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['CONTA_DIGITO'];
+                $value = $this->normalizeString($field_id['default']);
+                $result = is_string($value) ? strtoupper($value) : $value;
+                return $result;
+
+            },
             'USO_BANCO_20' => '',
             'NOME_EMPRESA' => '',
             'NOME_BANCO' => '',
@@ -446,11 +473,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CODIGO_REMESSA' => '',
             'DATA_GER_ARQUIVO' => function ($registrations) use ($detahe1) {
                 $date = new DateTime();
-                return $date->format('d/m/Y');
+                return $date->format('dmY');
             },
             'HORA_GER_ARQUIVO' => function ($registrations) use ($detahe1) {
                 $date = new DateTime();
-                return $date->format('H:i:s');
+                return $date->format('His');
             },
             'NUM_SERQUNCIAL_ARQUIVO' => '',
             'LAYOUT_ARQUIVO' => '',
@@ -474,10 +501,37 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CONVENIO_BB2' => '',
             'CONVENIO_BB3' => '',
             'CONVENIO_BB4' => '',
-            'AGENCIA' => '',
-            'AGENCIA_DIGITO' => '',
-            'CONTA' => '',
-            'CONTA_DIGITO' => '',
+            'AGENCIA' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['AGENCIA'];
+                $value = $this->normalizeString($field_id['default']);
+                return substr($value, 0, 4);                
+
+            },
+            'AGENCIA_DIGITO' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['AGENCIA_DIGITO'];
+                $value = $this->normalizeString($field_id['default']);
+                $result = is_string($value) ? strtoupper($value) : $value;
+                return $result;
+
+            },    
+            'CONTA' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['CONTA'];
+                $value = $this->normalizeString($field_id['default']);
+                return substr($value, 0, 12);
+                exit();
+
+            },
+            'CONTA_DIGITO' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['CONTA_DIGITO'];
+                $value = $this->normalizeString($field_id['default']);
+                $result = is_string($value) ? strtoupper($value) : $value;
+                return $result;
+
+            },
             'USO_BANCO_51' => '',
             'NOME_EMPRESA' => '',
             'USO_BANCO_40' => '',
@@ -506,11 +560,26 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'BEN_AGENCIA' => function ($registrations) use ($detahe1) {
                 $field_id = $detahe1['BEN_AGENCIA']['field_id'];
-                return $registrations->$field_id;
+                $age = $registrations->$field_id;
+
+                if(strlen($age)>4){
+                    $result = substr($age, 0, 4);
+                }else{
+                    $result =  $age;
+                }
+                return $result;
             },
             'BEN_AGENCIA_DIGITO' => function ($registrations) use ($detahe1) {
+                $result = "";
                 $field_id = $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
-                return $registrations->$field_id;
+                $dig = $registrations->$field_id;
+                if(strlen($dig)>4){
+                    $result = substr($dig, -1);
+                }else{
+                    $result = ""; 
+                }
+                
+                return is_string($result) ? strtoupper($result) :  $result;
             },
             'BEN_CONTA' => function ($registrations) use ($detahe1, $default) {
                 $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
@@ -520,54 +589,60 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $detahe1['BEN_CONTA']['field_id'];
                 $account = $registrations->$field_id;
 
+                $result = "";
                 if ($numberBank = '001' && $typeAccount == $default['typesAccount']['poupanca']) {
 
                     if (substr($account, 0, 3) != "510") {
-                        return "510" . $account;
+                        $result = "510" . $account;
                     } else {
 
-                        return $account;
+                        $result = $account;
 
                     }
                 } else {
 
-                    return $registrations->$field_id;
+                    $result = $registrations->$field_id;
                 }
 
-                $field_id = $detahe1['BEN_CONTA_DIGITO']['field_id'];
-
+                return substr($result, 0, -1); // Remove o ultimo caracter. Intende -se que o ultimo caracter é o DV da conta
             },
             'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe1, $default) {
                 $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+               
                 $numberBank = $this->numberBank($registrations->$temp);
-
-                $temp = $detahe1['TIPO_CONTA']['field_id'];
-                $typeAccount = $registrations->$temp;
+                
+                $temp = $detahe1['TIPO_CONTA']['field_id'];               
+                $typeAccount = $registrations->$temp;                
 
                 $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
-                $account = preg_replace('/[^0-9]/i', '', $registrations->$temp);
+                $account = preg_replace('/[^0-9]/i', '', $registrations->$temp);              
 
-                $digit = substr($account, -1);
+                $dig = substr($account, -1);
 
+                $result = "";
+                
                 if ($numberBank = '001' && $typeAccount == $default['typesAccount']['poupanca']) {
 
                     if (substr($account, 0, 3) == "510") {
-                        return $digit;
+                        $result = $dig;
                     } else {
 
-                        return $default['savingsDigit'][$digit];
+                        $result = $default['savingsDigit'][$dig];
 
                     }
                 } else {
 
-                    return $digit;
+                    $result = $dig;
                 }
+
+                return is_string($result) ? strtoupper($result) :  $result;
 
             },
             'BEN_DIGITO_CONTA_AGENCIA_80' => '',
             'BEN_NOME' => function ($registrations) use ($detahe1) {
-                $field_id = $detahe1['BEN_NOME']['field_id'];
-                return $registrations->$field_id;
+                $field_id = $detahe1['BEN_NOME']['field_id'];                
+                $result = substr($registrations->$field_id, 0, $detahe1['BEN_NOME']['length']);
+                return $result;
             },
             'BEN_DOC_ATRIB_EMPRESA_82' => '',
             'DATA_PAGAMENTO' => function ($registrations) use ($detahe1) {
@@ -589,13 +664,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $date->add(new DateInterval('P1D'));
                     $weekday = $date->format('D');
                 }
-
-                return $date->format('d/m/Y');
+                
+                return $date->format('dmY');
             },
             'TIPO_MOEDA' => '',
             'USO_BANCO_85' => '',
             'VALOR_INTEIRO' => function ($registrations) use ($detahe1) {
-                $valor = '100,50';
+                $valor = '100,98';
                 $valor = preg_replace('/[^0-9]/i', '', $valor);
 
                 return $valor;
@@ -625,41 +700,119 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'SEGMENTO' => '',
             'USO_BANCO_104' => '',
             'BEN_TIPO_DOC' => '',
-            'BEN_CPF' => '',
-            'BEN_ENDERECO_LOGRADOURO' => function ($registrations) use ($detahe2) {
+            'BEN_CPF' => function ($registrations) use ($detahe2) {
+                $field_id = $detahe2['BEN_CPF']['field_id'];                
+                $data = $registrations->$field_id; 
+                if(strlen($this->normalizeString($data))!=11){
+                    $_SESSION['problems'][$registrations->number] = "CPF Inválido";
+                }        
+                return $data;
+            },
+            'BEN_ENDERECO_LOGRADOURO' => function ($registrations) use ($detahe2, $app) {
                 $field_id = $detahe2['BEN_ENDERECO_LOGRADOURO']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_LOGRADOURO']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_Nome_Logradouro'];
+                $result = $data['En_Nome_Logradouro'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_LOGRADOURO Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+                
+                $result = substr($result, 0, $length);
+               
+             
+                return $result;
+                
             },
-            'BEN_ENDERECO_NUMERO' => function ($registrations) use ($detahe2) {
+            'BEN_ENDERECO_NUMERO' => function ($registrations) use ($detahe2, $app) {
                 $field_id = $detahe2['BEN_ENDERECO_NUMERO']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_NUMERO']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_Num'];
+                $result = $data['En_Num'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_NUMERO Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+                
+                $result = substr($result, 0, $length);
+               
+             
+                return $result;
             },
-            'BEN_ENDERECO_COMPLEMENTO' => function ($registrations) use ($detahe2) {
+            'BEN_ENDERECO_COMPLEMENTO' => function ($registrations) use ($detahe2, $app) {
                 $field_id = $detahe2['BEN_ENDERECO_COMPLEMENTO']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_COMPLEMENTO']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_Complemento'];
+                $result = $data['En_Complemento'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_COMPLEMENTO Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+                
+                $result = substr($result, 0, $length);
+               
+             
+                return $result;
             },
-            'BEN_ENDERECO_BAIRRO' => function ($registrations) use ($detahe2) {
+            'BEN_ENDERECO_BAIRRO' => function ($registrations) use ($detahe2, $app) {
                 $field_id = $detahe2['BEN_ENDERECO_BAIRRO']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_BAIRRO']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_Bairro'];
+                $result = $data['En_Bairro'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_BAIRRO Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+                
+                $result = substr($result, 0, $length);
+               
+             
+                return $result;
             },
-            'BEN_ENDERECO_CIDADE' => function ($registrations) use ($detahe2) {
+            'BEN_ENDERECO_CIDADE' => function ($registrations) use ($detahe2, $app) {
                 $field_id = $detahe2['BEN_ENDERECO_CIDADE']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_CIDADE']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_Municipio'];
+                $result = $data['En_Municipio'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_CIDADE Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+                
+                $result = substr($result, 0, $length);
+               
+             
+                return $result;
             },
-            'BEN_ENDERECO_CEP' => function ($registrations) use ($detahe2) {
+            'BEN_ENDERECO_CEP' => function ($registrations) use ($detahe2, $app) {
                 $field_id = $detahe2['BEN_ENDERECO_CEP']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_CEP']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_CEP'];
+                $result = $data['En_CEP'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_CEP Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+                
+                $result = substr($result, 0, $length);
+               
+             
+                return $result;
             },
-            'BEN_ENDERECO_ESTADO' => function ($registrations) use ($detahe2) {
+            'BEN_ENDERECO_ESTADO' => function ($registrations) use ($detahe2, $app) {
                 $field_id = $detahe2['BEN_ENDERECO_ESTADO']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_CIDADE']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_Estado'];
+                $result = $data['En_Estado'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_ESTADO Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+                
+                $result = substr($result, 0, $length);
+               
+             
+                return $result;
             },
             'USO_BANCO_114' => '',
             'USO_BANCO_115' => '',
@@ -725,9 +878,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $numLote = 0;
         $totaLotes = 0;
         $totalRegistros = 0;
+      
 
         $complement = [];
-        $txt_data = $this->mountTxt($header1, $mappedHeader1, $txt_data, null, null);
+        $txt_data = $this->mountTxt($header1, $mappedHeader1, $txt_data, null, null, $app);
         $totalRegistros += 1;
 
         $txt_data .= "\r\n";
@@ -745,7 +899,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'LOTE' => $numLote,
             ];
 
-            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement, $app);
             $txt_data .= "\r\n";
 
             $lotBBCorrente += 1;
@@ -753,17 +907,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $_SESSION['valor'] = 0;
 
             $totaLotes++;
+            $numSeqRegistro = 0;
 
             //Detalhes 1 e 2
 
             foreach ($recordsBBCorrente as $key_records => $records) {
+                $numSeqRegistro ++;
                 $complement = [
                     'LOTE' => $numLote,
+                    'NUMERO_REGISTRO' => $numSeqRegistro
                 ];
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
 
                 $lotBBCorrente += 2;
@@ -780,7 +937,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             ];
 
-            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement, $app);
             $txt_data .= "\r\n";
             $totalRegistros += $lotBBCorrente;
         }
@@ -797,7 +954,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'FORMA_LANCAMENTO' => 5,
                 'LOTE' => $numLote,
             ];
-            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement, $app);
             $txt_data .= "\r\n";
 
             $lotBBPoupanca += 1;
@@ -805,18 +962,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $_SESSION['valor'] = 0;
 
             $totaLotes++;
+            $numSeqRegistro = 0;
 
             //Detalhes 1 e 2
 
             foreach ($recordsBBPoupanca as $key_records => $records) {
+                $numSeqRegistro ++;
                 $complement = [
                     'LOTE' => $numLote,
+                    'NUMERO_REGISTRO' => $numSeqRegistro
                 ];
 
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
 
                 $lotBBPoupanca += 2;
@@ -833,7 +993,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'LOTE' => $numLote,
             ];
 
-            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement, $app);
             $txt_data .= "\r\n";
 
             $totalRegistros += $lotBBPoupanca;
@@ -852,7 +1012,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'LOTE' => $numLote,
             ];
 
-            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement, $app);
 
             $txt_data .= "\r\n";
 
@@ -861,18 +1021,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $_SESSION['valor'] = 0;
 
             $totaLotes++;
+            $numSeqRegistro = 0;
 
             //Detalhes 1 e 2
 
             foreach ($recordsOthers as $key_records => $records) {
+                $numSeqRegistro ++;
                 $complement = [
                     'LOTE' => $numLote,
+                    'NUMERO_REGISTRO' => $numSeqRegistro
                 ];
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement, $app);
 
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
                 $lotOthers += 2;
 
@@ -887,10 +1050,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
                 'LOTE' => $numLote,
             ];
-            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement, $app);
             $txt_data .= "\r\n";
             $totalRegistros += $lotOthers;
         }
+
 
         //treiller do arquivo
         $totalRegistros += 1; // Adiciona 1 para obedecer a regra de somar o treiller
@@ -899,7 +1063,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'QUANTIDADE_REGISTROS_ARQUIVOS' => $totalRegistros,
         ];
 
-        $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement);
+        $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement, $app);
+
+        if(isset($_SESSION['problems'])){
+            foreach($_SESSION['problems'] as $key => $value){
+                echo "<p>Problemas na inscrição " . $key . " => " .$value. " </p>";
+            }
+            unset($_SESSION['problems']);
+            die();
+        }
+        
+        header('Content-type: text/utf-8');
+        echo $txt_data;
+        exit();
 
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
@@ -920,7 +1096,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         fclose($stream);
 
-        header('Content-Type: application/txt');
+        header('Content-Type: application/csv');
         header('Content-Disposition: attachment; filename=' . $file_name);
         header('Pragma: no-cache');
         readfile($patch);
@@ -1097,7 +1273,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             echo "Não foram encontrados registros.";
             die();
         }
-
+        
         $mappedHeader1 = [
             'BANCO' => '',
             'LOTE' => '',
@@ -1109,10 +1285,37 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CONVENIO_BB2' => '',
             'CONVENIO_BB3' => '',
             'CONVENIO_BB4' => '',
-            'AGENCIA' => '',
-            'AGENCIA_DIGITO' => '',
-            'CONTA' => '',
-            'CONTA_DIGITO' => '',
+            'AGENCIA' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['AGENCIA'];
+                $value = $this->normalizeString($field_id['default']);
+                return substr($value, 0, 4);                
+
+            },
+            'AGENCIA_DIGITO' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['AGENCIA_DIGITO'];
+                $value = $this->normalizeString($field_id['default']);
+                $result = is_string($value) ? strtoupper($value) : $value;
+                return $result;
+
+            },    
+            'CONTA' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['CONTA'];
+                $value = $this->normalizeString($field_id['default']);
+                return substr($value, 0, 12);
+                exit();
+
+            },
+            'CONTA_DIGITO' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['CONTA_DIGITO'];
+                $value = $this->normalizeString($field_id['default']);
+                $result = is_string($value) ? strtoupper($value) : $value;
+                return $result;
+
+            },
             'USO_BANCO_20' => '',
             'NOME_EMPRESA' => '',
             'NOME_BANCO' => '',
@@ -1120,11 +1323,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CODIGO_REMESSA' => '',
             'DATA_GER_ARQUIVO' => function ($registrations) use ($detahe1) {
                 $date = new DateTime();
-                return $date->format('d/m/Y');
+                return $date->format('dmY');
             },
             'HORA_GER_ARQUIVO' => function ($registrations) use ($detahe1) {
                 $date = new DateTime();
-                return $date->format('H:i:s');
+                return $date->format('His');
             },
             'NUM_SERQUNCIAL_ARQUIVO' => '',
             'LAYOUT_ARQUIVO' => '',
@@ -1148,10 +1351,37 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CONVENIO_BB2' => '',
             'CONVENIO_BB3' => '',
             'CONVENIO_BB4' => '',
-            'AGENCIA' => '',
-            'AGENCIA_DIGITO' => '',
-            'CONTA' => '',
-            'CONTA_DIGITO' => '',
+            'AGENCIA' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['AGENCIA'];
+                $value = $this->normalizeString($field_id['default']);
+                return substr($value, 0, 4);                
+
+            },
+            'AGENCIA_DIGITO' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['AGENCIA_DIGITO'];
+                $value = $this->normalizeString($field_id['default']);
+                $result = is_string($value) ? strtoupper($value) : $value;
+                return $result;
+
+            },    
+            'CONTA' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['CONTA'];
+                $value = $this->normalizeString($field_id['default']);
+                return substr($value, 0, 12);
+                exit();
+
+            },
+            'CONTA_DIGITO' => function ($registrations) use ($header1) {
+                $result = "";
+                $field_id = $header1['CONTA_DIGITO'];
+                $value = $this->normalizeString($field_id['default']);
+                $result = is_string($value) ? strtoupper($value) : $value;
+                return $result;
+
+            },
             'USO_BANCO_51' => '',
             'NOME_EMPRESA' => '',
             'USO_BANCO_40' => '',
@@ -1180,11 +1410,26 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'BEN_AGENCIA' => function ($registrations) use ($detahe1) {
                 $field_id = $detahe1['BEN_AGENCIA']['field_id'];
-                return $registrations->$field_id;
+                $age = $registrations->$field_id;
+
+                if(strlen($age)>4){
+                    $result = substr($age, 0, 4);
+                }else{
+                    $result =  $age;
+                }
+                return $result;
             },
             'BEN_AGENCIA_DIGITO' => function ($registrations) use ($detahe1) {
+                $result = "";
                 $field_id = $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
-                return $registrations->$field_id;
+                $dig = $registrations->$field_id;
+                if(strlen($dig)>4){
+                    $result = substr($dig, -1);
+                }else{
+                    $result = ""; 
+                }
+                
+                return is_string($result) ? strtoupper($result) :  $result;
             },
             'BEN_CONTA' => function ($registrations) use ($detahe1, $default) {
                 $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
@@ -1194,54 +1439,60 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $detahe1['BEN_CONTA']['field_id'];
                 $account = $registrations->$field_id;
 
+                $result = "";
                 if ($numberBank = '001' && $typeAccount == $default['typesAccount']['poupanca']) {
 
                     if (substr($account, 0, 3) != "510") {
-                        return "510" . $account;
+                        $result = "510" . $account;
                     } else {
 
-                        return $account;
+                        $result = $account;
 
                     }
                 } else {
 
-                    return $registrations->$field_id;
+                    $result = $registrations->$field_id;
                 }
 
-                $field_id = $detahe1['BEN_CONTA_DIGITO']['field_id'];
-
+                return substr($result, 0, -1); // Remove o ultimo caracter. Intende -se que o ultimo caracter é o DV da conta
             },
             'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe1, $default) {
                 $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+               
                 $numberBank = $this->numberBank($registrations->$temp);
-
-                $temp = $detahe1['TIPO_CONTA']['field_id'];
-                $typeAccount = $registrations->$temp;
+                
+                $temp = $detahe1['TIPO_CONTA']['field_id'];               
+                $typeAccount = $registrations->$temp;                
 
                 $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
-                $account = preg_replace('/[^0-9]/i', '', $registrations->$temp);
+                $account = preg_replace('/[^0-9]/i', '', $registrations->$temp);              
 
-                $digit = substr($account, -1);
+                $dig = substr($account, -1);
 
+                $result = "";
+                
                 if ($numberBank = '001' && $typeAccount == $default['typesAccount']['poupanca']) {
 
                     if (substr($account, 0, 3) == "510") {
-                        return $digit;
+                        $result = $dig;
                     } else {
 
-                        return $default['savingsDigit'][$digit];
+                        $result = $default['savingsDigit'][$dig];
 
                     }
                 } else {
 
-                    return $digit;
+                    $result = $dig;
                 }
+
+                return is_string($result) ? strtoupper($result) :  $result;
 
             },
             'BEN_DIGITO_CONTA_AGENCIA_80' => '',
             'BEN_NOME' => function ($registrations) use ($detahe1) {
-                $field_id = $detahe1['BEN_NOME']['field_id'];
-                return $registrations->$field_id;
+                $field_id = $detahe1['BEN_NOME']['field_id'];                
+                $result = substr($registrations->$field_id, 0, $detahe1['BEN_NOME']['length']);
+                return $result;
             },
             'BEN_DOC_ATRIB_EMPRESA_82' => '',
             'DATA_PAGAMENTO' => function ($registrations) use ($detahe1) {
@@ -1263,8 +1514,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $date->add(new DateInterval('P1D'));
                     $weekday = $date->format('D');
                 }
-
-                return $date->format('d/m/Y');
+                
+                return $date->format('dmY');
             },
             'TIPO_MOEDA' => '',
             'USO_BANCO_85' => '',
@@ -1298,42 +1549,162 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'NUMERO_REGISTRO' => '',
             'SEGMENTO' => '',
             'USO_BANCO_104' => '',
-            'BEN_TIPO_DOC' => '',
-            'BEN_CPF' => '',
-            'BEN_ENDERECO_LOGRADOURO' => function ($registrations) use ($detahe2) {
-                $field_id = $detahe2['BEN_ENDERECO_LOGRADOURO']['field_id'];
-                $data = $registrations->$field_id;
-                return $data['En_Nome_Logradouro'];
+            'BEN_TIPO_DOC' => function ($registrations) use ($detahe2, $default, $field_labelMap) {
+                $result = "";
+                $type_register = $default['type_register'];
+                if(in_array($registrations->category, $type_register['CPF'])){
+                    $result = 1;
+                }elseif(in_array($registrations->category, $type_register['CNPJ'])){
+                    $result = 2;
+                }else{
+                    $_SESSION['problems'][$registrations->number] = "verificar tipo de cadastro (CPF ou CNPJ) na inscrição";
+                }
+                return $result;
             },
-            'BEN_ENDERECO_NUMERO' => function ($registrations) use ($detahe2) {
+            'BEN_CPF' => function ($registrations) use ($detahe2, $default, $field_labelMap) {
+                $type_register = $default['type_register'];
+                
+                $result = "";
+
+                
+                if(in_array($registrations->category, $type_register['CPF'])){
+                    $temp = $default['field_CPF'];
+                    if(is_array($temp)){
+                        foreach($temp as $value){
+                            $field_id = array_search(trim($value), $field_labelMap);
+                            if($field_id){
+                                $result = $registrations->$field_id;
+                                if(strlen($this->normalizeString($result))!=11){
+                                    $_SESSION['problems'][$registrations->number] = "CPF Inválido";
+                                }
+                            }
+                           
+                        }                        
+                    }else{
+                        $field_id = array_search(trim($temp), $field_labelMap);
+                        $result = $registrations->$field_id;
+                       
+                    }
+                }elseif(in_array($registrations->category, $type_register['CNPJ'])){
+                    $temp = $default['field_CNPJ'];
+                    if(is_array($temp)){
+                        foreach($temp as $value){
+                            $field_id = array_search(trim($value), $field_labelMap);
+                            if($field_id){
+                                $result = $registrations->$field_id;
+                                if(strlen($this->normalizeString($result))!=14){
+                                    $_SESSION['problems'][$registrations->number] = "CNPJ inválido";                                   
+                                }
+                            }
+                        }                        
+                    }else{
+                        $field_id = array_search(trim($temp), $field_labelMap);
+                        $result = $registrations->$field_id;
+                       
+                    }
+                }else{
+                    $_SESSION['problems'][$registrations->number] = "verificar tipo de cadastro (CPF ou CNPJ) na inscrição."; 
+                }
+                
+                return $this->normalizeString($result);
+            },
+            'BEN_ENDERECO_LOGRADOURO' => function ($registrations) use ($detahe2, $app) {
+                $field_id = $detahe2['BEN_ENDERECO_LOGRADOURO']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_LOGRADOURO']['length'];
+                $data = $registrations->$field_id;                
+                $result = $data['En_Nome_Logradouro'];
+                
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_LOGRADOURO Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+                $result = substr($result, 0, $length);
+               
+             
+                return $result;
+                
+            },
+            'BEN_ENDERECO_NUMERO' => function ($registrations) use ($detahe2, $app) {
                 $field_id = $detahe2['BEN_ENDERECO_NUMERO']['field_id'];
-                $data = $registrations->$field_id;
-                return $data['En_Num'];
+                $length = $detahe2['BEN_ENDERECO_NUMERO']['length'];
+                $data = $registrations->$field_id;               
+                $result = $data['En_Num'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_NUMERO Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+                
+                $result = substr($result, 0, $length);
+
+                return $result;
             },
             'BEN_ENDERECO_COMPLEMENTO' => function ($registrations) use ($detahe2) {
                 $field_id = $detahe2['BEN_ENDERECO_COMPLEMENTO']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_COMPLEMENTO']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_Complemento'];
+                $result = $data['En_Complemento'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_COMPLEMENTO Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+
+                $result = substr($result, 0, $length);
+
+                return $result;
             },
             'BEN_ENDERECO_BAIRRO' => function ($registrations) use ($detahe2) {
                 $field_id = $detahe2['BEN_ENDERECO_BAIRRO']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_BAIRRO']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_Bairro'];
+                $result =  $data['En_Bairro'];
+                
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_BAIRRO Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+
+                $result = substr($result, 0, $length);
+
+                return $result;
             },
             'BEN_ENDERECO_CIDADE' => function ($registrations) use ($detahe2) {
                 $field_id = $detahe2['BEN_ENDERECO_CIDADE']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_CIDADE']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_Municipio'];
+                $result = $data['En_Municipio'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_CIDADE Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+
+                $result = substr($result, 0, $length);
+
+                return $result;
             },
             'BEN_ENDERECO_CEP' => function ($registrations) use ($detahe2) {
                 $field_id = $detahe2['BEN_ENDERECO_CEP']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_CEP']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_CEP'];
+                $result = $data['En_CEP'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_CEP Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+
+                $result = substr($result, 0, $length);
+                return $result;
             },
             'BEN_ENDERECO_ESTADO' => function ($registrations) use ($detahe2) {
                 $field_id = $detahe2['BEN_ENDERECO_ESTADO']['field_id'];
+                $length = $detahe2['BEN_ENDERECO_ESTADO']['length'];
                 $data = $registrations->$field_id;
-                return $data['En_Estado'];
+                $result = $data['En_Estado'];
+
+                if(strlen($result)>$length){
+                    $app->log->info($registrations->number . " Campo BEN_ENDERECO_ESTADO Header 2 maior que o permitido o valor foi truncado. Máximo permitido = " . $length);
+                }
+
+                $result = substr($result, 0, $length);
+
+                return $result;
             },
             'USO_BANCO_114' => '',
             'USO_BANCO_115' => '',
@@ -1390,6 +1761,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
         }
 
+        
+      
+
         /**
          * Monta o txt analisando as configs. caso tenha que buscar algo no banco de dados,
          * faz a pesquisa atravez do array mapped. Caso contrario busca o valor default da configuração
@@ -1401,7 +1775,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $totalRegistros = 0;
 
         $complement = [];
-        $txt_data = $this->mountTxt($header1, $mappedHeader1, $txt_data, null, null);
+        $txt_data = $this->mountTxt($header1, $mappedHeader1, $txt_data, null, null, $app);
         $totalRegistros += 1;
 
         $txt_data .= "\r\n";
@@ -1419,7 +1793,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'LOTE' => $numLote,
             ];
 
-            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement, $app);
             $txt_data .= "\r\n";
 
             $lotBBCorrente += 1;
@@ -1427,17 +1801,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $_SESSION['valor'] = 0;
 
             $totaLotes++;
+            $numSeqRegistro = 0;
 
             //Detalhes 1 e 2
 
             foreach ($recordsBBCorrente as $key_records => $records) {
+                $numSeqRegistro ++;
                 $complement = [
                     'LOTE' => $numLote,
+                    'NUMERO_REGISTRO' => $numSeqRegistro
                 ];
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
 
                 $lotBBCorrente += 2;
@@ -1454,7 +1831,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             ];
 
-            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement, $app);
             $txt_data .= "\r\n";
             $totalRegistros += $lotBBCorrente;
         }
@@ -1471,7 +1848,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'FORMA_LANCAMENTO' => 5,
                 'LOTE' => $numLote,
             ];
-            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement, $app);
             $txt_data .= "\r\n";
 
             $lotBBPoupanca += 1;
@@ -1479,18 +1856,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $_SESSION['valor'] = 0;
 
             $totaLotes++;
+            $numSeqRegistro = 0;
 
             //Detalhes 1 e 2
 
             foreach ($recordsBBPoupanca as $key_records => $records) {
+                $numSeqRegistro ++;
                 $complement = [
                     'LOTE' => $numLote,
+                    'NUMERO_REGISTRO' => $numSeqRegistro
                 ];
 
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
 
                 $lotBBPoupanca += 2;
@@ -1507,7 +1887,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'LOTE' => $numLote,
             ];
 
-            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement, $app);
             $txt_data .= "\r\n";
 
             $totalRegistros += $lotBBPoupanca;
@@ -1526,7 +1906,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'LOTE' => $numLote,
             ];
 
-            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement, $app);
 
             $txt_data .= "\r\n";
 
@@ -1535,18 +1915,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $_SESSION['valor'] = 0;
 
             $totaLotes++;
+            $numSeqRegistro = 0;
 
             //Detalhes 1 e 2
 
             foreach ($recordsOthers as $key_records => $records) {
+                $numSeqRegistro ++;
                 $complement = [
                     'LOTE' => $numLote,
+                    'NUMERO_REGISTRO' => $numSeqRegistro
                 ];
-                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement, $app);
 
                 $txt_data .= "\r\n";
 
-                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement);
+                $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
                 $lotOthers += 2;
 
@@ -1561,7 +1944,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
                 'LOTE' => $numLote,
             ];
-            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement);
+            $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement, $app);
             $txt_data .= "\r\n";
             $totalRegistros += $lotOthers;
         }
@@ -1573,8 +1956,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'QUANTIDADE_REGISTROS_ARQUIVOS' => $totalRegistros,
         ];
 
-        $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement);
-        
+        $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement, $app);
+
+        if(isset($_SESSION['problems'])){
+            foreach($_SESSION['problems'] as $key => $value){
+                echo "<p>Problemas na inscrição " . $key . " => " .$value. " </p>";
+            }
+            unset($_SESSION['problems']);
+            die();
+        }
+
+        header('Content-type: text/utf-8');
+        echo $txt_data;
+        exit();
+
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
          */
@@ -1594,20 +1989,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         fclose($stream);
 
-        header('Content-Type: application/txt');
+        header('Content-Type: application/csv');
         header('Content-Disposition: attachment; filename=' . $file_name);
         header('Pragma: no-cache');
         readfile($patch);
-
-    }
-
-    /**
-     * Implementa o exportador TXT no modelo CNAB 240, para envio de remessas ao banco do Brasil Inciso 3
-     *
-     *
-     */
-    public function ALL_exportCnab240Inciso3()
-    {
 
     }
 
@@ -1639,8 +2024,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         } else {
             $data .= str_pad($value['default'], $length, " ");
         }
-
-        return substr($data, 0, $length);
+        
+        return $data;//substr($data, 0, $length);
     }
 
     /*
@@ -1698,7 +2083,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * Sempre será respeitado os valores de tamanho de string e tipo que estão no arquivo de config
      *
      */
-    private function mountTxt($array, $mapped, $txt_data, $register, $complement)
+    private function mountTxt($array, $mapped, $txt_data, $register, $complement,$app)
     {
 
         if ($complement) {
@@ -1706,14 +2091,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $array[$key]['default'] = $value;
             }
         }
-        //$_SESSION['valor'] = 0;
+
+       
         foreach ($array as $key => $value) {
             if ($value['field_id']) {
                 if (is_callable($mapped[$key])) {
                     $data = $mapped[$key];
                     $value['default'] = $data($register);
+                    if(strlen($data($register))>$value['length']){
+                        $app->log->info($register ." Esta com campo " . $key . " Maior que o permitido. Máximo permitido " . $value['length']);
+                      
+                    }
+                    
                     $value['field_id'] = null;
-                    $txt_data .= $this->createString($value);
+                    $txt_data .= $this->createString($value);                    
                     $value['default'] = null;
                     $value['field_id'] = $value['field_id'];
 
@@ -1737,4 +2128,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return $txt_data;
     }
 
+    /**
+     * Normaliza uma string
+     */
+    private function normalizeString($valor)
+    {
+        $valor = Normalizer::normalize($valor, Normalizer::FORM_D);
+        return preg_replace('/[^a-z0-9 ]/i', '', $valor);
+    }
 }

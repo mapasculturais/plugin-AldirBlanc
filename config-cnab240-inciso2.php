@@ -26,20 +26,21 @@
  *   hora : minutos : segundos = 00:00:00 => No arquivo a formatação não deve conter caracteres especiais.
  */
 return [
-    'HEADER1' => [
+    //Header do arquivo, HEADER1 segundo planilha
+    'HEADER1' => [ 
         'BANCO' => [ // Numero do banco da entidade pagadora, deve ser confirmado de qual banco sairá o recurso, casso seja Banco Do Brasil seria 001
             'length' => 3,
             'default' => '001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'LOTE' => [ // Valor default segundo planilha = 0000
+        'LOTE' => [ // Valor default segundo planilha e documento particularidades BB = 0000
             'length' => 4,
             'default' => '0000',
             'field_id' => null,
             'type' => 'int',
         ],
-        'REGISTRO' => [ //Valor default segundo planilha = 0
+        'REGISTRO' => [ //Valor default segundo planilha e documento particularidades BB = 0
             'length' => 1,
             'default' => '0',
             'field_id' => null,
@@ -89,26 +90,26 @@ return [
         ],
         'AGENCIA' => [ //Agência bancária da instituição em questão
             'length' => 5,
-            'default' => '0927',
-            'field_id' => null,
+            'default' => '0927-x',
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'AGENCIA_DIGITO' => [ //Gidito da agência bancária da instituição em questão
             'length' => 1,
-            'default' => '3',
-            'field_id' => null,
+            'default' => 'x',
+            'field_id' => 'mapped',
             'type' => 'string',
         ],
         'CONTA' => [ //Conta bancária da instituição em questão
             'length' => 12,
             'default' => '0073015',
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'CONTA_DIGITO' => [ //Digito da conta bancária da instituição em questão
             'length' => 1,
             'default' => '7',
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'USO_BANCO_20' => [ //Não usar, uso exclusivo do banco
@@ -184,6 +185,7 @@ return [
             'type' => 'int',
         ],
     ],
+    //Header do lote, HEADER2 segundo planilha
     'HEADER2' => [
         'BANCO' => [ // Numero do banco que sera usado para debitos dos montantes
             'length' => 3,
@@ -191,19 +193,19 @@ return [
             'field_id' => null,
             'type' => 'int',
         ],
-        'LOTE' => [
+        'LOTE' => [ // Numero incrimentado a cada novo lote EX.: no lote 2 dever ser 0002
             'length' => 4,
             'default' => '0001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'REGISTRO' => [
+        'REGISTRO' => [ //valor default segundo documento particularidades BB = 1
             'length' => 1,
             'default' => '1',
             'field_id' => null,
             'type' => 'int',
         ],
-        'OPERACAO' => [
+        'OPERACAO' => [ //valor default segundo documento particularidades BB = C
             'length' => 1,
             'default' => 'C',
             'field_id' => null,
@@ -215,13 +217,13 @@ return [
             'field_id' => null,
             'type' => 'int',
         ],
-        'FORMA_LANCAMENTO' => [
+        'FORMA_LANCAMENTO' => [ // Opções, [Corrente BB = 01, Poupança BB = 05, Outros bancos 03]
             'length' => 2,
             'default' => '01',
             'field_id' =>  null,
             'type' => 'int',
         ],
-        'LAYOUT_LOTE' => [ // Por default fomos orientados a deichar sempre 020
+        'LAYOUT_LOTE' => [ // Valor default orientado na planilha = 020
             'length' => 3,
             'default' => '020',
             'field_id' => null,
@@ -233,13 +235,13 @@ return [
             'field_id' => null,
             'type' => 'string',
         ],
-        'INSCRICAO_TIPO' => [
+        'INSCRICAO_TIPO' => [ // Tipo de inscrição da empresa (CPF = 1, CNPJ = 2)
             'length' => 1,
             'default' => '2',
             'field_id' => null,
             'type' => 'int',
         ],
-        'INSCRICAO_NUMERO' => [
+        'INSCRICAO_NUMERO' => [ //Numero de inscrição da empresa (CPF ou CNPJ) se atentar ao informado no campo INSCRICAO_TIPO
             'length' => 14,
             'default' => '92.418.062/0001-36',
             'field_id' => null,
@@ -269,29 +271,29 @@ return [
             'field_id' => null,
             'type' => 'string',
         ],
-        'AGENCIA' => [ //Agẽncia bancária da instituição ou empresa em questão
+        'AGENCIA' => [ //Agência bancária da instituição em questão
             'length' => 5,
-            'default' => '0927',
-            'field_id' => null,
+            'default' => '0927-x',
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
-        'AGENCIA_DIGITO' => [ //Digito da agẽncia bancária da instituição ou empresa em questão
+        'AGENCIA_DIGITO' => [ //Gidito da agência bancária da instituição em questão
             'length' => 1,
-            'default' => '3',
-            'field_id' => null,
+            'default' => 'x',
+            'field_id' => 'mapped',
             'type' => 'string',
         ],
-        'CONTA' => [ //COnta da instituição ou empresa em questão
+        'CONTA' => [ //Conta bancária da instituição em questão
             'length' => 12,
             'default' => '0073015',
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
-        'CONTA_DIGITO' => [ //Digito conta da instituição ou empresa em questão
+        'CONTA_DIGITO' => [ //Digito da conta bancária da instituição em questão
             'length' => 1,
             'default' => '7',
-            'field_id' => null,
-            'type' => 'string',
+            'field_id' => 'mapped',
+            'type' => 'int',
         ],
         'USO_BANCO_51' => [ //Não usar, uso exclusivo do banco
             'length' => 1,
@@ -299,7 +301,7 @@ return [
             'field_id' => null,
             'type' => 'int',
         ],
-        'NOME_EMPRESA' => [
+        'NOME_EMPRESA' => [ // Nome da empresa que efetuará os pagamentos
             'length' => 30,
             'default' => 'Elza e Pedro Henrique ME',
             'field_id' => null,
@@ -361,21 +363,21 @@ return [
         ],
     ],    
     'DETALHE1' => [
-        'BANCO' => [ // Informação 
+        'BANCO' => [ // Informação do banco que será debitado os montantes
             'length' => 3,
             'default' => '001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'LOTE' => [
+        'LOTE' => [ // Numero do lote a qual pertence o registro. Número deve ser igual ao LOTE do HEADER2 do lote em questão
             'length' => 4,
             'default' => '0001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'REGISTRO' => [
+        'REGISTRO' => [ //Valor default orientado na planilha e documento particularidades BB = 3
             'length' => 1,
-            'default' => '',
+            'default' => '3',
             'field_id' => null,
             'type' => 'int',
         ],
@@ -565,14 +567,14 @@ return [
         ],
         'BEN_TIPO_DOC' => [
             'length' => 1,
-            'default' => 1,
-            'field_id' => null,
+            'default' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'BEN_CPF' => [
             'length' => 14,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'BEN_ENDERECO_LOGRADOURO' => [
@@ -713,13 +715,13 @@ return [
         ],
         'LOTE' => [
             'length' => 4,
-            'default' => '0001',
+            'default' => '9999',
             'field_id' => null,
             'type' => 'int',
         ],
         'REGISTRO' => [
             'length' => 1,
-            'default' => '5',
+            'default' => '9',
             'field_id' => null,
             'type' => 'int',
         ],
@@ -773,7 +775,23 @@ return [
             'X' => '3'
         ],
         'field_conta' => 'NÚMERO DA CONTA:',
-        'field_banco' => 'BANCO:'
+        'field_banco' => 'BANCO:',
+        'field_CPF' => ['CPF DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:'],
+        'field_CNPJ' => [
+            'NÚMERO DE INSCRIÇÃO EM CADASTRO NACIONAL DE PESSOA JURÍDICA – CNPJ:',
+            'NÚMERO DE INSCRIÇÃO EM CADASTRO NACIONAL DE PESSOA JURÍDICA – CNPJ:'
+        ],
+        'type_register' => [
+            "CNPJ" => [
+                'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
+                'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO'
+            ],
+            "CPF" => [
+                'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',   
+                'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO'
+            ]
+        ]
     ],
+   
     
 ];

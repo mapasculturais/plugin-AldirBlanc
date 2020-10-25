@@ -89,26 +89,26 @@ return [
         ],
         'AGENCIA' => [ //Agência bancária da instituição em questão
             'length' => 5,
-            'default' => '0927',
-            'field_id' => null,
+            'default' => '0927-x',
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'AGENCIA_DIGITO' => [ //Gidito da agência bancária da instituição em questão
             'length' => 1,
-            'default' => '3',
-            'field_id' => null,
+            'default' => 'x',
+            'field_id' => 'mapped',
             'type' => 'string',
         ],
         'CONTA' => [ //Conta bancária da instituição em questão
             'length' => 12,
             'default' => '0073015',
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'CONTA_DIGITO' => [ //Digito da conta bancária da instituição em questão
             'length' => 1,
             'default' => '7',
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'USO_BANCO_20' => [ //Não usar, uso exclusivo do banco
@@ -271,27 +271,27 @@ return [
         ],
         'AGENCIA' => [ //Agẽncia bancária da instituição ou empresa em questão
             'length' => 5,
-            'default' => '0927',
-            'field_id' => null,
+            'default' => '0927-x',
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'AGENCIA_DIGITO' => [ //Digito da agẽncia bancária da instituição ou empresa em questão
             'length' => 1,
-            'default' => '3',
-            'field_id' => null,
+            'default' => 'x',
+            'field_id' => 'mapped',
             'type' => 'string',
         ],
         'CONTA' => [ //COnta da instituição ou empresa em questão
             'length' => 12,
             'default' => '0073015',
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'CONTA_DIGITO' => [ //Digito conta da instituição ou empresa em questão
             'length' => 1,
             'default' => '7',
-            'field_id' => null,
-            'type' => 'string',
+            'field_id' => 'mapped',
+            'type' => 'int',
         ],
         'USO_BANCO_51' => [ //Não usar, uso exclusivo do banco
             'length' => 1,
@@ -375,7 +375,7 @@ return [
         ],
         'REGISTRO' => [
             'length' => 1,
-            'default' => '',
+            'default' => '3',
             'field_id' => null,
             'type' => 'int',
         ],
@@ -572,7 +572,7 @@ return [
         'BEN_CPF' => [
             'length' => 14,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'field_28',
             'type' => 'int',
         ],
         'BEN_ENDERECO_LOGRADOURO' => [
