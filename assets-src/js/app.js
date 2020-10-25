@@ -1,5 +1,7 @@
 $(document).ready(function() {
 
+
+
     var params = {
         opportunity: null,
         category: null
@@ -282,4 +284,31 @@ $(document).ready(function() {
     $('.form-export-clear').on('click', function() {                      
         $('.form-export-dataprev').trigger("reset");
      });
+     
+     
+    var cpfInput = document.getElementById("RegraValida");
+    if(cpfInput) {
+        cpfInput.addEventListener('keydown', function() {
+        
+            function fMasc(objeto,mascara) {
+                obj=objeto
+                masc=mascara
+                setTimeout(() => {
+                    obj.value=masc(obj.value)
+                },1)
+            }
+    
+            function mCPF(cpf){
+                cpf=cpf.replace(/\D/g,"")
+                cpf=cpf.replace(/(\d{3})(\d)/,"$1.$2")
+                cpf=cpf.replace(/(\d{3})(\d)/,"$1.$2")
+                cpf=cpf.replace(/(\d{3})(\d{1,2})$/,"$1-$2")
+                return cpf
+            }
+    
+            fMasc( this, mCPF )
+
+        });
+    }
+    
 });
