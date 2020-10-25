@@ -282,4 +282,69 @@ $(document).ready(function() {
     $('.form-export-clear').on('click', function() {                      
         $('.form-export-dataprev').trigger("reset");
      });
+
+    /**
+     * Formulario de inscrição por mediadores
+     */
+
+    if ($(".registration-fieldset-moderator").length > 0){
+
+        // mediacao_contato_tipo
+        $field_validate = false;
+        $checked_mediacao_contato_tipo = $('.field-mediacao-contato-tipo label input:checked');
+        if($checked_mediacao_contato_tipo.length > 0) {
+            $field_validate = true;
+        }
+
+        if($field_validate == false) {
+            $('.ng-scope .registration-fieldset .errors-header').before('<div class="errors erro-mediacao-contato-tipo"><a href="">Forma de contato: <span class="errors-field ng-binding ng-scope"> O campo é obrigatório.</span></a></div>');
+        }
+
+        $fields_mediacao_contato_tipo = $('.field-mediacao-contato-tipo label input');
+        $fields_mediacao_contato_tipo.each(function(){
+            $(this).change(function(){
+                $field_validate = true;
+                $('.erro-mediacao-contato-tipo').remove();
+            });
+        });
+
+        // mediacao_contato
+        $field_mediacao_contato = $('#field-mediacao-contato');
+        $normalize_field_mediacao_contato = $field_mediacao_contato.val().replace(/[^0-9]/gi, '');
+
+        if ($normalize_field_mediacao_contato.length < 10) {
+            $('.ng-scope .registration-fieldset .errors-header').after('<div class="errors erro-mediacao-contato"><a href="">Número de telefone: <span class="errors-field ng-binding ng-scope"> O campo é obrigatório.</span></a></div>');
+        } else {
+            $('.erro-mediacao-contato').remove();
+        }
+
+        $field_mediacao_contato.change(function() {
+            $normalize_field_mediacao_contato = $field_mediacao_contato.val().replace(/[^0-9]/gi, '');
+            if ($normalize_field_mediacao_contato.length < 10) {
+                $('.erro-mediacao-contato').remove();
+                $('.ng-scope .registration-fieldset .errors-header').after('<div class="errors erro-mediacao-contato"><a href="">Número de telefone: <span class="errors-field ng-binding ng-scope"> O campo é obrigatório.</span></a></div>');
+            } else {
+                $('.erro-mediacao-contato').remove();
+            }
+        });
+
+        // mediacao_senha
+        $field_mediacao_senha = $('#field-mediacao-senha');
+
+        if ($field_mediacao_senha.val().length < 1) {
+            $('.ng-scope .registration-fieldset .errors-header').after('<div class="errors erro-mediacao-senha"><a href="">Senha: <span class="errors-field ng-binding ng-scope"> O campo é obrigatório.</span></a></div>');
+        } else {
+            $('.erro-mediacao-senha').remove();
+        }
+
+        $field_mediacao_senha.change(function() {
+            if ($field_mediacao_senha.val().length < 1) {
+                $('.erro-mediacao-senha').remove();
+                $('.ng-scope .registration-fieldset .errors-header').after('<div class="errors erro-mediacao-senha"><a href="">Senha: <span class="errors-field ng-binding ng-scope"> O campo é obrigatório.</span></a></div>');
+            } else {
+                $('.erro-mediacao-senha').remove();
+            }
+        });
+
+    }
 });

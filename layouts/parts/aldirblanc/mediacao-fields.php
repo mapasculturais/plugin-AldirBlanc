@@ -15,7 +15,7 @@ function __mediacao_file($file)
 <div class="registration-fieldset registration-fieldset-moderator" ng-controller="RegistrationFieldsController">
 
     <div class="each-line">
-        <span class="label">Documentação para a mediação</span>
+        <span class="label">Documentação para a mediação <span class="required">*todos campos são obrigatórios</span></span>
     </div>
 
     <div class="each-line">
@@ -58,8 +58,8 @@ function __mediacao_file($file)
     {{::(entity.mediacao_contato = "<?= $entity->mediacao_contato ?>") ? '' : null}}
     {{::(entity.mediacao_senha = "<?= $entity->mediacao_senha ?>") ? '' : null}}
 
-    <div class="each-line">
-        <span class="label">O contato será por</span>
+    <div class="each-line field-mediacao-contato-tipo">
+        <span class="label">O contato será por <span class="required">*</span></span>
         <label class="mr-10">
             <input type=radio ng-model="entity.mediacao_contato_tipo" ng-change="saveField({fieldName: 'mediacao_contato_tipo'}, entity.mediacao_contato_tipo)" value="telefone-fixo" />
             Telefone fixo
@@ -75,17 +75,17 @@ function __mediacao_file($file)
     </div>
 
     <div class="each-line">
-        <span class="label">Número de telefone</span>
+        <span class="label">Número de telefone <span class="required">*</span></span>
         <label>
-            <input class="input-text" ng-model="entity.mediacao_contato" ng-blur="saveField({fieldName: 'mediacao_contato'}, entity.mediacao_contato)" js-mask="(99) 999999999" placeholder="(__) _________" />
+            <input id="field-mediacao-contato" class="input-text" ng-model="entity.mediacao_contato" ng-blur="saveField({fieldName: 'mediacao_contato'}, entity.mediacao_contato)" js-mask="(99) 9999 99999" placeholder="(__) _________" ng-required=true />
         </label>
     </div>
 
     <div class="each-line">
-        <span class="label">Senha</span>
+        <span class="label">Senha <span class="required">*</span></span>
         <span class="description">Essa senha será utilizada pelo inscrito, junto com o CPF, para acompanhar a sua inscrição.</span>
         <label>
-            <input class="input-text" ng-model="entity.mediacao_senha" ng-blur="saveField({fieldName: 'mediacao_senha'}, entity.mediacao_senha)" />
+            <input id="field-mediacao-senha"  class="input-text" ng-model="entity.mediacao_senha" ng-blur="saveField({fieldName: 'mediacao_senha'}, entity.mediacao_senha)" ng-required=true />
         </label>
     </div>
 
