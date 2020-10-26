@@ -497,15 +497,27 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
      */
     function GET_status()
     {
-        $this->requireAuthentication();
         $app = App::i();
+        if (isset($_SESSION['mediado_data']) && $app->user->is('guest') ){
+            $data = $_SESSION['mediado_data'];
+            $registration = $this->requestedEntity;
+            $agentCpf = $this->cleanCpf($registration->owner->getMetadata('documento'));
+            $sessionCpf = $this->cleanCpf($data['cpf']);
+            if( $agentCpf == $sessionCpf && time() - $data['last_activity'] < 600 ){
+                $_SESSION['mediado_data']['last_activity'] = time();
+            }
+            else{
+                unset( $_SESSION['mediado_data'] );
+            }
+        }
+        else{
+            $this->requireAuthentication();
+            $registration = $this->requestedEntity;
 
-        $registration = $this->requestedEntity;
-
+        }
         if(!$registration) {
             $app->pass();
         }
-
         $registration->checkPermission('view');
         $summaryStatusName = $this->getStatusNames();
         $registrationStatusName = "";

@@ -148,7 +148,52 @@ class Plugin extends \MapasCulturais\Plugin
             }
             $this->part('aldirblanc/generate-opportunities-button');
         });
-        
+        // modulo de mediacao
+        $app->hook('entity(Agent).canUser(<<viewPrivateData>>)', function($user,&$can) use($app){
+            
+
+            if (isset($_SESSION['mediado_data']) && $user->is('guest') ){
+                $data = $_SESSION['mediado_data'];
+                $data = $_SESSION['mediado_data'];
+                $cpf = $this->getMetadata('documento');
+                $cpfClean = str_replace("-","",$cpf);
+                $cpfClean = str_replace(".","",$cpfClean);
+                $cpfSession = $data['cpf'];
+                $cpfSessionClean =str_replace("-","",$cpfSession);
+                $cpfSessionClean = str_replace(".","",$cpfSessionClean);
+                if( $cpfClean == $cpfSessionClean && time() - $data['last_activity'] < 600 ){
+                    $can = true;
+                    $_SESSION['mediado_data']['last_activity'] = time();
+                }
+                else{
+                    unset( $_SESSION['mediado_data'] );
+               }
+            }
+        });
+        $app->hook('entity(Registration).canUser(<<@control|view|viewPrivateData|viewConsolidatedResult>>)', function($user,&$can) use($app){
+            
+            if (isset($_SESSION['mediado_data']) && $user->is('guest') ){
+                $data = $_SESSION['mediado_data'];
+                $cpf = $this->owner->getMetadata('documento');
+                $cpfClean = str_replace("-","",$cpf);
+                $cpfClean = str_replace(".","",$cpfClean);
+                $cpfSession = $data['cpf'];
+                $cpfSessionClean =str_replace("-","",$cpfSession);
+                $cpfSessionClean = str_replace(".","",$cpfSessionClean);
+                if( $cpfSessionClean == $cpfClean && time() - $data['last_activity'] < 600 ){
+                    $can = true;
+                    $_SESSION['mediado_data']['last_activity'] = time();
+
+                }
+                else{
+                    unset( $_SESSION['mediado_data'] );
+                }
+            }
+            
+
+        });
+
+
         //botao de export csv
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
             $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
@@ -384,7 +429,10 @@ class Plugin extends \MapasCulturais\Plugin
         $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_senha', [
             'label'   => i::__('Senha'),
             'type'    => 'text',
-            'private' => true
+            'private' => true,
+            'serialize' => function ($val) {
+                return md5($val);
+            },
         ]);
 
         /**
