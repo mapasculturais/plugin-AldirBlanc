@@ -646,7 +646,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $inciso1 = $this->getOpportunityInciso1();
              
             if ($app->user->is('mediador')){
-                $allowed = $this->config['oportunidade_mediadores'][$app->user->id];
+                $allowed = $this->config['oportunidade_mediadores'][$app->user->email];
                 if( !in_array($inciso1->id, $allowed )){
                     $inciso1 = "";
                 }
@@ -667,7 +667,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if ($this->config['inciso2_enabled']) {
             $inciso2_ids = $this->config['inciso2_opportunity_ids'];
             if ($app->user->is('mediador')){
-                $allowed = $this->config['oportunidade_mediadores'][$app->user->id];
+                $allowed = $this->config['oportunidade_mediadores'][$app->user->email];
                 $inciso2_ids = array_filter($inciso2_ids, function($id) use($allowed){ 
                     if( in_array($id, $allowed )){
                         return $id;
