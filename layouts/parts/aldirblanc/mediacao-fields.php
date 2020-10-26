@@ -85,7 +85,7 @@ function __mediacao_file($file)
         <span class="label">Senha <span class="required">*</span></span>
         <span class="description">Essa senha será utilizada pelo inscrito, junto com o CPF, para acompanhar a sua inscrição.</span>
         <label>
-            <input id="field-mediacao-senha"  class="input-text" ng-model="entity.mediacao_senha" ng-blur="saveField({fieldName: 'mediacao_senha'}, entity.mediacao_senha)" ng-required=true />
+            <input id="field-mediacao-senha" class="input-text" ng-model="entity.mediacao_senha" ng-blur="saveField({fieldName: 'mediacao_senha'}, entity.mediacao_senha)" ng-required=true />
         </label>
     </div>
 
