@@ -43,6 +43,10 @@ $_messages = [
     '8' => [
         'title'   => 'Sua solicitação foi validada.',
         'message' => 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.',
+    ],
+    '0' => [
+        'title'   => 'Sua solicitação segue em análise.',
+        'message' => 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail.',
     ]
 ];
 
@@ -51,6 +55,7 @@ $_messages = [
 <section id="lab-status" class="lab-main-content">
 
     <article class="main-content registration" ng-controller="OpportunityController">
+        
         <?php $status = $registration->status; ?>
         <?php if(isset($status)) : ?>
             <div class="status-card status-<?= $registration->status ?>">
@@ -59,6 +64,9 @@ $_messages = [
             </div><!-- /.status-card -->
 
         <?php endif; ?>
+        <div class="wrap-button">
+            <a href="<?php echo $app->createUrl('aldirblanc', 'cadastro'); ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar para os Cadastros"); ?></a>
+        </div><!-- /.wrap-button -->
 
         <h4 class="title-subsection">Edital <span class="underline">Inciso <?= $registration->inciso ?></span></h4>
 
@@ -67,10 +75,13 @@ $_messages = [
         <?php $this->part('aldirblanc/registration-single--header', $_params) ?>
         <?php $this->part('singles/registration-single--fields', $_params) ?>
 
-        <!-- <div class="wrap-button">
-            <a href="" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar"); ?></a>
-        </div> -->
-        <!-- .wrap-button -->
+        <?php if ($app->user->is('mediador') || $app->user->is('admin')) {
+            $this->part('aldirblanc/registration-mediacao', $_params);
+        } ?>
+
+        <div class="wrap-button">
+            <a href="<?php echo $app->createUrl('aldirblanc', 'cadastro'); ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar para os Cadastros"); ?></a>
+        </div><!-- /.wrap-button -->
 
     </article>
 

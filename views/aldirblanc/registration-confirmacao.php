@@ -33,6 +33,10 @@ $_params = [
 
         <?php $this->part('singles/registration-single--fields', $_params) ?>
 
+        <?php if ($app->user->is('mediador') || $app->user->is('admin')) {
+            $this->part('aldirblanc/registration-mediacao', $_params);
+        } ?>
+
         <?php $this->applyTemplateHook('form', 'end'); ?>
         <p class="registration-help"><?php \MapasCulturais\i::_e("Certifique-se que você preencheu as informações corretamente antes de enviar sua inscrição."); ?> <strong><?php \MapasCulturais\i::_e("Depois de enviada, não será mais possível editá-la."); ?></strong></p>
         <a class="btn btn-confirmar" ng-click="sendRegistration(false)" rel='noopener noreferrer'><?php \MapasCulturais\i::_e("Confirmar envio"); ?></a>

@@ -1,0 +1,112 @@
+body.controller-aldirblanc.action-mediados {
+
+    article.main-content {
+        background: none;
+        float: none;
+        margin-left: auto;
+        margin-right: auto;
+        word-wrap: break-word;
+
+        h1 {
+            font-size: 1.75rem;
+            color: #111111;
+            line-height: 1.9375rem;
+            text-align: center;
+            margin-bottom: 35px;
+            padding-top: 35px;
+            font-weight: bold;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h4.title-subsection {
+            color: #666666;
+            font-size: 1rem;
+            font-weight: normal;
+            font-family: "aleo",
+            serif;
+            line-height: 1.5rem;
+            margin: 20px auto;
+            text-align: center;   
+        }
+
+        .registration-fieldset-moderator {
+            @extend .card;
+
+            form {
+                .each-field {
+                    box-sizing: border-box;
+                    float: left;
+                    margin-bottom: 5px;
+                    padding-right: 15px;
+                    width: 50%;
+
+                    &:nth-child(2) {
+                        padding-left: 15px;
+                        padding-right: 0;
+
+                        @include mobile-only {
+                            padding-left: 0;
+                        }
+                    }
+
+                    @include mobile-only {
+                        float: none;
+                        padding-right: 0;
+                        width: 100%;
+                    }
+
+                    label {
+                        color: #333;
+                        display: block;
+                        font-size: 1rem;
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                        width: 100%;
+                    }
+
+                    input[type="text"],
+                    input[type="password"] {
+                        width: 100%;
+                    }
+                }
+
+                button[type="submit"].btn {
+                    @extend .btn;
+                    border-radius: 10px;
+                    -webkit-border-radius: 10px;
+                    -moz-border-radius: 10px;
+                    border: 0;
+                    box-sizing: border-box;
+                    cursor: pointer;
+                    display: block;
+                    font-family: "aleo",
+                    serif;
+                    font-size: 1rem;
+                    font-weight: bold;
+                    height: auto;
+                    line-height: 1.4;
+                    margin: 5px auto;
+                    padding: 14px 50px;
+                    text-align: center;
+                    transition: all 0.3s;
+                    white-space: inherit;
+                    width: auto;
+                }
+            }
+
+            span.error-login {
+                box-sizing: border-box;
+                color: #cc0033;
+                display: block;
+                font-size: 14px;
+                font-weight: bolder;
+                font-family: "Open Sans", Helvetica, Arial, sans-serif;
+                padding: 10px 15px 0 15px;
+                text-align: center;
+                width: 100%;
+            }
+        }
+    }
+}

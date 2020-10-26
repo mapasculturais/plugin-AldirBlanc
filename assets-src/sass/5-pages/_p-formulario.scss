@@ -125,6 +125,168 @@ article.registration {
                 }
             }
         }
+        &.registration-fieldset-moderator {
+
+            .each-line {
+                display: block;
+                margin-bottom: 15px;
+                clear: both;
+                width: 100%;
+
+                span {
+                    color: #666666;
+                    font-size: 1rem;
+
+                    &.label {
+                        color: #333;
+                        display: block;
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                        width: 100%;
+                    }
+
+                    span.required {
+                        color: #C60931;
+                        float: right;
+                        font-size: 11px;
+                        font-weight: normal;
+                        letter-spacing: 0;
+                        line-height: 15px;
+                        text-transform: lowercase;
+                        padding-top: 3px;
+                    }
+                }
+
+                .description {
+                    display: block;
+                    color: #333;
+                    font-family: "Open Sans";
+                    font-size: 11px;
+                    line-height: 1.5rem;
+                    margin: 0 0 10px;
+                    width: 100%;
+                }
+
+                .input-text {
+                    width: 100%;
+                }
+
+                &:nth-last-child(1) {
+                    margin-bottom: 0;
+                }
+
+            }
+
+            .buttons {
+                box-sizing: border-box;
+                float: left;
+                margin-bottom: 5px;
+                padding-right: 15px;
+                width: 50%;
+
+                &:nth-child(2) {
+                    padding-left: 15px;
+                    padding-right: 0;
+                    @include mobile-only {
+                        padding-left: 0;
+                        padding-right: 0;
+                    }
+                }
+
+                #mediacao-autorizacao,
+                #mediacao-documento {
+                    text-align: center;
+
+                    @include mobile-only {
+                        margin-bottom: 15px;
+                    }
+
+                    a {
+                        font-weight: lighter;
+                    }
+                }
+
+                @include mobile-only {
+                    float: none;
+                    padding-left: 0;
+                    padding-right: 0;
+                    width: 100%;
+                }
+
+                .btn.btn-default {
+                    width: 100%;
+
+                    &:hover {
+                        background-color: var(--primary-button-bg-color);
+                        opacity: 0.85;
+                    }
+                }
+
+                // popup de upload
+                #editbox-upload-document,
+                #editbox-upload-autorizacao {
+                    input[type="file"] {
+                        padding-top: 12px;
+                    }
+
+                    footer {
+                        button {
+                            float: left;
+                            margin-bottom: 10px;
+                            margin-right: 15px;
+                            width: calc(50% - 15px);
+
+                            @include mobile-only {
+                                float: none;
+                                margin-left: 0;
+                                margin-right: 0;
+                                width: 100%;
+                            }
+
+                            &:nth-child(2) {
+                                margin-left: 15px;
+                                margin-right: 0;
+
+                                @include mobile-only {
+                                    margin-left: 0;
+                                    margin-right: 0;
+                                }
+                            }
+
+                            &.mc-submit {
+                                background-color: var(--primary-button-bg-color);
+                                border: 0;
+                                border-radius: 10px;
+                                color: #fff;
+                                cursor: pointer;
+                                display: inline-block;
+                                font-family: "aleo",
+                                serif;
+                                font-size: 1rem;
+                                font-weight: bold;
+                                height: auto;
+                                line-height: 1.4;
+                                margin-top: 5px;
+                                padding: 14px 50px;
+                                text-align: center;
+                                transition: all 0.3s;
+                                white-space: inherit;
+                                text-decoration: none;
+
+                                &:hover {
+                                    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+                                    opacity: 0.85;
+                                }
+                            }
+                        }
+                    }
+
+                    .mc-arrow {
+                        display: none;
+                    }
+                }
+            }
+        } // &.registration-fieldset-moderator
     }
 
     .errors {
