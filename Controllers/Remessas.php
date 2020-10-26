@@ -586,7 +586,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $numberBank = $this->numberBank($registrations->$temp);
                 $temp = $detahe1['TIPO_CONTA']['field_id'];
                 $typeAccount = $registrations->$temp;
+
                 $field_id = $detahe1['BEN_CONTA']['field_id'];
+                $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
+
                 $account = $registrations->$field_id;
 
                 $result = "";
@@ -604,11 +607,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $result = $registrations->$field_id;
                 }
 
-                return substr($result, 0, -1); // Remove o ultimo caracter. Intende -se que o ultimo caracter é o DV da conta
+                if($temp === $field_id){
+                    return substr($result, 0, -1); // Remove o ultimo caracter. Intende -se que o ultimo caracter é o DV da conta
+
+                }else{
+                    return $result;
+
+                }
+              
             },
             'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe1, $default) {
                 $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
-
+                $field_id = $detahe1['BEN_CONTA']['field_id'];
+                
                 $numberBank = $this->numberBank($registrations->$temp);
 
                 $temp = $detahe1['TIPO_CONTA']['field_id'];
@@ -616,17 +627,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
                 $account = preg_replace('/[^0-9]/i', '', $registrations->$temp);
-
+                
                 $dig = substr($account, -1);
-
+                
                 $result = "";
-
+                
                 if ($numberBank = '001' && $typeAccount == $default['typesAccount']['poupanca']) {
-
+                   
                     if (substr($account, 0, 3) == "510") {
                         $result = $dig;
                     } else {
-
+                       
                         $result = $default['savingsDigit'][$dig];
 
                     }
@@ -849,8 +860,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $field_conta = $default['field_conta'];
         $field_banco = $default['field_banco'];
         foreach ($registrations as $value) {
+          
             if ($this->numberBank($value->$field_banco) == "001") {
-
+               
                 if ($value->$field_conta == "Conta corrente") {
                     $recordsBBCorrente[] = $value;
                 } else {
@@ -943,7 +955,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $complement = [];
             $numLote++;
             $complement = [
-                'FORMA_LANCAMENTO' => 5,
+                'FORMA_LANCAMENTO' => 05,
                 'LOTE' => $numLote,
             ];
             $txt_data = $this->mountTxt($header2, $mappedHeader2, $txt_data, null, $complement, $app);
@@ -1061,7 +1073,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 echo "<p>Problemas na inscrição " . $key . " => " . $value . " </p>";
             }
             unset($_SESSION['problems']);
-            die();
+            //die();
         }
 
         // header('Content-type: text/utf-8');
@@ -1360,7 +1372,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $header1['CONTA'];
                 $value = $this->normalizeString($field_id['default']);
                 return substr($value, 0, 12);
-                exit();
+               
 
             },
             'CONTA_DIGITO' => function ($registrations) use ($header1) {
@@ -1734,7 +1746,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $recordsOthers = [];
         $field_conta = array_search(trim($default['field_conta']), $field_labelMap);
         $field_banco = array_search(trim($default['field_banco']), $field_labelMap);
-        foreach ($registrations as $value) {
+        foreach ($registrations as $value) {           
             if ($this->numberBank($value->$field_banco) == "001") {
 
                 if ($value->$field_conta == "Conta corrente") {
