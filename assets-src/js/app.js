@@ -316,7 +316,7 @@ $(document).ready(function() {
      * Formulario de inscrição por mediadores
      */
 
-    if ($(".registration-fieldset-moderator").length > 0){
+    if ($(".action-formulario .registration-fieldset-moderator").length > 0){
 
         // mediacao_contato_tipo
         $field_validate = false;
