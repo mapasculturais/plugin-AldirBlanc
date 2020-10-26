@@ -13,10 +13,10 @@
         <div class="lab-form-filter opcoes-inciso">
             <?php foreach ($registrations as $registration) {
                ?>
+            <a href="<?= $this->controller->createUrl( 'status', [$registration->id]) ?>">
+
                 <button id="" role="button" class="informative-box js-lab-option lab-option">
-                    <div class="informative-box--icon">
-                        <i class="fas fa-university"></i>
-                    </div>
+                  
                     <div class="informative-box--title">
                         <h2>
                             <?=$registration->opportunity->name;?>
@@ -24,6 +24,7 @@
                     </div>
 
                 </button>  
+            </a>
                <?php
             }
             ?>
