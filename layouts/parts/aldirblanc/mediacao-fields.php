@@ -56,7 +56,6 @@ function __mediacao_file($file)
 
     {{::(entity.mediacao_contato_tipo = "<?= $entity->mediacao_contato_tipo ?>") ? '' : null}}
     {{::(entity.mediacao_contato = "<?= $entity->mediacao_contato ?>") ? '' : null}}
-    {{::(entity.mediacao_senha = "<?= $entity->mediacao_senha ?>") ? '' : null}}
 
     <div class="each-line field-mediacao-contato-tipo">
         <span class="label">O contato será por <span class="required">*</span></span>
