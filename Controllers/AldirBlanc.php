@@ -644,42 +644,68 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         if ($this->config['inciso1_enabled']) {
             $inciso1 = $this->getOpportunityInciso1();
-            $registrations = $controller->apiQuery([
-                '@select' => 'id', 
-                'opportunity' => "EQ({$inciso1->id})", 
-                'status' => 'GTE(0)'
-            ]);
-            $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
-            $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
+             
+            if ($app->user->is('mediador')){
+                $allowed = $this->config['oportunidade_mediadores'][$app->user->id];
+                if( !in_array($inciso1->id, $allowed )){
+                    $inciso1 = "";
+                }
+            }
+            if($inciso1){
+                $registrations = $controller->apiQuery([
+                    '@select' => 'id', 
+                    'opportunity' => "EQ({$inciso1->id})", 
+                    'status' => 'GTE(0)'
+                ]);
+                $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+                $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
+            }
         }
 
         $opportunitiesInciso2 = [];
         $registrationsInciso2 = [];
-        
         if ($this->config['inciso2_enabled']) {
-            $inciso2_ids = implode(',', $this->config['inciso2_opportunity_ids']);
-            $registrations = $controller->apiQuery([
-                '@select' => 'id', 
-                'opportunity' => "IN({$inciso2_ids})", 
-                'status' => 'GTE(0)'
-            ]);
-            $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
-            $registrationsInciso2 = $repo->findBy(['id' => $registrations_ids]);
-            $opportunitiesIdsInciso2 = array_values($this->config['inciso2_opportunity_ids']);
-            $opportunitiesInciso2 = $app->repo('Opportunity')->findRegistrationWithDateByIds($opportunitiesIdsInciso2); 
+            $inciso2_ids = $this->config['inciso2_opportunity_ids'];
+            if ($app->user->is('mediador')){
+                $allowed = $this->config['oportunidade_mediadores'][$app->user->id];
+                $inciso2_ids = array_filter($inciso2_ids, function($id) use($allowed){ 
+                    if( in_array($id, $allowed )){
+                        return $id;
+                    }
+                });
+                $inciso2_ids = array_values($inciso2_ids);
+            }
+
+            $inciso2_ids = implode(',', $inciso2_ids);
+            if($inciso2_ids){
+                $registrations = $controller->apiQuery([
+                    '@select' => 'id', 
+                    'opportunity' => "IN({$inciso2_ids})", 
+                    'status' => 'GTE(0)'
+                ]);
+                $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+                $registrationsInciso2 = $repo->findBy(['id' => $registrations_ids]);
+                $opportunitiesIdsInciso2 = explode(',',$inciso2_ids);
+                $opportunitiesInciso2 = $app->repo('Opportunity')->findRegistrationWithDateByIds($opportunitiesIdsInciso2); 
+            }
         }
         $opportunitiesInciso3 = [];
         if ($this->config['inciso3_enabled']) {
             $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
         $this->render('cadastro', [
-                'cidades' => $this->getCidades(), 
-                'registrationsInciso1' => $registrationsInciso1, 
-                'registrationsInciso2' => $registrationsInciso2, 
+                'inciso1Limite' => $this->config['inciso1_limite'],
+                'inciso2Limite' => $this->config['inciso2_limite'],
+                'inciso2_enabled' => $inciso2_ids ? $this->config['inciso2_enabled']:false,
+                'inciso1_enabled' => $inciso1 ? $this->config['inciso1_enabled']: false,
+                'inciso3_enabled' => $app->user->is('mediador') ? false : $this->config['inciso3_enabled'],
+                'cidades' => $inciso2_ids ? $this->getCidades($opportunitiesIdsInciso2) : [], 
+                'registrationsInciso1' => $inciso1 ? $registrationsInciso1 : [], 
+                'registrationsInciso2' => $inciso2_ids ? $registrationsInciso2 : [], 
                 'summaryStatusName'=>$summaryStatusName, 
                 'niceName' => $owner_name,
-                'opportunitiesInciso2' => $opportunitiesInciso2,
-                'opportunitiesInciso3' => $opportunitiesInciso3
+                'opportunitiesInciso2' => $inciso2_ids ? $opportunitiesInciso2 : [],
+                'opportunitiesInciso3' => $app->user->is('mediador') ? [] : $opportunitiesInciso3
             ]);
     }
 
