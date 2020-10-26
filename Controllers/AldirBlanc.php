@@ -832,6 +832,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $this->render('mediados-login', ['errors'=>[], 'data' => $this->data]);
             return;
         }
+        
         $cpf = ($this->data['cpf'] ?? '');
         $pass = ($this->data['password'] ?? '');
         $errors = [];
@@ -843,66 +844,59 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         if ($cpf){
             $cpf = $this->mask($cpf,'###.###.###-##');
-            $agentMeta = $app->repo("AgentMeta")->findOneBy(array('key' => 'documento', 'value' => $cpf));
-            if ($agentMeta){
-                $agent = $agentMeta->owner;
-            }
-            else{
+            $agentMeta = $app->repo("AgentMeta")->findBy(array('key' => 'documento', 'value' => $cpf));
+            $cpfClean = $this->cleanCpf($cpf);
+            
+            $agentMetaCpfClean = $app->repo("AgentMeta")->findBy(array('key' => 'documento', 'value' => $cpfClean));
+            $agentMetas = array_merge($agentMeta, $agentMetaCpfClean);
+
+            if (!$agentMetas){
                 $errors['inexistente'] = "CPF não cadastrado";
             }
+            
         }
         if(count($errors) > 0 ){
             $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
            return;
         }
-        $registrations = $app->repo('registration')->findBy(['owner' => $agent]);
-        $app->disableAccessControl();
+        $registrations = [];
+        foreach ($agentMetas as $agentMeta) {
+            $agent = $agentMeta->owner;
+            $agentRegistrations = $app->repo('registration')->findBy(['owner' => $agent]);
+            $registrations = array_merge($registrations, $agentRegistrations);
+        }
 
-        $registrationsFiltered = array_map(function($r) { 
-            if ($r->mediacao_senha){
+        $app->disableAccessControl();
+        $registrationsFiltered = array_filter($registrations, function($r) use($pass) { 
+            if ($r->mediacao_senha && $r->mediacao_senha == md5($pass)){
                 return $r;
             }
-        }, $registrations);
+        });
+        $registrationsFiltered = array_values($registrationsFiltered);
         $app->enableAccessControl();
         if(count($registrationsFiltered) < 1){
-            $errors['inexistente'] = "CPF não cadastrado";
+            $errors['inexistente'] = "CPF ou senha incorretos.";
             $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
             
         }
-
         $summaryStatusName = $this->getStatusNames();
+        $_SESSION['mediado_data'] = [
+            'cpf' => $cpf,
+            'last_activity' => time()
+        ];
         // Caso só tenha um registro no cpf
-        if (count($registrations) == 1){
-            $app->disableAccessControl();
-            $passDb = $registrations[0]->mediacao_senha;
-            $app->enableAccessControl();
-
-            if($passDb){
-                if ($pass == $passDb){
-                    $registrationStatusName = "";
-                    foreach($summaryStatusName as $key => $value) {
-                        if($key == $registrationsFiltered[0]->status) {
-                            $registrationStatusName = $value;
-                            break;
-                        }
-                    }    
-                    
-                    $this->render('status', ['registration' => $registrationsFiltered[0], 'registrationStatusName'=> $registrationStatusName]);
-                    
-                    return;
-                }
-                else{
-                    $errors['senha_errada'] = "A senha digitada não esta correta.";
-                    $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
-                    return;
+        if (count($registrationsFiltered) == 1){
+            $registrationStatusName = "";
+            foreach($summaryStatusName as $key => $value) {
+                if($key == $registrationsFiltered[0]->status) {
+                    $registrationStatusName = $value;
+                    break;
                 }
             }
-            else{
-                $errors['inexistente'] = "Nenhuma inscrição feita por mediadores para este documento";
-                $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
-                return;
-            }
+            
 
+            $app->redirect($this->createUrl('status', [$registrationsFiltered[0]->id]));
+            return;
         }
         else{
             foreach ($registrationsFiltered as $registration) {
@@ -921,7 +915,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     }
     
  
-
     /* REPORTE */
     function GET_reporte() {
 
@@ -1005,4 +998,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         return $maskared;
     }
+    function cleanCpf($cpf){
+        $cpfClean = str_replace("-","",$cpf);
+        $cpfClean = str_replace(".","",$cpfClean);
+        return $cpfClean;
+    }
+    
 }
