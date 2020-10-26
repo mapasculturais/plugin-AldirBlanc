@@ -360,20 +360,48 @@ $(document).ready(function() {
         // mediacao_senha
         $field_mediacao_senha = $('#field-mediacao-senha');
 
-        if ($field_mediacao_senha.val().length < 1) {
+        if ($field_mediacao_senha.val().length < 1 || $field_mediacao_senha.val() == '""') {
             $('.ng-scope .registration-fieldset .errors-header').after('<div class="errors erro-mediacao-senha"><a href="">Senha: <span class="errors-field ng-binding ng-scope"> O campo é obrigatório.</span></a></div>');
         } else {
             $('.erro-mediacao-senha').remove();
         }
 
         $field_mediacao_senha.change(function() {
-            if ($field_mediacao_senha.val().length < 1) {
+            if ($field_mediacao_senha.val().length < 1 || $field_mediacao_senha.val() == '""') {
                 $('.erro-mediacao-senha').remove();
                 $('.ng-scope .registration-fieldset .errors-header').after('<div class="errors erro-mediacao-senha"><a href="">Senha: <span class="errors-field ng-binding ng-scope"> O campo é obrigatório.</span></a></div>');
             } else {
                 $('.erro-mediacao-senha').remove();
             }
         });
+
+        setInterval(function(){
+
+            // mediacao_autorizacao
+            if ($('#mediacao-autorizacao').children().length < 1) {
+                $('.erro-mediacao-autorizacao').remove();
+                $('.ng-scope .registration-fieldset .errors-header').after('<div class="errors erro-mediacao-autorizacao"><a href="">Autorização: <span class="errors-field ng-binding ng-scope"> O campo é obrigatório.</span></a></div>');
+            } else {
+                $('.erro-mediacao-autorizacao').remove();
+            }
+
+            // mediacao_documento
+            if ($('#mediacao-documento').children().length < 1) {
+                $('.erro-mediacao-documento').remove();
+                $('.ng-scope .registration-fieldset .errors-header').after('<div class="errors erro-mediacao-documento"><a href="">Documento: <span class="errors-field ng-binding ng-scope"> O campo é obrigatório.</span></a></div>');
+            } else {
+                $('.erro-mediacao-documento').remove();
+            }
+
+            $errors = $('.registration-fieldset .errors');
+            if($errors.length == 0) {
+                $('.btn-validate').css('display', 'inline-block');
+                console.log('habilita');
+            } else {
+                $('.btn-validate').css('display', 'none');
+            }
+
+        }, 1000);
 
     }
 });

@@ -1,39 +1,30 @@
-<section class="lab-main-content cadastro ">
-    <header>
-        <div class="intro-message">
-        </div>
-    </header>
+<article class="main-content moderator">
 
-    <div class="js-lab-item lab-item cadastro-options">
-        <!-- <p class="lab-form-question">Para quem você está solicitando o benefício? <a class="js-help icon icon-help" href="#" title=""></a></p> -->
-        <h2 class="featured-title">
-            Entre para acessar seu cadastro
-        </h2>
+    <h1 class="featured-title">Entre para acessar seu inscrição</h1>
+    <h4 class="title-subsection">Apenas para inscrições feitas por um mediador</h4>
 
-        <div class="lab-form-filter opcoes-inciso">
-           <form class="" action="" method="POST">
-                
+    <div class="registration-fieldset registration-fieldset-moderator">
+
+        <form action="" method="POST">
+            <div class="each-field">
                 <label for="cpf">CPF</label>
-                <input type="text" name="cpf" id="documento" value="<?=$data['cpf'] ?? '';?>">
-                <br/>
-                <label for="password">Senha</label>  
-                <input type="password" name="password" id="password" value="<?=$data['password'] ?? '';?>">
-                <br/>
+                <input type="text" name="cpf" id="documento" value="<?= $data['cpf'] ?? ''; ?>">
+            </div>
 
-                <button class="btn btn-primary" type="submit">Enviar</button>
-            </form>
-            <?php 
-                foreach ($errors as $error => $message) {?>
-                    <h3>
-                        <?=$message?>
-                    </h3>
-                <?php
-                }
-               ?>
+            <div class="each-field">
+                <label for="password">Senha</label>
+                <input type="password" name="password" id="password" value="<?= $data['password'] ?? ''; ?>">
+            </div>
+
+            <button class="btn btn-secondary" type="submit">Enviar</button>
+        </form>
+
+        <div class="display-error">
+            <?php foreach ($errors as $error => $message) : ?>
+                <span class="error-login"><?= $message ?></span>
+            <?php endforeach; ?>
         </div>
 
-    </div><!-- End .lab-item -->
+    </div><!-- /.registration-fieldset -->
 
-
-</section>
-
+</article>
