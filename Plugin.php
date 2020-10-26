@@ -195,6 +195,25 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
 
+        // botao de exportacao csv de inscricoes mediadas
+        $app->hook('template(opportunity.single.header-inscritos):end', function () use ($plugin, $app) {
+
+            $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
+            if (($requestedOpportunity->canUser('@control'))) {
+
+                $registrations = $app->repo('Registration')->findBy(array('opportunity' => $requestedOpportunity->id));
+
+                $registrationsByMediator = [];
+                foreach ($registrations as $registration) {
+
+                    if (array_key_exists('mediador', $registration->getOwner()->getAgentRelationsGrouped())) {
+                        $registrationsByMediator[] = $registration;
+                    }
+                }
+            }
+            //$this->part('aldirblanc/csv-button-mediacao', ['entity' => $requestedOpportunity, 'registrationsByMediator' => $registrationsByMediator]);
+        });
+
         //botao de export csv
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
             $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];

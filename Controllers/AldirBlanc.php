@@ -949,6 +949,33 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $app->enableAccessControl();
 
     }
+
+    function ALL_reportMediacoes()
+    {
+        $this->requireAuthentication();
+        $app = App::i();
+
+        eval(\psy\sh());
+
+        $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
+        if (($requestedOpportunity->canUser('@control'))) {
+
+            $registrations = $app->repo('Registration')->findBy(array('opportunity' => $requestedOpportunity->id));
+
+            $registrationsByMediator = [];
+            foreach ($registrations as $registration) {
+
+                if (array_key_exists('mediador', $registration->getOwner()->getAgentRelationsGrouped())) {
+                    $registrationsByMediator[] = $registration;
+                }
+            }
+        }
+
+        $filename = sprintf(\MapasCulturais\i::__("inscricoes-%s--mediacoes"), $entity->id);
+
+        //$this->reportOutput('mediacao-csv', ['entity' => $entity, 'registrationsByMediator' => $registrationsByMediator], $filename);
+
+    }
     
  
     /* REPORTE */
