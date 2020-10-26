@@ -62,7 +62,8 @@ class Plugin extends \MapasCulturais\Plugin
             'csv_inciso1' => require_once env('AB_CSV_INCISO1', __DIR__ . '/config-csv-inciso1.php'),
             'csv_inciso2' => require_once env('AB_CSV_INCISO2', __DIR__ . '/config-csv-inciso2.php'),
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO1', __DIR__ . '/config-csv-generic-inciso2.php'),
-            'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | ') 
+            'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
+            'oportunidade_mediadores' => (array) json_decode(env('AB_OPORTUNIDADES_MEDIADORES', '[]')),
         ];
 
         $skipConfig = false;
