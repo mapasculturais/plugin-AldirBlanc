@@ -396,7 +396,6 @@ $(document).ready(function() {
             $errors = $('.registration-fieldset .errors');
             if($errors.length == 0) {
                 $('.btn-validate').css('display', 'inline-block');
-                console.log('habilita');
             } else {
                 $('.btn-validate').css('display', 'none');
             }
