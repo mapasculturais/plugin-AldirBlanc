@@ -172,9 +172,19 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         ];
         return $summaryStatusName;
     }
-    function getCidades()
+    function getCidades($ids = [])
     {
-        return $this->config['inciso2_opportunity_ids'];
+        $cidadesConfig = $this->config['inciso2_opportunity_ids'];
+        if (count($ids)){
+            $cidades = [];
+            foreach ($cidadesConfig as $cidade => $id) {
+                if (in_array($id, $ids)){
+                    $cidades[$cidade] = $id;
+                }
+            }
+            return $cidades;
+        }
+        return $cidadesConfig;
     }
 
     function finish($data, $status = 200, $isAjax = false)
