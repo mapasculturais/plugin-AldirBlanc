@@ -65,7 +65,7 @@ class Plugin extends \MapasCulturais\Plugin
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
 
             // define o id para dataprev e avaliador generico
-            'avaliador_dataprev_user_id' => env('AB_AVALIADOR_DATAPREV_USER_ID', '1585'),
+            'avaliador_dataprev_user_id' => env('AB_AVALIADOR_DATAPREV_USER_ID', ''),
             'avaliador_generico_user_id' => env('AB_AVALIADOR_GENERICO_USER_ID', ''),
             
             // define a exibição do resultado das avaliações no status
