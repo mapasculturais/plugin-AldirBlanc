@@ -42,9 +42,9 @@ $_params = [
                 <h2 class="status-card--title">Você pode entrar com recurso</h2>
                 <p class="status-card--content"><?= $this->controller->config['msg_recourse']; ?></p>
 
-                <?php if (!empty($this->controller->config['email_recourse'])) : ?>
+                <?php if (!empty($this->controller->config['email_recurso'])) : ?>
                     <br>
-                    <p class="status-card--content">Caso queira solicitar recurso envie um email para <a href="mailto:<?php echo $this->controller->config['email_recourse']; ?>"><?php echo $this->controller->config['email_recourse']; ?></a></p>
+                    <p class="status-card--content">Caso queira solicitar recurso envie um email para <a href="mailto:<?php echo $this->controller->config['email_recurso']; ?>"><?php echo $this->controller->config['email_recurso']; ?></a></p>
                 <?php endif; ?>
             <?php endif; ?>
         </div><!-- /.status-card -->

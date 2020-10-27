@@ -84,7 +84,7 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_status_waitlist' => env('AB_STATUS_WAITLIST_MESSAGE', 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.'), //STATUS_WAITLIST = 8
 
             // informacoes para recurso das inscrições com status 2 e 3
-            'email_recourse' => env('AB_EMAIL_RECURSO', ''),
+            'email_recurso' => env('AB_EMAIL_RECURSO', ''),
             'msg_recourse' => env('AB_MESSAGE_RECOURSE', ''),
         ];
 
