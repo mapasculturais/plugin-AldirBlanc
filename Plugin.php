@@ -8,6 +8,7 @@ use MapasCulturais\i;
 
 // @todo refatorar autoloader de plugins para resolver classes em pastas
 require_once 'Controllers/AldirBlanc.php';
+require_once 'Controllers/Remessas.php';
 require_once 'vendor/autoload.php';
 
 class Plugin extends \MapasCulturais\Plugin
@@ -57,9 +58,7 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
-            
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO1', __DIR__ . '/config-csv-generic-inciso2.php'),
-
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
                         
             // só libera para os homologadores as inscrićões que já tenham sido validadas pelos validadores configurados
@@ -477,7 +476,8 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
-        
+        $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
+
         // registra o role para mediadores
         $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function ($user) {
             return $user->is('admin');
