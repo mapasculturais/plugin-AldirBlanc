@@ -67,6 +67,11 @@ class Plugin extends \MapasCulturais\Plugin
             // só consolida a a homologaćão se todos as validaćões já tiverem sido feitas
             'consolidacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev", "financeiro"]')),
             'oportunidade_mediadores' => (array) json_decode(env('AB_OPORTUNIDADES_MEDIADORES', '[]')),
+            
+            //zammad
+            'zammad_enable' => env('AB_ZAMMAD_ENABLE', false),
+            'zammad_src_form' => env('AB_ZAMMAD_SRC_FORM', ''),
+            'zammad_src_chat' => env('AB_ZAMMAD_SRC_CHAT', ''),
         ];
 
         $skipConfig = false;
@@ -463,7 +468,37 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
         
+        $app->hook('view.partial(footer):before', function() use($plugin, $app) {
+            if($plugin->config['zammad_enable']) {
+                ?>
 
+            <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+            <button id="feedback-form">Feedback</button>
+            <script id="zammad_form_script" src="<?= $plugin->config['zammad_src_form']; ?>"></script>
+                <script>
+                    $(function() {
+                    $('#feedback-form').ZammadForm({
+                        messageTitle: 'Formulário de Feedback',
+                        messageSubmit: 'Enviar',
+                        messageThankYou: 'Obrigado pela pergunta (#%s)! Nós responderemos assim que possível!',
+                        modal: true
+                    });
+                    });
+             </script>
+            <script src="<?= $plugin->config['zammad_src_chat']; ?>"></script>
+            <script>
+                $(function() {
+                new ZammadChat({
+                    background: '#ebebeb',
+                    fontSize: '12px',
+                    chatId: 1
+                });
+                });
+        </script>
+    
+    <?php
+            }
+        });
     }
 
     /**
