@@ -33,6 +33,7 @@ class Plugin extends \MapasCulturais\Plugin
             'project_id' => env('AB_INCISO2_PROJECT_ID',null),
             'inciso1_opportunity_id' => env('AB_INCISO1_OPPORTUNITY_ID', null),
             'inciso2_opportunity_ids' => (array) json_decode(env('AB_INCISO2_OPPORTUNITY_IDS', '[]')),
+            'inciso3_opportunity_ids' => (array) json_decode(env('AB_INCISO3_OPPORTUNITY_IDS', '[]')),
             'inciso1' => (array) json_decode(env('AB_INCISO1', '[]')),
             'inciso2' => (array) json_decode(env('AB_INCISO2_CITIES', '[]')),
             'inciso2_default' => (array) json_decode(env('AB_INCISO2_DEFAULT', '[]')),
