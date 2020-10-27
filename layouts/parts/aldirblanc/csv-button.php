@@ -31,7 +31,7 @@ else if ($inciso ==2){
     ?>
     <a class="btn btn-primary form-export-clear" ng-click="editbox.open('export-inciso2', $event)" rel="noopener noreferrer">CSV DataPrev</a>
     
-    <?php if($qtdSelected){?>
+    <?php if(isset($qtdSelected) && $qtdSelected){?>
         <a href="<?= $routeGenCsv?>"  class="btn btn-primary download"  rel="noopener noreferrer">CSV Prodam</a>
     <?php } ?>
     
