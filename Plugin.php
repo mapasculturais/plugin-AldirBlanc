@@ -85,7 +85,7 @@ class Plugin extends \MapasCulturais\Plugin
 
             // informacoes para recurso das inscrições com status 2 e 3
             'email_recurso' => env('AB_EMAIL_RECURSO', ''),
-            'msg_recourse' => env('AB_MESSAGE_RECOURSE', ''),
+            'msg_recurso' => env('AB_MENSAGEM_RECURSO', ''),
         ];
 
         $skipConfig = false;

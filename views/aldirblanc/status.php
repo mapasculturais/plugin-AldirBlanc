@@ -37,10 +37,10 @@ $_params = [
                 <hr>
             <?php endif; ?>
 
-            <?php if (($registration->status == 3 || $registration->status == 2) && !empty($this->controller->config['msg_recourse'])) : ?>
+            <?php if (($registration->status == 3 || $registration->status == 2) && !empty($this->controller->config['msg_recurso'])) : ?>
                 <hr>
                 <h2 class="status-card--title">Você pode entrar com recurso</h2>
-                <p class="status-card--content"><?= $this->controller->config['msg_recourse']; ?></p>
+                <p class="status-card--content"><?= $this->controller->config['msg_recurso']; ?></p>
 
                 <?php if (!empty($this->controller->config['email_recurso'])) : ?>
                     <br>
