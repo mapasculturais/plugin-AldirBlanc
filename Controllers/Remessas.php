@@ -2,6 +2,7 @@
 
 namespace AldirBlanc\Controllers;
 
+use DateTime;
 use Exception;
 use League\Csv\Writer;
 use MapasCulturais\App;
@@ -113,7 +114,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             echo "Não autorizado";
             die();
         }
-
+    
         /**
          * Busca as inscrições com status 10 (Selecionada)
          * lembrando que o botão para exportar esses dados, so estrá disponível se existir inscrições nesse status
@@ -152,7 +153,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             echo "Não foram encontrados registros.";
             die();
         }
-
+        
         /**
          * Mapeamento de fields_id pelo label do campo
          */
@@ -895,7 +896,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if (!is_dir($dir)) {
             mkdir($dir, 0700, true);
         }
-
         $stream = fopen($patch, 'w');
 
         $csv = Writer::createFromStream($stream);
