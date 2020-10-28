@@ -962,19 +962,24 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $agentRegistrations = $app->repo('registration')->findBy(['owner' => $agent]);
             $registrations = array_merge($registrations, $agentRegistrations);
         }
-
+        if(count($registrations) < 1){
+            $errors['inexistente'] = "CPF incorreto.";
+            $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);            
+            return;
+        }
         $app->disableAccessControl();
         $registrationsFiltered = array_filter($registrations, function($r) use($pass) { 
             if ($r->mediacao_senha && $r->mediacao_senha == md5($pass)){
                 return $r;
             }
         });
+
         $registrationsFiltered = array_values($registrationsFiltered);
         $app->enableAccessControl();
         if(count($registrationsFiltered) < 1){
-            $errors['inexistente'] = "CPF ou senha incorretos.";
+            $errors['inexistente'] = "Senha incorreta.";
             $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
-            
+            return;
         }
         $summaryStatusName = $this->getStatusNames();
         $_SESSION['mediado_data'] = [
@@ -991,7 +996,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 }
             }
             
-
             $app->redirect($this->createUrl('status', [$registrationsFiltered[0]->id]));
             return;
         }
@@ -1007,8 +1011,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
             $this->render('lista-mediado', ['registrations' => $registrationsFiltered, 'registrationStatusName'=> $registrationStatusName]);
         } 
-        $app->enableAccessControl();
-
     }
 
     function ALL_reportMediacoes()
