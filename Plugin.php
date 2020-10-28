@@ -8,7 +8,6 @@ use MapasCulturais\i;
 
 // @todo refatorar autoloader de plugins para resolver classes em pastas
 require_once 'Controllers/AldirBlanc.php';
-require_once 'Controllers/DataPrev.php';
 require_once 'Controllers/Remessas.php';
 require_once 'vendor/autoload.php';
 
@@ -34,6 +33,7 @@ class Plugin extends \MapasCulturais\Plugin
             'project_id' => env('AB_INCISO2_PROJECT_ID',null),
             'inciso1_opportunity_id' => env('AB_INCISO1_OPPORTUNITY_ID', null),
             'inciso2_opportunity_ids' => (array) json_decode(env('AB_INCISO2_OPPORTUNITY_IDS', '[]')),
+            'inciso3_opportunity_ids' => (array) json_decode(env('AB_INCISO3_OPPORTUNITY_IDS', '[]')),
             'inciso1' => (array) json_decode(env('AB_INCISO1', '[]')),
             'inciso2' => (array) json_decode(env('AB_INCISO2_CITIES', '[]')),
             'inciso2_default' => (array) json_decode(env('AB_INCISO2_DEFAULT', '[]')),
@@ -58,12 +58,25 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_espaco'  => env('AB_TXT_CADASTRO_ESPACO', 'Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado.'),
             'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
-            'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
-            'csv_inciso1' => require_once env('AB_CSV_INCISO1', __DIR__ . '/config-csv-inciso1.php'),
-            'csv_inciso2' => require_once env('AB_CSV_INCISO2', __DIR__ . '/config-csv-inciso2.php'),
-            'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO1', __DIR__ . '/config-csv-generic-inciso2.php'),
-            'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
             'oportunidade_mediadores' => (array) json_decode(env('AB_OPORTUNIDADES_MEDIADORES', '[]')),
+            'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),            
+            'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO2', __DIR__ . '/config-csv-generic-inciso2.php'),
+            'csv_generic_inciso3' => require_once env('AB_CSV_GENERIC_INCISO3', __DIR__ . '/config-csv-generic-inciso3.php'),
+
+            'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
+            
+                        
+
+            // só libera para os homologadores as inscrićões que já tenham sido validadas pelos validadores configurados
+            'homologacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '[]')),
+
+            // só consolida a a homologaćão se todos as validaćões já tiverem sido feitas
+            'consolidacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev", "financeiro"]')),
+            
+            //zammad
+            'zammad_enable' => env('AB_ZAMMAD_ENABLE', false),
+            'zammad_src_form' => env('AB_ZAMMAD_SRC_FORM', ''),
+            'zammad_src_chat' => env('AB_ZAMMAD_SRC_CHAT', ''),
         ];
 
         $skipConfig = false;
@@ -215,37 +228,161 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
         //botao de export csv
+        //Botão exportador genérico
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
             $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
             $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
-            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids);
+            $inciso3Ids = array_values($plugin->config['inciso3_opportunity_ids']);
+            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
             $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
             $opportunity = $requestedOpportunity->id;
+
+            //Busca oportunidades selecionadas
+            $selecteds = $app->repo('Registration')->findOneBy([
+                'opportunity' => $opportunity,
+                'status' => 10
+            ]);
+
+            $existsSelected = false;
+            if($selecteds){
+                $existsSelected = true;  
+            }
+
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
-                $selected = false;
                 if (in_array($requestedOpportunity->id, $inciso1Ids)){
                     $inciso = 1;
                 }
                 else if (in_array($requestedOpportunity->id, $inciso2Ids)){
                     $inciso = 2;
-
-                    //Busca as inscrições selecionadas (ststus 10)
-                    $registrationSelected = $app->repo("Registration")->findBy([
-                        'opportunity' => $requestedOpportunity->id,
-                        'status' => 10
-                    ]);
-                    
-                    //Flag que define se o botão do exportador genérico deve aparecer ou não                   
-                    if($registrationSelected){
-                        $selected = true;
-                    }
-                    
                 }
-                $this->part('aldirblanc/csv-button', ['inciso' => $inciso, 'opportunity' =>$opportunity, 'qtdSelected' => $selected]);
+                else if (in_array($requestedOpportunity->id, $inciso3Ids)){
+                    $inciso = 3;
+                }
+                $this->part('aldirblanc/csv-generic-button', ['inciso' => $inciso, 'opportunity' => $opportunity, 'existsSelected' => $existsSelected]);
             }
-         });
+        });
 
+        /**
+         * só consolida as avaliações para "selecionado" se tiver acontecido as validações (dataprev, etc)
+         * 
+         * @TODO: implementar para método de avaliaçào documental
+         */
+        $app->hook('entity(Registration).consolidateResult', function(&$result, $caller) use($plugin, $app) {
+            // eval(\psy\sh());
+            // só aplica o hook para as oportunidades do inciso I e II
+            $ids = [];
+            if ($plugin->config['inciso2_enabled']) {
+                $ids = $plugin->config['inciso2_opportunity_ids'];
+            }
+            
+            if ($plugin->config['inciso1_enabled']) {
+                $ids[] = $plugin->config['inciso1_opportunity_id'];
+            }
+
+            if (!in_array($this->opportunity->id, $ids)) {
+                return;
+            }
+
+            // só aplica o hook para usuários homologadores
+            if ($caller->user->aldirblanc_validador) {
+                return;
+            }
+
+            // se a consolidação não é para selecionada (statu = 10) pode continuar
+            if ($result != '10') {
+                return;
+            } 
+
+            $can_consolidate = true;
+
+            $evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $this, 'status' => 1]);
+
+            /**
+             * Se a consolidação requer validações, verifica se existe alguma
+             * avaliação dos usuários validadores
+             */
+            if ($validacoes = $plugin->config['consolidacao_requer_validacao']) {
+                foreach($validacoes as $slug) {
+                    $can = false;
+                    foreach ($evaluations as $eval) {
+                        if ($eval->user->aldirblanc_validador == $slug) {
+                            $can = true;
+                        }
+                    }
+
+                    if (!$can) {
+                        $can_consolidate = false;
+                    }
+                }
+            }
+
+            // se não pode consolidar, coloca a string 'homologado'
+            if (!$can_consolidate) {
+                if (!$this->consolidatedResult) {
+                    $result = 'homologado';
+                } else if (strpos($this->consolidatedResult, 'homologado') === false) {
+                    $result = "{$this->consolidatedResult}, homologado";
+                } else {
+                    $result = $this->consolidatedResult;
+                }
+            }
+        });
+
+
+        if($this->_config['homologacao_requer_validacao']){
+            /**
+             * para o caso das instalaćões que homologarão depois do retorno do Dataprev,
+             * só dá permissão para o usuário avaliar depois das validaćões configuradas
+             */
+            $app->hook('entity(Registration).canUser(<<evaluate|viewUserEvaluation>>)', function($user, &$can) use($plugin, $app) {
+                $ids = [];
+                if ($plugin->config['inciso2_enabled']) {
+                    $ids = $plugin->config['inciso2_opportunity_ids'];
+                }
+                
+                if ($plugin->config['inciso1_enabled']) {
+                    $ids[] = $plugin->config['inciso1_opportunity_id'];
+                }
+    
+                if (!in_array($this->opportunity->id, $ids)) {
+                    return;
+                }
+
+                if($user->is('guest')) {
+                    return;
+                }
+    
+                if ($user->aldirblanc_validador) {
+                    return;
+                }
+
+                if ($can) {
+                    $evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $this, 'status' => 1]);
+                    foreach ($plugin->config['homologacao_requer_validacao'] as $validador) {
+                        $ok = false;
+                        foreach ($evaluations as $evaluation) {
+                            if($evaluation->user->aldirblanc_validador == $validador && $evaluation->result == '10'){
+                                $ok = true;
+                            }
+                        }
+
+                        if(!$ok) {
+                            $can = false;
+                        }
+                    }
+                }
+                
+            });
+        }
+
+        $app->hook('template(panel.opportunities.panel-header):end', function () use($app){
+            if(!$app->user->is('admin')) {
+                return;
+            }
+            $this->part('aldirblanc/generate-opportunities-button');
+        });
+        
         // add hooks
         $app->hook('mapasculturais.styles', function () use ($app) {
             $app->view->printStyles('aldirblanc');
@@ -368,6 +505,9 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
             $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
             $requestedOpportunity = $this->requestedEntity;
+            if (!$requestedOpportunity) {
+                return;
+            }
             $can_view = $requestedOpportunity->canUser('@control') || 
                         $requestedOpportunity->canUser('viewEvaluations') || 
                         $requestedOpportunity->canUser('evaluateRegistrations');
@@ -381,6 +521,9 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
             $registration = $this->requestedEntity;
             $requestedOpportunity = $registration->opportunity;
+            if (!$requestedOpportunity) {
+                return;
+            }
             $can_view = $requestedOpportunity->canUser('@control') || 
                         $requestedOpportunity->canUser('viewEvaluations') || 
                         $requestedOpportunity->canUser('evaluateRegistrations');
@@ -391,7 +534,37 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
         
+        $app->hook('view.partial(footer):before', function() use($plugin, $app) {
+            if($plugin->config['zammad_enable']) {
+                ?>
 
+            <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+            <button id="feedback-form">Feedback</button>
+            <script id="zammad_form_script" src="<?= $plugin->config['zammad_src_form']; ?>"></script>
+                <script>
+                    $(function() {
+                    $('#feedback-form').ZammadForm({
+                        messageTitle: 'Formulário de Feedback',
+                        messageSubmit: 'Enviar',
+                        messageThankYou: 'Obrigado pela pergunta (#%s)! Nós responderemos assim que possível!',
+                        modal: true
+                    });
+                    });
+             </script>
+            <script src="<?= $plugin->config['zammad_src_chat']; ?>"></script>
+            <script>
+                $(function() {
+                new ZammadChat({
+                    background: '#ebebeb',
+                    fontSize: '12px',
+                    chatId: 1
+                });
+                });
+        </script>
+    
+    <?php
+            }
+        });
     }
 
     /**
@@ -403,8 +576,11 @@ class Plugin extends \MapasCulturais\Plugin
     {
         $app = App::i();
 
+
+        $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');        
+        $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
+
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
-        $app->registerController('dataprev', 'AldirBlanc\Controllers\DataPrev');
         $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
 
         // registra o role para mediadores
