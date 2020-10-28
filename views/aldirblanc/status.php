@@ -14,51 +14,43 @@ $this->includeEditableEntityAssets();
 $_params = [
     'entity'      => $registration,
     'opportunity' => $registration->opportunity
-];
-
-$_messages = [
-    //STATUS_SENT = 1
-    '1' => [
-        'title'   => 'Sua solicitação segue em análise.',
-        'message' => 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail.',
-    ],
-    //STATUS_APPROVED = 10;
-    '10' => [
-        'title'   => 'Sua solicitação foi aprovada.',
-        'message' => '<p>Caso tenha optado por transação bancária, brevemente seu benefício será disponibilizado na conta informada.</p>
-        <p>Caso tenha optado por ordem de pagamento, quando disponibilizado o recurso, você poderá realizar o saque diretamente em qualquer agência do Banco do Brasil pessoalmente - apresentando RG e CPF, sem nenhum custo.</p>
-        <p>Em virtude da pandemia da covid-19, algumas agências do Banco do Brasil podem estar operando com restrições e horários diferenciados de funcionamento, conforme determinação do poder público.</p>',
-    ],
-    //STATUS_INVALID = 2;
-    '2' => [
-        'title'   => 'Sua solicitação foi negada.',
-        'message' => 'Não atendeu aos requisitos necessários. Caso não concorde com o resultado, você poderá fazer enviar novo formulário de solicitação ao benefício - fique atento aos preenchimento dos campos.',
-    ],
-    //STATUS_NOTAPPROVED = 3;
-    '3' => [
-        'title'   => 'Sua solicitação foi negada.',
-        'message' => 'Não atendeu aos requisitos necessários. Caso não concorde com o resultado, você poderá fazer enviar novo formulário de solicitação ao benefício - fique atento aos preenchimento dos campos.',
-    ],
-    //STATUS_WAITLIST = 8;
-    '8' => [
-        'title'   => 'Sua solicitação foi validada.',
-        'message' => 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.',
-    ]
-];
-
-?>
+]; ?>
 
 <section id="lab-status" class="lab-main-content">
 
     <article class="main-content registration" ng-controller="OpportunityController">
-        <?php $status = $registration->status; ?>
-        <?php if(isset($status)) : ?>
-            <div class="status-card status-<?= $registration->status ?>">
-                <h2 class="status-card--title"><?= $_messages[$registration->status]['title'] ?></h2>
-                <p class="status-card--content"><?= $_messages[$registration->status]['message'] ?></p>
-            </div><!-- /.status-card -->
 
-        <?php endif; ?>
+        <div class="status-card status-<?= $registration->status ?>">
+            <h2 class="status-card--title"><?= $registrationStatusMessage['title'] ?? ''; ?></h2>
+
+            <?php if (!empty($justificativaAvaliacao) && sizeof($justificativaAvaliacao) != 0) : ?>
+                <?php foreach ($justificativaAvaliacao as $message) : ?>
+                    <?php if (is_array($message) && $this->controller->config['exibir_resultado_padrao']) : ?>
+                        <p class="status-card--content"><?= $message['message']; ?></p>
+                        <hr>
+                    <?php else : ?>
+                        <p class="status-card--content"><?= $message; ?></p>
+                        <hr>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <hr>
+            <?php endif; ?>
+
+            <?php if (($registration->status == 3 || $registration->status == 2) && !empty($this->controller->config['msg_recurso'])) : ?>
+                <hr>
+                <h2 class="status-card--title">Você pode entrar com recurso</h2>
+                <p class="status-card--content"><?= $this->controller->config['msg_recurso']; ?></p>
+
+                <?php if (!empty($this->controller->config['email_recurso'])) : ?>
+                    <br>
+                    <p class="status-card--content">Caso queira solicitar recurso envie um email para <a href="mailto:<?php echo $this->controller->config['email_recurso']; ?>"><?php echo $this->controller->config['email_recurso']; ?></a></p>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div><!-- /.status-card -->
+        <div class="wrap-button">
+            <a href="<?php echo $app->createUrl('aldirblanc', 'cadastro'); ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar para os Cadastros"); ?></a>
+        </div><!-- /.wrap-button -->
 
         <h4 class="title-subsection">Edital <span class="underline">Inciso <?= $registration->inciso ?></span></h4>
 
@@ -67,10 +59,13 @@ $_messages = [
         <?php $this->part('aldirblanc/registration-single--header', $_params) ?>
         <?php $this->part('singles/registration-single--fields', $_params) ?>
 
-        <!-- <div class="wrap-button">
-            <a href="" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar"); ?></a>
-        </div> -->
-        <!-- .wrap-button -->
+        <?php if ($app->user->is('mediador') || $app->user->is('admin')) {
+            $this->part('aldirblanc/registration-mediacao', $_params);
+        } ?>
+
+        <div class="wrap-button">
+            <a href="<?php echo $app->createUrl('aldirblanc', 'cadastro'); ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar para os Cadastros"); ?></a>
+        </div><!-- /.wrap-button -->
 
     </article>
 
