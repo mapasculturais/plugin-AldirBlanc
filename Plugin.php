@@ -33,6 +33,7 @@ class Plugin extends \MapasCulturais\Plugin
             'project_id' => env('AB_INCISO2_PROJECT_ID',null),
             'inciso1_opportunity_id' => env('AB_INCISO1_OPPORTUNITY_ID', null),
             'inciso2_opportunity_ids' => (array) json_decode(env('AB_INCISO2_OPPORTUNITY_IDS', '[]')),
+            'inciso3_opportunity_ids' => (array) json_decode(env('AB_INCISO3_OPPORTUNITY_IDS', '[]')),
             'inciso1' => (array) json_decode(env('AB_INCISO1', '[]')),
             'inciso2' => (array) json_decode(env('AB_INCISO2_CITIES', '[]')),
             'inciso2_default' => (array) json_decode(env('AB_INCISO2_DEFAULT', '[]')),
@@ -60,6 +61,7 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),            
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO2', __DIR__ . '/config-csv-generic-inciso2.php'),
             'csv_generic_inciso3' => require_once env('AB_CSV_GENERIC_INCISO3', __DIR__ . '/config-csv-generic-inciso3.php'),
+
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
             
                         
@@ -69,7 +71,11 @@ class Plugin extends \MapasCulturais\Plugin
 
             // só consolida a a homologaćão se todos as validaćões já tiverem sido feitas
             'consolidacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev", "financeiro"]')),
-
+            
+            //zammad
+            'zammad_enable' => env('AB_ZAMMAD_ENABLE', false),
+            'zammad_src_form' => env('AB_ZAMMAD_SRC_FORM', ''),
+            'zammad_src_chat' => env('AB_ZAMMAD_SRC_CHAT', ''),
         ];
 
         $skipConfig = false;
@@ -455,7 +461,37 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
         
+        $app->hook('view.partial(footer):before', function() use($plugin, $app) {
+            if($plugin->config['zammad_enable']) {
+                ?>
 
+            <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+            <button id="feedback-form">Feedback</button>
+            <script id="zammad_form_script" src="<?= $plugin->config['zammad_src_form']; ?>"></script>
+                <script>
+                    $(function() {
+                    $('#feedback-form').ZammadForm({
+                        messageTitle: 'Formulário de Feedback',
+                        messageSubmit: 'Enviar',
+                        messageThankYou: 'Obrigado pela pergunta (#%s)! Nós responderemos assim que possível!',
+                        modal: true
+                    });
+                    });
+             </script>
+            <script src="<?= $plugin->config['zammad_src_chat']; ?>"></script>
+            <script>
+                $(function() {
+                new ZammadChat({
+                    background: '#ebebeb',
+                    fontSize: '12px',
+                    chatId: 1
+                });
+                });
+        </script>
+    
+    <?php
+            }
+        });
     }
 
     /**
@@ -467,10 +503,13 @@ class Plugin extends \MapasCulturais\Plugin
     {
         $app = App::i();
 
+
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');        
         $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
 
-        
+        $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
+        $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
+
         // registra o role para mediadores
         $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function($user){ return $user->is('admin'); });
         $app->registerRole($role_definition);

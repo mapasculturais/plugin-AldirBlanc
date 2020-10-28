@@ -881,8 +881,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
         }
 
-        // var_dump($csv_data);
-        // exit();
         /**
          * Salva o arquivo no servidor e faz o dispatch dele em um formato CSV
          * O arquivo e salvo no deretório docker-data/private-files/aldirblanc/inciso2/remessas

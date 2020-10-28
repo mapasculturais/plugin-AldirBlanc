@@ -13,17 +13,20 @@ return [
         'MUNICIPIO',
         'CEP',
         'ESTADO',
+
         'TELEFONE',
         'NUM_BANCO',
         //'TIPO_CONTA_BANCO',        
         'AGENCIA_BANCO',
         'CONTA_BANCO',
         //'OPERACAO_BANCO',
+
         'VALOR',
         'INSCRICAO_ID',
         'INCISO',
     ],
     'fields' => [        
+
         'CPF' => 'CPF',
         'NOME_SOCIAL' => 'Nome completo', 
         'CNPJ' => [
@@ -50,6 +53,7 @@ return [
         'AGENCIA_BANCO' => 'Agência',
         'CONTA_BANCO'  => 'Conta Corrente',
         'OPERACAO_BANCO'  => '',
+
         'VALOR' => '600',        
         'INCISO' => 1288,
     ],
@@ -59,7 +63,9 @@ return [
     'categories' => [
         'CPF' => [
             'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
+
             'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO'
+
         ],
         'CNPJ' => [
             'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
