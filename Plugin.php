@@ -152,7 +152,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
             $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
             $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
-            $inciso3Ids = [];//array_values($plugin->config['inciso3_opportunity_ids']);
+            $inciso3Ids = array_values($plugin->config['inciso3_opportunity_ids']);
             $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
             $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
             $opportunity = $requestedOpportunity->id;
