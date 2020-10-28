@@ -48,6 +48,9 @@ $_params = [
                 <?php endif; ?>
             <?php endif; ?>
         </div><!-- /.status-card -->
+        <div class="wrap-button">
+            <a href="<?php echo $app->createUrl('aldirblanc', 'cadastro'); ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar para os Cadastros"); ?></a>
+        </div><!-- /.wrap-button -->
 
         <h4 class="title-subsection">Edital <span class="underline">Inciso <?= $registration->inciso ?></span></h4>
 

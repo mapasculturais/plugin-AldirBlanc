@@ -58,7 +58,10 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_espaco'  => env('AB_TXT_CADASTRO_ESPACO', 'Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado.'),
             'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
+            'oportunidade_mediadores' => (array) json_decode(env('AB_OPORTUNIDADES_MEDIADORES', '[]')),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),            
+            'csv_inciso1' => require_once env('AB_CSV_INCISO1', __DIR__ . '/config-csv-inciso1.php'),
+            'csv_inciso2' => require_once env('AB_CSV_INCISO2', __DIR__ . '/config-csv-inciso2.php'),
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO2', __DIR__ . '/config-csv-generic-inciso2.php'),
             'csv_generic_inciso3' => require_once env('AB_CSV_GENERIC_INCISO3', __DIR__ . '/config-csv-generic-inciso3.php'),
 
@@ -177,6 +180,73 @@ class Plugin extends \MapasCulturais\Plugin
 
         $plugin = $this;
 
+       
+        // modulo de mediacao
+        $app->hook('entity(Agent).canUser(<<viewPrivateData>>)', function($user,&$can) use($app){
+            
+
+            if (isset($_SESSION['mediado_data']) && $user->is('guest') ){
+                $data = $_SESSION['mediado_data'];
+                $data = $_SESSION['mediado_data'];
+                $cpf = $this->getMetadata('documento');
+                $cpfClean = str_replace("-","",$cpf);
+                $cpfClean = str_replace(".","",$cpfClean);
+                $cpfSession = $data['cpf'];
+                $cpfSessionClean =str_replace("-","",$cpfSession);
+                $cpfSessionClean = str_replace(".","",$cpfSessionClean);
+                if( $cpfClean == $cpfSessionClean && time() - $data['last_activity'] < 600 ){
+                    $can = true;
+                    $_SESSION['mediado_data']['last_activity'] = time();
+                }
+                else{
+                    unset( $_SESSION['mediado_data'] );
+               }
+            }
+        });
+        $app->hook('entity(Registration).canUser(<<@control|view|viewPrivateData|viewConsolidatedResult>>)', function($user,&$can) use($app){
+            
+            if (isset($_SESSION['mediado_data']) && $user->is('guest') ){
+                $data = $_SESSION['mediado_data'];
+                $cpf = $this->owner->getMetadata('documento');
+                $cpfClean = str_replace("-","",$cpf);
+                $cpfClean = str_replace(".","",$cpfClean);
+                $cpfSession = $data['cpf'];
+                $cpfSessionClean =str_replace("-","",$cpfSession);
+                $cpfSessionClean = str_replace(".","",$cpfSessionClean);
+                if( $cpfSessionClean == $cpfClean && time() - $data['last_activity'] < 600 ){
+                    $can = true;
+                    $_SESSION['mediado_data']['last_activity'] = time();
+
+                }
+                else{
+                    unset( $_SESSION['mediado_data'] );
+                }
+            }
+            
+
+        });
+
+
+        // botao de exportacao csv de inscricoes mediadas
+        $app->hook('template(opportunity.single.header-inscritos):end', function () use ($plugin, $app) {
+
+            $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
+            if (($requestedOpportunity->canUser('@control'))) {
+
+                $registrations = $app->repo('Registration')->findBy(array('opportunity' => $requestedOpportunity->id));
+
+                $registrationsByMediator = [];
+                foreach ($registrations as $registration) {
+
+                    if (array_key_exists('mediador', $registration->getOwner()->getAgentRelationsGrouped())) {
+                        $registrationsByMediator[] = $registration;
+                    }
+                }
+            }
+            //$this->part('aldirblanc/csv-button-mediacao', ['entity' => $requestedOpportunity, 'registrationsByMediator' => $registrationsByMediator]);
+        });
+
+        //botao de export csv
         //Botão exportador genérico
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
             $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
