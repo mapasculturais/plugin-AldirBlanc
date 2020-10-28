@@ -172,6 +172,43 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         ];
         return $summaryStatusName;
     }
+
+    /**
+     * Retorna array associativo com mensagens para cada status da inscrição
+     *
+     * @return array
+     */
+    function getStatusMessages(){
+        $summaryStatusMessages = [
+            //STATUS_SENT = 1 - Em análise
+            '1' => [
+                'title'   => 'Sua solicitação segue em análise.',
+                'message'  => $this->config['msg_status_sent']
+            ],
+            //STATUS_INVALID = 2 - Inválida
+            '2' => [
+                'title'    => 'Sua solicitação não foi aprovada.',
+                'message'  => $this->config['msg_status_invalid']
+            ],
+            //STATUS_NOTAPPROVED = 3 - Reprovado
+            '3' => [
+                'title'    => 'Sua solicitação não foi aprovada.',
+                'message'  => $this->config['msg_status_notapproved']
+            ],
+            //STATUS_APPROVED = 10 - Aprovado
+            '10' => [
+                'title'   => 'Sua solicitação foi aprovada.',
+                'message' => $this->config['msg_status_approved']
+            ],
+            //STATUS_WAITLIST = 8 - Recursos Exauridos
+            '8' => [
+                'title'   => 'Sua solicitação foi validada.',
+                'message' => $this->config['msg_status_waitlist']
+            ]
+        ];
+        return $summaryStatusMessages;
+    }
+    
     function getCidades($ids = [])
     {
         $cidadesConfig = $this->config['inciso2_opportunity_ids'];
@@ -529,15 +566,39 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $app->pass();
         }
         $registration->checkPermission('view');
-        $summaryStatusName = $this->getStatusNames();
-        $registrationStatusName = "";
-        foreach($summaryStatusName as $key => $value) {
-            if($key == $registration->status) {
-                $registrationStatusName = $value;
-                break;
+
+        // retorna a mensagem de acordo com o status
+        $getStatusMessages = $this->getStatusMessages();
+        $registrationStatusMessage = $getStatusMessages[$registration->status];
+
+        // retorna as avaliações da avaliação
+        $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
+        
+        // monta array de mensagens
+        $justificativaAvaliacao = [];
+        foreach ($evaluations as $evaluation) {
+
+            if ($evaluation->getResult() == $registration->status) {
+                
+                if ($evaluation->user->id == $this->config['avaliador_dataprev_user_id'] && $this->config['exibir_resultado_dataprev']) {
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                } elseif ($evaluation->user->id == $this->config['avaliador_generico_user_id'] && $this->config['exibir_resultado_generico']) {
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                } 
+                
+                if ($this->config['exibir_resultado_avaliadores']) {
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                }
+
             }
+            
         }
-        $this->render('status', ['registration' => $registration, 'registrationStatusName'=> $registrationStatusName]);
+
+        if ($this->config['exibir_resultado_padrao']) {
+            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
+        }
+
+        $this->render('status', ['registration' => $registration, 'registrationStatusMessage' => $registrationStatusMessage, 'justificativaAvaliacao' => $justificativaAvaliacao]);
     }
 
     /**
