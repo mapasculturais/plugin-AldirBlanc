@@ -58,9 +58,12 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_espaco'  => env('AB_TXT_CADASTRO_ESPACO', 'Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado.'),
             'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
-            'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),
-            'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO1', __DIR__ . '/config-csv-generic-inciso2.php'),
+            'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),            
+            'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO2', __DIR__ . '/config-csv-generic-inciso2.php'),
+            'csv_generic_inciso3' => require_once env('AB_CSV_GENERIC_INCISO3', __DIR__ . '/config-csv-generic-inciso3.php'),
+
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
+            
                         
 
             // só libera para os homologadores as inscrićões que já tenham sido validadas pelos validadores configurados
@@ -68,7 +71,11 @@ class Plugin extends \MapasCulturais\Plugin
 
             // só consolida a a homologaćão se todos as validaćões já tiverem sido feitas
             'consolidacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev", "financeiro"]')),
-
+            
+            //zammad
+            'zammad_enable' => env('AB_ZAMMAD_ENABLE', false),
+            'zammad_src_form' => env('AB_ZAMMAD_SRC_FORM', ''),
+            'zammad_src_chat' => env('AB_ZAMMAD_SRC_CHAT', ''),
         ];
 
         $skipConfig = false;
@@ -146,6 +153,41 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
         
         $plugin = $this;
+
+        //Botão exportador genérico
+        $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
+            $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
+            $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
+            $inciso3Ids = array_values($plugin->config['inciso3_opportunity_ids']);
+            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
+            $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
+            $opportunity = $requestedOpportunity->id;
+
+            //Busca oportunidades selecionadas
+            $selecteds = $app->repo('Registration')->findOneBy([
+                'opportunity' => $opportunity,
+                'status' => 10
+            ]);
+
+            $existsSelected = false;
+            if($selecteds){
+                $existsSelected = true;  
+            }
+
+            if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
+                $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
+                if (in_array($requestedOpportunity->id, $inciso1Ids)){
+                    $inciso = 1;
+                }
+                else if (in_array($requestedOpportunity->id, $inciso2Ids)){
+                    $inciso = 2;
+                }
+                else if (in_array($requestedOpportunity->id, $inciso3Ids)){
+                    $inciso = 3;
+                }
+                $this->part('aldirblanc/csv-generic-button', ['inciso' => $inciso, 'opportunity' => $opportunity, 'existsSelected' => $existsSelected]);
+            }
+        });
 
         /**
          * só consolida as avaliações para "selecionado" se tiver acontecido as validações (dataprev, etc)
@@ -419,7 +461,37 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
         
+        $app->hook('view.partial(footer):before', function() use($plugin, $app) {
+            if($plugin->config['zammad_enable']) {
+                ?>
 
+            <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+            <button id="feedback-form">Feedback</button>
+            <script id="zammad_form_script" src="<?= $plugin->config['zammad_src_form']; ?>"></script>
+                <script>
+                    $(function() {
+                    $('#feedback-form').ZammadForm({
+                        messageTitle: 'Formulário de Feedback',
+                        messageSubmit: 'Enviar',
+                        messageThankYou: 'Obrigado pela pergunta (#%s)! Nós responderemos assim que possível!',
+                        modal: true
+                    });
+                    });
+             </script>
+            <script src="<?= $plugin->config['zammad_src_chat']; ?>"></script>
+            <script>
+                $(function() {
+                new ZammadChat({
+                    background: '#ebebeb',
+                    fontSize: '12px',
+                    chatId: 1
+                });
+                });
+        </script>
+    
+    <?php
+            }
+        });
     }
 
     /**
@@ -430,6 +502,10 @@ class Plugin extends \MapasCulturais\Plugin
     public function register()
     {
         $app = App::i();
+
+
+        $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');        
+        $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
         $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
