@@ -48,6 +48,9 @@ $_params = [
                 <?php endif; ?>
             <?php endif; ?>
         </div><!-- /.status-card -->
+        <div class="wrap-button">
+            <a href="<?php echo $app->createUrl('aldirblanc', 'cadastro'); ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar para os Cadastros"); ?></a>
+        </div><!-- /.wrap-button -->
 
         <h4 class="title-subsection">Edital <span class="underline">Inciso <?= $registration->inciso ?></span></h4>
 
@@ -56,10 +59,13 @@ $_params = [
         <?php $this->part('aldirblanc/registration-single--header', $_params) ?>
         <?php $this->part('singles/registration-single--fields', $_params) ?>
 
-        <!-- <div class="wrap-button">
-            <a href="" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar"); ?></a>
-        </div> -->
-        <!-- .wrap-button -->
+        <?php if ($app->user->is('mediador') || $app->user->is('admin')) {
+            $this->part('aldirblanc/registration-mediacao', $_params);
+        } ?>
+
+        <div class="wrap-button">
+            <a href="<?php echo $app->createUrl('aldirblanc', 'cadastro'); ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar para os Cadastros"); ?></a>
+        </div><!-- /.wrap-button -->
 
     </article>
 

@@ -209,9 +209,19 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return $summaryStatusMessages;
     }
     
-    function getCidades()
+    function getCidades($ids = [])
     {
-        return $this->config['inciso2_opportunity_ids'];
+        $cidadesConfig = $this->config['inciso2_opportunity_ids'];
+        if (count($ids)){
+            $cidades = [];
+            foreach ($cidadesConfig as $cidade => $id) {
+                if (in_array($id, $ids)){
+                    $cidades[$cidade] = $id;
+                }
+            }
+            return $cidades;
+        }
+        return $cidadesConfig;
     }
 
     function finish($data, $status = 200, $isAjax = false)
@@ -243,7 +253,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $agent->save(true);
 
-        $agent->createAgentRelation($app->user->profile, 'mediaror', true, true);
+        $agent->createAgentRelation($app->user->profile, 'mediador', true, true);
 
         $app->disableAccessControl();
 
@@ -534,15 +544,27 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
      */
     function GET_status()
     {
-        $this->requireAuthentication();
         $app = App::i();
+        if (isset($_SESSION['mediado_data']) && $app->user->is('guest') ){
+            $data = $_SESSION['mediado_data'];
+            $registration = $this->requestedEntity;
+            $agentCpf = $this->cleanCpf($registration->owner->getMetadata('documento'));
+            $sessionCpf = $this->cleanCpf($data['cpf']);
+            if( $agentCpf == $sessionCpf && time() - $data['last_activity'] < 600 ){
+                $_SESSION['mediado_data']['last_activity'] = time();
+            }
+            else{
+                unset( $_SESSION['mediado_data'] );
+            }
+        }
+        else{
+            $this->requireAuthentication();
+            $registration = $this->requestedEntity;
 
-        $registration = $this->requestedEntity;
-
+        }
         if(!$registration) {
             $app->pass();
         }
-
         $registration->checkPermission('view');
 
         // retorna a mensagem de acordo com o status
@@ -600,6 +622,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $registration->checkPermission('modify');
         
         if (!$registration->termos_aceitos) {
+            if ($app->user->is('mediador')) {
+                $this->GET_aceitar_termos();
+            }
             $app->redirect($this->createUrl('termos_e_condicoes', [$registration->id]));
         }
         //@todo verificar se funciona isso 
@@ -680,42 +705,68 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         if ($this->config['inciso1_enabled']) {
             $inciso1 = $this->getOpportunityInciso1();
-            $registrations = $controller->apiQuery([
-                '@select' => 'id', 
-                'opportunity' => "EQ({$inciso1->id})", 
-                'status' => 'GTE(0)'
-            ]);
-            $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
-            $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
+             
+            if ($app->user->is('mediador')){
+                $allowed = $this->config['oportunidade_mediadores'][$app->user->email];
+                if( !in_array($inciso1->id, $allowed )){
+                    $inciso1 = "";
+                }
+            }
+            if($inciso1){
+                $registrations = $controller->apiQuery([
+                    '@select' => 'id', 
+                    'opportunity' => "EQ({$inciso1->id})", 
+                    'status' => 'GTE(0)'
+                ]);
+                $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+                $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
+            }
         }
 
         $opportunitiesInciso2 = [];
         $registrationsInciso2 = [];
-        
         if ($this->config['inciso2_enabled']) {
-            $inciso2_ids = implode(',', $this->config['inciso2_opportunity_ids']);
-            $registrations = $controller->apiQuery([
-                '@select' => 'id', 
-                'opportunity' => "IN({$inciso2_ids})", 
-                'status' => 'GTE(0)'
-            ]);
-            $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
-            $registrationsInciso2 = $repo->findBy(['id' => $registrations_ids]);
-            $opportunitiesIdsInciso2 = array_values($this->config['inciso2_opportunity_ids']);
-            $opportunitiesInciso2 = $app->repo('Opportunity')->findRegistrationWithDateByIds($opportunitiesIdsInciso2); 
+            $inciso2_ids = $this->config['inciso2_opportunity_ids'];
+            if ($app->user->is('mediador')){
+                $allowed = $this->config['oportunidade_mediadores'][$app->user->email];
+                $inciso2_ids = array_filter($inciso2_ids, function($id) use($allowed){ 
+                    if( in_array($id, $allowed )){
+                        return $id;
+                    }
+                });
+                $inciso2_ids = array_values($inciso2_ids);
+            }
+
+            $inciso2_ids = implode(',', $inciso2_ids);
+            if($inciso2_ids){
+                $registrations = $controller->apiQuery([
+                    '@select' => 'id', 
+                    'opportunity' => "IN({$inciso2_ids})", 
+                    'status' => 'GTE(0)'
+                ]);
+                $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+                $registrationsInciso2 = $repo->findBy(['id' => $registrations_ids]);
+                $opportunitiesIdsInciso2 = explode(',',$inciso2_ids);
+                $opportunitiesInciso2 = $app->repo('Opportunity')->findRegistrationWithDateByIds($opportunitiesIdsInciso2); 
+            }
         }
         $opportunitiesInciso3 = [];
         if ($this->config['inciso3_enabled']) {
             $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
         $this->render('cadastro', [
-                'cidades' => $this->getCidades(), 
-                'registrationsInciso1' => $registrationsInciso1, 
-                'registrationsInciso2' => $registrationsInciso2, 
+                'inciso1Limite' => $this->config['inciso1_limite'],
+                'inciso2Limite' => $this->config['inciso2_limite'],
+                'inciso2_enabled' => $inciso2_ids ? $this->config['inciso2_enabled']:false,
+                'inciso1_enabled' => $inciso1 ? $this->config['inciso1_enabled']: false,
+                'inciso3_enabled' => $app->user->is('mediador') ? false : $this->config['inciso3_enabled'],
+                'cidades' => $inciso2_ids ? $this->getCidades($opportunitiesIdsInciso2) : [], 
+                'registrationsInciso1' => $inciso1 ? $registrationsInciso1 : [], 
+                'registrationsInciso2' => $inciso2_ids ? $registrationsInciso2 : [], 
                 'summaryStatusName'=>$summaryStatusName, 
                 'niceName' => $owner_name,
-                'opportunitiesInciso2' => $opportunitiesInciso2,
-                'opportunitiesInciso3' => $opportunitiesInciso3
+                'opportunitiesInciso2' => $inciso2_ids ? $opportunitiesInciso2 : [],
+                'opportunitiesInciso3' => $app->user->is('mediador') ? [] : $opportunitiesInciso3
             ]);
     }
 
@@ -835,6 +886,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $app->redirect($this->createUrl('status', [$registration->id]));
         }
         if (!$registration->termos_aceitos) {
+            if ($app->user->is('mediador')) {
+                $this->GET_aceitar_termos();
+            }
             $app->redirect($this->createUrl('termos_e_condicoes', [$registration->id]));
         }
         $registration->checkPermission('control');
@@ -860,6 +914,131 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->json("Sucesso");
     }
 
+
+    /**
+     * Tela para login dos mediados
+     * 
+     * rota: /aldirblanc/mediados
+     * 
+     * @return void
+     */
+    function ALL_mediados()
+    {
+        $app = APP::i();
+        if (!count ($this->data) > 0){
+            $this->render('mediados-login', ['errors'=>[], 'data' => $this->data]);
+            return;
+        }
+        
+        $cpf = ($this->data['cpf'] ?? '');
+        $pass = ($this->data['password'] ?? '');
+        $errors = [];
+        if (!$cpf){
+            $errors['user'] = "CPF não informado.";
+        }
+        if (!$pass){
+            $errors['pass'] = "Senha não informada.";
+        }
+        if ($cpf){
+            $cpf = $this->mask($cpf,'###.###.###-##');
+            $agentMeta = $app->repo("AgentMeta")->findBy(array('key' => 'documento', 'value' => $cpf));
+            $cpfClean = $this->cleanCpf($cpf);
+            
+            $agentMetaCpfClean = $app->repo("AgentMeta")->findBy(array('key' => 'documento', 'value' => $cpfClean));
+            $agentMetas = array_merge($agentMeta, $agentMetaCpfClean);
+
+            if (!$agentMetas){
+                $errors['inexistente'] = "CPF não cadastrado";
+            }
+            
+        }
+        if(count($errors) > 0 ){
+            $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
+           return;
+        }
+        $registrations = [];
+        foreach ($agentMetas as $agentMeta) {
+            $agent = $agentMeta->owner;
+            $agentRegistrations = $app->repo('registration')->findBy(['owner' => $agent]);
+            $registrations = array_merge($registrations, $agentRegistrations);
+        }
+
+        $app->disableAccessControl();
+        $registrationsFiltered = array_filter($registrations, function($r) use($pass) { 
+            if ($r->mediacao_senha && $r->mediacao_senha == md5($pass)){
+                return $r;
+            }
+        });
+        $registrationsFiltered = array_values($registrationsFiltered);
+        $app->enableAccessControl();
+        if(count($registrationsFiltered) < 1){
+            $errors['inexistente'] = "CPF ou senha incorretos.";
+            $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
+            
+        }
+        $summaryStatusName = $this->getStatusNames();
+        $_SESSION['mediado_data'] = [
+            'cpf' => $cpf,
+            'last_activity' => time()
+        ];
+        // Caso só tenha um registro no cpf
+        if (count($registrationsFiltered) == 1){
+            $registrationStatusName = "";
+            foreach($summaryStatusName as $key => $value) {
+                if($key == $registrationsFiltered[0]->status) {
+                    $registrationStatusName = $value;
+                    break;
+                }
+            }
+            
+
+            $app->redirect($this->createUrl('status', [$registrationsFiltered[0]->id]));
+            return;
+        }
+        else{
+            foreach ($registrationsFiltered as $registration) {
+                $registrationStatusName = "";
+                foreach($summaryStatusName as $key => $value) {
+                    if($key == $registration->status) {
+                        $registration->statusName = $value;
+                        break;
+                    }
+                }        
+            }
+            $this->render('lista-mediado', ['registrations' => $registrationsFiltered, 'registrationStatusName'=> $registrationStatusName]);
+        } 
+        $app->enableAccessControl();
+
+    }
+
+    function ALL_reportMediacoes()
+    {
+        $this->requireAuthentication();
+        $app = App::i();
+
+        eval(\psy\sh());
+
+        $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
+        if (($requestedOpportunity->canUser('@control'))) {
+
+            $registrations = $app->repo('Registration')->findBy(array('opportunity' => $requestedOpportunity->id));
+
+            $registrationsByMediator = [];
+            foreach ($registrations as $registration) {
+
+                if (array_key_exists('mediador', $registration->getOwner()->getAgentRelationsGrouped())) {
+                    $registrationsByMediator[] = $registration;
+                }
+            }
+        }
+
+        $filename = sprintf(\MapasCulturais\i::__("inscricoes-%s--mediacoes"), $entity->id);
+
+        //$this->reportOutput('mediacao-csv', ['entity' => $entity, 'registrationsByMediator' => $registrationsByMediator], $filename);
+
+    }
+    
+ 
     /* REPORTE */
     function GET_reporte() {
 
@@ -928,4 +1107,25 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             'total' => $query->getSingleScalarResult()
         ];
     }
+    function mask($val, $mask) {
+        if (strlen($val) == strlen($mask)) return $val;
+        $maskared = '';
+        $k = 0;
+        for($i = 0; $i<=strlen($mask)-1; $i++) {
+            if($mask[$i] == '#') {
+                if(isset($val[$k]))
+                    $maskared .= $val[$k++];
+            } else {
+                if(isset($mask[$i]))
+                    $maskared .= $mask[$i];
+            }
+        }
+        return $maskared;
+    }
+    function cleanCpf($cpf){
+        $cpfClean = str_replace("-","",$cpf);
+        $cpfClean = str_replace(".","",$cpfClean);
+        return $cpfClean;
+    }
+    
 }
