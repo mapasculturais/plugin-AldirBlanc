@@ -37,6 +37,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * diretamente ao banco do Brasil.
      * http://localhost:8080/remessas/genericExportInciso2/opportunity:12/
      *
+     *
      * O Parâmetro opportunity e identificado e incluido no endpiont automáricamente
      *
      */
@@ -117,9 +118,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          * Busca as inscrições com status 10 (Selecionada)
          * lembrando que o botão para exportar esses dados, so estrá disponível se existir inscrições nesse status
          */
-        if($getData){
-            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e 
-            WHERE e.status = :status AND 
+        if ($getData) {
+            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
+            WHERE e.status = :status AND
             e.opportunity = :opportunity_Id AND
             e.sentTimestamp >=:startDate AND
             e.sentTimestamp <= :finishDate";
@@ -129,24 +130,23 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'opportunity_Id' => $opportunity_id,
                 'status' => $status,
                 'startDate' => $startDate,
-                'finishDate' => $finishDate
+                'finishDate' => $finishDate,
             ]);
-    
+
             $registrations = $query->getResult();
-        }else{
-            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e 
-            WHERE e.status = :status AND 
+        } else {
+            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
+            WHERE e.status = :status AND
             e.opportunity = :opportunity_Id";
 
             $query = $app->em->createQuery($dql);
             $query->setParameters([
                 'opportunity_Id' => $opportunity_id,
-                'status' => $status,                
+                'status' => $status,
             ]);
-    
+
             $registrations = $query->getResult();
         }
-        
 
         if (empty($registrations)) {
             echo "Não foram encontrados registros.";
@@ -273,17 +273,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $result = $this->normalizeString($registrations->$field_id['En_Num']);
 
                 if (strlen($result) > 5) {
-                    $app->log->info($registrations->number . " campo NUMERO está maior que o permitido. Maximo deve ser 5 caracteres. O registro não foi alterado.");
+                    $app->log->info($registrations->number . " campo NUMERO está maior que o permitido. Maximo deve ser 5 caracteres. O registro foi truncado.");
                 }
 
-                return $result;
+                return $result ? substr($this->normalizeString($result), 0, 5) : " ";
             },
             'COMPLEMENTO' => function ($registrations) use ($fieldsID, $app) {
                 $field_id = $fieldsID['COMPLEMENTO'];
                 $result = $registrations->$field_id['En_Complemento'];
 
                 if (strlen($result) > 20) {
-                    $app->log->info($registrations->number . " campo COMPLEMENTO está maior que o permitido. Maximo deve ser 20 caracteres. o registro foi truncado.");
+                    $app->log->info($registrations->number . " campo COMPLEMENTO está maior que o permitido. Maximo deve ser 20 caracteres. O registro foi truncado.");
                 }
 
                 return $result ? substr($this->normalizeString($result), 0, 20) : " ";
@@ -384,7 +384,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          * Salva o arquivo no servidor e faz o dispatch dele em um formato CSV
          * O arquivo e salvo no deretório docker-data/private-files/aldirblanc/inciso2/remessas
          */
-        $file_name = 'inciso2-genCsv-' . md5(json_encode($csv_data)) . '.csv';
+        $file_name = 'inciso2-genCsv-' . $opportunity_id . '-' . md5(json_encode($csv_data)) . '.csv';
 
         $dir = PRIVATE_FILES_PATH . 'aldirblanc/inciso2/remessas/generics/';
 
@@ -415,6 +415,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     /**
      * Implementa um exportador genérico, que de momento tem a intenção de antender os municipios que não vão enviar o arquivo de remessa
      * diretamente ao banco do Brasil.
+     *
+     *
      * http://localhost:8080/remessas/genericExportInciso3/opportunity:12/
      *
      *
@@ -542,17 +544,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             die();
         }
 
+        /**
+         * Mapeamento de fields_id
+         */
         $fieldsID = [];
         if ($searchType == 'field_id') {
             $fieldsID = $csv_conf[$opportunity_id];
         } else {
-
-            /**
-             * Mapeamento de fields_id pelo label do campo
-             */
-            foreach ($opportunity->registrationFieldConfigurations as $field) {
-                $field_labelMap["field_" . $field->id] = trim($field->title);
-            }
 
             /**
              * Monta a estrutura de field_id's e as coloca dentro de um array organizado para a busca dos dados
@@ -560,6 +558,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              * Será feito uma comparação de string, coloque no arquivo de configuração
              * exatamente o texto do label desejado
              */
+
+            foreach ($opportunity->registrationFieldConfigurations as $field) {
+                $field_labelMap["field_" . $field->id] = trim($field->title);
+            }
 
             foreach ($csv_conf['fields'] as $key_csv_conf => $field) {
                 if (is_array($field)) {
@@ -718,10 +720,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
 
                 if (strlen($result) > 5) {
-                    $app->log->info($registrations->number . " campo NUMERO está maior que o permitido. Maximo deve ser 5 caracteres. O registro não foi alterado.");
+                    $app->log->info($registrations->number . " campo NUMERO está maior que o permitido. Maximo deve ser 5 caracteres. O registro foi truncado.");
                 }
 
-                return $result;
+                return $result ? substr($this->normalizeString($result), 0, 5) : " ";
             },
             'COMPLEMENTO' => function ($registrations) use ($fieldsID, $app) {
                 $field_id = $fieldsID['COMPLEMENTO'];
@@ -736,7 +738,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
 
                 if (strlen($result) > 20) {
-                    $app->log->info($registrations->number . " campo COMPLEMENTO está maior que o permitido. Maximo deve ser 20 caracteres. o registro foi truncado.");
+                    $app->log->info($registrations->number . " campo COMPLEMENTO está maior que o permitido. Maximo deve ser 20 caracteres. O registro foi truncado.");
                 }
 
                 return $result ? substr($this->normalizeString($result), 0, 20) : " ";
