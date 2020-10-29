@@ -177,13 +177,10 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $plugin = $this;
-
-        $app->hook('template(panel.opportunities.panel-header):end', function () use ($app) {
-            if (!$app->user->is('admin')) {
-                return;
-            }
-            $this->part('aldirblanc/generate-opportunities-button');
-        });
+        if($plugin->config['zammad_enable']) {
+            $app->view->enqueueStyle('app','chat','chat.css');
+        }
+       
         // modulo de mediacao
         $app->hook('entity(Agent).canUser(<<viewPrivateData>>)', function($user,&$can) use($app){
             
