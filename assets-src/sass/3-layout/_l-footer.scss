@@ -65,7 +65,9 @@ footer#main-footer {
         font-weight: bold;
     }
 }
-
+.zammad-chat{
+    z-index: 9999;
+}
 .terms-conditions{
     @include mobile {
         display: none;
