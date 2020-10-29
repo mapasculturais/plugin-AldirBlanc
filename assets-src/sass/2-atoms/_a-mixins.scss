@@ -69,6 +69,11 @@ $desktop-width: 1025px;
 $large-width: 1600px;
 $medium-width: 1200px;
 
+@mixin mobile-only {
+    @media (max-width: 599px) {
+        @content;
+    }
+}
 
 @mixin mobile {
     @media (max-width: #{$tablet-width - 1px}) {

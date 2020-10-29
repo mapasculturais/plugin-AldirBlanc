@@ -57,12 +57,12 @@ $inciso2_categories = $plugin->config['inciso2_categories'];
         <?php $this->applyTemplateHook('form','begin'); ?>
         
         <?php $this->part('singles/registration-edit--header', $_params) ?>
-        
-        <?php $this->part('singles/registration-edit--fields', $_params) ?>
 
         <?php if($app->user->is('mediador')): ?>
             <?php $this->part('aldirblanc/mediacao-fields', $_params) ?>
         <?php endif; ?>
+        
+        <?php $this->part('singles/registration-edit--fields', $_params) ?>
 
         <?php $this->part('aldirblanc/registration-edit--validate-button', $_params) ?>
         
