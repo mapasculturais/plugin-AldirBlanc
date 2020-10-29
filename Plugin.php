@@ -173,7 +173,7 @@ class Plugin extends \MapasCulturais\Plugin
             if($selecteds){
                 $existsSelected = true;  
             }
-
+            
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
                 if (in_array($requestedOpportunity->id, $inciso1Ids)){
@@ -506,10 +506,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');        
         $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
-
-        $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');
-        $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
-
+        
         // registra o role para mediadores
         $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function($user){ return $user->is('admin'); });
         $app->registerRole($role_definition);
