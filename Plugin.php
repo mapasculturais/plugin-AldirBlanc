@@ -98,6 +98,7 @@ class Plugin extends \MapasCulturais\Plugin
             'zammad_enable' => env('AB_ZAMMAD_ENABLE', false),
             'zammad_src_form' => env('AB_ZAMMAD_SRC_FORM', ''),
             'zammad_src_chat' => env('AB_ZAMMAD_SRC_CHAT', ''),
+            'zammad_background_color' => env('AB_ZAMMAD_BACKGROUND_COLOR', '#000000'),
         ];
 
         $skipConfig = false;
@@ -559,26 +560,15 @@ class Plugin extends \MapasCulturais\Plugin
             if($plugin->config['zammad_enable']) {
                 ?>
 
-            <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-            <button id="feedback-form">Feedback</button>
-            <script id="zammad_form_script" src="<?= $plugin->config['zammad_src_form']; ?>"></script>
-                <script>
-                    $(function() {
-                    $('#feedback-form').ZammadForm({
-                        messageTitle: 'Formulário de Feedback',
-                        messageSubmit: 'Enviar',
-                        messageThankYou: 'Obrigado pela pergunta (#%s)! Nós responderemos assim que possível!',
-                        modal: true
-                    });
-                    });
-             </script>
+            
             <script src="<?= $plugin->config['zammad_src_chat']; ?>"></script>
             <script>
                 $(function() {
                 new ZammadChat({
-                    background: '#ebebeb',
+                    background: ("<?= $plugin->config['zammad_background_color']?>"),
                     fontSize: '12px',
-                    chatId: 1
+                    chatId: 1,
+                    title: '<strong>Dúvidas?</strong> Fale conosco'
                 });
                 });
         </script>

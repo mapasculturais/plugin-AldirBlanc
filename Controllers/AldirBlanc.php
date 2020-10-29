@@ -169,6 +169,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             Registration::STATUS_APPROVED => i::__('Aprovado', 'aldirblanc'),
             Registration::STATUS_NOTAPPROVED => i::__('Reprovado', 'aldirblanc'),
             Registration::STATUS_WAITLIST => i::__('Recursos Exauridos', 'aldirblanc'),
+            Registration::STATUS_INVALID => i::__('Inválida', 'aldirblanc'),
         ];
         return $summaryStatusName;
     }
