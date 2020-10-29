@@ -45,7 +45,20 @@ $logotipo = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldi
 
         <span> e comunidade </span>
     </div>
-
+    <?php  if($aldirBlancController->config['zammad_enable']) {
+                ?>
+            <script src="<?= $aldirBlancController->config['zammad_src_chat']; ?>"></script>
+            <script>
+                $(function() {
+                new ZammadChat({
+                    background: '<?= $aldirBlancController->config['zammad_background_color']; ?>',
+                    fontSize: '14px',
+                    chatId: 1
+                });
+                });
+        </script>
+    
+    <?php }?>
 </footer>
 
 <?php $this->bodyEnd(); ?>
