@@ -177,7 +177,9 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $plugin = $this;
-
+        if($plugin->config['zammad_enable']) {
+            $app->view->enqueueStyle('app','chat','chat.css');
+        }
        
         // modulo de mediacao
         $app->hook('entity(Agent).canUser(<<viewPrivateData>>)', function($user,&$can) use($app){
