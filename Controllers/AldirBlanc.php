@@ -707,8 +707,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $inciso1 = $this->getOpportunityInciso1();
              
             if ($app->user->is('mediador')){
-                $allowed = $this->config['oportunidade_mediadores'][$app->user->email];
-                if( !in_array($inciso1->id, $allowed )){
+                $allowed = $this->config['lista_mediadores'][$app->user->email] ?? '';
+                
+                if( !empty($allowed) && !in_array($inciso1->id, $allowed )){
                     $inciso1 = "";
                 }
             }
@@ -728,7 +729,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if ($this->config['inciso2_enabled']) {
             $inciso2_ids = $this->config['inciso2_opportunity_ids'];
             if ($app->user->is('mediador')){
-                $allowed = $this->config['oportunidade_mediadores'][$app->user->email];
+                $allowed = $this->config['lista_mediadores'][$app->user->email] ?? "";
+                if (!$allowed){
+                    $allowed = $inciso2_ids;
+                }
                 $inciso2_ids = array_filter($inciso2_ids, function($id) use($allowed){ 
                     if( in_array($id, $allowed )){
                         return $id;
@@ -752,7 +756,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $opportunitiesInciso3 = [];
         if ($this->config['inciso3_enabled']) {
-            $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
+            #TODO inciso 3
+            // $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
         $this->render('cadastro', [
                 'inciso1Limite' => $this->config['inciso1_limite'],
@@ -962,19 +967,24 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $agentRegistrations = $app->repo('registration')->findBy(['owner' => $agent]);
             $registrations = array_merge($registrations, $agentRegistrations);
         }
-
+        if(count($registrations) < 1){
+            $errors['inexistente'] = "CPF incorreto.";
+            $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);            
+            return;
+        }
         $app->disableAccessControl();
         $registrationsFiltered = array_filter($registrations, function($r) use($pass) { 
             if ($r->mediacao_senha && $r->mediacao_senha == md5($pass)){
                 return $r;
             }
         });
+
         $registrationsFiltered = array_values($registrationsFiltered);
         $app->enableAccessControl();
         if(count($registrationsFiltered) < 1){
-            $errors['inexistente'] = "CPF ou senha incorretos.";
+            $errors['inexistente'] = "Senha incorreta.";
             $this->render('mediados-login', ['errors'=>$errors, 'data' => $this->data]);
-            
+            return;
         }
         $summaryStatusName = $this->getStatusNames();
         $_SESSION['mediado_data'] = [
@@ -991,7 +1001,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 }
             }
             
-
             $app->redirect($this->createUrl('status', [$registrationsFiltered[0]->id]));
             return;
         }
@@ -1007,8 +1016,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
             $this->render('lista-mediado', ['registrations' => $registrationsFiltered, 'registrationStatusName'=> $registrationStatusName]);
         } 
-        $app->enableAccessControl();
-
     }
 
     function ALL_reportMediacoes()
