@@ -177,7 +177,9 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $plugin = $this;
-
+        if($plugin->config['zammad_enable']) {
+            $app->view->enqueueStyle('app','chat','chat.css');
+        }
         $app->hook('template(panel.opportunities.panel-header):end', function () use ($app) {
             if (!$app->user->is('admin')) {
                 return;
