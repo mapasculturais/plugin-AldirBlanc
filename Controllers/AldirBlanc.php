@@ -758,7 +758,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $opportunitiesInciso3 = [];
         if ($this->config['inciso3_enabled']) {
             #TODO inciso 3
-            // $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
+            $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
         $this->render('cadastro', [
                 'inciso1Limite' => $this->config['inciso1_limite'],
