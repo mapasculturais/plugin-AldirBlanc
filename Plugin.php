@@ -178,7 +178,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         $plugin = $this;
         if($plugin->config['zammad_enable']) {
-            $app->view->enqueueStyle('app','chat','chat.css');
+            // $app->view->enqueueStyle('app','chat','chat.css');
         }
        
         // modulo de mediacao
@@ -576,6 +576,9 @@ class Plugin extends \MapasCulturais\Plugin
                 });
                 });
         </script>
+         <style>.zammad-chat{
+            z-index: 9999!important;
+        }</style>
     
     <?php
             }
