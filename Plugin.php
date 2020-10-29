@@ -147,6 +147,41 @@ class Plugin extends \MapasCulturais\Plugin
         
         $plugin = $this;
 
+        //Botão exportador genérico
+        $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
+            $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
+            $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
+            $inciso3Ids = array_values($plugin->config['inciso3_opportunity_ids']);
+            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
+            $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
+            $opportunity = $requestedOpportunity->id;
+
+            //Analisa se o botão deve ser mostrado na tela
+            $selecteds = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
+                'opportunity' => $opportunity,
+                'status' => 0
+            ]);
+            
+            $existsSelected = false;
+            if($selecteds){
+                $existsSelected = true;  
+            }
+
+            if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
+                $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
+                if (in_array($requestedOpportunity->id, $inciso1Ids)){
+                    $inciso = 1;
+                }
+                else if (in_array($requestedOpportunity->id, $inciso2Ids)){
+                    $inciso = 2;
+                }
+                else if (in_array($requestedOpportunity->id, $inciso3Ids)){
+                    $inciso = 3;
+                }
+                $this->part('aldirblanc/csv-generic-button', ['inciso' => $inciso, 'opportunity' => $opportunity, 'existsSelected' => $existsSelected]);
+            }
+        });
+
         /**
          * só consolida as avaliações para "selecionado" se tiver acontecido as validações (dataprev, etc)
          * 
