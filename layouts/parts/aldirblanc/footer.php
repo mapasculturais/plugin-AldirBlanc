@@ -59,6 +59,9 @@ $logotipo = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldi
                 });
                 });
         </script>
+         <style>.zammad-chat{
+            z-index: 9999!important;
+        }</style>
     
     <?php }?>
 </footer>
