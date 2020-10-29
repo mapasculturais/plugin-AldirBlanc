@@ -169,6 +169,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             Registration::STATUS_APPROVED => i::__('Aprovado', 'aldirblanc'),
             Registration::STATUS_NOTAPPROVED => i::__('Reprovado', 'aldirblanc'),
             Registration::STATUS_WAITLIST => i::__('Recursos Exauridos', 'aldirblanc'),
+            Registration::STATUS_INVALID => i::__('Inválida', 'aldirblanc'),
         ];
         return $summaryStatusName;
     }
@@ -707,8 +708,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $inciso1 = $this->getOpportunityInciso1();
              
             if ($app->user->is('mediador')){
-                $allowed = $this->config['oportunidade_mediadores'][$app->user->email];
-                if( !in_array($inciso1->id, $allowed )){
+                $allowed = $this->config['lista_mediadores'][$app->user->email] ?? '';
+                
+                if( !empty($allowed) && !in_array($inciso1->id, $allowed )){
                     $inciso1 = "";
                 }
             }
@@ -728,7 +730,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if ($this->config['inciso2_enabled']) {
             $inciso2_ids = $this->config['inciso2_opportunity_ids'];
             if ($app->user->is('mediador')){
-                $allowed = $this->config['oportunidade_mediadores'][$app->user->email];
+                $allowed = $this->config['lista_mediadores'][$app->user->email] ?? "";
+                if (!$allowed){
+                    $allowed = $inciso2_ids;
+                }
                 $inciso2_ids = array_filter($inciso2_ids, function($id) use($allowed){ 
                     if( in_array($id, $allowed )){
                         return $id;
@@ -752,7 +757,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $opportunitiesInciso3 = [];
         if ($this->config['inciso3_enabled']) {
-            $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
+            #TODO inciso 3
+            // $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
         $this->render('cadastro', [
                 'inciso1Limite' => $this->config['inciso1_limite'],
