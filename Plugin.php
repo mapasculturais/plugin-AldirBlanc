@@ -69,8 +69,8 @@ class Plugin extends \MapasCulturais\Plugin
             'avaliador_generico_user_id' => env('AB_AVALIADOR_GENERICO_USER_ID', ''),
             
             // define a exibição do resultado das avaliações no status
-            'exibir_resultado_padrao' => env('AB_EXIBIR_RESULTADO_PADRAO', false),
-            'exibir_resultado_dataprev' => env('AB_EXIBIR_RESULTADO_DATAPREV', true),
+            'exibir_resultado_padrao' => env('AB_EXIBIR_RESULTADO_PADRAO', true),
+            'exibir_resultado_dataprev' => env('AB_EXIBIR_RESULTADO_DATAPREV', false),
             'exibir_resultado_generico' => env('AB_EXIBIR_RESULTADO_GENERICO', false),
             'exibir_resultado_avaliadores' => env('AB_EXIBIR_RESULTADO_AVALIADORES', false),
 
@@ -256,17 +256,17 @@ class Plugin extends \MapasCulturais\Plugin
             $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
             $opportunity = $requestedOpportunity->id;
 
-            //Busca oportunidades selecionadas
-            $selecteds = $app->repo('Registration')->findOneBy([
+            //Analisa se o botão deve ser mostrado na tela
+            $selecteds = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
                 'opportunity' => $opportunity,
-                'status' => 10
+                'status' => 0
             ]);
-
+            
             $existsSelected = false;
             if($selecteds){
                 $existsSelected = true;  
             }
-
+            
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
                 if (in_array($requestedOpportunity->id, $inciso1Ids)){
@@ -632,7 +632,6 @@ class Plugin extends \MapasCulturais\Plugin
     public function register()
     {
         $app = App::i();
-
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');        
         $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
