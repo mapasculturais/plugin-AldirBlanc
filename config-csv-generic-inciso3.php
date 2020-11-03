@@ -136,7 +136,7 @@ return [
     '4793' => [ 
         'TIPO_PROPONENTE' => 'field_1215',        
         'CPF' => 'field_1238',
-        'NOME_SOCIAL' => ['field_1221', 'field_1228'],
+        'NOME_SOCIAL' => ['field_1221', 'field_1228'],    
         'CNPJ' => null,
         'RAZAO_SOCIAL' => null,                
         'LOGRADOURO' => 'field_1214',
@@ -199,12 +199,7 @@ return [
         'VALOR' => '600',        
         'INCISO' => 1291,
     ],
-    
-    
-    
-    
-    'parameters_default' => [
-        'status' => '10',
+    'parameters_default' => [        
         'searchType' => 'field_id',
         'proponentTypes' => [
             'fisica' => 'Pessoa Física',
@@ -213,7 +208,4 @@ return [
             'juridica-mei' => 'Pessoa Jurídica - MEI'
         ]
     ],
-    
-        
-
 ];
