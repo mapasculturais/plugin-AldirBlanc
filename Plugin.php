@@ -292,8 +292,7 @@ class Plugin extends \MapasCulturais\Plugin
             }
             //$this->part('aldirblanc/csv-button-mediacao', ['entity' => $requestedOpportunity, 'registrationsByMediator' => $registrationsByMediator]);
         });
-
-        //botao de export csv
+       
         //Botão exportador genérico
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
             $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
@@ -302,17 +301,6 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
             $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
             $opportunity = $requestedOpportunity->id;
-
-            //Analisa se o botão deve ser mostrado na tela
-            $selecteds = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-                'opportunity' => $opportunity,
-                'status' => 0
-            ]);
-            
-            $existsSelected = false;
-            if($selecteds){
-                $existsSelected = true;  
-            }
             
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
@@ -325,7 +313,7 @@ class Plugin extends \MapasCulturais\Plugin
                 else if (in_array($requestedOpportunity->id, $inciso3Ids)){
                     $inciso = 3;
                 }
-                $this->part('aldirblanc/csv-generic-button', ['inciso' => $inciso, 'opportunity' => $opportunity, 'existsSelected' => $existsSelected]);
+                $this->part('aldirblanc/csv-generic-button', ['inciso' => $inciso, 'opportunity' => $opportunity]);
             }
         });
 
