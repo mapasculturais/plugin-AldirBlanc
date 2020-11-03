@@ -66,7 +66,7 @@ class Plugin extends \MapasCulturais\Plugin
 
             // define o id para dataprev e avaliador generico
             'avaliador_dataprev_user_id' => env('AB_AVALIADOR_DATAPREV_USER_ID', ''),
-            'avaliador_generico_user_id' => env('AB_AVALIADOR_GENERICO_USER_ID', ''),
+            'avaliadores_genericos_user_id' => (array) json_decode(env('AB_AVALIADORES_GENERICOS_USER_ID', '[]')),
             
             // define a exibição do resultado das avaliações no status
             'exibir_resultado_padrao' => env('AB_EXIBIR_RESULTADO_PADRAO', true),
