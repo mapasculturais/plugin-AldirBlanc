@@ -51,6 +51,28 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
         });
 
         $plugin = $this;
+        $user = $this->getUser();
+
+        $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app, $user, $plugin) {
+            $em = $opportunity->getEvaluationMethod();
+            $_evaluations = $app->repo('RegistrationEvaluation')->findBy(['user' => $user, 'registration' => $registrations]);
+
+            $evaluations_status = [];
+            $evaluations_obs = [];
+            foreach($_evaluations as $eval) {
+                $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
+                $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs;
+            }
+
+
+            $header[] = $plugin->getName() . ' - status';
+            $header[] = $plugin->getName() . ' - obs';
+            
+            foreach($body as $i => $line){
+                $body[$i][] = $evaluations_status[$line[0]] ?? null;
+                $body[$i][] = $evaluations_obs[$line[0]] ?? null;
+            }
+        });
         
 
         /**
