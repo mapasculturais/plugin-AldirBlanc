@@ -13,42 +13,57 @@ return [
         'MUNICIPIO',
         'CEP',
         'ESTADO',
+
+        'TELEFONE',
         'NUM_BANCO',
-        'TIPO_CONTA_BANCO',        
+        //'TIPO_CONTA_BANCO',        
         'AGENCIA_BANCO',
         'CONTA_BANCO',
-        'OPERACAO_BANCO',
+        //'OPERACAO_BANCO',
+
         'VALOR',
         'INSCRICAO_ID',
         'INCISO',
     ],
     'fields' => [        
-        'CPF' => 'CPF DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
-        'NOME_SOCIAL' => 'NOME COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:', 
-        'CNPJ' => ['NÚMERO DE INSCRIÇÃO EM CADASTRO NACIONAL DE PESSOA JURÍDICA – CNPJ:'],
-        'RAZAO_SOCIAL' => ['RAZÃO SOCIAL DA ENTIDADE, EMPRESA OU DA COOPERATIVA CULTURAL:'],                
-        'LOGRADOURO' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
-        'NUMERO' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
-        'COMPLEMENTO' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
-        'BAIRRO' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
-        'MUNICIPIO' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
-        'CEP' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
-        'ESTADO' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
-        'NUM_BANCO' => 'BANCO:' ,
-        'TIPO_CONTA_BANCO' => 'TIPO DE CONTA BANCÁRIA:',        
-        'AGENCIA_BANCO' => 'AGÊNCIA',
-        'CONTA_BANCO'  => 'NÚMERO DA CONTA:',
-        'OPERACAO_BANCO'  => 'NÚMERO DA OPERAÇÃO SE HOUVER',
+
+        'CPF' => 'CPF',
+        'NOME_SOCIAL' => 'Nome completo', 
+        'CNPJ' => [
+            'CNPJ',
+            'CNPJ'
+            ],
+        'RAZAO_SOCIAL' => [
+            'Razão social',
+            'Razão Social'
+        ],                
+        'LOGRADOURO' => 'Endereço completo',
+        'NUMERO' => 'Endereço completo',
+        'COMPLEMENTO' => 'Endereço completo',
+        'BAIRRO' => 'Endereço completo',
+        'MUNICIPIO' => 'Endereço completo',
+        'CEP' => 'Endereço completo',
+        'ESTADO' => 'Endereço completo',
+        'TELEFONE' => [
+            'Telefone comercial',
+            'Telefone'
+        ],
+        'NUM_BANCO' => 'Banco' ,
+        'TIPO_CONTA_BANCO' => 0,        
+        'AGENCIA_BANCO' => 'Agência',
+        'CONTA_BANCO'  => 'Conta Corrente',
+        'OPERACAO_BANCO'  => '',
+
         'VALOR' => '600',        
         'INCISO' => 1288,
     ],
-    'parameters_default' => [
-        'status' => '10'
-    ],
+    'parameters_default' => [],
     'categories' => [
         'CPF' => [
             'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',
-            'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO'
+
+            'BENEFICIÁRIO COM CPF E SEM ESPAÇO FÍSICO'
+
         ],
         'CNPJ' => [
             'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
