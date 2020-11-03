@@ -15,9 +15,7 @@ if($inciso == 1){
 }
 ?>
 
-<?php if($existsSelected){?>
 <a class="btn btn-default download btn-export-cancel"  ng-click="editbox.open('form-parameters', $event)" rel="noopener noreferrer">Exportador genérico</a>
-<?php } ?>
 
 <!-- Formulário -->
 <edit-box id="form-parameters" position="top" title="<?php i::esc_attr_e($title) ?>" cancel-label="Cancelar" close-on-cancel="true">

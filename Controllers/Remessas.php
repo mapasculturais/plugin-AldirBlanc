@@ -59,7 +59,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          */
 
         $csv_conf = $this->config['csv_generic_inciso2'];
-        $status = $csv_conf['parameters_default']['status'];
         $categories = $csv_conf['categories'];
         $header = $csv_conf['header'];
 
@@ -114,14 +113,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             echo "Não autorizado";
             die();
         }
-    
+
         /**
          * Busca as inscrições com status 10 (Selecionada)
          * lembrando que o botão para exportar esses dados, so estrá disponível se existir inscrições nesse status
          */
         if ($getData) {
             $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-            WHERE e.status = :status AND
+            WHERE e.status = 1 AND
             e.opportunity = :opportunity_Id AND
             e.sentTimestamp >=:startDate AND
             e.sentTimestamp <= :finishDate";
@@ -129,7 +128,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $query = $app->em->createQuery($dql);
             $query->setParameters([
                 'opportunity_Id' => $opportunity_id,
-                'status' => $status,
                 'startDate' => $startDate,
                 'finishDate' => $finishDate,
             ]);
@@ -137,13 +135,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $registrations = $query->getResult();
         } else {
             $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-            WHERE e.status = :status AND
+            WHERE e.status = 1 AND
             e.opportunity = :opportunity_Id";
 
             $query = $app->em->createQuery($dql);
             $query->setParameters([
                 'opportunity_Id' => $opportunity_id,
-                'status' => $status,
             ]);
 
             $registrations = $query->getResult();
@@ -153,7 +150,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             echo "Não foram encontrados registros.";
             die();
         }
-        
+
         /**
          * Mapeamento de fields_id pelo label do campo
          */
@@ -328,13 +325,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //     }
 
             //  },
-            'AGENCIA_BANCO' => function ($registrations) use ($fieldsID) {
+            'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $app) {
                 $field_id = $fieldsID['AGENCIA_BANCO'];
                 return $this->normalizeString(substr($registrations->$field_id, 0, 4));
             },
-            'CONTA_BANCO' => function ($registrations) use ($fieldsID) {
+            'CONTA_BANCO' => function ($registrations) use ($fieldsID, $app) {
                 $field_id = $fieldsID['CONTA_BANCO'];
-                return $this->normalizeString($registrations->$field_id);
+
+                $result = $registrations->$field_id;
+
+                return $this->normalizeString($result);
             },
             //  'OPERACAO_BANCO' => function ($registrations) use ($fieldsID){
             //     $field_id = $fieldsID['OPERACAO_BANCO'];
@@ -344,7 +344,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //         return " ";
             //     }
             //  },
-            'VALOR' => $fieldsID['VALOR'],
+            'VALOR' => '',
             'INSCRICAO_ID' => function ($registrations) use ($fieldsID) {
                 return $this->normalizeString($registrations->number);
 
@@ -359,6 +359,18 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         //Itera sobre os dados mapeados
         $csv_data = [];
         foreach ($registrations as $key_registration => $registration) {
+
+            //Pega as informações de pagamento
+            $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
+                'registration' => $registration->id,
+                'status' => 0,
+            ]);
+
+            if (!$payment) {
+                $app->log->debug("\nPagamento nao encontrado para " . $registration->id);
+                continue;
+            }
+
             foreach ($mappedRecords as $key_fields => $field) {
                 if (is_callable($field)) {
                     $csv_data[$key_registration][$key_fields] = $field($registration);
@@ -379,6 +391,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 }
             }
+
+            //Insere o valor a ser pago no CSV
+            $csv_data[$key_registration]['VALOR'] = $payment->amount;
+            
+
         }
 
         /**
@@ -420,7 +437,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      *
      * http://localhost:8080/remessas/genericExportInciso3/opportunity:12/
      *
-     *
+     * O Parâmetro opportunity e identificado e incluido no endpiont automáricamente
      *
      */
     public function ALL_genericExportInciso3()
@@ -440,7 +457,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          */
 
         $csv_conf = $this->config['csv_generic_inciso3'];
-        $status = $csv_conf['parameters_default']['status'];
         $searchType = $csv_conf['parameters_default']['searchType'];
         $proponentTypes = $csv_conf['parameters_default']['proponentTypes'];
         $header = $csv_conf['header'];
@@ -502,15 +518,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          * lembrando que o botão para exportar esses dados, so estrá disponível se existir inscrições nesse status
          */
         if ($getData) { //caso existe data como parametro ele pega o range da data selecionada com satatus 1
-            $dql = "
-            SELECT
+            $dql = "SELECT
                 e
             FROM
                 MapasCulturais\Entities\Registration e
             WHERE
                 e.sentTimestamp >=:startDate AND
                 e.sentTimestamp <= :finishDate AND
-                e.status = :status AND
+                e.status = 1 AND
                 e.opportunity = :opportunity_Id";
 
             $query = $app->em->createQuery($dql);
@@ -518,24 +533,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'opportunity_Id' => $opportunity_id,
                 'startDate' => $startDate,
                 'finishDate' => $finishDate,
-                'status' => $status,
             ]);
             $registrations = $query->getResult();
 
         } else { //Se não exister data como parametro ele retorna todos os registros com status 1
-            $dql = "
-            SELECT
+            $dql = "SELECT
                 e
             FROM
                 MapasCulturais\Entities\Registration e
             WHERE
-                e.status = :status AND
+                e.status = 1 AND
                 e.opportunity = :opportunity_Id";
 
             $query = $app->em->createQuery($dql);
             $query->setParameters([
                 'opportunity_Id' => $opportunity_id,
-                'status' => $status,
             ]);
             $registrations = $query->getResult();
         }
@@ -544,7 +556,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             echo "Não foram encontrados registros.";
             die();
         }
-
+        
         /**
          * Mapeamento de fields_id
          */
@@ -599,7 +611,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $fieldsID['CPF'];
                 if ($temp) {
                     $propType = trim($registrations->$temp);
-                    if ($propType === $proponentTypes['fisica'] || $propType === $proponentTypes['coletivo']) {
+                    if ($propType === $proponentTypes['fisica'] || empty($propType) || $propType === $proponentTypes['coletivo']) {
 
                         $result = $this->normalizeString($registrations->$field_id);
 
@@ -618,17 +630,23 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'NOME_SOCIAL' => function ($registrations) use ($fieldsID, $proponentTypes) {
                 $temp = $fieldsID['TIPO_PROPONENTE'];
                 $field_id = $fieldsID['NOME_SOCIAL'];
-                if ($temp) {
-
-                    $propType = $registrations->$temp;
-
-                    if ($propType == $proponentTypes['fisica'] || empty($propType)) {
-                        $result = $this->normalizeString($registrations->$field_id);
-                    } else {
-                        $result = " ";
+                
+                $propType = trim($registrations->$temp);
+                
+                if ($propType == $proponentTypes['fisica'] || empty($propType) || $propType == $proponentTypes['coletivo']) {
+                    
+                    if(is_array($field_id)){
+                        foreach($field_id as $value){
+                            if($registrations->$value){
+                                $result = $this->normalizeString($registrations->$value); 
+                            }
+                        }
+                    }else{
+                        $result = $this->normalizeString($registrations->$field_id);  
                     }
-                } else {
-                    $result = $this->normalizeString($registrations->$field_id);
+                    
+                }else{
+                    $result = " ";
                 }
 
                 return $result;
@@ -639,7 +657,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 if ($temp) {
                     $propType = $registrations->$temp;
-                    if ($propType === trim($proponentTypes['juridica'])) {
+                    if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
                         if (is_array($field_id)) {
                             $result = " ";
                             foreach ($field_id as $key => $value) {
@@ -677,7 +695,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 if ($temp) {
                     $propType = $registrations->$temp;
 
-                    if ($propType === trim($proponentTypes['juridica'])) {
+                    if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
                         if (is_array($field_id)) {
                             $result = " ";
                             foreach ($field_id as $key => $value) {
@@ -699,7 +717,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'LOGRADOURO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['LOGRADOURO'];
-                if (is_string($registrations->$field_id)) {
+                
+                if (is_string($registrations->$field_id)) {                    
                     return $this->normalizeString($registrations->$field_id);
                 } elseif (is_array($registrations->$field_id)) {
                     return $this->normalizeString($registrations->$field_id['En_Nome_Logradouro']);
@@ -708,7 +727,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
 
             },
-            'NUMERO' => function ($registrations) use ($fieldsID, $app) {
+            'NUMERO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['NUMERO'];
                 if ($field_id) {
                     if (is_array($registrations->$field_id)) {
@@ -746,6 +765,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'BAIRRO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['BAIRRO'];
+
                 if ($field_id) {
                     if (is_array($registrations->$field_id)) {
                         return $this->normalizeString($registrations->$field_id['En_Bairro']);
@@ -772,6 +792,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'CEP' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['CEP'];
+
                 if (is_string($registrations->$field_id)) {
                     return $this->normalizeString($registrations->$field_id);
                 } elseif (is_array($registrations->$field_id)) {
@@ -783,6 +804,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'ESTADO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['ESTADO'];
+                
                 if ($field_id) {
                     if (is_array($registrations->$field_id)) {
                         return $this->normalizeString($registrations->$field_id['En_Estado']);
@@ -834,7 +856,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'CONTA_BANCO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['CONTA_BANCO'];
-                return $this->normalizeString($registrations->$field_id);
+
+                $result = $registrations->$field_id;
+
+                return $this->normalizeString($result);
             },
             //  'OPERACAO_BANCO' => function ($registrations) use ($fieldsID){
             //     $field_id = $fieldsID['OPERACAO_BANCO'];
@@ -859,6 +884,18 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         //Itera sobre os dados mapeados
         $csv_data = [];
         foreach ($registrations as $key_registration => $registration) {
+
+            //Busca as informaçoes de pagamento
+            $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
+                'registration' => $registration->id,
+                'status' => 0,
+            ]);
+
+            if (!$payment) {
+                $app->log->debug("\nPagamento nao encontrado para " . $registration->id);
+                continue;
+            }
+
             foreach ($mappedRecords as $key_fields => $field) {
                 if (is_callable($field)) {
                     $csv_data[$key_registration][$key_fields] = $field($registration);
@@ -879,8 +916,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 }
             }
-        }
 
+            //Insere o valor a ser pago no CSV
+            $csv_data[$key_registration]['VALOR'] = $payment->amount;
+            
+        }
+        
         /**
          * Salva o arquivo no servidor e faz o dispatch dele em um formato CSV
          * O arquivo e salvo no deretório docker-data/private-files/aldirblanc/inciso2/remessas
@@ -915,8 +956,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     /**
      * Função para retornar o número do banco, levando como base de pesquisa o nome do banco
-     * Todos os textos que entram pelo parâmetro $bankName, são primeiro colocados em lowercase em seguida a primeira letra
-     * de cada palavra e passado para upercase
+     * Todos os textos que entram pelo parâmetro $bankName, são primeiro colocados em lowercase e comparado com o array $bankList também em lowercase
+     *
      *
      */
     private function numberBank($bankName)

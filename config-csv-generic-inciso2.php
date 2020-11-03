@@ -57,9 +57,7 @@ return [
         'VALOR' => '600',        
         'INCISO' => 1288,
     ],
-    'parameters_default' => [
-        'status' => '10'
-    ],
+    'parameters_default' => [],
     'categories' => [
         'CPF' => [
             'BENEFICIÁRIO COM CPF E ESPAÇO FÍSICO',

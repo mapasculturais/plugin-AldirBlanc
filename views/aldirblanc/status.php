@@ -25,11 +25,11 @@ $_params = [
 
             <?php if (!empty($justificativaAvaliacao) && sizeof($justificativaAvaliacao) != 0) : ?>
                 <?php foreach ($justificativaAvaliacao as $message) : ?>
-                    <?php if (is_array($message) && $this->controller->config['exibir_resultado_padrao']) : ?>
-                        <p class="status-card--content"><?= $message['message']; ?></p>
+                    <?php if (is_array($message) && !empty($this->controller->config['exibir_resultado_padrao'])) : ?>
+                        <?= $message['message']; ?>
                         <hr>
                     <?php else : ?>
-                        <p class="status-card--content"><?= $message; ?></p>
+                        <p><?= $message; ?></p>
                         <hr>
                     <?php endif; ?>
                 <?php endforeach; ?>
