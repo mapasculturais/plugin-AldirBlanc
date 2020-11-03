@@ -583,7 +583,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 
                 if ($evaluation->user->id == $this->config['avaliador_dataprev_user_id'] && $this->config['exibir_resultado_dataprev']) {
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
-                } elseif ($evaluation->user->id == $this->config['avaliador_generico_user_id'] && $this->config['exibir_resultado_generico']) {
+                } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && $this->config['exibir_resultado_generico']) {
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
                 } 
                 
@@ -1023,8 +1023,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     {
         $this->requireAuthentication();
         $app = App::i();
-
-        eval(\psy\sh());
 
         $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
         if (($requestedOpportunity->canUser('@control'))) {
