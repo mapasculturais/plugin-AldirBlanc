@@ -556,7 +556,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             echo "Não foram encontrados registros.";
             die();
         }
-
+        
         /**
          * Mapeamento de fields_id
          */
@@ -611,7 +611,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $fieldsID['CPF'];
                 if ($temp) {
                     $propType = trim($registrations->$temp);
-                    if ($propType === $proponentTypes['fisica'] || $propType === $proponentTypes['coletivo']) {
+                    if ($propType === $proponentTypes['fisica'] || empty($propType) || $propType === $proponentTypes['coletivo']) {
 
                         $result = $this->normalizeString($registrations->$field_id);
 
@@ -630,17 +630,23 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'NOME_SOCIAL' => function ($registrations) use ($fieldsID, $proponentTypes) {
                 $temp = $fieldsID['TIPO_PROPONENTE'];
                 $field_id = $fieldsID['NOME_SOCIAL'];
-                if ($temp) {
-
-                    $propType = $registrations->$temp;
-
-                    if ($propType == $proponentTypes['fisica'] || empty($propType)) {
-                        $result = $this->normalizeString($registrations->$field_id);
-                    } else {
-                        $result = " ";
+                
+                $propType = trim($registrations->$temp);
+                
+                if ($propType == $proponentTypes['fisica'] || empty($propType) || $propType == $proponentTypes['coletivo']) {
+                    
+                    if(is_array($field_id)){
+                        foreach($field_id as $value){
+                            if($registrations->$value){
+                                $result = $this->normalizeString($registrations->$value); 
+                            }
+                        }
+                    }else{
+                        $result = $this->normalizeString($registrations->$field_id);  
                     }
-                } else {
-                    $result = $this->normalizeString($registrations->$field_id);
+                    
+                }else{
+                    $result = " ";
                 }
 
                 return $result;
@@ -711,7 +717,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'LOGRADOURO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['LOGRADOURO'];
-                if (is_string($registrations->$field_id)) {
+                
+                if (is_string($registrations->$field_id)) {                    
                     return $this->normalizeString($registrations->$field_id);
                 } elseif (is_array($registrations->$field_id)) {
                     return $this->normalizeString($registrations->$field_id['En_Nome_Logradouro']);
@@ -720,7 +727,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
 
             },
-            'NUMERO' => function ($registrations) use ($fieldsID, $app) {
+            'NUMERO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['NUMERO'];
                 if ($field_id) {
                     if (is_array($registrations->$field_id)) {
@@ -758,6 +765,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'BAIRRO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['BAIRRO'];
+
                 if ($field_id) {
                     if (is_array($registrations->$field_id)) {
                         return $this->normalizeString($registrations->$field_id['En_Bairro']);
@@ -784,6 +792,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'CEP' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['CEP'];
+
                 if (is_string($registrations->$field_id)) {
                     return $this->normalizeString($registrations->$field_id);
                 } elseif (is_array($registrations->$field_id)) {
@@ -795,6 +804,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'ESTADO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['ESTADO'];
+                
                 if ($field_id) {
                     if (is_array($registrations->$field_id)) {
                         return $this->normalizeString($registrations->$field_id['En_Estado']);
@@ -911,7 +921,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $csv_data[$key_registration]['VALOR'] = $payment->amount;
             
         }
-
+        
         /**
          * Salva o arquivo no servidor e faz o dispatch dele em um formato CSV
          * O arquivo e salvo no deretório docker-data/private-files/aldirblanc/inciso2/remessas
