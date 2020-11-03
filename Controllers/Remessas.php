@@ -657,7 +657,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 if ($temp) {
                     $propType = $registrations->$temp;
-                    if ($propType === trim($proponentTypes['juridica'])) {
+                    if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
                         if (is_array($field_id)) {
                             $result = " ";
                             foreach ($field_id as $key => $value) {
@@ -695,7 +695,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 if ($temp) {
                     $propType = $registrations->$temp;
 
-                    if ($propType === trim($proponentTypes['juridica'])) {
+                    if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
                         if (is_array($field_id)) {
                             $result = " ";
                             foreach ($field_id as $key => $value) {
