@@ -69,8 +69,8 @@ class Plugin extends \MapasCulturais\Plugin
             'avaliador_generico_user_id' => env('AB_AVALIADOR_GENERICO_USER_ID', ''),
             
             // define a exibição do resultado das avaliações no status
-            'exibir_resultado_padrao' => env('AB_EXIBIR_RESULTADO_PADRAO', false),
-            'exibir_resultado_dataprev' => env('AB_EXIBIR_RESULTADO_DATAPREV', true),
+            'exibir_resultado_padrao' => env('AB_EXIBIR_RESULTADO_PADRAO', true),
+            'exibir_resultado_dataprev' => env('AB_EXIBIR_RESULTADO_DATAPREV', false),
             'exibir_resultado_generico' => env('AB_EXIBIR_RESULTADO_GENERICO', false),
             'exibir_resultado_avaliadores' => env('AB_EXIBIR_RESULTADO_AVALIADORES', false),
 
