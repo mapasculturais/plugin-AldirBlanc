@@ -9,6 +9,7 @@ use MapasCulturais\i;
 // @todo refatorar autoloader de plugins para resolver classes em pastas
 require_once 'Controllers/AldirBlanc.php';
 require_once 'Controllers/Remessas.php';
+require_once 'Controllers/Retorno.php';
 require_once 'vendor/autoload.php';
 
 class Plugin extends \MapasCulturais\Plugin
@@ -63,6 +64,9 @@ class Plugin extends \MapasCulturais\Plugin
             'csv_generic_inciso3' => require_once env('AB_CSV_GENERIC_INCISO3', __DIR__ . '/config-csv-generic-inciso3.php'),
 
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
+
+            // arquivo para importação dos retornos de pagamento
+            'csv_retorno' => env('AB_CSV_RETORNO', ''),
 
             // define o id para dataprev e avaliador generico
             'avaliador_dataprev_user_id' => env('AB_AVALIADOR_DATAPREV_USER_ID', ''),
@@ -589,6 +593,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');        
         $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
+        $app->registerController('retorno', 'AldirBlanc\Controllers\Retorno');
 
         // registra o role para mediadores
         $role_definition = new Role('mediador', 'Mediador', 'Mediadores', true, function ($user) {
