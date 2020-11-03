@@ -589,7 +589,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
                 } 
                 
-                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores'])) {
+                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
                     // resultados dos demais avaliadores
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
                 }
@@ -766,15 +766,15 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->render('cadastro', [
                 'inciso1Limite' => $this->config['inciso1_limite'],
                 'inciso2Limite' => $this->config['inciso2_limite'],
-                'inciso2_enabled' => $inciso2_ids ? $this->config['inciso2_enabled']:false,
-                'inciso1_enabled' => $inciso1 ? $this->config['inciso1_enabled']: false,
+                'inciso2_enabled' => isset($inciso2_ids) && $inciso2_ids ? $this->config['inciso2_enabled']:false,
+                'inciso1_enabled' => isset($inciso1) &&  $inciso1 ? $this->config['inciso1_enabled']: false,
                 'inciso3_enabled' => $app->user->is('mediador') ? false : $this->config['inciso3_enabled'],
-                'cidades' => $inciso2_ids ? $this->getCidades($opportunitiesIdsInciso2) : [], 
-                'registrationsInciso1' => $inciso1 ? $registrationsInciso1 : [], 
-                'registrationsInciso2' => $inciso2_ids ? $registrationsInciso2 : [], 
+                'cidades' => isset($inciso2_ids) && $inciso2_ids ? $this->getCidades($opportunitiesIdsInciso2) : [], 
+                'registrationsInciso1' => isset($inciso1) &&  $inciso1 ? $registrationsInciso1 : [], 
+                'registrationsInciso2' => isset($inciso2_ids) && $inciso2_ids ? $registrationsInciso2 : [], 
                 'summaryStatusName'=>$summaryStatusName, 
                 'niceName' => $owner_name,
-                'opportunitiesInciso2' => $inciso2_ids ? $opportunitiesInciso2 : [],
+                'opportunitiesInciso2' => isset($inciso2_ids) && $inciso2_ids ? $opportunitiesInciso2 : [],
                 'opportunitiesInciso3' => $app->user->is('mediador') ? [] : $opportunitiesInciso3
             ]);
     }
