@@ -180,6 +180,53 @@ class Plugin extends \MapasCulturais\Plugin
         if($plugin->config['zammad_enable']) {
             // $app->view->enqueueStyle('app','chat','chat.css');
         }
+
+        $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
+            $em = $opportunity->getEvaluationMethod();
+            
+            $_evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $registrations]);
+
+            $evaluations_avaliadores = [];
+            $evaluations_status = [];
+            $evaluations_obs = [];
+            
+            foreach ($_evaluations as $eval) {
+                if ($eval->user->aldirblanc_avaliador) {
+                    continue;
+                }
+
+                if (isset($evaluations_status[$eval->registration->number])) {
+                    if ($eval->result < $evaluations_status[$eval->registration->number]) {
+                        $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
+                    }
+                } else {
+                    $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
+                }
+
+                if (isset($evaluations_obs[$eval->registration->number])) {
+                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $eval->evaluationData->obs;
+                } else {
+                    $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs;
+                }
+
+                if (isset($evaluations_avaliadores[$eval->registration->number])) {
+                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $eval->user->profile->name;
+                } else {
+                    $evaluations_obs[$eval->registration->number] = $eval->user->profile->name;
+                }
+            }
+
+
+            $header[] = 'Homologação - avaliadores';
+            $header[] = 'Homologação - status';
+            $header[] = 'Homologação - obs';
+            
+            foreach($body as $i => $line){
+                $body[$i][] = $evaluations_avaliadores[$line[0]] ?? null;
+                $body[$i][] = $evaluations_status[$line[0]] ?? null;
+                $body[$i][] = $evaluations_obs[$line[0]] ?? null;
+            }
+        });
        
         // modulo de mediacao
         $app->hook('entity(Agent).canUser(<<viewPrivateData>>)', function($user,&$can) use($app){
