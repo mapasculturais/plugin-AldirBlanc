@@ -50,7 +50,6 @@ class Plugin extends \MapasCulturais\Plugin
             'link_suporte' => env('AB_LINK_SUPORTE',null),
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS',null),
             'mediados_owner' => env('AB_MEDIADOS_OWNER',''),
-            'lista_mediadores' =>  (array) json_decode(env('AB_LISTA_MEDIADORES', '[]')),
             'texto_categoria_espaco-formalizado' => env('AB_TXT_CAT_ESPACO_FORMALIZADO', '<strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.' ),
             'texto_categoria_espaco-nao-formalizado' => env('AB_TXT_CAT_ESPACO_NAO_FORMALIZADO', '<strong>Espaço artístico e cultural mantido por coletivo ou grupo cultural (sem CNPJ) ou por pessoa física (CPF)</strong> para espaço do tipo <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.' ),
             'texto_categoria_coletivo-formalizado' => env('AB_TXT_CAT_COLETIVO_FORMALIZADO', '<strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo <strong>Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital</strong>.' ),
@@ -58,7 +57,7 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_espaco'  => env('AB_TXT_CADASTRO_ESPACO', 'Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado.'),
             'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
-            'oportunidade_mediadores' => (array) json_decode(env('AB_OPORTUNIDADES_MEDIADORES', '[]')),
+            'lista_mediadores' => (array) json_decode(env('AB_OPORTUNIDADES_MEDIADORES', '[]')),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),            
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO2', __DIR__ . '/config-csv-generic-inciso2.php'),
             'csv_generic_inciso3' => require_once env('AB_CSV_GENERIC_INCISO3', __DIR__ . '/config-csv-generic-inciso3.php'),
@@ -67,11 +66,11 @@ class Plugin extends \MapasCulturais\Plugin
 
             // define o id para dataprev e avaliador generico
             'avaliador_dataprev_user_id' => env('AB_AVALIADOR_DATAPREV_USER_ID', ''),
-            'avaliador_generico_user_id' => env('AB_AVALIADOR_GENERICO_USER_ID', ''),
+            'avaliadores_genericos_user_id' => (array) json_decode(env('AB_AVALIADORES_GENERICOS_USER_ID', '[]')),
             
             // define a exibição do resultado das avaliações no status
-            'exibir_resultado_padrao' => env('AB_EXIBIR_RESULTADO_PADRAO', false),
-            'exibir_resultado_dataprev' => env('AB_EXIBIR_RESULTADO_DATAPREV', true),
+            'exibir_resultado_padrao' => env('AB_EXIBIR_RESULTADO_PADRAO', true),
+            'exibir_resultado_dataprev' => env('AB_EXIBIR_RESULTADO_DATAPREV', false),
             'exibir_resultado_generico' => env('AB_EXIBIR_RESULTADO_GENERICO', false),
             'exibir_resultado_avaliadores' => env('AB_EXIBIR_RESULTADO_AVALIADORES', false),
 
@@ -99,6 +98,7 @@ class Plugin extends \MapasCulturais\Plugin
             'zammad_enable' => env('AB_ZAMMAD_ENABLE', false),
             'zammad_src_form' => env('AB_ZAMMAD_SRC_FORM', ''),
             'zammad_src_chat' => env('AB_ZAMMAD_SRC_CHAT', ''),
+            'zammad_background_color' => env('AB_ZAMMAD_BACKGROUND_COLOR', '#000000'),
         ];
 
         $skipConfig = false;
@@ -177,13 +177,57 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $plugin = $this;
+        if($plugin->config['zammad_enable']) {
+            // $app->view->enqueueStyle('app','chat','chat.css');
+        }
 
-        $app->hook('template(panel.opportunities.panel-header):end', function () use ($app) {
-            if (!$app->user->is('admin')) {
-                return;
+        $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
+            $em = $opportunity->getEvaluationMethod();
+            
+            $_evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $registrations]);
+
+            $evaluations_avaliadores = [];
+            $evaluations_status = [];
+            $evaluations_obs = [];
+            
+            foreach ($_evaluations as $eval) {
+                if ($eval->user->aldirblanc_avaliador) {
+                    continue;
+                }
+
+                if (isset($evaluations_status[$eval->registration->number])) {
+                    if ($eval->result < $evaluations_status[$eval->registration->number]) {
+                        $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
+                    }
+                } else {
+                    $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
+                }
+
+                if (isset($evaluations_obs[$eval->registration->number])) {
+                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $eval->evaluationData->obs;
+                } else {
+                    $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs;
+                }
+
+                if (isset($evaluations_avaliadores[$eval->registration->number])) {
+                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $eval->user->profile->name;
+                } else {
+                    $evaluations_obs[$eval->registration->number] = $eval->user->profile->name;
+                }
             }
-            $this->part('aldirblanc/generate-opportunities-button');
+
+
+            $header[] = 'Homologação - avaliadores';
+            $header[] = 'Homologação - status';
+            $header[] = 'Homologação - obs';
+            
+            foreach($body as $i => $line){
+                $body[$i][] = $evaluations_avaliadores[$line[0]] ?? null;
+                $body[$i][] = $evaluations_status[$line[0]] ?? null;
+                $body[$i][] = $evaluations_obs[$line[0]] ?? null;
+            }
         });
+       
         // modulo de mediacao
         $app->hook('entity(Agent).canUser(<<viewPrivateData>>)', function($user,&$can) use($app){
             
@@ -248,8 +292,7 @@ class Plugin extends \MapasCulturais\Plugin
             }
             //$this->part('aldirblanc/csv-button-mediacao', ['entity' => $requestedOpportunity, 'registrationsByMediator' => $registrationsByMediator]);
         });
-
-        //botao de export csv
+       
         //Botão exportador genérico
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
             $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
@@ -258,18 +301,7 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
             $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
             $opportunity = $requestedOpportunity->id;
-
-            //Busca oportunidades selecionadas
-            $selecteds = $app->repo('Registration')->findOneBy([
-                'opportunity' => $opportunity,
-                'status' => 10
-            ]);
-
-            $existsSelected = false;
-            if($selecteds){
-                $existsSelected = true;  
-            }
-
+            
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
                 if (in_array($requestedOpportunity->id, $inciso1Ids)){
@@ -281,7 +313,7 @@ class Plugin extends \MapasCulturais\Plugin
                 else if (in_array($requestedOpportunity->id, $inciso3Ids)){
                     $inciso = 3;
                 }
-                $this->part('aldirblanc/csv-generic-button', ['inciso' => $inciso, 'opportunity' => $opportunity, 'existsSelected' => $existsSelected]);
+                $this->part('aldirblanc/csv-generic-button', ['inciso' => $inciso, 'opportunity' => $opportunity]);
             }
         });
 
@@ -503,7 +535,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         // Adiciona permissão para mediador se o email do usuário estiver na lista de mediadores na config
         $app->hook('entity(User).save:after', function() use ($plugin, $app) {
-            $emails = $plugin->config['lista_mediadores'];
+            $emails = array_keys($plugin->config['lista_mediadores']);
             if (in_array($this->email, $emails)) {
                 $this->addRole('mediador');
             }
@@ -560,29 +592,21 @@ class Plugin extends \MapasCulturais\Plugin
             if($plugin->config['zammad_enable']) {
                 ?>
 
-            <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-            <button id="feedback-form">Feedback</button>
-            <script id="zammad_form_script" src="<?= $plugin->config['zammad_src_form']; ?>"></script>
-                <script>
-                    $(function() {
-                    $('#feedback-form').ZammadForm({
-                        messageTitle: 'Formulário de Feedback',
-                        messageSubmit: 'Enviar',
-                        messageThankYou: 'Obrigado pela pergunta (#%s)! Nós responderemos assim que possível!',
-                        modal: true
-                    });
-                    });
-             </script>
+            
             <script src="<?= $plugin->config['zammad_src_chat']; ?>"></script>
             <script>
                 $(function() {
                 new ZammadChat({
-                    background: '#ebebeb',
+                    background: ("<?= $plugin->config['zammad_background_color']?>"),
                     fontSize: '12px',
-                    chatId: 1
+                    chatId: 1,
+                    title: '<strong>Dúvidas?</strong> Fale conosco'
                 });
                 });
         </script>
+         <style>.zammad-chat{
+            z-index: 9999!important;
+        }</style>
     
     <?php
             }
@@ -597,7 +621,6 @@ class Plugin extends \MapasCulturais\Plugin
     public function register()
     {
         $app = App::i();
-
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');        
         $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');
