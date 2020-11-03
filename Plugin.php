@@ -64,15 +64,15 @@ class Plugin extends \MapasCulturais\Plugin
 
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
 
-            // define o id para dataprev e avaliador generico
-            'avaliador_dataprev_user_id' => env('AB_AVALIADOR_DATAPREV_USER_ID', ''),
-            'avaliador_generico_user_id' => env('AB_AVALIADOR_GENERICO_USER_ID', ''),
+            // define os ids para dataprev e avaliadores genericos
+            'avaliadores_dataprev_user_id' => (array) json_decode(env('AB_AVALIADORES_DATAPREV_USER_ID', '[]')),
+            'avaliadores_genericos_user_id' => (array) json_decode(env('AB_AVALIADORES_GENERICOS_USER_ID', '[]')),
             
-            // define a exibição do resultado das avaliações no status
-            'exibir_resultado_padrao' => env('AB_EXIBIR_RESULTADO_PADRAO', true),
-            'exibir_resultado_dataprev' => env('AB_EXIBIR_RESULTADO_DATAPREV', false),
-            'exibir_resultado_generico' => env('AB_EXIBIR_RESULTADO_GENERICO', false),
-            'exibir_resultado_avaliadores' => env('AB_EXIBIR_RESULTADO_AVALIADORES', false),
+            // define a exibição do resultado das avaliações para cada status (1, 2, 3, 8, 10)
+            'exibir_resultado_padrao' => (array) json_decode(env('AB_EXIBIR_RESULTADO_PADRAO', '["1", "2", "3", "8", "10"]')),
+            'exibir_resultado_dataprev' => (array) json_decode(env('AB_EXIBIR_RESULTADO_DATAPREV', '[]')),
+            'exibir_resultado_generico' => (array) json_decode(env('AB_EXIBIR_RESULTADO_GENERICO', '[]')),
+            'exibir_resultado_avaliadores' => (array) json_decode(env('AB_EXIBIR_RESULTADO_AVALIADORES', '["10"]')),
 
             // mensagens de status padrao
             'msg_status_sent' => env('AB_STATUS_SENT_MESSAGE', 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail.'), // STATUS_SENT = 1
