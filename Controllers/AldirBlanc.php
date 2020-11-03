@@ -589,7 +589,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
                 } 
                 
-                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores'])) {
+                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
                     // resultados dos demais avaliadores
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
                 }
