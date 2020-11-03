@@ -394,10 +394,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             //Insere o valor a ser pago no CSV
             $csv_data[$key_registration]['VALOR'] = $payment->amount;
-
-            //Altera o status do pagamento para em porcesso = 1
-            $payment->status = 1;
-            $payment->save(true);
+            
 
         }
 
@@ -912,10 +909,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             //Insere o valor a ser pago no CSV
             $csv_data[$key_registration]['VALOR'] = $payment->amount;
-
-            //Altera o status do pagamento para em processo =1
-            $payment->status = 1;
-            $payment->save(true);
+            
         }
 
         /**
