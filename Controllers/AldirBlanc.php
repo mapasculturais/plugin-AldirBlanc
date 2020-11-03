@@ -572,7 +572,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $getStatusMessages = $this->getStatusMessages();
         $registrationStatusMessage = $getStatusMessages[$registration->status];
 
-        // retorna as avaliações da avaliação
+        // retorna as avaliações da inscrição
         $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
         
         // monta array de mensagens
@@ -581,13 +581,16 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
             if ($evaluation->getResult() == $registration->status) {
                 
-                if ($evaluation->user->id == $this->config['avaliador_dataprev_user_id'] && $this->config['exibir_resultado_dataprev']) {
+                if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
+                    // resultados do dataprev
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
-                } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && $this->config['exibir_resultado_generico']) {
+                } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
+                    // resultados dos avaliadores genericos
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
                 } 
                 
-                if ($this->config['exibir_resultado_avaliadores']) {
+                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores'])) {
+                    // resultados dos demais avaliadores
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
                 }
 
@@ -595,7 +598,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             
         }
 
-        if ($this->config['exibir_resultado_padrao']) {
+        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
             $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
         }
 
