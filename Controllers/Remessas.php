@@ -195,6 +195,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          */
         $mappedRecords = [
             'CPF' => function ($registrations) use ($fieldsID, $categories, $app) {
+                $result = " ";
                 if (in_array($registrations->category, $categories['CPF'])) {
                     $field_id = $fieldsID['CPF'];
                     $result = $this->normalizeString($registrations->$field_id);
@@ -202,9 +203,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     if (strlen($result) != 11) {
                         $app->log->info($registrations->number . " CPF inválido");
                     }
-
-                } else {
-                    $result = " ";
                 }
 
                 return $result;
@@ -219,10 +217,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
             },
             'CNPJ' => function ($registrations) use ($fieldsID, $categories, $app) {
+                $result = " ";
                 if (in_array($registrations->category, $categories['CNPJ'])) {
-                    $field_id = $fieldsID['CNPJ'];
-                    if (is_array($field_id)) {
-                        $result = " ";
+                    $field_id = $fieldsID['CNPJ'];                    
+                    if (is_array($field_id)) {                        
                         foreach ($field_id as $key => $value) {
                             if ($registrations->$value) {
                                 $result = str_replace(['.', '-', '/'], '', $registrations->$value);
@@ -237,70 +235,61 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     if (strlen($result) != 14 && $result != " ") {
                         $app->log->info($registrations->number . " CNPJ inválido");
                     }
-                } else {
-                    $result = " ";
-                }
+                } 
 
                 return $result;
 
             },
             'RAZAO_SOCIAL' => function ($registrations) use ($fieldsID, $categories) {
+                $result = " ";
                 if (in_array($registrations->category, $categories['CNPJ'])) {
-                    $field_id = $fieldsID['RAZAO_SOCIAL'];
-                    if (is_array($field_id)) {
-                        $result = " ";
+                    $field_id = $fieldsID['RAZAO_SOCIAL'];                    
+                    if (is_array($field_id)) {                        
                         foreach ($field_id as $key => $value) {
                             if ($registrations->$value) {
-                                $result = $registrations->$value;
+                                $result = $this->normalizeString($registrations->$value);
                             }
-                        }
-                        return $this->normalizeString($result);
+                        }                       
                     } else {
-                        return $this->normalizeString($registrations->$field_id);
+                        $result = $this->normalizeString($registrations->$field_id);
                     }
-                } else {
-                    return " ";
                 }
+
+                return $result;
             },
-            'LOGRADOURO' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['LOGRADOURO'];
-                return $this->normalizeString($registrations->$field_id['En_Nome_Logradouro']);
+            'LOGRADOURO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('LOGRADOURO', 'En_Nome_Logradouro', $fieldsID, $registrations, $app, null);                
+                return $result;
+                
             },
             'NUMERO' => function ($registrations) use ($fieldsID, $app) {
-                $field_id = $fieldsID['NUMERO'];
-                $result = $this->normalizeString($registrations->$field_id['En_Num']);
-
-                if (strlen($result) > 5) {
-                    $app->log->info($registrations->number . " campo NUMERO está maior que o permitido. Maximo deve ser 5 caracteres. O registro foi truncado.");
-                }
-
-                return $result ? substr($this->normalizeString($result), 0, 5) : " ";
+                $result = $this->getAddress('NUMERO', 'En_Num', $fieldsID, $registrations, $app, 5);
+                return substr($result, 0, 5);
             },
             'COMPLEMENTO' => function ($registrations) use ($fieldsID, $app) {
-                $field_id = $fieldsID['COMPLEMENTO'];
-                $result = $registrations->$field_id['En_Complemento'];
-
-                if (strlen($result) > 20) {
-                    $app->log->info($registrations->number . " campo COMPLEMENTO está maior que o permitido. Maximo deve ser 20 caracteres. O registro foi truncado.");
-                }
-
-                return $result ? substr($this->normalizeString($result), 0, 20) : " ";
+                $result = $this->getAddress('COMPLEMENTO', 'En_Complemento', $fieldsID, $registrations, $app, 20);
+                return substr($result, 0, 20);
+            
             },
-            'BAIRRO' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['BAIRRO'];
-                return $this->normalizeString($registrations->$field_id['En_Bairro']);
+            'BAIRRO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('BAIRRO', 'En_Bairro', $fieldsID, $registrations, $app, null);
+                return $result;
+                
             },
-            'MUNICIPIO' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['MUNICIPIO'];
-                return $this->normalizeString($registrations->$field_id['En_Municipio']);
+            'MUNICIPIO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('MUNICIPIO', 'En_Municipio', $fieldsID, $registrations, $app, null);
+                return $result;
+                
             },
-            'CEP' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['CEP'];
-                return $this->normalizeString($registrations->$field_id['En_CEP']);
+            'CEP' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('CEP', 'En_CEP', $fieldsID, $registrations, $app, null);
+                return $result;
+                
             },
-            'ESTADO' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['ESTADO'];
-                return $this->normalizeString($registrations->$field_id['En_Estado']);
+            'ESTADO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('ESTADO', 'En_Estado', $fieldsID, $registrations, $app, null);
+                return $result;
+               
             },
             'TELEFONE' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['TELEFONE'];
@@ -609,18 +598,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CPF' => function ($registrations) use ($fieldsID, $app, $proponentTypes) {
                 $temp = $fieldsID['TIPO_PROPONENTE'];
                 $field_id = $fieldsID['CPF'];
+                $result = " ";
                 if ($temp) {
                     $propType = trim($registrations->$temp);
                     if ($propType === $proponentTypes['fisica'] || empty($propType) || $propType === $proponentTypes['coletivo']) {
-
                         $result = $this->normalizeString($registrations->$field_id);
-
+                        
                         if (strlen($result) != 11) {
-                            $app->log->info($registrations->number . " CPF inválido");
+                            $app->log->info("\n".$registrations->number . " CPF inválido");
                         }
-                    } else {
-                        $result = " ";
-                    }
+                    } 
                 } else {
                     $result = $this->normalizeString($registrations->$field_id);
                 }
@@ -629,62 +616,52 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'NOME_SOCIAL' => function ($registrations) use ($fieldsID, $proponentTypes) {
                 $temp = $fieldsID['TIPO_PROPONENTE'];
-                $field_id = $fieldsID['NOME_SOCIAL'];
+                $field_id = $fieldsID['NOME_SOCIAL'];                
+                $propType = $temp ? trim($registrations->$temp) : null;
                 
-                $propType = trim($registrations->$temp);
                 $result = " ";
-                if ($propType == $proponentTypes['fisica'] || empty($propType) || $propType == $proponentTypes['coletivo']) {
-                    
+                if ($propType == trim($proponentTypes['fisica']) || empty($propType) || $propType == trim($proponentTypes['coletivo'])) {
                     if(is_array($field_id)){
                         foreach($field_id as $value){
                             if($registrations->$value){
-                                $result = $this->normalizeString($registrations->$value); 
+                                $result = $registrations->$value; 
                             }
                         }
                     }else{
-                        $result = $this->normalizeString($registrations->$field_id);  
-                    }
-                    
-                }else{
-                    $result = " ";
-                }
+                        $result = $registrations->$field_id;  
 
-                return $result;
+                    }
+                }
+                
+                return $this->normalizeString($result);
             },
             'CNPJ' => function ($registrations) use ($fieldsID, $app, $proponentTypes) {
                 $temp = $fieldsID['TIPO_PROPONENTE'];
                 $field_id = $fieldsID['CNPJ'];
+                $result = " ";
 
-                if ($temp) {
-                    $propType = $registrations->$temp;
-                    if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
-                        if (is_array($field_id)) {
-                            $result = " ";
-                            foreach ($field_id as $key => $value) {
-                                if ($registrations->$value) {
-                                    $result = str_replace(['.', '-', '/'], '', $registrations->$value);
-                                    break;
-                                }
+                $propType = $temp ? trim($registrations->$temp) : null; 
+                
+                if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
+                    if (is_array($field_id)) {                            
+                        foreach ($field_id as $key => $value) {
+                            if ($registrations->$value) {
+                                $result = str_replace(['.', '-', '/'], '', $registrations->$value);
+                                break;
                             }
-
-                            $result = $this->normalizeString($result);
-                        } else {
-
-                            $result = $this->normalizeString($registrations->$field_id);
                         }
-
-                        if (strlen($result) != 14 && $result != " ") {
-                            $app->log->info($registrations->number . " CNPJ inválido");
-                        }
+                        
+                        $result = $this->normalizeString($result);
                     } else {
-                        $result = " ";
 
+                        $result = $this->normalizeString($registrations->$field_id);
                     }
 
-                } else {
-                    $result = " ";
+                    if (strlen($result) != 14) {
+                        $app->log->info("\n".$registrations->number . " CNPJ inválido");
+                    }
                 }
-
+                
                 return $result;
 
             },
@@ -692,204 +669,60 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $temp = $fieldsID['TIPO_PROPONENTE'];
                 $field_id = $fieldsID['RAZAO_SOCIAL'];
 
-                if ($temp) {
-                    $propType = $registrations->$temp;
+                $result = " ";
+                $propType = $temp ? trim($registrations->$temp) : null;               
 
-                    if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
-                        if (is_array($field_id)) {
-                            $result = " ";
-                            foreach ($field_id as $key => $value) {
-                                if ($registrations->$value) {
-                                    $result = $registrations->$value;
-                                }
+                if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
+                    if (is_array($field_id)) {                           
+                        foreach ($field_id as $key => $value) {
+                            if ($registrations->$value) {
+                                $result = $registrations->$value;
                             }
-                            return $this->normalizeString($result);
-                        } else {
-                            return $this->normalizeString($registrations->$field_id);
-                        }
+
+                        }                           
                     } else {
-                        return " ";
+                        $result = $registrations->$field_id;
+
                     }
-                } else {
-                    return " ";
-                }
+
+                } 
+                
+                return $this->normalizeString($result);
 
             },
             'LOGRADOURO' => function ($registrations) use ($fieldsID, $app) {
-                $field_id = $fieldsID['LOGRADOURO'];                
-                
-                if (is_string($registrations->$field_id)) {                    
-                    $result = $this->normalizeString($registrations->$field_id);
-                } elseif (is_array($registrations->$field_id)) {
-                    $result = $this->normalizeString($registrations->$field_id['En_Nome_Logradouro']);
-                } else {
-                    $endereco = $registrations->$field_id;
-                    if(!$endereco){
-                        $endereco = json_decode($registrations->getMetadata($field_id));
-                    }
-
-                    if($endereco){
-                        $result =  $this->normalizeString($endereco->En_Nome_Logradouro);   
-                    }else{
-                        $result = " ";
-                    } 
-                }
+                $result = $this->getAddress('LOGRADOURO', 'En_Nome_Logradouro', $fieldsID, $registrations, $app, null);                
                 return $result;
+
             },
             'NUMERO' => function ($registrations) use ($fieldsID, $app) {
-                $field_id = $fieldsID['NUMERO'];
-                if ($field_id) {
-                    
-                    if (is_string($registrations->$field_id)) {                    
-                        $result = $this->normalizeString($registrations->$field_id);
-                    } elseif (is_array($registrations->$field_id)) {
-                        $result = $this->normalizeString($registrations->$field_id['En_Num']);
-                    } else {
-                        $endereco = $registrations->$field_id;
-                        if(!$endereco){
-                            $endereco = json_decode($registrations->getMetadata($field_id));
-                        }
-    
-                        if($endereco){                            
-                           
-                            $result =  $this->normalizeString($endereco->En_Num ?? "");   
-                        }else{
-                            $result = " ";
-                        } 
-                    }
-                }
+                $result = $this->getAddress('NUMERO', 'En_Num', $fieldsID, $registrations, $app, 5);
+                return $result ? substr($result, 0, 5) : " ";
 
-                if (strlen($result) > 5) {
-                    $app->log->info($registrations->number . " campo NUMERO está maior que o permitido. Maximo deve ser 5 caracteres. O registro foi truncado.");
-                }
-
-                return $result ? substr($this->normalizeString($result), 0, 5) : " ";
             },
             'COMPLEMENTO' => function ($registrations) use ($fieldsID, $app) {
-                $field_id = $fieldsID['COMPLEMENTO'];
-                $result = " ";
-                if ($field_id) {
-                    if (is_string($registrations->$field_id)) {                    
-                        $result = $this->normalizeString($registrations->$field_id);
-                    } elseif (is_array($registrations->$field_id)) {
-                        $result = $this->normalizeString($registrations->$field_id['En_Complemento']);
-                    } else {
-                        $endereco = $registrations->$field_id;
-                       
-                        if(!$endereco){
-                            $endereco = json_decode($registrations->getMetadata($field_id));
-                        }
-    
-                        if($endereco){
-                            $result =  isset($endereco->En_Complemento) ? $this->normalizeString($endereco->En_Complemento) :  " ";   
-                        }else{
-                            $result = " ";
-                        } 
-                    }
-                } 
-
-                if (strlen($result) > 20) {
-                    $app->log->info($registrations->number . " campo COMPLEMENTO está maior que o permitido. Maximo deve ser 20 caracteres. O registro foi truncado.");
-                }
-
-                return $result ? substr($this->normalizeString($result), 0, 20) : " ";
-            },
-            'BAIRRO' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['BAIRRO'];
-
-                if ($field_id) {
-                    if (is_string($registrations->$field_id)) {                    
-                        $result = $this->normalizeString($registrations->$field_id);
-                    } elseif (is_array($registrations->$field_id)) {
-                        $result = $this->normalizeString($registrations->$field_id['En_Bairro']);
-                    } else {
-                        $endereco = $registrations->$field_id;
-                        if(!$endereco){
-                            $endereco = json_decode($registrations->getMetadata($field_id));
-                        }
-    
-                        if($endereco){
-                            $result =  $this->normalizeString($endereco->En_Bairro);   
-                        }else{
-                            $result = " ";
-                        } 
-                    }
-                } else {
-                    $result = " ";
-                }
+                $result = $this->getAddress('COMPLEMENTO', 'En_Complemento', $fieldsID, $registrations, $app, 20);
+                return $result ? substr($result, 0, 20) : " ";
 
             },
-            'MUNICIPIO' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['MUNICIPIO'];
-                if ($field_id) {
-                    if (is_string($registrations->$field_id)) {                    
-                        $result = $this->normalizeString($registrations->$field_id);
-                    } elseif (is_array($registrations->$field_id)) {
-                        $result = $this->normalizeString($registrations->$field_id['En_Municipio']);
-                    } else {
-                        $endereco = $registrations->$field_id;
-                        if(!$endereco){
-                            $endereco = json_decode($registrations->getMetadata($field_id));
-                        }
-    
-                        if($endereco){
-                            $result =  $this->normalizeString($endereco->En_Municipio);   
-                        }else{
-                            $result = " ";
-                        } 
-                    }
-                } else {
-                    return " ";
-                }
-
-            },
-            'CEP' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['CEP'];
-
-                if (is_string($registrations->$field_id)) {
-                    return $this->normalizeString($registrations->$field_id);
-                } elseif (is_array($registrations->$field_id)) {
-                    return $this->normalizeString($registrations->$field_id['En_CEP']);
-                } else {
-                    $endereco = $registrations->$field_id;
-                    if(!$endereco){
-                        $endereco = json_decode($registrations->getMetadata($field_id));
-                    }
-
-                    if($endereco){
-                        $result =  $this->normalizeString($endereco->En_CEP);   
-                    }else{
-                        $result = " ";
-                    } 
-                }
-
+            'BAIRRO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('BAIRRO', 'En_Bairro', $fieldsID, $registrations, $app, null);
                 return $result;
+            },
+            'MUNICIPIO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('MUNICIPIO', 'En_Municipio', $fieldsID, $registrations, $app, null);
+                return $result;               
 
             },
-            'ESTADO' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['ESTADO'];
-                
-                if ($field_id) {
-                    if (is_string($registrations->$field_id)) {                    
-                        $result = $this->normalizeString($registrations->$field_id);
-                    } elseif (is_array($registrations->$field_id)) {
-                        $result = $this->normalizeString($registrations->$field_id['En_Estado']);
-                    } else {
-                        $endereco = $registrations->$field_id;
-                        if(!$endereco){
-                            $endereco = json_decode($registrations->getMetadata($field_id));
-                        }
-    
-                        if($endereco){
-                            $result =  $this->normalizeString($endereco->En_Estado);   
-                        }else{
-                            $result = " ";
-                        } 
-                    }
-                } else {
-                    $result = " ";
-                }
-
+            'CEP' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('CEP', 'En_CEP', $fieldsID, $registrations, $app, null);
+                return $result;
+            
+            },
+            'ESTADO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('ESTADO', 'En_Estado', $fieldsID, $registrations, $app, null);
+                return $result;
+            
             },
             'TELEFONE' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['TELEFONE'];
@@ -912,7 +745,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $result = $this->numberBank($registrations->$field_id);
 
                 if (empty($result)) {
-                    $app->log->info($registrations->number . " Número do banco não encontrado");
+                    $app->log->info("\n".$registrations->number . " Número do banco não encontrado");
                 }
                 return $result;
             },
@@ -1073,7 +906,55 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return $return;
 
     }
+    /**
+     * Retorna o valor do objeto endereço de uma registration
+     *     
+     * @return string
+     */
+    private function getAddress($field, $attribute, $fieldsID, $registrations, $app, $length){
+        $field_id = $fieldsID[$field];
 
+        $result = " ";
+        if ($field_id) {
+            if (is_string($registrations->$field_id)) {                    
+                $result = $registrations->$field_id;
+
+            } elseif (is_array($registrations->$field_id)) {
+                $result = $registrations->$field_id[$attribute];
+
+            } else {
+                
+                $address = $registrations->$field_id;
+                if(!$address){
+                    $address = json_decode($registrations->getMetadata($field_id));
+                }
+
+                if($address){
+                    $result =  $address->$attribute ?? " ";   
+                }else{
+                    $result = " ";
+                } 
+            }
+        }
+        
+        if($length){
+            if (strlen($result) > $length) {
+                $app->log->info("\n".$registrations->number ." ". $field . " > que ". $length . " Char. Truncado!");
+            }
+        }elseif(empty($result)){
+            $app->log->info("\n".$registrations->id . $attribute . " Não encontrado");
+        }
+        
+        return $this->normalizeString($result);
+                  
+    }
+
+    /**
+     * Normaliza uma string
+     *
+     * @param string $valor
+     * @return string
+     */
     private function normalizeString($valor): string
     {
         $valor = Normalizer::normalize($valor, Normalizer::FORM_D);
