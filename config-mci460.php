@@ -120,7 +120,7 @@ return [
         ],
     ],
     "details" => [
-        [
+        [ // detail01, informações básicas do cliente
             "fields" => [
                 [
                     "length" => 5,
@@ -206,7 +206,7 @@ return [
                 ],
             ],
         ],
-        [
+        [ // detail02, informações extras do cliente
             "fields" => [
                 [
                     "length" => 5,
@@ -228,6 +228,7 @@ return [
                     "length" => 2,
                     "type" => "int",
                     "name" => "nacionalidade",
+                    "function" => "mci460NationalityES",
                 ],
                 [
                     "length" => 25,
@@ -315,7 +316,7 @@ return [
                 ],
             ],
         ],
-        [
+        [ // detail03, filiação
             "fields" => [
                 [
                     "length" => 5,
@@ -347,7 +348,7 @@ return [
                 ],
             ],
         ],
-        [
+        [ // detail04, informações do cônjuge
             "fields" => [
                 [
                     "length" => 5,
@@ -400,7 +401,7 @@ return [
             "condition" => "mci460ConditionDetail04ES",
         ],
         // [], // detail05, ocupação, sem uso
-        [
+        [ // detail06, endereço
             "fields" => [
                 [
                     "length" => 5,
@@ -422,6 +423,7 @@ return [
                             "length" => 60,
                             "type" => "text",
                             "name" => "logradouro",
+                            "filter" => "/[^a-z0-9 ,\.]/i",
                         ],
                         [
                             "length" => 30,
@@ -445,6 +447,7 @@ return [
                             "length" => 4,
                             "type" => "text",
                             "name" => "ddd",
+                            "filter" => "/[^0-9\(\)]/",
                         ],
                         [
                             "length" => 9,
@@ -481,7 +484,7 @@ return [
             ],
         ],
         // [], // detail07, endereço de trabalho, sem uso
-        [
+        [ // detail08, e-mail
             "fields" => [
                 [
                     "length" => 5,
@@ -498,6 +501,7 @@ return [
                     "length" => 60,
                     "type" => "text",
                     "name" => "email",
+                    "filter" => "/[^a-z0-9_\.@\-\+]/i",
                 ],
                 [
                     "length" => 83,

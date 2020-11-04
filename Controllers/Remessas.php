@@ -1203,7 +1203,8 @@ public function ALL_addressReport()
         $length = $value['length'];
         $type = $value['type'];
         $value['default'] = Normalizer::normalize($value['default'], Normalizer::FORM_D);
-        $value['default'] = preg_replace('/[^a-z0-9 ]/i', '', $value['default']);
+        $regex = isset($value['filter']) ? $value['filter'] : '/[^a-z0-9 ]/i';
+        $value['default'] = preg_replace($regex, '', $value['default']);
         if ($type === 'int') {
             $data .= str_pad($value['default'], $length, '0', STR_PAD_LEFT);
         } else {
@@ -1299,7 +1300,7 @@ public function ALL_addressReport()
 
     private function mci460ConditionDetail09ES($config, $registration) {
         $field = $config["fieldMap"]["email"];
-        return !empty($registration->$field);
+        return (strlen($registration->$field) > 0);
     }
 
     private function mci460AddressES($fieldSpec, $address)
@@ -1336,11 +1337,27 @@ public function ALL_addressReport()
         return (new DateTime())->format('dmY');
     }
 
-    private function mci460PhoneES($fieldSpec, $phone) // TODO
+    private function mci460NationalityES($value)
+    {
+        if (($value != null) && !str_starts_with($value, "Estrangeiro"))
+            return 1;
+        return 0;
+    }
+
+    private function mci460PhoneES($fieldSpec, $phone)
     {
         $out = "";
+        $components = [];
+        $phone = preg_replace("/[^0-9\(\)]/", "", $phone);
+        if (strlen($phone) < 12) {
+            $components["ddd"] = "";
+            $components["telefone"] = "";
+        } else {
+            $components["ddd"] = substr($phone, 0, 4);
+            $components["telefone"] = substr($phone, 4);
+        }
         foreach ($fieldSpec["fields"] as $field) {
-            $field["default"] = ($field["type"] === "int") ? 0 : "";
+            $field["default"] = $components[$field["name"]];
             $out .= $this->createString($field);
         }
         return $out;
