@@ -632,7 +632,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $fieldsID['NOME_SOCIAL'];
                 
                 $propType = trim($registrations->$temp);
-                
+                $result = " ";
                 if ($propType == $proponentTypes['fisica'] || empty($propType) || $propType == $proponentTypes['coletivo']) {
                     
                     if(is_array($field_id)){
@@ -715,28 +715,48 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
 
             },
-            'LOGRADOURO' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['LOGRADOURO'];
+            'LOGRADOURO' => function ($registrations) use ($fieldsID, $app) {
+                $field_id = $fieldsID['LOGRADOURO'];                
                 
                 if (is_string($registrations->$field_id)) {                    
-                    return $this->normalizeString($registrations->$field_id);
+                    $result = $this->normalizeString($registrations->$field_id);
                 } elseif (is_array($registrations->$field_id)) {
-                    return $this->normalizeString($registrations->$field_id['En_Nome_Logradouro']);
+                    $result = $this->normalizeString($registrations->$field_id['En_Nome_Logradouro']);
                 } else {
-                    return $this->normalizeString($registrations->$field_id->En_Nome_Logradouro);
-                }
+                    $endereco = $registrations->$field_id;
+                    if(!$endereco){
+                        $endereco = json_decode($registrations->getMetadata($field_id));
+                    }
 
+                    if($endereco){
+                        $result =  $this->normalizeString($endereco->En_Nome_Logradouro);   
+                    }else{
+                        $result = " ";
+                    } 
+                }
+                return $result;
             },
-            'NUMERO' => function ($registrations) use ($fieldsID) {
+            'NUMERO' => function ($registrations) use ($fieldsID, $app) {
                 $field_id = $fieldsID['NUMERO'];
                 if ($field_id) {
-                    if (is_array($registrations->$field_id)) {
+                    
+                    if (is_string($registrations->$field_id)) {                    
+                        $result = $this->normalizeString($registrations->$field_id);
+                    } elseif (is_array($registrations->$field_id)) {
                         $result = $this->normalizeString($registrations->$field_id['En_Num']);
                     } else {
-                        $result = $this->normalizeString($registrations->$field_id->En_Num);
+                        $endereco = $registrations->$field_id;
+                        if(!$endereco){
+                            $endereco = json_decode($registrations->getMetadata($field_id));
+                        }
+    
+                        if($endereco){                            
+                           
+                            $result =  $this->normalizeString($endereco->En_Num ?? "");   
+                        }else{
+                            $result = " ";
+                        } 
                     }
-                } else {
-                    return " ";
                 }
 
                 if (strlen($result) > 5) {
@@ -747,15 +767,26 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'COMPLEMENTO' => function ($registrations) use ($fieldsID, $app) {
                 $field_id = $fieldsID['COMPLEMENTO'];
+                $result = " ";
                 if ($field_id) {
-                    if (is_array($registrations->$field_id)) {
+                    if (is_string($registrations->$field_id)) {                    
+                        $result = $this->normalizeString($registrations->$field_id);
+                    } elseif (is_array($registrations->$field_id)) {
                         $result = $this->normalizeString($registrations->$field_id['En_Complemento']);
                     } else {
-                        $result = $this->normalizeString($registrations->$field_id->En_Complemento);
+                        $endereco = $registrations->$field_id;
+                       
+                        if(!$endereco){
+                            $endereco = json_decode($registrations->getMetadata($field_id));
+                        }
+    
+                        if($endereco){
+                            $result =  isset($endereco->En_Complemento) ? $this->normalizeString($endereco->En_Complemento) :  " ";   
+                        }else{
+                            $result = " ";
+                        } 
                     }
-                } else {
-                    $result = " ";
-                }
+                } 
 
                 if (strlen($result) > 20) {
                     $app->log->info($registrations->number . " campo COMPLEMENTO está maior que o permitido. Maximo deve ser 20 caracteres. O registro foi truncado.");
@@ -767,10 +798,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $fieldsID['BAIRRO'];
 
                 if ($field_id) {
-                    if (is_array($registrations->$field_id)) {
-                        return $this->normalizeString($registrations->$field_id['En_Bairro']);
+                    if (is_string($registrations->$field_id)) {                    
+                        $result = $this->normalizeString($registrations->$field_id);
+                    } elseif (is_array($registrations->$field_id)) {
+                        $result = $this->normalizeString($registrations->$field_id['En_Bairro']);
                     } else {
-                        return $this->normalizeString($registrations->$field_id->En_Bairro);
+                        $endereco = $registrations->$field_id;
+                        if(!$endereco){
+                            $endereco = json_decode($registrations->getMetadata($field_id));
+                        }
+    
+                        if($endereco){
+                            $result =  $this->normalizeString($endereco->En_Bairro);   
+                        }else{
+                            $result = " ";
+                        } 
                     }
                 } else {
                     $result = " ";
@@ -780,10 +822,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'MUNICIPIO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['MUNICIPIO'];
                 if ($field_id) {
-                    if (is_array($registrations->$field_id)) {
-                        return $this->normalizeString($registrations->$field_id['En_Municipio']);
+                    if (is_string($registrations->$field_id)) {                    
+                        $result = $this->normalizeString($registrations->$field_id);
+                    } elseif (is_array($registrations->$field_id)) {
+                        $result = $this->normalizeString($registrations->$field_id['En_Municipio']);
                     } else {
-                        return $this->normalizeString($registrations->$field_id->En_Municipio);
+                        $endereco = $registrations->$field_id;
+                        if(!$endereco){
+                            $endereco = json_decode($registrations->getMetadata($field_id));
+                        }
+    
+                        if($endereco){
+                            $result =  $this->normalizeString($endereco->En_Municipio);   
+                        }else{
+                            $result = " ";
+                        } 
                     }
                 } else {
                     return " ";
@@ -798,21 +851,43 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 } elseif (is_array($registrations->$field_id)) {
                     return $this->normalizeString($registrations->$field_id['En_CEP']);
                 } else {
-                    return $this->normalizeString($registrations->$field_id->En_CEP);
+                    $endereco = $registrations->$field_id;
+                    if(!$endereco){
+                        $endereco = json_decode($registrations->getMetadata($field_id));
+                    }
+
+                    if($endereco){
+                        $result =  $this->normalizeString($endereco->En_CEP);   
+                    }else{
+                        $result = " ";
+                    } 
                 }
+
+                return $result;
 
             },
             'ESTADO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['ESTADO'];
                 
                 if ($field_id) {
-                    if (is_array($registrations->$field_id)) {
-                        return $this->normalizeString($registrations->$field_id['En_Estado']);
+                    if (is_string($registrations->$field_id)) {                    
+                        $result = $this->normalizeString($registrations->$field_id);
+                    } elseif (is_array($registrations->$field_id)) {
+                        $result = $this->normalizeString($registrations->$field_id['En_Estado']);
                     } else {
-                        return $this->normalizeString($registrations->$field_id->En_Estado);
+                        $endereco = $registrations->$field_id;
+                        if(!$endereco){
+                            $endereco = json_decode($registrations->getMetadata($field_id));
+                        }
+    
+                        if($endereco){
+                            $result =  $this->normalizeString($endereco->En_Estado);   
+                        }else{
+                            $result = " ";
+                        } 
                     }
                 } else {
-                    return " ";
+                    $result = " ";
                 }
 
             },
