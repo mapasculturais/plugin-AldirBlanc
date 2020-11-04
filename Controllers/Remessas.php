@@ -1066,9 +1066,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         // percorre as oportunidades
         foreach ($opportunities as $opportunity) {
             // pega inscrições via DQL seguindo recomendações do Doctrine para grandes volumes
-            /**
-             * TODO: selecionar corretamente as inscrições por homologação + avaliação DataPrev
-             */
             $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
                              WHERE e.status IN (1, 10) AND e.opportunity=:oppId";
             $query = $app->em->createQuery($dql);
@@ -1159,9 +1156,6 @@ public function ALL_addressReport()
     $config = $this->config["config-mci460"];
     $address = $config["fieldMap"]["endereco"];
     foreach ($opportunities as $opportunity) {
-        /**
-         * TODO: selecionar corretamente as inscrições por homologação + avaliação DataPrev
-         */
         // pega inscrições via DQL seguindo recomendações do Doctrine para grandes volumes
         $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
                          WHERE e.status IN (1, 10) AND e.opportunity=:oppId";
@@ -1336,6 +1330,12 @@ public function ALL_addressReport()
     {
         $hasAccount = $fieldMap["hasAccount"];
         $wantsAccount = $fieldMap["wantsAccount"];
+        if ($this->config["exportador_requer_homologacao"] &&
+            !in_array($registration->consolidatedResult, [
+                "10", "homologado, validado por Dataprev"
+        ])) {
+            return false;
+        }
         return (($registration->$hasAccount != "SIM") &&
                 ($registration->$wantsAccount != null) &&
                 (str_starts_with($registration->$wantsAccount, "CONTA")));
@@ -1444,7 +1444,9 @@ public function ALL_addressReport()
     private function mci460Details($config, $registration, $extraData)
     {
         $out = [];
+        // itera sobre definições de detalhes
         foreach ($config["details"] as $detail) {
+            // pula detalhes cuja condição o registro não atende
             if (isset($detail["condition"])) {
                 if (!$this->mci460Thunk2($detail["condition"], $config,
                                          $registration)) {
@@ -1452,16 +1454,19 @@ public function ALL_addressReport()
                 }
             }
             $line = "";
+            // itera sobre definições de campos
             foreach ($detail["fields"] as $field) {
+                // processa campos variáveis
                 if (!isset($field["default"])) {
                     if ($field["type"] === "meta") {
                         $line .= $this->mci460MetaField($config, $field, $registration);
                         continue;
                     }
                     $fieldName = $field["name"];
+                    // campos externos (por exemplo, o contador de clientes)
                     if (!isset($config["fieldMap"][$fieldName])) {
                         $field["default"] = $extraData[$fieldName];
-                    } else {
+                    } else { // campos do banco de dados
                         $fieldName = $config["fieldMap"][$fieldName];
                         $field["default"] = isset($field["function"]) ?
                                             $this->mci460Thunk2($field["function"], $registration->$fieldName, null) :
