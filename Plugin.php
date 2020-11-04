@@ -63,6 +63,7 @@ class Plugin extends \MapasCulturais\Plugin
             'csv_generic_inciso3' => require_once env('AB_CSV_GENERIC_INCISO3', __DIR__ . '/config-csv-generic-inciso3.php'),
 
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
+            'config-mci460' => require_once env('AB_CONFIG_BANKDATA', __DIR__ . '/config-mci460.php'),
 
             // define os ids para dataprev e avaliadores genericos
             'avaliadores_dataprev_user_id' => (array) json_decode(env('AB_AVALIADORES_DATAPREV_USER_ID', '[]')),

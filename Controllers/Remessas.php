@@ -1029,7 +1029,191 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     }
 
+    public function ALL_exportMCI460()
+    {
+        $this->requireAuthentication();
+        $app = App::i();
+        if (!empty($this->data)) {
+            // oportunidades
+            if (isset($this->data["opportunity"])) {
+                $opportunityIDs = explode(",", $this->data["op"]);
+                foreach ($opportunityIDs as $oID) {
+                    if (!is_numeric($oID)) {
+                        throw new Exception("Oportunidade(s) inválida(s)");
+                    }
+                }
+            }
+        }
+        // pega oportunidades via ORM
+        $opportunities = [];
+        if (isset($opportunityIDs)) {
+            $opportunities = $app->repo("Opportunity")->findBy(["id" => $opportunityIDs]);
+        } else {
+            $opportunities = $app->repo("Opportunity")->findAll();
+        }
+        $config = $this->config["config-mci460"];
+        if (!isset($config["condition"])) {
+            throw new Exception("Configuração inválida: \"condition\" não configurada.");
+        }
+        $newline = "\r\n";
+        set_time_limit(0);
+        header("Content-type: text/utf-8");
+        flush();
+        // inicializa contadores
+        $nLines = 1;
+        $nClients = 0;
+        // gera o header
+        echo($this->mci460Header($config) . $newline);
+        // percorre as oportunidades
+        foreach ($opportunities as $opportunity) {
+            // pega inscrições via DQL seguindo recomendações do Doctrine para grandes volumes
+            /**
+             * TODO: selecionar corretamente as inscrições por homologação + avaliação DataPrev
+             */
+            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
+                             WHERE e.status IN (1, 10) AND e.opportunity=:oppId";
+            $query = $app->em->createQuery($dql);
+            $registrations = $query->iterate(["oppId" => $opportunity->id]);
+            /**
+             * Mapeamento de fielsds_id pelo label do campo
+             */
+            $this->registerRegistrationMetadata($opportunity);
+            // processa inscrições
+            while ($registration = $registrations->next()[0]) {
+                // testa se é desbancarizado
+                if (!$this->mci460Thunk2($config["condition"], $config["fieldMap"], $registration)) {
+                    continue;
+                }
+                ++$nClients;
+                $details = $this->mci460Details($config, $registration, [
+                    "sequencialCliente" => $nClients,
+                    "agencia" => 6666, // placeholder
+                    "dvAgencia" => "X", // placeholder
+                    "grupoSetex" => 66, // placeholder
+                    "dvGrupoSetex" => "X", // placeholder
+                ]);
+                $nLines += sizeof($details);
+                echo(implode($newline, $details) . $newline);
+            }
+        }
+        ++$nLines;
+        echo($this->mci460Trailer($config, [
+            "totalClientes" => $nClients,
+            "totalRegistros" => $nLines,
+        ]) . $newline);
+        return;
+    }
+
+public function ALL_addressReport()
+{
+    $this->requireAuthentication();
+    $app = App::i();
+    // pega oportunidades via ORM
+    $opportunityIDs = [1];
+    if (isset($opportunityIDs)) {
+        $opportunities = $app->repo("Opportunity")->findBy(["id" => $opportunityIDs]);
+    } else {
+        $opportunities = $app->repo("Opportunity")->findAll();
+    }
+    set_time_limit(0);
+    header("Content-Type: application/csv");
+    header("Pragma: no-cache");
+    flush();
+    $header = ["Inscrição", "Nome", "Logradouro", "Número", "Complemento",
+               "Bairro", "Município", "Estado", "CEP"];
+    $report = [];
+    $config = $this->config["config-mci460"];
+    $address = $config["fieldMap"]["endereco"];
+    foreach ($opportunities as $opportunity) {
+        $part = ($opportunity->id == $this->config["inciso1_opportunity_id"]) ? 1 :
+                (in_array($opportunity->id, $this->config["inciso2_opportunity_ids"]) ? 2 : 3);
+        if ($part != 1) { continue; }
+        /**
+         * TODO: selecionar corretamente as inscrições por homologação + avaliação DataPrev
+         */
+        // pega inscrições via DQL seguindo recomendações do Doctrine para grandes volumes
+        $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
+                         WHERE e.status IN (1, 10) AND e.opportunity=:oppId";
+        $query = $app->em->createQuery($dql);
+        $registrations = $query->iterate(["oppId" => $opportunity->id]);
+        /**
+         * Mapeamento de fielsds_id pelo label do campo
+         */
+        $this->registerRegistrationMetadata($opportunity);
+        while ($registration = $registrations->next()[0]) {
+            if (!$this->mci460Thunk2($config["condition"], $config["fieldMap"], $registration)) {
+                continue;
+            }
+            $addressFields = [];
+            $source = $registration->$address;
+            if (is_array($source)) {
+                $addressFields[] = $source["En_Nome_Logradouro"];
+                $addressFields[] = $source["En_Num"];
+                $addressFields[] = isset($source["En_Complemento"]) ? $source["En_Complemento"] : "";
+                $addressFields[] = $source["En_Bairro"];
+                $addressFields[] = $source["En_Municipio"];
+                $addressFields[] = $source["En_Estado"];
+                $addressFields[] = $source["En_CEP"];
+            } else {
+                $addressFields[] = $source->En_Nome_Logradouro;
+                $addressFields[] = $source->En_Num;
+                $addressFields[] = isset($source->En_Complemento) ? $source->En_Complemento : "";
+                $addressFields[] = $source->En_Bairro;
+                $addressFields[] = $source->En_Municipio;
+                $addressFields[] = $source->En_Estado;
+                $addressFields[] = $source->En_CEP;
+            }
+            $report[] = array_merge([$registration->number,
+                                     $registration->field_22], $addressFields);
+            $app->em->clear();
+        }
+    }
+    $csv = Writer::createFromString();
+    $csv->insertOne($header);
+    foreach ($report as $line) {
+        $csv->insertOne($line);
+    }
+    echo($csv->getContent());
+    return;
+}
+
     /**
+     * Placeholder para o número de seqüência dos arquivos de remessa.
+     */
+    public function sequenceNumber($type)
+    {
+        $n = 0;
+        switch ($type) {
+            case "cnab240": break;
+            case "mci460": break;
+            default: break;
+        }
+        return $n;
+    }
+
+    //###################################################################################################################################
+
+    /**
+     * Pega a string e enquadra a mesma no formato necessario para tender o modelo CNAB 240
+     * Caso a string nao atenda o numero de caracteres desejado, ela completa com zero ou espaço em banco
+     */
+    private function createString($value)
+    {
+        $data = "";
+        $length = $value['length'];
+        $type = $value['type'];
+        $value['default'] = Normalizer::normalize($value['default'], Normalizer::FORM_D);
+        $value['default'] = preg_replace('/[^a-z0-9 ]/i', '', $value['default']);
+        if ($type === 'int') {
+            $data .= str_pad($value['default'], $length, '0', STR_PAD_LEFT);
+        } else {
+            $data .= str_pad($value['default'], $length, " ");
+        }
+
+        return substr($data, 0, $length);
+    }
+
+    /*
      * Função para retornar o número do banco, levando como base de pesquisa o nome do banco
      * Todos os textos que entram pelo parâmetro $bankName, são primeiro colocados em lowercase e comparado com o array $bankList também em lowercase
      *
@@ -1078,6 +1262,198 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     {
         $valor = Normalizer::normalize($valor, Normalizer::FORM_D);
         return preg_replace('/[^A-Za-z0-9 ]/i', '', $valor);
+    }
+
+    /** #########################################################################
+     * Funções para o MCI460
+     */
+
+    private function mci460Thunk2($func, $parm0, $parm1)
+    {
+        if (!method_exists($this, $func)) {
+            throw new Exception("Configuração inválida: $func não existe.");
+        }
+        return $this->$func($parm0, $parm1);
+    }
+
+    private function mci460ConditionES($fieldMap, $registration)
+    {
+        $hasAccount = $fieldMap["hasAccount"];
+        $wantsAccount = $fieldMap["wantsAccount"];
+        return (($registration->$hasAccount != "SIM") &&
+                ($registration->$wantsAccount != null) &&
+                (str_starts_with($registration->$wantsAccount, "CONTA")));
+    }
+
+    private function mci460ConditionDetail04ES($config, $registration)
+    {
+        $field = $config["fieldMap"]["conjuge"];
+        foreach ($registration->$field as $member) {
+            if (property_exists($member, "relationship") &&
+                ($member->relationship === "1")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function mci460ConditionDetail09ES($config, $registration) {
+        $field = $config["fieldMap"]["email"];
+        return !empty($registration->$field);
+    }
+
+    private function mci460AddressES($fieldSpec, $address)
+    {
+        $out = "";
+        $components = [];
+        if (is_array($address)) {
+            $components["logradouro"] = $address["En_Nome_Logradouro"] . ", " .
+                                        $address["En_Num"];
+            $components["logradouro"] .= isset($address["En_Complemento"]) ?
+                                         (", " . $address["En_Complemento"]) : "";
+            $components["distritoBairro"] = $address["En_Bairro"];
+            $components["cep"] = $address["En_CEP"];
+        } else { // caminho não testado, todos os endereços no teste são dictionary
+            $components["logradouro"] = $address->En_Nome_Logradouro . ", " .
+                                        $address->En_Num;
+            $components["logradouro"] .= isset($address->En_Complemento) ?
+                                         (", " . $address->En_Complemento) : "";
+            $components["distritoBairro"] = $address->En_Bairro;
+            $components["cep"] = $address->En_CEP;
+        }
+        foreach ($fieldSpec["fields"] as $field) {
+            $field["default"] = $components[$field["name"]];
+            $out .= $this->createString($field);
+        }
+        return $out;
+    }
+
+    private function mci460DateDDMMYYYY() {
+        return (new DateTime())->format('dmY');
+    }
+
+    private function mci460PhoneES($fieldSpec, $phone) // TODO
+    {
+        $out = "";
+        foreach ($fieldSpec["fields"] as $field) {
+            $field["default"] = ($field["type"] === "int") ? 0 : "";
+            $out .= $this->createString($field);
+        }
+        return $out;
+    }
+
+    private function mci460SpouseES($fieldSpec, $family)
+    {
+        $out = "";
+        foreach ($family as $member) {
+            if (!property_exists($member, "relationship") ||
+                ($member->relationship != "1")) {
+                continue;
+            }
+            foreach ($fieldSpec["fields"] as $field) {
+                if (!isset($field["default"])) {
+                    $fieldName = $field["name"];
+                    $field["default"] = $member->$fieldName;
+                }
+                $out .= $this->createString($field);
+            }
+            break;
+        }
+        return $out;
+    }
+
+    /**
+     * Gera os detalhes do arquivo MCI460.
+     */
+    private function mci460Details($config, $registration, $extraData)
+    {
+        $out = [];
+        foreach ($config["details"] as $detail) {
+            if (isset($detail["condition"])) {
+                if (!$this->mci460Thunk2($detail["condition"], $config,
+                                         $registration)) {
+                    continue;
+                }
+            }
+            $line = "";
+            foreach ($detail["fields"] as $field) {
+                if (!isset($field["default"])) {
+                    if ($field["type"] === "meta") {
+                        $line .= $this->mci460MetaField($config, $field, $registration);
+                        continue;
+                    }
+                    $fieldName = $field["name"];
+                    if (!isset($config["fieldMap"][$fieldName])) {
+                        $field["default"] = $extraData[$fieldName];
+                    } else {
+                        $fieldName = $config["fieldMap"][$fieldName];
+                        $field["default"] = $registration->$fieldName;
+                    }
+                }
+                $line .= $this->createString($field);
+            }
+            $out[] = $line;
+        }
+        return $out;
+    }
+
+    /**
+     * Gera o cabeçalho do arquivo MCI460.
+     */
+    private function mci460Header($config)
+    {
+        $out = "";
+        foreach ($config["header"] as $field) {
+            if (!isset($field["default"])) {
+                if (isset($field["function"])) {
+                    $field["default"] = $this->mci460Thunk2($field["function"],
+                                                            null, null);
+                } else {
+                    throw new Exception("Configuração inválida: $field");
+                }
+            }
+            $out .= $this->createString($field);
+        }
+        return $out;
+    }
+
+    private function mci460MetaField($config, $metafieldConfig, $registration)
+    {
+        $out = "";
+        $metaname = $metafieldConfig["name"];
+        if (isset($metafieldConfig["function"])) {
+            $field = $config["fieldMap"][$metaname];
+            return $this->mci460Thunk2($metafieldConfig["function"],
+                                       $metafieldConfig, $registration->$field);
+        }
+        // caminho não testado a seguir; todos os metacampos atualmente têm sua própria função geradora
+        foreach ($metafieldConfig["fields"] as $field) {
+            if (!isset($field["default"])) {
+                $fieldName = $field["name"];
+                if (!isset($config["fieldMap"][$metaname])) {
+                    $field["default"] = $registration->$fieldName;
+                } else {
+                    $field["default"] = $registration->$metaname->$fieldName;
+                }
+            }
+            $out[] .= $this->createString($field);
+        }
+        return $out;
+    }
+
+    /**
+     * Gera o rodapé do arquivo MCI460.
+     */
+    private function mci460Trailer($config, $counters)
+    {
+        $out = "";
+        foreach ($config["trailer"] as $field) {
+            if (!isset($field["default"])) {
+                $field["default"] = $counters[$field["name"]];
+            }
+            $out .= $this->createString($field);
+        }
+        return $out;
     }
 
 }
