@@ -154,6 +154,7 @@ return [
                     "length" => 8,
                     "type" => "int",
                     "name" => "dataNascimento",
+                    "function" => "mci460DateFormatDDMMYYYY",
                 ],
                 [
                     "length" => 60,

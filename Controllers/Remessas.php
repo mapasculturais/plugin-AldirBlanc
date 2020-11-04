@@ -1328,6 +1328,10 @@ public function ALL_addressReport()
         return $out;
     }
 
+    private function mci460DateFormatDDMMYYYY($value) {
+        return implode("", array_reverse(explode("-", $value)));
+    }
+
     private function mci460DateDDMMYYYY() {
         return (new DateTime())->format('dmY');
     }
@@ -1387,7 +1391,9 @@ public function ALL_addressReport()
                         $field["default"] = $extraData[$fieldName];
                     } else {
                         $fieldName = $config["fieldMap"][$fieldName];
-                        $field["default"] = $registration->$fieldName;
+                        $field["default"] = isset($field["function"]) ?
+                                            $this->mci460Thunk2($field["function"], $registration->$fieldName, null) :
+                                            $registration->$fieldName;
                     }
                 }
                 $line .= $this->createString($field);
