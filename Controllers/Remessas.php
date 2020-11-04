@@ -1036,7 +1036,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if (!empty($this->data)) {
             // oportunidades
             if (isset($this->data["opportunity"])) {
-                $opportunityIDs = explode(",", $this->data["op"]);
+                $opportunityIDs = explode(",", $this->data["opportunity"]);
                 foreach ($opportunityIDs as $oID) {
                     if (!is_numeric($oID)) {
                         throw new Exception("Oportunidade(s) inválida(s)");
@@ -1057,13 +1057,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         $newline = "\r\n";
         set_time_limit(0);
-        header("Content-type: text/utf-8");
-        flush();
         // inicializa contadores
         $nLines = 1;
         $nClients = 0;
         // gera o header
-        echo($this->mci460Header($config) . $newline);
+        $out = $this->mci460Header($config) . $newline;
+        $opportunityIDs = [];
         // percorre as oportunidades
         foreach ($opportunities as $opportunity) {
             // pega inscrições via DQL seguindo recomendações do Doctrine para grandes volumes
@@ -1079,6 +1078,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              */
             $this->registerRegistrationMetadata($opportunity);
             // processa inscrições
+            $clientsBefore = $nClients;
             while ($registration = $registrations->next()[0]) {
                 // testa se é desbancarizado
                 if (!$this->mci460Thunk2($config["condition"], $config["fieldMap"], $registration)) {
@@ -1093,14 +1093,40 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     "dvGrupoSetex" => "X", // placeholder
                 ]);
                 $nLines += sizeof($details);
-                echo(implode($newline, $details) . $newline);
+                $out .= implode($newline, $details) . $newline;
+                $app->em->clear();
+            }
+            if ($nClients > $clientsBefore) {
+                $opportunityIDs[] = $this->createString([
+                    "default" => $opportunity->id,
+                    "length" => 3,
+                    "type" => "int",
+                ]);
             }
         }
         ++$nLines;
-        echo($this->mci460Trailer($config, [
+        $out .= $this->mci460Trailer($config, [
             "totalClientes" => $nClients,
             "totalRegistros" => $nLines,
-        ]) . $newline);
+        ]) . $newline;
+        /**
+         * cria o arquivo no servidor e insere o conteuto da váriavel $out
+         */
+        $fileName = "mci460-" . (new DateTime())->format('Ymd') . "-op" .
+                    implode("-", $opportunityIDs) . "-" .
+                    md5(json_encode($out)) . '.txt';
+        $dir = PRIVATE_FILES_PATH . "aldirblanc/inciso1/remessas/mci460/";
+        $path = $dir . $fileName;
+        if (!is_dir($dir)) {
+            mkdir($dir, 0700, true);
+        }
+        $stream = fopen($path, "w");
+        fwrite($stream, $out);
+        fclose($stream);
+        header("Content-Type: text/utf-8");
+        header("Content-Disposition: attachment; filename=" . $fileName);
+        header("Pragma: no-cache");
+        readfile($path);
         return;
     }
 
@@ -1108,26 +1134,31 @@ public function ALL_addressReport()
 {
     $this->requireAuthentication();
     $app = App::i();
+    if (!empty($this->data)) {
+        // oportunidades
+        if (isset($this->data["opportunity"])) {
+            $opportunityIDs = explode(",", $this->data["opportunity"]);
+            foreach ($opportunityIDs as $oID) {
+                if (!is_numeric($oID)) {
+                    throw new Exception("Oportunidade(s) inválida(s)");
+                }
+            }
+        }
+    }
     // pega oportunidades via ORM
-    $opportunityIDs = [1];
     if (isset($opportunityIDs)) {
         $opportunities = $app->repo("Opportunity")->findBy(["id" => $opportunityIDs]);
     } else {
         $opportunities = $app->repo("Opportunity")->findAll();
     }
     set_time_limit(0);
-    header("Content-Type: application/csv");
-    header("Pragma: no-cache");
-    flush();
     $header = ["Inscrição", "Nome", "Logradouro", "Número", "Complemento",
                "Bairro", "Município", "Estado", "CEP"];
     $report = [];
+    $opportunityIDs = [];
     $config = $this->config["config-mci460"];
     $address = $config["fieldMap"]["endereco"];
     foreach ($opportunities as $opportunity) {
-        $part = ($opportunity->id == $this->config["inciso1_opportunity_id"]) ? 1 :
-                (in_array($opportunity->id, $this->config["inciso2_opportunity_ids"]) ? 2 : 3);
-        if ($part != 1) { continue; }
         /**
          * TODO: selecionar corretamente as inscrições por homologação + avaliação DataPrev
          */
@@ -1140,6 +1171,7 @@ public function ALL_addressReport()
          * Mapeamento de fielsds_id pelo label do campo
          */
         $this->registerRegistrationMetadata($opportunity);
+        $linesBefore = sizeof($report);
         while ($registration = $registrations->next()[0]) {
             if (!$this->mci460Thunk2($config["condition"], $config["fieldMap"], $registration)) {
                 continue;
@@ -1167,13 +1199,36 @@ public function ALL_addressReport()
                                      $registration->field_22], $addressFields);
             $app->em->clear();
         }
+        if (sizeof($report) > $linesBefore) {
+            $opportunityIDs[] = $this->createString([
+                "default" => $opportunity->id,
+                "length" => 3,
+                "type" => "int",
+            ]);
+        }
     }
-    $csv = Writer::createFromString();
+    /**
+     * cria o arquivo no servidor e insere o $header e as entradas do $report
+     */
+    $fileName = "addressReport-" . (new DateTime())->format('Ymd') . "-op" .
+                implode("-", $opportunityIDs) . "-" .
+                md5(json_encode(array_merge([$header], $report))) . '.csv';
+    $dir = PRIVATE_FILES_PATH . "aldirblanc/inciso1/remessas/generics/";
+    $path = $dir . $fileName;
+    if (!is_dir($dir)) {
+        mkdir($dir, 0700, true);
+    }
+    $stream = fopen($path, "w");
+    $csv = Writer::createFromStream($stream);
     $csv->insertOne($header);
     foreach ($report as $line) {
         $csv->insertOne($line);
     }
-    echo($csv->getContent());
+    header("Content-Type: application/csv");
+    header("Content-Disposition: attachment; filename=" . $fileName);
+    header("Pragma: no-cache");
+    readfile($path);
+    fclose($stream);
     return;
 }
 
