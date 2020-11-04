@@ -210,9 +210,9 @@ class Plugin extends \MapasCulturais\Plugin
                 }
 
                 if (isset($evaluations_avaliadores[$eval->registration->number])) {
-                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $eval->user->profile->name;
+                    $evaluations_avaliadores[$eval->registration->number] .= "\n-------------\n" . $eval->user->profile->name;
                 } else {
-                    $evaluations_obs[$eval->registration->number] = $eval->user->profile->name;
+                    $evaluations_avaliadores[$eval->registration->number] = $eval->user->profile->name;
                 }
             }
 
