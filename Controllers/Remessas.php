@@ -1212,15 +1212,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'TIPO_MOEDA' => '',
             'USO_BANCO_85' => '',
-            'VALOR_INTEIRO' => function ($registrations) use ($detahe1, $default) {
-                $field_id = $default['womanMonoParent'];
-                if($registrations->$field_id == "SIM"){
-                    $valor = '6000.00';
-                }else{
-                    $valor = '3000.00';
+            'VALOR_INTEIRO' => function ($registrations) use ($detahe1, $app) {
+                $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
+                    'registration' => $registrations->id,
+                    'status' => 0,
+                ]);
+
+                if(!$payment){
+                    $app->log->info("\n Pagamento nao encontrado");
                 }
-                $valor = preg_replace('/[^0-9]/i', '', $valor);
-                return $valor;
+
+                $amount =  preg_replace('/[^0-9]/i', '', $payment->amount);
+                return number_format($amount, 2, '.', '');
+                
             },
             'USO_BANCO_88' => '',
             'USO_BANCO_89' => '',
@@ -1379,19 +1383,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             
             if($defaultBank && $defaultBank ==  '001'){
 
-                foreach ($registrations as $value) {   
+                foreach ($registrations as $value) {
                     
-                    //Pega as informações de pagamento                   
-                    $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-                        'registration' => $value->id,
-                        'status' => 0,
-                    ]);
-
-                    if (!$payment) {
-                        $app->log->debug("\nPagamento nao encontrado para " . $value->id);
-                        continue;
-                    }
-
                     if ($value->$field_TipoConta == "Conta corrente" && $value->$correntistabb == "SIM") {
                         $recordsBBCorrente[] = $value;
 
@@ -1425,17 +1418,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
         }else{
             foreach ($registrations as $value) {
-                 //Pega as informações de pagamento                   
-                 $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-                    'registration' => $value->id,
-                    'status' => 0,
-                ]);
-
-                if (!$payment) {
-                    $app->log->debug("\nPagamento nao encontrado para " . $value->id);
-                    continue;
-                }
-
                 if ($this->numberBank($value->$field_banco) == "001") {               
                     if ($value->$field_TipoConta == "Conta corrente") {
                         $recordsBBCorrente[] = $value;
@@ -1666,10 +1648,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
             unset($_SESSION['problems']);
         }
-
-        // header('Content-type: text/utf-8');
-        // echo $txt_data;
-        // exit();
         
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
@@ -1737,6 +1715,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $detahe2 = $txt_config['DETALHE2'];
         $trailer1 = $txt_config['TRAILER1'];
         $trailer2 = $txt_config['TRAILER2'];
+        $deParaContasbb = $default['deParaContasbb'];
+        
+        $dePara = $this->readingCsvAccounts($deParaContasbb);
+        $cpfCsv = $this->cpfCsv($deParaContasbb);  
 
         foreach ($header1 as $key_config => $value) {
             if (is_string($value['field_id']) && strlen($value['field_id']) > 0 && $value['field_id'] != 'mapped') {
@@ -1811,6 +1793,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $header1['CONTA'];
                 $value = $this->normalizeString($field_id['default']);
                 return substr($value, 0, 12);
+                
+
             },
             'CONTA_DIGITO' => function ($registrations) use ($header1) {
                 $result = "";
@@ -1919,63 +1903,95 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 return $this->numberBank($registrations->$field_id);
 
             },
-            'BEN_AGENCIA' => function ($registrations) use ($detahe1, $default) {
+            'BEN_AGENCIA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
+                $result = "";
+                $field_cpf = $detahe2['BEN_CPF']['field_id'];
+                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
                 
-                $temp = $default['formoReceipt'];
-                $formoReceipt = $registrations->$temp; 
-
-                if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                    $field_id = $default['fieldsWalletDigital']['agency'];                    
-                }else{
-                    $field_id = $detahe1['BEN_AGENCIA']['field_id'];
-                }
-
-                $age = $this->normalizeString($registrations->$field_id);
-                
-                if (strlen($age) > 4) {
+                $pos = array_search($cpfBase,$cpfCsv);
+               
+                if($pos){                    
+                    $agencia = $dePara[$pos]['BEN_AGENCIA'];
                     
-                    $result = substr($age, 0, 4);
-                } else {
-                    $result = $age;
+                }else{
+                    $temp = $default['formoReceipt'];
+                    $formoReceipt = $registrations->$temp; 
+    
+                    if($formoReceipt == "CARTEIRA DIGITAL BB"){
+                        $field_id = $default['fieldsWalletDigital']['agency'];                    
+                    }else{
+                        $field_id = $detahe1['BEN_AGENCIA']['field_id'];
+                    }
+
+                    $agencia = $registrations->$field_id;
+                }
+                
+                
+
+                $age = explode("-", $agencia);
+                
+                if(count($age)>1){
+                    $result = $age[0];
+
+                }else{
+                    if (strlen($age[0]) > 4) {
+                    
+                        $result = substr($age[0], 0, 4);
+                    } else {
+                        $result = $age[0];
+                    }
                 }
                
+                $result = $this->normalizeString($result);
                 return is_string($result) ? strtoupper($result) : $result;
             },
-            'BEN_AGENCIA_DIGITO' => function ($registrations) use ($detahe1, $default) {
+            'BEN_AGENCIA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
                 $result = "";
-
-                $temp = $default['formoReceipt'];
-                $formoReceipt = $registrations->$temp; 
-
-                if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                    $field_id = $default['fieldsWalletDigital']['agency'];                    
+                $field_cpf = $detahe2['BEN_CPF']['field_id'];
+                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
+                
+                $pos = array_search($cpfBase,$cpfCsv);               
+                if($pos){                    
+                    $agencia = $dePara[$pos]['BEN_AGENCIA'];
+                    
                 }else{
-                    $field_id = $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
+                    $temp = $default['formoReceipt'];
+                    $formoReceipt = $registrations->$temp; 
+    
+                    if($formoReceipt == "CARTEIRA DIGITAL BB"){
+                        $field_id = $default['fieldsWalletDigital']['agency'];                    
+                    }else{
+                        $field_id = $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
+                    }
+
+                    $agencia = $registrations->$field_id;
                 }
                 
-                $dig = $this->normalizeString($registrations->$field_id);
-                if (strlen($dig) > 4) {
-                    $result = substr($dig, -1);
-                } else {
-                    $result = "";
-                }
+                
+                $age = explode("-", $agencia);
 
+                if(count($age)>1){
+                    $result = $age[1];
+                }else{
+                    if (strlen($age[0]) > 4) {
+                        $result = substr($age[0], -1);
+                    } else {
+                        $result = "";
+                    }
+                }
+                
+                $result = $this->normalizeString($result);
                 return is_string($result) ? strtoupper($result) : $result;
             },
-            'BEN_CONTA' => function ($registrations) use ($detahe1, $default, $app) {                
-                $temp = $default['formoReceipt'];
-                $formoReceipt = $registrations->$temp; 
+            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {    
+                $result  = ""; 
+                $field_cpf = $detahe2['BEN_CPF']['field_id'];
+                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
 
-                if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                    $field_id = $default['fieldsWalletDigital']['account'];                    
-                }else{
-                    $field_id = $detahe1['BEN_CONTA_DIGITO']['field_id'];
-                }
+                $field_conta = $detahe1['TIPO_CONTA']['field_id'];
+                $typeAccount = $registrations->$field_conta;
 
-                $account = $this->normalizeString($registrations->$field_id);
-
-                $temp = $detahe1['TIPO_CONTA']['field_id'];
-                $typeAccount = $registrations->$temp;
+                $dig = $detahe1['BEN_CONTA_DIGITO']['field_id']; //pega o field_id do digito da conta
 
                 $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
                 if($temp){
@@ -1984,12 +2000,36 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $numberBank = $default['defaultBank'];
                 }
 
+                $pos = array_search($cpfBase,$cpfCsv);               
+                if($pos){                    
+                    $temp_account = $dePara[$pos]['BEN_CONTA'];
+                    
+                }else{
+                    $temp = $default['formoReceipt'];
+                    $formoReceipt = $registrations->$temp;
+
+                    if($formoReceipt == "CARTEIRA DIGITAL BB"){
+                        $field_id = $default['fieldsWalletDigital']['account'];                    
+                    }else{
+                        $field_id = $detahe1['BEN_CONTA']['field_id'];
+                    }
+
+                    $temp_account = $registrations->$field_id;
+                }
+                
+                $temp_account = explode("-", $temp_account);
+                if(count($temp_account)>1){
+                    $account = $temp_account[0];
+                }else{
+                    $account = substr($temp_account[0], 0, -1);
+                }
+                
                 if(!$account){
                     $app->log->info($registrations->number . " Conta bancária não informada");
                     return " ";
                 }
 
-                $result  = "";
+                
                 if($typeAccount == $default['typesAccount']['poupanca']){
 
                     if (($numberBank == '001') && (substr($account, 0, 3) != "510")) {
@@ -2005,71 +2045,77 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
                 $result = preg_replace('/[^0-9]/i', '',$result);
 
-                if($temp === $field_id){
+                if($dig === $field_conta && $temp_account == 1){
                     return substr($this->normalizeString($result), 0, -1); // Remove o ultimo caracter. Intende -se que o ultimo caracter é o DV da conta
 
                 }else{
-                    return $result;
+                    return $this->normalizeString($result);
 
                 }
                 
-              
-               
-              
             },
-            'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe1, $default, $app) {
+            'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
+                $result = "";
                 $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
                 $field_id = $detahe1['BEN_CONTA']['field_id'];
+                $field_cpf = $detahe2['BEN_CPF']['field_id'];
+                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
                 
+
                 if($temp){
                     $numberBank = $this->numberBank($registrations->$temp);
                 }else{
                     $numberBank = $default['defaultBank'];
                 }
 
-                $temp = $default['formoReceipt'];
-                $formoReceipt = $registrations->$temp; 
-
-                if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                    $temp = $default['fieldsWalletDigital']['account'];                    
-                }else{
-                    $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
-                }
-
-                $account = $this->normalizeString(preg_replace('/[^0-9]/i', '', $registrations->$temp));
 
                 $temp = $detahe1['TIPO_CONTA']['field_id'];
                 $typeAccount = $registrations->$temp;
-                
-                $dig = substr($account, -1);
 
-                if(!$account && ($temp == $field_id)){
-                    $app->log->info($registrations->number . " Conta sem DV");
-                    return " ";
+                $pos = array_search($cpfBase,$cpfCsv);               
+                if($pos){                    
+                    $temp_account = $dePara[$pos]['BEN_CONTA'];
+                    
+                }else{
+                    $temp = $default['formoReceipt'];
+                    $formoReceipt = $registrations->$temp;
+                    
+                    if($formoReceipt == "CARTEIRA DIGITAL BB"){
+                        $temp = $default['fieldsWalletDigital']['account'];                    
+                    }else{
+                        $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
+                    }
+                    $temp_account = $registrations->$field_id;
                 }
-            
-                $result = "";
+                
+                $temp_account = explode("-", $temp_account);
+                if(count($temp_account)>1){
+                    $dig = $temp_account[1];
+
+                }else{
+                    $dig = substr($temp_account[0], -1);
+                }
                 
                 if ($numberBank == '001' && $typeAccount == $default['typesAccount']['poupanca']) {                   
-                    if (substr($account, 0, 3) == "510") {
+                    if (substr($temp_account[0], 0, 3) == "510") {
                         $result = $dig;
                     } else {
-                        
+                        $dig = trim(strtoupper($dig));                       
                         $result = $default['savingsDigit'][$dig];
-
                     }
                 } else {
 
                     $result = $dig;
                 }
                 
+                $result = $this->normalizeString(preg_replace('/[^0-9]/i', '',$result));
                 return is_string($result) ? strtoupper($result) : $result;
                
             },
             'BEN_DIGITO_CONTA_AGENCIA_80' => '',
             'BEN_NOME' => function ($registrations) use ($detahe1) {
                 $field_id = $detahe1['BEN_NOME']['field_id'];
-                $result = substr($this->normalizeString($registrations->$field_id), 0, $detahe1['BEN_NOME']['length']);
+                $result = substr($this->normalizeString($registrations->$field_id), 0, $detahe1['BEN_NOME']['length']);                            
                 return $result;
             },
             'BEN_DOC_ATRIB_EMPRESA_82' => '',
@@ -2097,15 +2143,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'TIPO_MOEDA' => '',
             'USO_BANCO_85' => '',
-            'VALOR_INTEIRO' => function ($registrations) use ($detahe1) {
-                $field_id = $default['womanMonoParent'];
-                if($registrations->$field_id == "SIM"){
-                    $valor = '6000.00';
-                }else{
-                    $valor = '3000.00';
+            'VALOR_INTEIRO' => function ($registrations) use ($detahe1, $app) {
+                $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
+                    'registration' => $registrations->id,
+                    'status' => 0,
+                ]);
+
+                if(!$payment){
+                    $app->log->info("\n Pagamento nao encontrado");
                 }
-                $valor = preg_replace('/[^0-9]/i', '', $valor);
-                return $valor;
+
+                $amount =  preg_replace('/[^0-9]/i', '', $payment->amount);
+                return number_format($amount, 2, '.', '');
+                
             },
             'USO_BANCO_88' => '',
             'USO_BANCO_89' => '',
@@ -2725,7 +2775,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     private function readingCsvAccounts($filename){
 
-        $filename = PRIVATE_FILES_PATH. "LAB/CSV/".$filename;
+        $filename = __DIR__."/../".$filename;
+
+        //Verifica se o arquivo existe
+        if(!file_exists($filename)){
+            return false;
+        }
 
         $data = [];
          //Abre o arquivo em modo de leitura
@@ -2752,7 +2807,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     private function cpfCsv($filename){
 
-        $filename = PRIVATE_FILES_PATH. "LAB/CSV/". $filename;
+        $filename = __DIR__."/../".$filename;
+
+        //Verifica se o arquivo existe
+        if(!file_exists($filename)){
+            return false;
+        }
 
         $data = [];
          //Abre o arquivo em modo de leitura
