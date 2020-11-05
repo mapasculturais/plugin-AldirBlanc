@@ -1,0 +1,217 @@
+<?php
+
+/**
+ * Configuração do exportador do PPG100
+ *
+ * fieldMap: usado para localizar os diversos campos na oportunidade
+ * header: configuração do header; lista seqüencial de campos com length, type e
+ *         name, mais default se for um campo constante ou function para um
+ *         campo dinâmico
+ * details: configuração dos detalhes; este formato tem apenas um tipo de
+ *          detalhe mas na configuração é lista por compatibilidade
+ * detail: fields com lista seqüencial de campos com length, type, e name, mais
+ *         default se for um campo constante; se o tipo do campo for "meta", o
+ *         campo deve conter a lista de subcampos fields e uma function para
+ *         preenchimento
+ * trailer: configuração do trailer; lista seqüencial de campos com length, type
+ *          e name, mais default se for um campo constante; os nomes dos campos
+ *          dinâmicos são utilizados como chaves do último parâmetro passado
+ *          para o método que gera o trailer
+ * condition: function para determinar se o registro entra na remessa
+ *
+ * Tudo o que for "condition" ou "function" precisa ser o nome de um método no
+ * controller.
+ * ToDo: documentar assinaturas para esses métodos.
+ */
+return [
+    "fieldMap" => [
+		"wantsPaymentOrder" => "field_1",
+		"numeroProtocolo" => "id",
+		"senhaSaque" => "number",
+        "cpf" => "field_21",
+    ],
+    "header" => [
+		[
+			"length" => 1,
+			"type" => "int",
+			"name" => "tipoRegistro",
+			"default" => 0,
+		],
+        [
+            "length" => 8,
+            "type" => "int",
+            "name" => "dataRemessa",
+            "function" => "genericDateDDMMYYYY",
+        ],
+        [
+            "length" => 4,
+            "type" => "int",
+            "name" => "horaRemessa",
+            "function" => "genericTimeHHMM",
+        ],
+        [
+            "length" => 6,
+            "type" => "text",
+            "name" => "nomeArquivo",
+            "default" => "PPG100",
+        ],
+        [
+            "length" => 9,
+            "type" => "int",
+            "name" => "mciCliente",
+            "default" => "", // preenchimento SECULT
+        ],
+        [
+            "length" => 9,
+            "type" => "int",
+            "name" => "codigoParametroCliente",
+            "default" => 0, // preenchimento SECULT
+        ],
+        [
+            "length" => 3,
+            "type" => "int",
+            "name" => "versaoLayout",
+            "default" => 11,
+        ],
+        [
+            "length" => 9,
+            "type" => "int",
+            "name" => "sequencialRemessa",
+            "function" => "sequenceNumber",
+        ],
+		[
+			"length" => 9,
+			"type" => "text",
+			"name" => "padding",
+			"default" => "",
+		],
+        [
+            "length" => 4,
+            "type" => "int",
+            "name" => "agenciaDebito",
+            "default" => 0, // preenchimento SECULT
+        ],
+        [
+            "length" => 9,
+            "type" => "int",
+            "name" => "contaDebito",
+            "default" => 0, // preenchimento SECULT
+        ],
+		[
+			"length" => 120,
+			"type" => "text",
+			"name" => "padding",
+			"default" => "",
+		],
+		[
+			"length" => 9,
+			"type" => "int",
+			"name" => "numeroRegistro",
+			"default" => 1,
+		],
+    ],
+    "details" => [
+        [
+            "fields" => [
+				[
+					"length" => 1,
+					"type" => "int",
+					"name" => "tipoRegistro",
+					"default" => 1,
+				],
+				[
+					"length" => 15,
+					"type" => "meta",
+					"name" => "numeroProtocolo",
+                    "fields" => [
+                        [
+                            "length" => 4,
+                            "type" => "int",
+                            "name" => "idBB",
+                        ],
+                        [
+                            "length" => 10,
+                            "type" => "int",
+                            "name" => "idCliente",
+                        ],
+                        [
+                            "length" => 1,
+                            "type" => "int",
+                            "name" => "dv",
+						],
+					],
+					"function" => "ppg100ProtocolNumberPA",
+				],
+				[
+                    "length" => 6,
+                    "type" => "int",
+					"name" => "senhaSaque",
+					"function" => "ppg100PIN",
+                ],
+				[
+					"length" => 10,
+					"type" => "text",
+					"name" => "padding",
+					"default" => "",
+				],
+                [
+                    "length" => 11,
+                    "type" => "int",
+                    "name" => "cpf",
+                ],
+				[
+					"length" => 11,
+					"type" => "int",
+					"name" => "valorCarga",
+				],
+                [
+                    "length" => 1,
+                    "type" => "int",
+                    "name" => "indicadorAcao",
+                    "default" => 3, // sempre apenas carga
+                ],
+				[
+					"length" => 136,
+					"type" => "text",
+					"name" => "padding",
+					"default" => "",
+				],
+				[
+					"length" => 9,
+					"type" => "int",
+					"name" => "numeroRegistro",
+				],
+            ],
+        ],
+	],
+    "trailer" => [
+        [
+            "length" => 1,
+            "type" => "int",
+            "name" => "tipoRegistro",
+            "default" => 9,
+        ],
+        [
+            "length" => 9,
+            "type" => "int",
+            "name" => "totalDetalhes",
+        ],
+        [
+            "length" => 11,
+            "type" => "int", // em desacordo com a documentação
+            "name" => "totalCarga",
+        ],
+        [
+            "length" => 170,
+            "type" => "text",
+            "name" => "padding",
+            "default" => "",
+        ],
+        [
+            "length" => 9,
+            "type" => "int",
+            "name" => "numeroRegistro",
+        ],
+    ],
+    "condition" => "ppg100ConditionPA",
+];

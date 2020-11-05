@@ -1068,6 +1068,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             case "mci460":
                 $this->exportMCI460($opportunities, $startDate, $finishDate);
                 break;
+            case "ppg100":
+                $this->exportPPG100($opportunities, $startDate, $finishDate);
+                break;
             case "addressReport":
                 $this->addressReport($opportunities, $startDate, $finishDate);
                 break;
@@ -1088,6 +1091,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         switch ($type) {
             case "cnab240": break;
             case "mci460": break;
+            case "ppg100": break;
             default: break;
         }
         return $n;
@@ -1216,7 +1220,290 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     }
 
     /** #########################################################################
+     * Funções para exportadores - genéricas
+     */
+
+    /**
+     * Chama outro método com dois parâmetros.
+     */
+    private function genericThunk2($func, $parm0, $parm1)
+    {
+        if (!method_exists($this, $func)) {
+            throw new Exception("Configuração inválida: $func não existe.");
+        }
+        return $this->$func($parm0, $parm1);
+    }
+
+    /**
+     * Gera o cabeçalho do arquivo exportado de acordo com a configuração.
+     */
+    private function genericHeader($config)
+    {
+        $out = "";
+        foreach ($config["header"] as $field) {
+            if (!isset($field["default"])) {
+                if (isset($field["function"])) {
+                    $field["default"] = $this->genericThunk2($field["function"],
+                                                             null, null);
+                } else {
+                    throw new Exception("Configuração inválida: $field");
+                }
+            }
+            $out .= $this->createString($field);
+        }
+        return $out;
+    }
+
+    /**
+     * Gera os detalhes do arquivo exportado de acordo com a configuração.
+     */
+    private function genericDetails($config, $registration, $extraData)
+    {
+        $out = [];
+        // itera sobre definições de detalhes
+        foreach ($config["details"] as $detail) {
+            // pula detalhes cuja condição o registro não atende
+            if (isset($detail["condition"])) {
+                if (!$this->genericThunk2($detail["condition"], $config,
+                                          $registration)) {
+                    continue;
+                }
+            }
+            $line = "";
+            // itera sobre definições de campos
+            foreach ($detail["fields"] as $field) {
+                // processa campos variáveis
+                if (!isset($field["default"])) {
+                    if ($field["type"] === "meta") {
+                        $line .= $this->genericMetaField($config, $field, $registration);
+                        continue;
+                    }
+                    $fieldName = $field["name"];
+                    // campos externos (por exemplo, o contador de clientes)
+                    if (!isset($config["fieldMap"][$fieldName])) {
+                        $field["default"] = $extraData[$fieldName];
+                    } else { // campos do banco de dados
+                        $fieldName = $config["fieldMap"][$fieldName];
+                        $field["default"] = isset($field["function"]) ?
+                                            $this->genericThunk2($field["function"], $registration->$fieldName, null) :
+                                            $registration->$fieldName;
+                    }
+                }
+                $line .= $this->createString($field);
+            }
+            $out[] = $line;
+        }
+        return $out;
+    }
+
+    /**
+     * Retorna um metacampo para o arquivo exportado de acordo com a configuração.
+     */
+    private function genericMetaField($config, $metafieldConfig, $registration)
+    {
+        $out = "";
+        $metaname = $metafieldConfig["name"];
+        if (isset($metafieldConfig["function"])) {
+            $field = $config["fieldMap"][$metaname];
+            return $this->genericThunk2($metafieldConfig["function"],
+                                        $metafieldConfig, $registration->$field);
+        }
+        // caminho não testado a seguir; todos os metacampos atualmente têm sua própria função geradora
+        foreach ($metafieldConfig["fields"] as $field) {
+            if (!isset($field["default"])) {
+                $fieldName = $field["name"];
+                if (!isset($config["fieldMap"][$metaname])) {
+                    $field["default"] = $registration->$fieldName;
+                } else {
+                    $field["default"] = $registration->$metaname->$fieldName;
+                }
+            }
+            $out[] .= $this->createString($field);
+        }
+        return $out;
+    }
+
+    /**
+     * Gera o rodapé do arquivo exportado de acordo com a configuração.
+     */
+    private function genericTrailer($config, $counters)
+    {
+        $out = "";
+        foreach ($config["trailer"] as $field) {
+            if (!isset($field["default"])) {
+                $field["default"] = $counters[$field["name"]];
+            }
+            $out .= $this->createString($field);
+        }
+        return $out;
+    }
+
+    private function genericMod10Digit($value)
+    {
+        $sum = 0;
+        $mult = 2;
+        $len = mb_strlen($value);
+        for ($i = 0; $i < $len; ++$i) {
+            $d = intval(mb_substr($value, ($len - $i - 1), 1)) * $mult;
+            if ($d > 9) {
+                $d = $d - 9;
+            }
+            $sum += $d;
+            $mult = 1 + !($mult - 1);
+        }
+        return ((10 - ($sum % 10)) % 10);
+    }
+
+    private function genericDateDDMMYYYY() {
+        return (new DateTime())->format("dmY");
+    }
+
+    private function genericTimeHHMM() {
+        return (new DateTime())->format("Hi");
+    }
+
+    /** #########################################################################
+     * Funções para o PPG100
+     */
+
+    private function exportPPG100($opportunities, $startDate, $finishDate)
+    {
+        $app = App::i();
+        $config = $this->config["config-ppg10x"];
+        if (!isset($config["condition"])) {
+            throw new Exception("Configuração inválida: \"condition\" não configurada");
+        }
+        $newline = "\r\n";
+        set_time_limit(0);
+        // inicializa contadores
+        $nLines = 1;
+        $totalAmount = 0;
+        // gera o header
+        $out = $this->genericHeader($config) . $newline;
+        $opportunityIDs = [];
+        // percorre as oportunidades
+        foreach ($opportunities as $opportunity) {
+            // pega inscrições via DQL seguindo recomendações do Doctrine para grandes volumes
+            if ($startDate != null) {
+                $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
+                        WHERE e.status IN (1, 10) AND e.opportunity = :oppId AND
+                              e.sentTimestamp >=:startDate AND
+                              e.sentTimestamp <= :finishDate";
+                $query = $app->em->createQuery($dql);
+                $query->setParameters([
+                    'oppId' => $opportunity->id,
+                    'startDate' => $startDate,
+                    'finishDate' => $finishDate,
+                ]);
+            } else {
+                $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
+                                 WHERE e.status IN (1, 10) AND e.opportunity=:oppId";
+                $query = $app->em->createQuery($dql);
+                $query->setParameters(["oppId" => $opportunity->id]);
+            }
+            $registrations = $query->iterate();
+            /**
+             * Mapeamento de fielsds_id pelo label do campo
+             */
+            $this->registerRegistrationMetadata($opportunity);
+            // processa inscrições
+            $linesBefore = $nLines;
+            while ($registration = $registrations->next()[0]) {
+                // testa se é desbancarizado
+                if (!$this->genericThunk2($config["condition"], $config["fieldMap"], $registration)) {
+                    continue;
+                }
+                $amount = 60000; // placeholder
+                $details = $this->genericDetails($config, $registration, [
+                    "numeroRegistro" => ($nLines + 1),
+                    "valorCarga" => $amount,
+                ]);
+                $nLines += sizeof($details);
+                $totalAmount += $amount;
+                $out .= implode($newline, $details) . $newline;
+                $app->em->clear();
+            }
+            if ($nLines > $linesBefore) {
+                $opportunityIDs[] = $this->createString([
+                    "default" => $opportunity->id,
+                    "length" => 3,
+                    "type" => "int",
+                ]);
+            }
+        }
+        ++$nLines;
+        $out .= $this->genericTrailer($config, [
+            "totalDetalhes" => ($nLines - 2),
+            "totalCarga" => $totalAmount,
+            "numeroRegistro" => $nLines,
+        ]) . $newline;
+        /**
+         * cria o arquivo no servidor e insere o conteuto da váriavel $out
+         */
+        $fileName = "ppg100-" . (new DateTime())->format('Ymd') . "-op" .
+                    implode("-", $opportunityIDs) . "-" .
+                    md5(json_encode($out)) . '.txt';
+        $dir = PRIVATE_FILES_PATH . "aldirblanc/inciso1/remessas/ppg100/";
+        $path = $dir . $fileName;
+        if (!is_dir($dir)) {
+            mkdir($dir, 0700, true);
+        }
+        $stream = fopen($path, "w");
+        fwrite($stream, $out);
+        fclose($stream);
+        header("Content-Type: text/utf-8");
+        header("Content-Disposition: attachment; filename=" . $fileName);
+        header("Pragma: no-cache");
+        readfile($path);
+        return;
+    }
+
+    private function ppg100ConditionPA($fieldMap, $registration)
+    {
+        $wantsPaymentOrder = $fieldMap["wantsPaymentOrder"];
+        if ($this->config["exportador_requer_homologacao"] &&
+            !in_array($registration->consolidatedResult, [
+                "10", "homologado, validado por Dataprev"
+        ])) {
+            return false;
+        }
+        return ($registration->$wantsPaymentOrder != "SIM");
+    }
+
+    private function ppg100ProtocolNumberPA($fieldSpec, $registrationNumber)
+    {
+        $out = "";
+        foreach ($this->config["config-ppg10x"]["header"] as $field) {
+            if ($field["name"] == "codigoParametroCliente") {
+                $idBB = mb_substr(("" . $field["default"]), 0, 4);
+                break;
+            }
+        }
+        $components = [
+            "idBB" => $idBB,
+            "idCliente" => "$registrationNumber",
+        ];
+        foreach ($fieldSpec["fields"] as $field) {
+            if (!isset($components[$field["name"]])) {
+                $field["default"] = $this->genericMod10Digit($out);
+            } else {
+                $field["default"] = $components[$field["name"]];
+            }
+            $out .= $this->createString($field);
+        }
+        return $out;
+    }
+
+    private function ppg100PIN($value)
+    {
+        return random_int(0, 999999);
+    }
+
+
+    /** ########################################################################
      * Funções para o MCI460
+     * Os métodos mci460* são referenciados pelas configurações e não devem ser
+     * removidos sem ajuste nas mesmas.
      */
 
     private function exportMCI460($opportunities, $startDate, $finishDate)
@@ -1232,7 +1519,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $nLines = 1;
         $nClients = 0;
         // gera o header
-        $out = $this->mci460Header($config) . $newline;
+        $out = $this->genericHeader($config) . $newline;
         $opportunityIDs = [];
         // percorre as oportunidades
         foreach ($opportunities as $opportunity) {
@@ -1263,11 +1550,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $clientsBefore = $nClients;
             while ($registration = $registrations->next()[0]) {
                 // testa se é desbancarizado
-                if (!$this->mci460Thunk2($config["condition"], $config["fieldMap"], $registration)) {
+                if (!$this->genericThunk2($config["condition"], $config["fieldMap"], $registration)) {
                     continue;
                 }
                 ++$nClients;
-                $details = $this->mci460Details($config, $registration, [
+                $details = $this->genericDetails($config, $registration, [
                     "sequencialCliente" => $nClients,
                     "agencia" => 6666, // placeholder
                     "dvAgencia" => "X", // placeholder
@@ -1287,7 +1574,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
         }
         ++$nLines;
-        $out .= $this->mci460Trailer($config, [
+        $out .= $this->genericTrailer($config, [
             "totalClientes" => $nClients,
             "totalRegistros" => $nLines,
         ]) . $newline;
@@ -1348,7 +1635,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $this->registerRegistrationMetadata($opportunity);
             $linesBefore = sizeof($report);
             while ($registration = $registrations->next()[0]) {
-                if (!$this->mci460Thunk2($config["condition"], $config["fieldMap"], $registration)) {
+                if (!$this->genericThunk2($config["condition"], $config["fieldMap"], $registration)) {
                     continue;
                 }
                 $addressFields = [];
@@ -1405,14 +1692,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         readfile($path);
         fclose($stream);
         return;
-    }
-
-    private function mci460Thunk2($func, $parm0, $parm1)
-    {
-        if (!method_exists($this, $func)) {
-            throw new Exception("Configuração inválida: $func não existe.");
-        }
-        return $this->$func($parm0, $parm1);
     }
 
     private function mci460ConditionES($fieldMap, $registration)
@@ -1477,10 +1756,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return implode("", array_reverse(explode("-", $value)));
     }
 
-    private function mci460DateDDMMYYYY() {
-        return (new DateTime())->format('dmY');
-    }
-
     private function mci460NationalityES($value)
     {
         if (($value != null) && !str_starts_with($value, "Estrangeiro"))
@@ -1523,107 +1798,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $out .= $this->createString($field);
             }
             break;
-        }
-        return $out;
-    }
-
-    /**
-     * Gera os detalhes do arquivo MCI460.
-     */
-    private function mci460Details($config, $registration, $extraData)
-    {
-        $out = [];
-        // itera sobre definições de detalhes
-        foreach ($config["details"] as $detail) {
-            // pula detalhes cuja condição o registro não atende
-            if (isset($detail["condition"])) {
-                if (!$this->mci460Thunk2($detail["condition"], $config,
-                                         $registration)) {
-                    continue;
-                }
-            }
-            $line = "";
-            // itera sobre definições de campos
-            foreach ($detail["fields"] as $field) {
-                // processa campos variáveis
-                if (!isset($field["default"])) {
-                    if ($field["type"] === "meta") {
-                        $line .= $this->mci460MetaField($config, $field, $registration);
-                        continue;
-                    }
-                    $fieldName = $field["name"];
-                    // campos externos (por exemplo, o contador de clientes)
-                    if (!isset($config["fieldMap"][$fieldName])) {
-                        $field["default"] = $extraData[$fieldName];
-                    } else { // campos do banco de dados
-                        $fieldName = $config["fieldMap"][$fieldName];
-                        $field["default"] = isset($field["function"]) ?
-                                            $this->mci460Thunk2($field["function"], $registration->$fieldName, null) :
-                                            $registration->$fieldName;
-                    }
-                }
-                $line .= $this->createString($field);
-            }
-            $out[] = $line;
-        }
-        return $out;
-    }
-
-    /**
-     * Gera o cabeçalho do arquivo MCI460.
-     */
-    private function mci460Header($config)
-    {
-        $out = "";
-        foreach ($config["header"] as $field) {
-            if (!isset($field["default"])) {
-                if (isset($field["function"])) {
-                    $field["default"] = $this->mci460Thunk2($field["function"],
-                                                            null, null);
-                } else {
-                    throw new Exception("Configuração inválida: $field");
-                }
-            }
-            $out .= $this->createString($field);
-        }
-        return $out;
-    }
-
-    private function mci460MetaField($config, $metafieldConfig, $registration)
-    {
-        $out = "";
-        $metaname = $metafieldConfig["name"];
-        if (isset($metafieldConfig["function"])) {
-            $field = $config["fieldMap"][$metaname];
-            return $this->mci460Thunk2($metafieldConfig["function"],
-                                       $metafieldConfig, $registration->$field);
-        }
-        // caminho não testado a seguir; todos os metacampos atualmente têm sua própria função geradora
-        foreach ($metafieldConfig["fields"] as $field) {
-            if (!isset($field["default"])) {
-                $fieldName = $field["name"];
-                if (!isset($config["fieldMap"][$metaname])) {
-                    $field["default"] = $registration->$fieldName;
-                } else {
-                    $field["default"] = $registration->$metaname->$fieldName;
-                }
-            }
-            $out[] .= $this->createString($field);
-        }
-        return $out;
-    }
-
-    /**
-     * Gera o rodapé do arquivo MCI460.
-     */
-    private function mci460Trailer($config, $counters)
-    {
-        $out = "";
-        foreach ($config["trailer"] as $field) {
-            if (!isset($field["default"])) {
-                $field["default"] = $counters[$field["name"]];
-            }
-            $out .= $this->createString($field);
         }
         return $out;
     }

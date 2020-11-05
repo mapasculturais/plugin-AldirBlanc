@@ -50,7 +50,7 @@ return [
             "length" => 8,
             "type" => "int",
             "name" => "dataRemessa",
-            "function" => "mci460DateDDMMYYYY",
+            "function" => "genericDateDDMMYYYY",
         ],
         [
             "length" => 8,
@@ -62,7 +62,7 @@ return [
             "length" => 9,
             "type" => "int",
             "name" => "mciEmpresa",
-            "default" => "", // preenchimento SECULT
+            "default" => 0, // preenchimento SECULT
         ],
         [
             "length" => 5,
