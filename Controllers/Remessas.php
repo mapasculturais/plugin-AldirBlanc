@@ -1265,11 +1265,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'TIPO_MOEDA' => '',
             'USO_BANCO_85' => '',
-            'VALOR_INTEIRO' => function ($registrations) use ($detahe1, $default, $app) {
+            'VALOR_INTEIRO' => function ($registrations) use ($detahe1, $app) {
                 $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
                     'registration' => $registrations->id,
                     'status' => 0,
                 ]);
+
+                if(!$payment){
+                    $app->log->info("\n Pagamento nao encontrado");
+                }
 
                 $amount =  preg_replace('/[^0-9]/i', '', $payment->amount);
                 return number_format($amount, 2, '.', '');
@@ -2124,15 +2128,18 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'TIPO_MOEDA' => '',
             'USO_BANCO_85' => '',
-            'VALOR_INTEIRO' => function ($registrations) use ($detahe1, $default) {
-                $field_id = $default['womanMonoParent'];
-                if($registrations->$field_id == "SIM"){
-                    $valor = '6000.00';
-                }else{
-                    $valor = '3000.00';
+            'VALOR_INTEIRO' => function ($registrations) use ($detahe1, $app) {
+                $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
+                    'registration' => $registrations->id,
+                    'status' => 0,
+                ]);
+
+                if(!$payment){
+                    $app->log->info("\n Pagamento nao encontrado");
                 }
-                $valor = preg_replace('/[^0-9]/i', '', $valor);
-                return $valor;
+
+                $amount =  preg_replace('/[^0-9]/i', '', $payment->amount);
+                return number_format($amount, 2, '.', '');
             },
             'USO_BANCO_88' => '',
             'USO_BANCO_89' => '',
