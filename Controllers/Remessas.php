@@ -12,6 +12,7 @@ use League\Csv\Writer;
 use MapasCulturais\App;
 use League\Csv\Statement;
 use MapasCulturais\Entities\Registration;
+use MapasCulturais\Entities\Opportunity;
 
 /**
  * Registration Controller
@@ -36,33 +37,129 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $this->layout = 'aldirblanc';
     }
 
-    protected function filterRegistrations(array $registrations) {
+    /**
+     * Retorna a oportunidade
+     *
+     * @return \MapasCulturais\Entities\Opportunity
+     * @throws Exception
+     */
+    function getOpportunity() {
         $app = App::i();
 
-        $_regs = [];
+        //Pega a oportunidade do endpoint
+        if (empty($this->data['opportunity'])) {
+            throw new Exception("Informe a oportunidade! Ex.: opportunity:2");
 
-        $plugin = $app->plugins['AldirBlancDataprev'];
-        $user = $plugin->getUser();
-        $validador_recurso = $app->repo('User')->findOneBy(['email' => 'recurso@validador']);
+        } elseif (!is_numeric($this->data['opportunity']) || !in_array($this->data['opportunity'], $this->config['inciso2_opportunity_ids'])) {
+            throw new Exception("Oportunidade inválida");
 
-        foreach ($registrations as $registration) {
-            $dataprev_validation = $app->repo('RegistrationEvaluation')->findBy(['registration' => $registration, 'user' => $user]);
-            $recurso = $validador_recurso ?
-                $app->repo('RegistrationEvaluation')->findBy(['registration' => $registration, 'user' => $validador_recurso, 'result' => '10']) :
-                null;
+        } else {
+            $opportunity_id = $this->data['opportunity'];
+        }
 
-            if($recurso || !$dataprev_validation){
-                if ($this->config['exportador_requer_homologacao']) {
-                    if (in_array($registration->consolidatedResult, ['10', 'homologado']) ) {
-                        $_regs[] = $registration;
-                    }
+        /**
+         * Pega informações da oportunidade
+         */
+        $opportunity = $app->repo('Opportunity')->find($opportunity_id);
+        $this->registerRegistrationMetadata($opportunity);
+
+        if (!$opportunity->canUser('@control')) {
+            echo "Não autorizado";
+            die();
+        }
+
+        return $opportunity;
+    }
+
+    /**
+     * Retorna as inscrições
+     *
+     * @param mixed $opportunity
+     * @return \MapasCulturais\Entities\Registration[]
+     * @throws Exception
+     */
+    function getRegistrations(Opportunity $opportunity) {
+        $app = App::i();
+        /**
+         * Pega os parâmetros do endpoint
+         */
+        $finishDate = null;
+        $startDate = null;
+
+        //Pega os parâmetros de filtro por data
+        if (isset($this->data['from']) && isset($this->data['to'])) {
+
+            if (!empty($this->data['from']) && !empty($this->data['to'])) {
+                if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
+                    !preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['to'])) {
+
+                    throw new \Exception("O formato da data é inválido.");
+
                 } else {
-                    $_regs[] = $registration;
+                    //Data ínicial
+                    $startDate = new DateTime($this->data['from']);
+                    $startDate = $startDate->format('Y-m-d 00:00');
+
+                    //Data final
+                    $finishDate = new DateTime($this->data['to']);
+                    $finishDate = $finishDate->format('Y-m-d 23:59');
                 }
             }
         }
+        /**
+         * Busca as inscrições com status 10 (Selecionada)
+         * lembrando que o botão para exportar esses dados, so estrá disponível se existir inscrições nesse status
+         */
+        if ($startDate && $finishDate) {
+            $dql = "
+                SELECT
+                    r
+                FROM
+                    MapasCulturais\\Entities\\Registration r
+                        JOIN RegistrationPayments\\Payment p
+                            WITH r = p.registration
+                WHERE
+                    r.status > 0 AND
+                    r.opportunity = :opportunity AND
+                    p.status = 0 AND
+                    r.sentTimestamp >=:startDate AND
+                    r.sentTimestamp <= :finishDate";
 
-        return $_regs;
+            $query = $app->em->createQuery($dql);
+            $query->setParameters([
+                'opportunity' => $opportunity,
+                'startDate' => $startDate,
+                'finishDate' => $finishDate,
+            ]);
+
+            $registrations = $query->getResult();
+        } else {
+            $dql = "
+                SELECT
+                    r
+                FROM
+                    MapasCulturais\\Entities\\Registration r
+                        JOIN RegistrationPayments\\Payment p
+                            WITH r = p.registration
+                WHERE
+                    r.status > 0
+                    r.opportunity = :opportunity AND
+                    p.status = 0";
+
+            $query = $app->em->createQuery($dql);
+            $query->setParameters([
+                'opportunity' => $opportunity,
+            ]);
+
+            $registrations = $query->getResult();
+        }
+
+        if (empty($registrations)) {
+            echo "Não foram encontrados registros.";
+            die();
+        }
+
+        return $registrations;
     }
 
     /**
@@ -94,94 +191,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $categories = $csv_conf['categories'];
         $header = $csv_conf['header'];
 
-        /**
-         * Pega os parâmetros do endpoint
-         */
-        $getData = false;
-        if (!empty($this->data)) {
-
-            //Pega os parâmetros de filtro por data
-            if (isset($this->data['from']) && isset($this->data['to'])) {
-
-                if (!empty($this->data['from']) && !empty($this->data['to'])) {
-                    if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
-                        !preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['to'])) {
-
-                        throw new \Exception("O formato da data é inválido.");
-
-                    } else {
-                        //Data ínicial
-                        $startDate = new DateTime($this->data['from']);
-                        $startDate = $startDate->format('Y-m-d 00:00');
-
-                        //Data final
-                        $finishDate = new DateTime($this->data['to']);
-                        $finishDate = $finishDate->format('Y-m-d 23:59');
-                    }
-                    $getData = true;
-                }
-
-            }
-
-            //Pega a oportunidade do endpoint
-            if (!isset($this->data['opportunity']) || empty($this->data['opportunity'])) {
-                throw new Exception("Informe a oportunidade! Ex.: opportunity:2");
-
-            } elseif (!is_numeric($this->data['opportunity']) || !in_array($this->data['opportunity'], $this->config['inciso2_opportunity_ids'])) {
-                throw new Exception("Oportunidade inválida");
-
-            } else {
-                $opportunity_id = $this->data['opportunity'];
-            }
-        }
-
-        /**
-         * Pega informações da oportunidade
-         */
-        $opportunity = $app->repo('Opportunity')->find($opportunity_id);
-        $this->registerRegistrationMetadata($opportunity);
-
-        if (!$opportunity->canUser('@control')) {
-            echo "Não autorizado";
-            die();
-        }
-
-        /**
-         * Busca as inscrições com status 10 (Selecionada)
-         * lembrando que o botão para exportar esses dados, so estrá disponível se existir inscrições nesse status
-         */
-        if ($getData) {
-            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-            WHERE e.status = 1 AND
-            e.opportunity = :opportunity_Id AND
-            e.sentTimestamp >=:startDate AND
-            e.sentTimestamp <= :finishDate";
-
-            $query = $app->em->createQuery($dql);
-            $query->setParameters([
-                'opportunity_Id' => $opportunity_id,
-                'startDate' => $startDate,
-                'finishDate' => $finishDate,
-            ]);
-
-            $registrations = $query->getResult();
-        } else {
-            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-            WHERE e.status = 1 AND
-            e.opportunity = :opportunity_Id";
-
-            $query = $app->em->createQuery($dql);
-            $query->setParameters([
-                'opportunity_Id' => $opportunity_id,
-            ]);
-
-            $registrations = $query->getResult();
-        }
-
-        if (empty($registrations)) {
-            echo "Não foram encontrados registros.";
-            die();
-        }
+        $opportunity = $this->getOpportunity();
+        $opportunity_id = $opportunity->id;
+        $registrations = $this->getRegistrations($opportunity);
 
         /**
          * Mapeamento de fields_id pelo label do campo
@@ -482,101 +494,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $proponentTypes = $csv_conf['parameters_default']['proponentTypes'];
         $header = $csv_conf['header'];
 
-        /**
-         * Pega os parâmetros do endpoint
-         */
-        $getData = false;
-        if (!empty($this->data)) {
 
-            //Pega os parâmetros de filtro por data
-            if (isset($this->data['from']) && isset($this->data['to'])) {
-
-                if (!empty($this->data['from']) && !empty($this->data['to'])) {
-                    if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
-                        !preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['to'])) {
-
-                        throw new \Exception("O formato da data é inválido.");
-
-                    } else {
-                        //Data ínicial
-                        $startDate = new DateTime($this->data['from']);
-                        $startDate = $startDate->format('Y-m-d 00:00');
-
-                        //Data final
-                        $finishDate = new DateTime($this->data['to']);
-                        $finishDate = $finishDate->format('Y-m-d 23:59');
-                    }
-                    $getData = true;
-                }
-
-            }
-
-            //Pega a oportunidade do endpoint
-            if (!isset($this->data['opportunity']) || empty($this->data['opportunity'])) {
-                throw new Exception("Informe a oportunidade! Ex.: opportunity:2");
-
-            } elseif (!is_numeric($this->data['opportunity'])) {
-                throw new Exception("Oportunidade inválida");
-
-            } else {
-                $opportunity_id = $this->data['opportunity'];
-            }
-        }
-
-        /**
-         * Pega informações da oportunidade
-         */
-        $opportunity = $app->repo('Opportunity')->find($opportunity_id);
-        $this->registerRegistrationMetadata($opportunity);
-
-        if (!$opportunity->canUser('@control')) {
-            echo "Não autorizado";
-            die();
-        }
-
-        /**
-         * Busca as inscrições com status 10 (Selecionada)
-         * lembrando que o botão para exportar esses dados, so estrá disponível se existir inscrições nesse status
-         */
-        if ($getData) { //caso existe data como parametro ele pega o range da data selecionada com satatus 1
-            $dql = "SELECT
-                e
-            FROM
-                MapasCulturais\Entities\Registration e
-            WHERE
-                e.sentTimestamp >=:startDate AND
-                e.sentTimestamp <= :finishDate AND
-                e.status = 1 AND
-                e.opportunity = :opportunity_Id";
-
-            $query = $app->em->createQuery($dql);
-            $query->setParameters([
-                'opportunity_Id' => $opportunity_id,
-                'startDate' => $startDate,
-                'finishDate' => $finishDate,
-            ]);
-            $registrations = $query->getResult();
-
-        } else { //Se não exister data como parametro ele retorna todos os registros com status 1
-            $dql = "SELECT
-                e
-            FROM
-                MapasCulturais\Entities\Registration e
-            WHERE
-                e.status = 1 AND
-                e.opportunity = :opportunity_Id";
-
-            $query = $app->em->createQuery($dql);
-            $query->setParameters([
-                'opportunity_Id' => $opportunity_id,
-            ]);
-            $registrations = $query->getResult();
-        }
-
-        if (empty($registrations)) {
-            echo "Não foram encontrados registros.";
-            die();
-        }
+        $opportunity = $this->getOpportunity();
+        $opportunity_id = $opportunity->id;
+        $registrations = $this->getRegistrations($opportunity);
 
         /**
          * Mapeamento de fields_id
@@ -964,46 +885,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
         $app = App::i();
 
-        $getData = false;
-        if (!empty($this->data)) {
-
-            if (isset($this->data['from']) && isset($this->data['to'])) {
-
-                if (!empty($this->data['from']) && !empty($this->data['to'])) {
-                    if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
-                        !preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['to'])) {
-
-                        throw new \Exception("O formato da data é inválido.");
-
-                    } else {
-                        //Data ínicial
-                        $startDate = new DateTime($this->data['from']);
-                        $startDate = $startDate->format('Y-m-d 00:00');
-
-                        //Data final
-                        $finishDate = new DateTime($this->data['to']);
-                        $finishDate = $finishDate->format('Y-m-d 23:59');
-                    }
-
-                    $getData = true;
-                }
-
-            }
-        }
-
-        //Pega a oportunidade no array de config
-        $opportunity_id = $this->config['inciso1_opportunity_id'];
-
-        /**
-         * Pega informações da oportunidade
-         */
-        $opportunity = $app->repo('Opportunity')->find($opportunity_id);
-        $this->registerRegistrationMetadata($opportunity);
-
-        if (!$opportunity->canUser('@control')) {
-            echo "Não autorizado";
-            die();
-        }
+        $opportunity = $this->getOpportunity();
+        $opportunity_id = $opportunity->id;
+        $registrations = $this->getRegistrations($opportunity);
 
         /**
          * Pega os dados das configurações
@@ -1020,48 +904,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         $dePara = $this->readingCsv($deParaContasbb);
         $cpfBB = $this->cpfBB($deParaContasbb);
-
-        /**
-         * Busca as inscrições com status 1 (Selecionada)
-         */
-        if ($getData) {
-            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-            WHERE e.status = 1 AND
-            e.opportunity = :opportunity_Id AND
-            e.sentTimestamp >=:startDate AND
-            e.sentTimestamp <= :finishDate";
-
-            $query = $app->em->createQuery($dql);
-            $query->setParameters([
-                'opportunity_Id' => $opportunity_id,
-                'startDate' => $startDate,
-                'finishDate' => $finishDate,
-            ]);
-
-            $registrations = $query->getResult();
-
-        } else {
-            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-            WHERE e.status = 1 AND
-            e.opportunity = :opportunity_Id";
-
-            $query = $app->em->createQuery($dql);
-            $query->setParameters([
-                'opportunity_Id' => $opportunity_id,
-            ]);
-
-            $registrations = $query->getResult();
-
-        }
-
-        //$registrations = $this->filterRegistrations($registrations);
-
-        if (empty($registrations)) {
-            echo "Não foram encontrados registros.";
-            die();
-        }
-
-
 
         $mappedHeader1 = [
             'BANCO' => '',
@@ -1961,53 +1803,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
         $app = App::i();
 
-        $getData = false;
-        if (!empty($this->data)) {
-
-            if (isset($this->data['from']) && isset($this->data['to'])) {
-
-                if (!empty($this->data['from']) && !empty($this->data['to'])) {
-                    if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['from']) ||
-                        !preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['to'])) {
-
-                        throw new \Exception("O formato da data é inválido.");
-
-                    } else {
-                        //Data ínicial
-                        $startDate = new DateTime($this->data['from']);
-                        $startDate = $startDate->format('Y-m-d 00:00');
-
-                        //Data final
-                        $finishDate = new DateTime($this->data['to']);
-                        $finishDate = $finishDate->format('Y-m-d 23:59');
-                    }
-
-                    $getData = true;
-                }
-
-            }
-
-            //Pega a oportunidade do endpoint
-            if (!isset($this->data['opportunity']) || empty($this->data['opportunity'])) {
-                throw new Exception("Informe a oportunidade! Ex.: opportunity:2");
-
-            } elseif (!is_numeric($this->data['opportunity']) || !in_array($this->data['opportunity'], $this->config['inciso2_opportunity_ids'])) {
-                throw new Exception("Oportunidade inválida");
-
-            } else {
-                $opportunity_id = $this->data['opportunity'];
-            }
-
-        } else {
-            throw new Exception("Informe a oportunidade! Ex.: opportunity:2");
-
-        }
-
-        /**
-         * Pega informações da oportunidade
-         */
-        $opportunity = $app->repo('Opportunity')->find($opportunity_id);
-        $this->registerRegistrationMetadata($opportunity);
+        $opportunity = $this->getOpportunity();
+        $opportunity_id = $opportunity->id;
+        $registrations = $this->getRegistrations($opportunity);
 
         /**
          * Mapeamento de fielsds_id pelo label do campo
@@ -2015,11 +1813,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         foreach ($opportunity->registrationFieldConfigurations as $field) {
             $field_labelMap["field_" . $field->id] = trim($field->title);
 
-        }
-
-        if (!$opportunity->canUser('@control')) {
-            echo "Não autorizado";
-            die();
         }
 
         /**
@@ -2074,44 +1867,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = array_search(trim($value['field_id']), $field_labelMap);
                 $trailer2[$key_config]['field_id'] = $field_id;
             }
-        }
-
-        /**
-         * Busca as inscrições com status 10 (Selecionada)
-         */
-        if ($getData) {
-            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-            WHERE e.status = 1 AND
-            e.opportunity = :opportunity_Id AND
-            e.sentTimestamp >=:startDate AND
-            e.sentTimestamp <= :finishDate";
-
-            $query = $app->em->createQuery($dql);
-            $query->setParameters([
-                'opportunity_Id' => $opportunity_id,
-                'startDate' => $startDate,
-                'finishDate' => $finishDate,
-            ]);
-
-            $registrations = $query->getResult();
-
-        } else {
-            $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-            WHERE e.status = 1 AND
-            e.opportunity = :opportunity_Id";
-
-            $query = $app->em->createQuery($dql);
-            $query->setParameters([
-                'opportunity_Id' => $opportunity_id,
-            ]);
-
-            $registrations = $query->getResult();
-
-        }
-
-        if (empty($registrations)) {
-            echo "Não foram encontrados registros.";
-            die();
         }
 
         $mappedHeader1 = [
