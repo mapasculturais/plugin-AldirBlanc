@@ -1195,10 +1195,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     return $this->normalizeString($result);
 
                 }
+<<<<<<< HEAD
 
 
 
 
+=======
+                
+>>>>>>> 675b20c... remove código desnecessário de verificação de pagamento
             },
             'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfBB) {
                 $result = "";
@@ -1484,6 +1488,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             }else{
                 foreach ($registrations as $value) {
+<<<<<<< HEAD
 
 
                      //Pega as informações de pagamento
@@ -1498,6 +1503,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }
 
                     if ($this->numberBank($value->$field_banco) == "001" && $value->$correntistabb == "SIM") {
+=======
+                    
+                    if ($this->numberBank($value->$field_banco) == "001" && $value->$correntistabb == "SIM") {               
+>>>>>>> 675b20c... remove código desnecessário de verificação de pagamento
                         if ($value->$field_TipoConta == "Conta corrente") {
                             $recordsBBCorrente[] = $value;
                         } else {
