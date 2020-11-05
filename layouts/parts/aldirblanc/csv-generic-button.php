@@ -15,10 +15,10 @@ if($inciso == 1){
 }
 ?>
 
-<a class="btn btn-default download btn-export-cancel"  ng-click="editbox.open('form-parameters', $event)" rel="noopener noreferrer">Exportador genérico</a>
+<a class="btn btn-default download btn-export-cancel"  ng-click="editbox.open('form-parameters-generic', $event)" rel="noopener noreferrer">Exportador genérico</a>
 
 <!-- Formulário -->
-<edit-box id="form-parameters" position="top" title="<?php i::esc_attr_e($title) ?>" cancel-label="Cancelar" close-on-cancel="true">
+<edit-box id="form-parameters-generic" position="top" title="<?php i::esc_attr_e($title) ?>" cancel-label="Cancelar" close-on-cancel="true">
     <form class="form-export-dataprev" action="<?=$route?>" method="POST">
   
         <label for="from">Data inícial</label>
