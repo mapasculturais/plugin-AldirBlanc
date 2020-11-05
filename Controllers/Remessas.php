@@ -1379,19 +1379,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             
             if($defaultBank && $defaultBank ==  '001'){
 
-                foreach ($registrations as $value) {   
+                foreach ($registrations as $value) {
                     
-                    //Pega as informações de pagamento                   
-                    $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-                        'registration' => $value->id,
-                        'status' => 0,
-                    ]);
-
-                    if (!$payment) {
-                        $app->log->debug("\nPagamento nao encontrado para " . $value->id);
-                        continue;
-                    }
-
                     if ($value->$field_TipoConta == "Conta corrente" && $value->$correntistabb == "SIM") {
                         $recordsBBCorrente[] = $value;
 
@@ -1425,17 +1414,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
         }else{
             foreach ($registrations as $value) {
-                 //Pega as informações de pagamento                   
-                 $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-                    'registration' => $value->id,
-                    'status' => 0,
-                ]);
-
-                if (!$payment) {
-                    $app->log->debug("\nPagamento nao encontrado para " . $value->id);
-                    continue;
-                }
-
                 if ($this->numberBank($value->$field_banco) == "001") {               
                     if ($value->$field_TipoConta == "Conta corrente") {
                         $recordsBBCorrente[] = $value;
@@ -1666,10 +1644,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
             unset($_SESSION['problems']);
         }
-
-        // header('Content-type: text/utf-8');
-        // echo $txt_data;
-        // exit();
         
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
