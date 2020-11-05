@@ -45,7 +45,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     function getOpportunity() {
         $app = App::i();
-        
+
         $opportunity_id = $this->data['opportunity'];
 
         /**
@@ -102,19 +102,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          * lembrando que o botão para exportar esses dados, so estrá disponível se existir inscrições nesse status
          */
         if ($startDate && $finishDate) {
-<<<<<<< HEAD
-            $dql = "
-                SELECT
-                    r
-                FROM
-                    MapasCulturais\\Entities\\Registration r
-                        JOIN RegistrationPayments\\Payment p
-                            WITH r = p.registration
-                WHERE
-=======
-            $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r 
-                    JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE 
->>>>>>> dba57d9... Refatora funções getRegistration() e getOpportunity()
+            $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r
+                    JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE
                     r.status > 0 AND
                     r.opportunity = :opportunity AND
                     p.status = 0 AND
@@ -130,25 +119,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             $registrations = $query->getResult();
         } else {
-<<<<<<< HEAD
-            $dql = "
-                SELECT
-                    r
-                FROM
-                    MapasCulturais\\Entities\\Registration r
-                        JOIN RegistrationPayments\\Payment p
-                            WITH r = p.registration
-                WHERE
-                    r.status > 0
-                    r.opportunity = :opportunity AND
-                    p.status = 0";
-=======
-            $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r 
-            JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE 
-            r.status > 0 AND 
+            $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r
+            JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE
+            r.status > 0 AND
             p.status = 0 AND
             r.opportunity = :opportunity";
->>>>>>> dba57d9... Refatora funções getRegistration() e getOpportunity()
 
             $query = $app->em->createQuery($dql);
             $query->setParameters([
@@ -906,15 +881,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $trailer2 = $txt_config['TRAILER2'];
         $deParaContasbb = $default['deParaContasbb'];
 
-<<<<<<< HEAD
-        $dePara = $this->readingCsv($deParaContasbb);
-        $cpfBB = $this->cpfBB($deParaContasbb);
-
-=======
         $dePara = $this->readingCsvAccounts($deParaContasbb);
-        $cpfCsv = $this->cpfCsv($deParaContasbb);       
-       
->>>>>>> dba57d9... Refatora funções getRegistration() e getOpportunity()
+        $cpfCsv = $this->cpfCsv($deParaContasbb);
+
         $mappedHeader1 = [
             'BANCO' => '',
             'LOTE' => '',
@@ -1060,17 +1029,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $result = "";
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-<<<<<<< HEAD
 
-                $pos = array_search($cpfBase,$cpfBB);
+                $pos = array_search($cpfBase,$cpfCsv);
 
                 if($pos){
-=======
-                
-                $pos = array_search($cpfBase,$cpfCsv);
-               
-                if($pos){                    
->>>>>>> dba57d9... Refatora funções getRegistration() e getOpportunity()
                     $agencia = $dePara[$pos]['BEN_AGENCIA'];
 
                 }else{
@@ -1109,15 +1071,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $result = "";
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-<<<<<<< HEAD
 
-                $pos = array_search($cpfBase,$cpfBB);
+                $pos = array_search($cpfBase,$cpfCsv);
                 if($pos){
-=======
-                
-                $pos = array_search($cpfBase,$cpfCsv);               
-                if($pos){                    
->>>>>>> dba57d9... Refatora funções getRegistration() e getOpportunity()
                     $agencia = $dePara[$pos]['BEN_AGENCIA'];
 
                 }else{
@@ -1149,13 +1105,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $result = $this->normalizeString($result);
                 return is_string($result) ? strtoupper($result) : $result;
             },
-<<<<<<< HEAD
-            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfBB) {
+            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
                 $result  = "";
-=======
-            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {    
-                $result  = ""; 
->>>>>>> dba57d9... Refatora funções getRegistration() e getOpportunity()
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
 
@@ -1171,13 +1122,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $numberBank = $default['defaultBank'];
                 }
 
-<<<<<<< HEAD
-                $pos = array_search($cpfBase,$cpfBB);
+                $pos = array_search($cpfBase,$cpfCsv);
                 if($pos){
-=======
-                $pos = array_search($cpfBase,$cpfCsv);               
-                if($pos){                    
->>>>>>> dba57d9... Refatora funções getRegistration() e getOpportunity()
                     $temp_account = $dePara[$pos]['BEN_CONTA'];
 
                 }else{
@@ -1228,14 +1174,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     return $this->normalizeString($result);
 
                 }
-<<<<<<< HEAD
 
-
-
-
-=======
-                
->>>>>>> 675b20c... remove código desnecessário de verificação de pagamento
             },
             'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
                 $result = "";
@@ -1255,13 +1194,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $temp = $detahe1['TIPO_CONTA']['field_id'];
                 $typeAccount = $registrations->$temp;
 
-<<<<<<< HEAD
-                $pos = array_search($cpfBase,$cpfBB);
+                $pos = array_search($cpfBase,$cpfCsv);
                 if($pos){
-=======
-                $pos = array_search($cpfBase,$cpfCsv);               
-                if($pos){                    
->>>>>>> dba57d9... Refatora funções getRegistration() e getOpportunity()
                     $temp_account = $dePara[$pos]['BEN_CONTA'];
 
                 }else{
@@ -1339,7 +1273,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 $amount =  preg_replace('/[^0-9]/i', '', $payment->amount);
                 return number_format($amount, 2, '.', '');
-                
+
             },
             'USO_BANCO_88' => '',
             'USO_BANCO_89' => '',
@@ -1500,17 +1434,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 foreach ($registrations as $value) {
 
-                    //Pega as informações de pagamento
-                    $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-                        'registration' => $value->id,
-                        'status' => 0,
-                    ]);
-
-                    if (!$payment) {
-                        $app->log->debug("\nPagamento nao encontrado para " . $value->id);
-                        continue;
-                    }
-
                     if ($value->$field_TipoConta == "Conta corrente" && $value->$correntistabb == "SIM") {
                         $recordsBBCorrente[] = $value;
 
@@ -1526,25 +1449,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             }else{
                 foreach ($registrations as $value) {
-<<<<<<< HEAD
-
-
-                     //Pega as informações de pagamento
-                    $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-                        'registration' => $value->id,
-                        'status' => 0,
-                    ]);
-
-                    if (!$payment) {
-                        $app->log->debug("\nPagamento nao encontrado para " . $value->id);
-                        continue;
-                    }
 
                     if ($this->numberBank($value->$field_banco) == "001" && $value->$correntistabb == "SIM") {
-=======
-                    
-                    if ($this->numberBank($value->$field_banco) == "001" && $value->$correntistabb == "SIM") {               
->>>>>>> 675b20c... remove código desnecessário de verificação de pagamento
                         if ($value->$field_TipoConta == "Conta corrente") {
                             $recordsBBCorrente[] = $value;
                         } else {
@@ -1561,17 +1467,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
         }else{
             foreach ($registrations as $value) {
-                 //Pega as informações de pagamento
-                 $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-                    'registration' => $value->id,
-                    'status' => 0,
-                ]);
-
-                if (!$payment) {
-                    $app->log->debug("\nPagamento nao encontrado para " . $value->id);
-                    continue;
-                }
-
                 if ($this->numberBank($value->$field_banco) == "001") {
                     if ($value->$field_TipoConta == "Conta corrente") {
                         $recordsBBCorrente[] = $value;
@@ -1802,10 +1697,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
             unset($_SESSION['problems']);
         }
-
-        // header('Content-type: text/utf-8');
-        // echo $txt_data;
-        // exit();
 
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
