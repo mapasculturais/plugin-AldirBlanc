@@ -45,17 +45,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     function getOpportunity() {
         $app = App::i();
-
-        //Pega a oportunidade do endpoint
-        if (empty($this->data['opportunity'])) {
-            throw new Exception("Informe a oportunidade! Ex.: opportunity:2");
-
-        } elseif (!is_numeric($this->data['opportunity']) || !in_array($this->data['opportunity'], $this->config['inciso2_opportunity_ids'])) {
-            throw new Exception("Oportunidade inválida");
-
-        } else {
-            $opportunity_id = $this->data['opportunity'];
-        }
+        
+        $opportunity_id = $this->data['opportunity'];
 
         /**
          * Pega informações da oportunidade
@@ -111,14 +102,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          * lembrando que o botão para exportar esses dados, so estrá disponível se existir inscrições nesse status
          */
         if ($startDate && $finishDate) {
-            $dql = "
-                SELECT 
-                    r 
-                FROM 
-                    MapasCulturais\\Entities\\Registration r 
-                        JOIN RegistrationPayments\\Payment p 
-                            WITH r = p.registration 
-                WHERE 
+            $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r 
+                    JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE 
                     r.status > 0 AND
                     r.opportunity = :opportunity AND
                     p.status = 0 AND
@@ -134,17 +119,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             $registrations = $query->getResult();
         } else {
-            $dql = "
-                SELECT 
-                    r 
-                FROM 
-                    MapasCulturais\\Entities\\Registration r 
-                        JOIN RegistrationPayments\\Payment p 
-                            WITH r = p.registration 
-                WHERE 
-                    r.status > 0
-                    r.opportunity = :opportunity AND
-                    p.status = 0";
+            $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r 
+            JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE 
+            r.status > 0 AND 
+            p.status = 0 AND
+            r.opportunity = :opportunity";
 
             $query = $app->em->createQuery($dql);
             $query->setParameters([
@@ -849,8 +828,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $trailer2 = $txt_config['TRAILER2'];
         $deParaContasbb = $default['deParaContasbb'];
 
-        $dePara = $this->readingCsv($deParaContasbb);
-        $cpfBB = $this->cpfBB($deParaContasbb);       
+        $dePara = $this->readingCsvAccounts($deParaContasbb);
+        $cpfCsv = $this->cpfCsv($deParaContasbb);       
        
         $mappedHeader1 = [
             'BANCO' => '',
@@ -993,12 +972,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 return $this->numberBank($registrations->$field_id);
 
             },
-            'BEN_AGENCIA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfBB) {
+            'BEN_AGENCIA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
                 $result = "";
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
                 
-                $pos = array_search($cpfBase,$cpfBB);
+                $pos = array_search($cpfBase,$cpfCsv);
                
                 if($pos){                    
                     $agencia = $dePara[$pos]['BEN_AGENCIA'];
@@ -1035,12 +1014,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $result = $this->normalizeString($result);
                 return is_string($result) ? strtoupper($result) : $result;
             },
-            'BEN_AGENCIA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfBB) {
+            'BEN_AGENCIA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
                 $result = "";
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
                 
-                $pos = array_search($cpfBase,$cpfBB);               
+                $pos = array_search($cpfBase,$cpfCsv);               
                 if($pos){                    
                     $agencia = $dePara[$pos]['BEN_AGENCIA'];
                     
@@ -1073,7 +1052,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $result = $this->normalizeString($result);
                 return is_string($result) ? strtoupper($result) : $result;
             },
-            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfBB) {    
+            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {    
                 $result  = ""; 
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
@@ -1090,7 +1069,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $numberBank = $default['defaultBank'];
                 }
 
-                $pos = array_search($cpfBase,$cpfBB);               
+                $pos = array_search($cpfBase,$cpfCsv);               
                 if($pos){                    
                     $temp_account = $dePara[$pos]['BEN_CONTA'];
                     
@@ -1144,7 +1123,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
                 
             },
-            'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfBB) {
+            'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
                 $result = "";
                 $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
                 $field_id = $detahe1['BEN_CONTA']['field_id'];
@@ -1162,7 +1141,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $temp = $detahe1['TIPO_CONTA']['field_id'];
                 $typeAccount = $registrations->$temp;
 
-                $pos = array_search($cpfBase,$cpfBB);               
+                $pos = array_search($cpfBase,$cpfCsv);               
                 if($pos){                    
                     $temp_account = $dePara[$pos]['BEN_CONTA'];
                     
@@ -2744,9 +2723,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return substr($data, 0, $length);
     }
 
-    private function readingCsv($filename){
+    private function readingCsvAccounts($filename){
 
-        $filename = PRIVATE_FILES_PATH. "LAB/ES/CSV/deParaContasbb.csv";
+        $filename = PRIVATE_FILES_PATH. "LAB/CSV/".$filename;
 
         $data = [];
          //Abre o arquivo em modo de leitura
@@ -2771,9 +2750,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
  
     }
 
-    private function cpfBB($filename){
+    private function cpfCsv($filename){
 
-        $filename = PRIVATE_FILES_PATH. "LAB/ES/CSV/". $filename;
+        $filename = PRIVATE_FILES_PATH. "LAB/CSV/". $filename;
 
         $data = [];
          //Abre o arquivo em modo de leitura
