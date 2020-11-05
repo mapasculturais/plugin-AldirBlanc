@@ -577,6 +577,11 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         // monta array de mensagens
         $justificativaAvaliacao = [];
+
+        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
+            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
+        }
+        
         foreach ($evaluations as $evaluation) {
 
             if ($evaluation->getResult() == $registration->status) {
@@ -596,10 +601,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
             }
             
-        }
-
-        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
-            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
         }
 
         $this->render('status', ['registration' => $registration, 'registrationStatusMessage' => $registrationStatusMessage, 'justificativaAvaliacao' => $justificativaAvaliacao]);
