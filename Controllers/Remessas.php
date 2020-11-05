@@ -2706,7 +2706,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     private function readingCsvAccounts($filename){
 
-        $filename = PRIVATE_FILES_PATH. "LAB/CSV/".$filename;
+        $filename = __DIR__."/../".$filename;
 
         $data = [];
          //Abre o arquivo em modo de leitura
@@ -2733,7 +2733,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     private function cpfCsv($filename){
 
-        $filename = PRIVATE_FILES_PATH. "LAB/CSV/". $filename;
+        $filename = __DIR__."/../".$filename;
 
         $data = [];
          //Abre o arquivo em modo de leitura
