@@ -577,32 +577,33 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         // monta array de mensagens
         $justificativaAvaliacao = [];
+
+        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
+            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
+        }
+        
         foreach ($evaluations as $evaluation) {
 
             if ($evaluation->getResult() == $registration->status) {
                 
                 if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
                     // resultados do dataprev
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
                 } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
                     // resultados dos avaliadores genericos
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
                 } 
                 
                 if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
                     // resultados dos demais avaliadores
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
                 }
 
             }
             
         }
 
-        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
-            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
-        }
-
-        $this->render('status', ['registration' => $registration, 'registrationStatusMessage' => $registrationStatusMessage, 'justificativaAvaliacao' => $justificativaAvaliacao]);
+        $this->render('status', ['registration' => $registration, 'registrationStatusMessage' => $registrationStatusMessage, 'justificativaAvaliacao' => array_filter($justificativaAvaliacao)]);
     }
 
     /**
