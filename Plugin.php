@@ -97,9 +97,6 @@ class Plugin extends \MapasCulturais\Plugin
 
             // só consolida a a homologaćão se todos as validaćões já tiverem sido feitas
             'consolidacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev", "financeiro"]')),
-
-            // se true, só exporta as inscrições pendentes que já tenham alguma avaliação
-            'exportador_requer_homologacao' => env('DATAPREV_REQUER_HOMOLOGACAO', true),
             
             //zammad
             'zammad_enable' => env('AB_ZAMMAD_ENABLE', false),
