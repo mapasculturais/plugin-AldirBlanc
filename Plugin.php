@@ -62,18 +62,20 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),            
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO2', __DIR__ . '/config-csv-generic-inciso2.php'),
             'csv_generic_inciso3' => require_once env('AB_CSV_GENERIC_INCISO3', __DIR__ . '/config-csv-generic-inciso3.php'),
+            'config-cnab240-inciso1' => require_once env('AB_TXT_CANAB240_INCISO1', __DIR__ . '/config-cnab240-inciso1.php'),
+            'config-cnab240-inciso2' => require_once env('AB_TXT_CANAB240_INCISO2', __DIR__ . '/config-cnab240-inciso2.php'),
 
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
 
-            // define o id para dataprev e avaliador generico
-            'avaliador_dataprev_user_id' => env('AB_AVALIADOR_DATAPREV_USER_ID', ''),
-            'avaliador_generico_user_id' => env('AB_AVALIADOR_GENERICO_USER_ID', ''),
+            // define os ids para dataprev e avaliadores genericos
+            'avaliadores_dataprev_user_id' => (array) json_decode(env('AB_AVALIADORES_DATAPREV_USER_ID', '[]')),
+            'avaliadores_genericos_user_id' => (array) json_decode(env('AB_AVALIADORES_GENERICOS_USER_ID', '[]')),
             
-            // define a exibição do resultado das avaliações no status
-            'exibir_resultado_padrao' => env('AB_EXIBIR_RESULTADO_PADRAO', true),
-            'exibir_resultado_dataprev' => env('AB_EXIBIR_RESULTADO_DATAPREV', false),
-            'exibir_resultado_generico' => env('AB_EXIBIR_RESULTADO_GENERICO', false),
-            'exibir_resultado_avaliadores' => env('AB_EXIBIR_RESULTADO_AVALIADORES', false),
+            // define a exibição do resultado das avaliações para cada status (1, 2, 3, 8, 10)
+            'exibir_resultado_padrao' => (array) json_decode(env('AB_EXIBIR_RESULTADO_PADRAO', '["1", "2", "3", "8", "10"]')),
+            'exibir_resultado_dataprev' => (array) json_decode(env('AB_EXIBIR_RESULTADO_DATAPREV', '[]')),
+            'exibir_resultado_generico' => (array) json_decode(env('AB_EXIBIR_RESULTADO_GENERICO', '[]')),
+            'exibir_resultado_avaliadores' => (array) json_decode(env('AB_EXIBIR_RESULTADO_AVALIADORES', '["10"]')),
 
             // mensagens de status padrao
             'msg_status_sent' => env('AB_STATUS_SENT_MESSAGE', 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail.'), // STATUS_SENT = 1
@@ -93,6 +95,9 @@ class Plugin extends \MapasCulturais\Plugin
 
             // só consolida a a homologaćão se todos as validaćões já tiverem sido feitas
             'consolidacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '["dataprev", "financeiro"]')),
+
+            // se true, só exporta as inscrições pendentes que já tenham alguma avaliação
+            'exportador_requer_homologacao' => env('DATAPREV_REQUER_HOMOLOGACAO', true),
             
             //zammad
             'zammad_enable' => env('AB_ZAMMAD_ENABLE', false),
@@ -180,6 +185,33 @@ class Plugin extends \MapasCulturais\Plugin
         if($plugin->config['zammad_enable']) {
             // $app->view->enqueueStyle('app','chat','chat.css');
         }
+
+         //Botão exportador CNAB240 BB
+         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
+            $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
+            $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
+            $inciso3Ids = [];//$plugin->config['inciso3_opportunity_ids'];
+            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
+            $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
+            $opportunity = $requestedOpportunity->id;            
+            
+
+            if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
+                $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
+                if (in_array($requestedOpportunity->id, $inciso1Ids)){
+                    $inciso = 1;
+
+                }
+                else if (in_array($requestedOpportunity->id, $inciso2Ids)){
+                    $inciso = 2;
+
+                }else if(in_array($requestedOpportunity->id, $inciso3Ids)){
+                    $inciso = 3;
+
+                }
+                $this->part('aldirblanc/cnab240-button', ['inciso' => $inciso, 'opportunity' => $opportunity]);
+            }
+        });
 
         $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
             $em = $opportunity->getEvaluationMethod();
