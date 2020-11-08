@@ -3314,11 +3314,41 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return ((10 - ($sum % 10)) % 10);
     }
 
-    private function genericDateDDMMYYYY() {
+    private function genericCondition($registration)
+    {
+        // condições de status da inscrição
+        if ($this->config["exportador_requer_homologacao"] &&
+            !in_array($registration->consolidatedResult, [
+                "10", "homologado, validado por Dataprev"
+        ])) {
+            return false;
+        }
+        // condições do pagamento
+        $app = App::i();
+        $payment = $app->em->getRepository("\\RegistrationPayments\\
+                                            Payment")->findOneBy([
+            "registration" => $registration->id,
+            "status" => 0,
+        ]);
+        if (!$payment) {
+            $app->log->debug("\nPagamento não encontrado: " . $registration->id);
+            return false;
+        }
+        return true;
+    }
+
+    private function genericFalse()
+    {
+        return false;
+    }
+
+    private function genericDateDDMMYYYY()
+    {
         return (new DateTime())->format("dmY");
     }
 
-    private function genericTimeHHMM() {
+    private function genericTimeHHMM()
+    {
         return (new DateTime())->format("Hi");
     }
 
@@ -3421,13 +3451,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     private function ppg100ConditionPA($fieldMap, $registration)
     {
         $wantsPaymentOrder = $fieldMap["wantsPaymentOrder"];
-        if ($this->config["exportador_requer_homologacao"] &&
-            !in_array($registration->consolidatedResult, [
-                "10", "homologado, validado por Dataprev"
-        ])) {
+        if (!str_starts_with($registration->$wantsPaymentOrder,
+                             "Ordem de pagamento")) {
             return false;
         }
-        return ($registration->$wantsPaymentOrder != "SIM");
+        return $this->genericCondition($registration);
     }
 
     private function ppg100ProtocolNumberPA($fieldSpec, $registrationNumber)
@@ -3658,15 +3686,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     {
         $hasAccount = $fieldMap["hasAccount"];
         $wantsAccount = $fieldMap["wantsAccount"];
-        if ($this->config["exportador_requer_homologacao"] &&
-            !in_array($registration->consolidatedResult, [
-                "10", "homologado, validado por Dataprev"
-        ])) {
+        // condições do formulário
+        if (($registration->$hasAccount == "SIM") ||
+            ($registration->$wantsAccount == null) ||
+            !str_starts_with($registration->$wantsAccount, "CONTA")) {
             return false;
         }
-        return (($registration->$hasAccount != "SIM") &&
-                ($registration->$wantsAccount != null) &&
-                (str_starts_with($registration->$wantsAccount, "CONTA")));
+        return $this->genericCondition($registration);
     }
 
     private function mci460ConditionDetail04ES($config, $registration)

@@ -25,10 +25,10 @@
  */
 return [
     "fieldMap" => [
-		"wantsPaymentOrder" => "field_1",
+		"wantsPaymentOrder" => "field_8564",
 		"numeroProtocolo" => "id",
 		"senhaSaque" => "number",
-        "cpf" => "field_21",
+        "cpf" => "field_104",
     ],
     "header" => [
 		[
@@ -59,7 +59,7 @@ return [
             "length" => 9,
             "type" => "int",
             "name" => "mciCliente",
-            "default" => "", // preenchimento SECULT
+            "default" => 0, // preenchimento SECULT
         ],
         [
             "length" => 9,
@@ -128,6 +128,7 @@ return [
                             "length" => 4,
                             "type" => "int",
                             "name" => "idBB",
+                            "default" => 0, // preenchimento SECULT
                         ],
                         [
                             "length" => 10,

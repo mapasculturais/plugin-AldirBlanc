@@ -315,6 +315,7 @@ return [
                     "default" => "",
                 ],
             ],
+            "condition" => "genericFalse",
         ],
         [ // detail03, filiação
             "fields" => [
@@ -398,9 +399,64 @@ return [
                 "default" => "",
                 ],
             ],
-            "condition" => "mci460ConditionDetail04ES",
+            "condition" => "genericFalse",
         ],
-        // [], // detail05, ocupação, sem uso
+        [ // detail05, ocupação
+            "fields" => [
+                [
+                    "length" => 5,
+                    "type" => "int",
+                    "name" => "sequencialCliente",
+                ],
+                [
+                    "length" => 2,
+                    "type" => "int",
+                    "name" => "tipoDetalhe",
+                    "default" => 6,
+                ],
+                [
+                    "length" => 1,
+                    "type" => "int",
+                    "name" => "tipoContratoTrabalho",
+                    "default" => 3, // sempre sem vínculo
+                ],
+                [
+                    "length" => 1,
+                    "type" => "int",
+                    "name" => "tipoPessoaTrabalho",
+                    "default" => 1, // sempre PF
+                ],
+                [
+                    "length" => 14,
+                    "type" => "int",
+                    "name" => "cpfcnpj", // mapeia para o do beneficiário
+                ],
+                [
+                    "length" => 6,
+                    "type" => "int",
+                    "name" => "inicioEmprego",
+                    "default" => 0, // indisponível
+                ],
+                [
+                    "length" => 60,
+                    "type" => "text",
+                    "name" => "nomeCliente", // mapeia para o do beneficiário
+                ],
+                [
+                    "length" => 60,
+                    "type" => "text",
+                    "name" => "cargo",
+                    "default" => "", // indisponível
+                ],
+                [
+                    "length" => 1,
+                    "type" => "int",
+                    "name" => "nivelCargo",
+                    "default" => 6, // sempre sem nível
+                ],
+			],
+			"condition" => "genericFalse",
+		],
         [ // detail06, endereço
             "fields" => [
                 [
@@ -482,6 +538,7 @@ return [
                     "default" => "",
                 ],
             ],
+            "condition" => "genericFalse",
         ],
         // [], // detail07, endereço de trabalho, sem uso
         [ // detail08, e-mail
@@ -512,8 +569,84 @@ return [
             ],
             "condition" => "mci460ConditionDetail09ES",
         ],
-        // [], // detail09, primeira referência, sem uso
-        // [], // detail10, segunda referência, sem uso
+        [ // detail09, primeira referência
+            "fields" => [
+                [
+                    "length" => 5,
+                    "type" => "int",
+                    "name" => "sequencialCliente",
+                ],
+                [
+                    "length" => 2,
+                    "type" => "int",
+                    "name" => "tipoDetalhe",
+                    "default" => 9,
+                ],
+                [
+                    "length" => 60,
+                    "type" => "text",
+                    "name" => "nomeReferencia",
+                    "default" => "", // preenchimento SECULT
+                ],
+                [
+                    "length" => 4,
+                    "type" => "text",
+                    "name" => "dddReferencia",
+                    "default" => "", // preenchimento SECULT
+                ],
+                [
+                    "length" => 9,
+                    "type" => "text",
+                    "name" => "telefoneReferencia",
+                    "default" => "", // preenchimento SECULT
+                ],
+                [
+                    "length" => 70,
+                    "type" => "text",
+                    "name" => "padding",
+                    "default" => "",
+                ],
+            ],
+        ],
+        [ // detail10, segunda referência
+            "fields" => [
+                [
+                    "length" => 5,
+                    "type" => "int",
+                    "name" => "sequencialCliente",
+                ],
+                [
+                    "length" => 2,
+                    "type" => "int",
+                    "name" => "tipoDetalhe",
+                    "default" => 10,
+                ],
+                [
+                    "length" => 60,
+                    "type" => "text",
+                    "name" => "nomeReferencia",
+                    "default" => "", // preenchimento SECULT
+                ],
+                [
+                    "length" => 4,
+                    "type" => "text",
+                    "name" => "dddReferencia",
+                    "default" => "", // preenchimento SECULT
+                ],
+                [
+                    "length" => 9,
+                    "type" => "text",
+                    "name" => "telefoneReferencia",
+                    "default" => "", // preenchimento SECULT
+                ],
+                [
+                    "length" => 70,
+                    "type" => "text",
+                    "name" => "padding",
+                    "default" => "",
+                ],
+            ],
+        ],
     ],
     "trailer" => [
         [
