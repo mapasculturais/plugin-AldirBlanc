@@ -29,19 +29,19 @@ return [
     'HEADER1' => [
         'BANCO' => [ // Numero do banco da entidade pagadora, deve ser confirmado de qual banco sairá o recurso, casso seja Banco Do Brasil seria 001
             'length' => 3,
-            'default' => '001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'LOTE' => [ // Valor default segundo planilha = 0000
             'length' => 4,
-            'default' => '0000',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'REGISTRO' => [ //Valor default segundo planilha = 0
             'length' => 1,
-            'default' => '0',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
@@ -53,25 +53,25 @@ return [
         ],
         'INSCRICAO_TIPO' => [ // CPF ou CNPJ da entidade pagadora (1 = CPF ou 2 = CNPJ) deve ser perguntado ao banco
             'length' => 1,
-            'default' => 2,
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'CPF_CNPJ_FONTE_PAG' => [ //CPF ou CNPJ da fonte pagadora, colocar com base no que foi informado no campo INSCRICAO_TIPO
             'length' => 14,
-            'default' => '05.252.176/0001-54',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'CONVENIO_BB1' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
             'length' => 9,
-            'default' => '265894',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'CONVENIO_BB2' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
             'length' => 4,
-            'default' => '0126',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
@@ -83,32 +83,32 @@ return [
         ],
         'CONVENIO_BB4' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
             'length' => 2,
-            'default' => 'TS',
+            'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
         'AGENCIA' => [ //Agência bancária da instituição em questão
             'length' => 5,
-            'default' => '1674',
-            'field_id' => 'mapped',
+            'default' => null,
+            'field_id' => null,
             'type' => 'int',
         ],
         'AGENCIA_DIGITO' => [ //Gidito da agência bancária da instituição em questão
             'length' => 1,
-            'default' => '8',
-            'field_id' => 'mapped',
+            'default' => null,
+            'field_id' => null,
             'type' => 'string',
         ],
         'CONTA' => [ //Conta bancária da instituição em questão
             'length' => 12,
-            'default' => '12969',
-            'field_id' => 'mapped',
+            'default' => null,
+            'field_id' => null,
             'type' => 'int',
         ],
         'CONTA_DIGITO' => [ //Digito da conta bancária da instituição em questão
             'length' => 1,
-            'default' => '0',
-            'field_id' => 'mapped',
+            'default' => '9',
+            'field_id' => null,
             'type' => 'int',
         ],
         'USO_BANCO_20' => [ //Não usar, uso exclusivo do banco
@@ -119,13 +119,13 @@ return [
         ],
         'NOME_EMPRESA' => [ //Nome da empresa ou instituição em questão
             'length' => 30,
-            'default' => 'SECRETARIA DE ESTADO DE CULTURA',
+            'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
         'NOME_BANCO' => [ //Agência bancária da instituição em questão
             'length' => 30,
-            'default' => 'BANCO DO BRASIL S.A.',
+            'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
@@ -137,31 +137,31 @@ return [
         ],
         'CODIGO_REMESSA' => [ // Por default fomos orientado a deixar sempre 1
             'length' => 1,
-            'default' => '1',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'DATA_GER_ARQUIVO' => [ // Data de geração do arqiovo
             'length' => 8,
             'default' => null,
-            'field_id' => 'mapped',
+            'field_id' => null,
             'type' => 'int',
         ],
         'HORA_GER_ARQUIVO' => [ //Horario de geração do arquivo
             'length' => 6,
             'default' => null,
-            'field_id' => 'mapped',
+            'field_id' => null,
             'type' => 'int',
         ],
         'NUM_SERQUNCIAL_ARQUIVO' => [ //Número sequancial autoincremente. Esse numero e o número sequencial do documento segundo registro da empresa ou entidade
             'length' => 6,
-            'default' => '000001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'LAYOUT_ARQUIVO' => [ // Por Default sempre iremos preencher com 030
             'length' => 3,
-            'default' => '030',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
@@ -187,43 +187,43 @@ return [
     'HEADER2' => [
         'BANCO' => [ // Numero do banco que sera usado para debitos dos montantes
             'length' => 3,
-            'default' => '001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'LOTE' => [
             'length' => 4,
-            'default' => '0001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'REGISTRO' => [
             'length' => 1,
-            'default' => '1',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'OPERACAO' => [
             'length' => 1,
-            'default' => 'C',
+            'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
         'SERVICO' => [ // para secretarias estaduais sempre deve ser 98 caso seja municípios deve ser confirmardo com banco
             'length' => 2,
-            'default' => '98',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'FORMA_LANCAMENTO' => [
             'length' => 2,
-            'default' => '01',
+            'default' => null,
             'field_id' =>  null,
             'type' => 'int',
         ],
         'LAYOUT_LOTE' => [ // Por default fomos orientados a deichar sempre 020
             'length' => 3,
-            'default' => '020',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
@@ -235,25 +235,25 @@ return [
         ],
         'INSCRICAO_TIPO' => [ // CPF ou CNPJ da entidade pagadora (1 = CPF ou 2 = CNPJ) deve ser perguntado ao banco 
             'length' => 1,
-            'default' => '2',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'INSCRICAO_NUMERO' => [ //CPF ou CNPJ da fonte pagadora, colocar com base no que foi informado no campo INSCRICAO_TIPO
             'length' => 14,
-            'default' => '05.252.176/0001-54',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],        
         'CONVENIO_BB1' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
             'length' => 9,
-            'default' => '265894',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'CONVENIO_BB2' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
             'length' => 4,
-            'default' => '0126',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
@@ -265,32 +265,32 @@ return [
         ],
         'CONVENIO_BB4' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
             'length' => 2,
-            'default' => 'TS',
+            'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
         'AGENCIA' => [ //Agẽncia bancária da instituição ou empresa em questão
             'length' => 5,
-            'default' => '1674',
-            'field_id' => 'mapped',
+            'default' => null,
+            'field_id' => null,
             'type' => 'int',
         ],
         'AGENCIA_DIGITO' => [ //Digito da agẽncia bancária da instituição ou empresa em questão
             'length' => 1,
-            'default' => '8',
-            'field_id' => 'mapped',
+            'default' => null,
+            'field_id' => null,
             'type' => 'string',
         ],
         'CONTA' => [ //COnta da instituição ou empresa em questão
             'length' => 12,
-            'default' => '12969',
-            'field_id' => 'mapped',
+            'default' => null,
+            'field_id' => null,
             'type' => 'int',
         ],
         'CONTA_DIGITO' => [ //Digito conta da instituição ou empresa em questão
             'length' => 1,
-            'default' => '0',
-            'field_id' => 'mapped',
+            'default' => null,
+            'field_id' => null,
             'type' => 'int',
         ],
         'USO_BANCO_51' => [ //Não usar, uso exclusivo do banco
@@ -301,8 +301,8 @@ return [
         ],
         'NOME_EMPRESA' => [
             'length' => 30,
-            'default' => 'SECRETARIA DE ESTADO DE CULTURA',
-            'field_id' => 'mapped',
+            'default' => null,
+            'field_id' => null,
             'type' => 'string',
         ],
         'USO_BANCO_40' => [ //Não usar, uso exclusivo do banco
@@ -313,13 +313,13 @@ return [
         ],
         'LOGRADOURO' => [ // Logradouro do endereço da instituição ou empresa em questão
             'length' => 30,
-            'default' => 'AV MAGALHAES BARATA',
+            'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
         'NUMERO' => [ // Número do endereço da instituição ou empresa em questão
             'length' => 5,
-            'default' => '830',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
@@ -331,19 +331,19 @@ return [
         ],
         'CIDADE' => [ // Cidade do endereço da instituição ou empresa em questão
             'length' => 20,
-            'default' => 'BELEM',
+            'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
         'CEP' => [  // CEP do endereço da instituição ou empresa em questão
             'length' => 8,
-            'default' => '66.063-240',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'ESTADO' => [  // Estado do endereço da instituição ou empresa em questão
             'length' => 2,
-            'default' => 'PA',
+            'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
@@ -363,25 +363,25 @@ return [
     'DETALHE1' => [
         'BANCO' => [ // Informação 
             'length' => 3,
-            'default' => '001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'LOTE' => [
             'length' => 4,
-            'default' => '0001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'REGISTRO' => [
             'length' => 1,
-            'default' => '3',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'NUMERO_REGISTRO' => [
             'length' => 5,
-            'default' => '00001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
@@ -393,51 +393,51 @@ return [
         ],
         'TIPO_MOVIMENTO' => [
             'length' => 1,
-            'default' => '0',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'CODIGO_MOVIMENTO' => [
             'length' => 2,
-            'default' => '00',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],       
         'CAMARA_CENTRALIZADORA' => [
             'length' => 3,
-            'default' => '000',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'BEN_CODIGO_BANCO' => [
             'length' => 3,
             'default' => null,
-            'field_id' => 'TIPO DE CONTA BANCÁRIA:',
+            'field_id' => null,
             'type' => 'int',
         ],
         'BEN_AGENCIA' => [
             'length' => 5,
             'default' => null,
-            'field_id' => 'AGÊNCIA',
+            'field_id' => null,
             'type' => 'int',
         ],
         'BEN_AGENCIA_DIGITO' => [
             'length' => 1,
             'default' => null,
-            'field_id' => 'AGÊNCIA',
-            'type' => 'string',
+            'field_id' => null,
+            'type' => 'int',
         ],
         'BEN_CONTA' => [
             'length' => 12,
             'default' => null,
-            'field_id' => 'NÚMERO DA CONTA:',
+            'field_id' => null,
             'type' => 'int',
         ],
         'BEN_CONTA_DIGITO' => [
             'length' => 1,
             'default' => null,
-            'field_id' => 'NÚMERO DA CONTA:',
-            'type' => 'string',
+            'field_id' => null,
+            'type' => 'int',
         ],
         'BEN_DIGITO_CONTA_AGENCIA_80' => [
             'length' => 1,
@@ -448,7 +448,7 @@ return [
         'BEN_NOME' => [
             'length' => 30,
             'default' => null,
-            'field_id' => 'NOME COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
+            'field_id' => null,
             'type' => 'string',
         ],
         'BEN_DOC_ATRIB_EMPRESA_82' => [
@@ -460,7 +460,7 @@ return [
         'DATA_PAGAMENTO' => [
             'length' => 8,
             'default' => null,
-            'field_id' => 'mapped',
+            'field_id' => null,
             'type' => 'int',
         ],
         'TIPO_MOEDA' => [
@@ -478,7 +478,7 @@ return [
         'VALOR_INTEIRO' => [
             'length' => 15,
             'default' => null,
-            'field_id' => 'mapped',
+            'field_id' => null,
             'type' => 'int',
         ],        
         'USO_BANCO_88' => [
@@ -502,7 +502,7 @@ return [
         'CODIGO_FINALIDADE_TED' => [
             'length' => 5,
             'default' => null,
-            'field_id' => 'mapped',
+            'field_id' => null,
             'type' => 'string',
         ],
         'USO_BANCO_92' => [
@@ -520,7 +520,7 @@ return [
         'TIPO_CONTA' => [
             'length' => 11,
             'default' => null,
-            'field_id' => 'TIPO DE CONTA BANCÁRIA:',
+            'field_id' => null,
             'type' => 'int',
         ]
         
@@ -529,13 +529,13 @@ return [
     'DETALHE2' => [
         'BANCO' => [
             'length' => 3,
-            'default' => '001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'LOTE' => [
             'length' => 4,
-            'default' => '0001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
@@ -547,7 +547,7 @@ return [
         ],
         'NUMERO_REGISTRO' => [
             'length' => 5,
-            'default' => '00001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
@@ -572,49 +572,49 @@ return [
         'BEN_CPF' => [
             'length' => 14,
             'default' => null,
-            'field_id' => 'CPF DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
+            'field_id' => null,
             'type' => 'int',
         ],
         'BEN_ENDERECO_LOGRADOURO' => [
             'length' => 30,
             'default' => null,
-            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
+            'field_id' => null,
             'type' => 'string',
         ],
         'BEN_ENDERECO_NUMERO' => [
             'length' => 5,
             'default' => null,
-            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
+            'field_id' => null,
             'type' => 'int',
         ],
         'BEN_ENDERECO_COMPLEMENTO' => [
             'length' => 15,
             'default' => null,
-            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
+            'field_id' => null,
             'type' => 'string',
         ],        
         'BEN_ENDERECO_BAIRRO' => [
             'length' => 15,
             'default' => null,
-            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
+            'field_id' => null,
             'type' => 'string',
         ],        
         'BEN_ENDERECO_CIDADE' => [
             'length' => 20,
             'default' => null,
-            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
+            'field_id' => null,
             'type' => 'string',
         ],
         'BEN_ENDERECO_CEP' => [
             'length' => 8,
             'default' => null,
-            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
+            'field_id' => null,
             'type' => 'int',
         ],
         'BEN_ENDERECO_ESTADO' => [
             'length' => 2,
             'default' => null,
-            'field_id' => 'ENDEREÇO COMPLETO DO RESPONSÁVEL PELO ESPAÇO CULTURAL, EMPRESA, ENTIDADE OU COOPERATIVA CULTURAL:',
+            'field_id' => null,
             'type' => 'string',
         ],
         'USO_BANCO_114' => [
@@ -645,13 +645,13 @@ return [
     'TRAILER1' => [
         'BANCO' => [
             'length' => 3,
-            'default' => '001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'LOTE' => [
             'length' => 4,
-            'default' => '0001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
@@ -701,19 +701,19 @@ return [
     'TRAILER2' => [
         'BANCO' => [
             'length' => 3,
-            'default' => '001',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'LOTE' => [
             'length' => 4,
-            'default' => '9999',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
         'REGISTRO' => [
             'length' => 1,
-            'default' => '9',
+            'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
@@ -757,10 +757,10 @@ return [
         ],
         'ducumentsType' => [ 
             "cnab240" => true,
-            "mci460" => false 
+            "mci460" => false // Se caso for utilizar o MCI460 setar aqui como true  
         ],
-        'correntistabb' => 'field_1',
-        'formoReceipt' => 'field_18', // Campo para informar onde buscar opções de recebimento EX.: CARTEIRA DIGITAL BB ou CONTA BANCÁRIA NO BANCO DO BRASIL ABERTA PELA SECULT-ES
+        'correntistabb' => null,
+        'formoReceipt' => null, // Campo para informar onde buscar opções de recebimento EX.: CARTEIRA DIGITAL BB ou CONTA BANCÁRIA NO BANCO DO BRASIL ABERTA PELA SECULT-ES
         'savingsDigit' => [
             '0' => '3',
             '1' => '4',
@@ -775,14 +775,14 @@ return [
             'X' => '2',
             
         ],
-        'field_TipoConta' => 'TIPO DE CONTA BANCÁRIA:',// Define onde deve buscar o banco para verificar 
-        'field_banco' => 'BANCO:', 
+        'field_TipoConta' => null,// Define onde deve buscar o banco para verificar 
+        'field_banco' => null, 
         'fieldsWalletDigital' =>[
-            'agency' => 'AGÊNCIA',
-            'account' =>  'NÚMERO DA CONTA:'
+            'agency' => null,
+            'account' =>  null
         ],
-        'womanMonoParent' => 'field_10',
-        'deParaContasbb' => '/CSV/deParaContasbb.csv' // Caso exista um arquivo para captura de contas bancárioas, colocar o aqruivo na raiz AldirBlanc e passar o caminho aqui     
+        'womanMonoParent' => null,
+        'deParaContasbb' => 'deParaContasbb.csv' // Caso exista um arquivo vom numero de contas   
     ],
     
 ];
