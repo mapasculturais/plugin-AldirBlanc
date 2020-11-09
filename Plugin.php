@@ -340,13 +340,11 @@ class Plugin extends \MapasCulturais\Plugin
             }
             if ($requestedOpportunity->canUser('@control')) {
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
-                if ($regSelected) {
                 $this->part('aldirblanc/bankless-button', [
                     'inciso' => 1,
                     'opportunity' => $opportunity,
                     'exports' => $plugin->config['exporta_desbancarizados'],
                 ]);
-            }
             }
             return;
         });
