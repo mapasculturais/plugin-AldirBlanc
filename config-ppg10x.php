@@ -17,10 +17,10 @@
  *          e name, mais default se for um campo constante; os nomes dos campos
  *          dinâmicos são utilizados como chaves do último parâmetro passado
  *          para o método que gera o trailer
- * condition: function para determinar se o registro entra na remessa
+ * condition: estrutura de verificações para decidir se o registro entra na
+ *            remessa
  *
- * Tudo o que for "condition" ou "function" precisa ser o nome de um método no
- * controller.
+ * Tudo o que for "function" precisa ser o nome de um método no controller.
  * ToDo: documentar assinaturas para esses métodos.
  */
 return [
