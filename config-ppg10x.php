@@ -25,7 +25,8 @@
  */
 return [
     "fieldMap" => [
-		"wantsPaymentOrder" => "field_8564",
+        "wantsPaymentOrder" => "field_8564",
+        "singleParent" => "field_119",
 		"numeroProtocolo" => "id",
 		"senhaSaque" => "number",
         "cpf" => "field_104",
@@ -214,5 +215,24 @@ return [
             "name" => "numeroRegistro",
         ],
     ],
-    "condition" => "ppg100ConditionPA",
+    "condition" => [
+        "operator" => "and",
+        "operands" => [
+            [
+                "operator" => "exists",
+                "operands" => ["wantsPaymentOrder"],
+            ],
+            [
+                "operator" => "prefix",
+                "operands" => [
+                    "wantsPaymentOrder",
+                    ["const" => "Ordem de pagamento"],
+                ],
+            ],
+            [
+                "operator" => "equals",
+                "operands" => ["singleParent", ["const" => "NÃO"]]
+            ]
+        ],
+    ],
 ];

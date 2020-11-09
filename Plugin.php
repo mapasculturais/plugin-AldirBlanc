@@ -324,7 +324,7 @@ class Plugin extends \MapasCulturais\Plugin
             //$this->part('aldirblanc/csv-button-mediacao', ['entity' => $requestedOpportunity, 'registrationsByMediator' => $registrationsByMediator]);
         });
        
-        // botões exportador MCI460 e planilha de endereços
+        // botão exportadores desbancarizados
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app) {
             // condiciona exibição do botão a uma configuração
             if (!isset($plugin->config['exporta_desbancarizados']) ||
@@ -338,19 +338,15 @@ class Plugin extends \MapasCulturais\Plugin
             if ($opportunity != $plugin->config['inciso1_opportunity_id']) {
                 return;
             }
-            $regSelected = $app->repo('Registration')->findBy([
-                'consolidatedResult' => ['10', 'homologado, validado por Dataprev'],
-                'opportunity' => $opportunity
-            ]);
             if ($requestedOpportunity->canUser('@control')) {
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
                 if ($regSelected) {
-                    $this->part('aldirblanc/bankless-button', [
-                        'inciso' => 1,
-                        'opportunity' => $opportunity,
-                        'exports' => $plugin->config['exporta_desbancarizados'],
-                    ]);
-                }
+                $this->part('aldirblanc/bankless-button', [
+                    'inciso' => 1,
+                    'opportunity' => $opportunity,
+                    'exports' => $plugin->config['exporta_desbancarizados'],
+                ]);
+            }
             }
             return;
         });

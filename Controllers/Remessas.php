@@ -71,7 +71,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * @return \MapasCulturais\Entities\Registration[]
      * @throws Exception
      */
-    function getRegistrations(Opportunity $opportunity) {
+    function getRegistrations(Opportunity $opportunity, $asIterator=false) {
         $app = App::i();
         /**
          * Pega os parâmetros do endpoint
@@ -118,8 +118,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'startDate' => $startDate,
                 'finishDate' => $finishDate,
             ]);
-
-            $registrations = $query->getResult();
+            $registrations = $asIterator ? $query->iterate() : $query->getResult();
         } else {
             $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r
             JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE
@@ -132,10 +131,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 'opportunity' => $opportunity,
             ]);
 
-            $registrations = $query->getResult();
+            $registrations = $asIterator ? $query->iterate() : $query->getResult();
         }
 
-        if (empty($registrations)) {
+        if (!$asIterator && empty($registrations)) {
             echo "Não foram encontrados registros.";
             die();
         }
@@ -3078,6 +3077,71 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return $out;
     }
 
+    private function genericCondition($fieldMap, $registration, $condition)
+    {
+        if (!is_array($condition)) {
+            $field = $fieldMap[$condition];
+            return $registration->$field;
+        }
+        if (!isset($condition["operator"])) {
+            return $condition["const"];
+        }
+        switch ($condition["operator"]) {
+            case "and":
+                foreach ($condition["operands"] as $op) {
+                    if (!$this->genericCondition($fieldMap, $registration, $op)) {
+                        return false;
+                    }
+                }
+                return true;
+            case "or":
+                foreach ($condition["operands"] as $op) {
+                    if (!!$this->genericCondition($fieldMap, $registration, $op)) {
+                        return true;
+                    }
+                }
+                return false;
+            case "xor":
+                return (!!$this->genericCondition($fieldMap, $registration,
+                                                  $condition["operands"][0]) !=
+                        !!$this->genericcondition($fieldMap, $registration,
+                                                  $condition["operands"][1]));
+            case "not":
+                return !$this->genericCondition($fieldMap, $registration,
+                                                $condition["operands"][0]);
+            case "exists":
+                $value = $this->genericCondition($fieldMap, $registration,
+                                                 $condition["operands"][0]);
+                return (($value !== null) && !empty($value));
+            case "equals":
+                return ($this->genericCondition($fieldMap, $registration,
+                                                $condition["operands"][0]) ==
+                        $this->genericCondition($fieldMap, $registration,
+                                                $condition["operands"][1]));
+            case "in":
+                return in_array($this->genericCondition($fieldMap, $registration,
+                                                        $condition["operands"][0]),
+                                $this->genericCondition($fieldMap, $registration,
+                                                        $condition["operands"][1]));
+            case "prefix":
+                return str_starts_with($this->genericCondition($fieldMap, $registration,
+                                                               $condition["operands"][0]),
+                                       $this->genericCondition($fieldMap, $registration,
+                                                               $condition["operands"][1]));
+        }
+        return null;
+    }
+
+    private function genericFalse()
+    {
+        return false;
+    }
+
+    private function genericDateDDMMYYYY()
+    {
+        return (new DateTime())->format("dmY");
+    }
+
     private function genericMod10Digit($value)
     {
         $sum = 0;
@@ -3094,36 +3158,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return ((10 - ($sum % 10)) % 10);
     }
 
-    private function genericCondition($registration)
+    private function genericPaymentAmount($registrationID)
     {
-        // condições de status da inscrição
-        if ($this->config["exportador_requer_homologacao"] &&
-            !in_array($registration->consolidatedResult, [
-                "10", "homologado, validado por Dataprev"
-        ])) {
-            return false;
-        }
-        // condições do pagamento
         $app = App::i();
         $payment = $app->repo("\\RegistrationPayments\\Payment")->findOneBy([
-            "registration" => $registration->id,
-            "status" => 0,
+            "registration" => $registrationID,
+            "status" => 0
         ]);
-        if (!$payment) {
-            $app->log->debug("\nPagamento não encontrado: " . $registration->id);
-            return false;
-        }
-        return true;
-    }
-
-    private function genericFalse()
-    {
-        return false;
-    }
-
-    private function genericDateDDMMYYYY()
-    {
-        return (new DateTime())->format("dmY");
+        return ((int) round(($payment->amount * 100), 0));
     }
 
     private function genericTimeHHMM()
@@ -3152,25 +3194,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunityIDs = [];
         // percorre as oportunidades
         foreach ($opportunities as $opportunity) {
-            // pega inscrições via DQL seguindo recomendações do Doctrine para grandes volumes
-            if ($startDate != null) {
-                $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-                        WHERE e.status IN (1, 10) AND e.opportunity = :oppId AND
-                              e.sentTimestamp >=:startDate AND
-                              e.sentTimestamp <= :finishDate";
-                $query = $app->em->createQuery($dql);
-                $query->setParameters([
-                    'oppId' => $opportunity->id,
-                    'startDate' => $startDate,
-                    'finishDate' => $finishDate,
-                ]);
-            } else {
-                $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-                                 WHERE e.status IN (1, 10) AND e.opportunity=:oppId";
-                $query = $app->em->createQuery($dql);
-                $query->setParameters(["oppId" => $opportunity->id]);
-            }
-            $registrations = $query->iterate();
+            $registrations = $this->getRegistrations($opportunity, true);
             /**
              * Mapeamento de fielsds_id pelo label do campo
              */
@@ -3179,10 +3203,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $linesBefore = $nLines;
             while ($registration = $registrations->next()[0]) {
                 // testa se é desbancarizado
-                if (!$this->genericThunk2($config["condition"], $config["fieldMap"], $registration)) {
+                if (!$this->genericCondition($config["fieldMap"], $registration,
+                                             $config["condition"])) {
                     continue;
                 }
-                $amount = 60000; // placeholder
+                $amount = $this->genericPaymentAmount($registration->id);
                 $details = $this->genericDetails($config, $registration, [
                     "numeroRegistro" => ($nLines + 1),
                     "valorCarga" => $amount,
@@ -3225,16 +3250,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         header("Pragma: no-cache");
         readfile($path);
         return;
-    }
-
-    private function ppg100ConditionPA($fieldMap, $registration)
-    {
-        $wantsPaymentOrder = $fieldMap["wantsPaymentOrder"];
-        if (!str_starts_with($registration->$wantsPaymentOrder,
-                             "Ordem de pagamento")) {
-            return false;
-        }
-        return $this->genericCondition($registration);
     }
 
     private function ppg100ProtocolNumberPA($fieldSpec, $registrationNumber)
@@ -3290,25 +3305,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunityIDs = [];
         // percorre as oportunidades
         foreach ($opportunities as $opportunity) {
-            // pega inscrições via DQL seguindo recomendações do Doctrine para grandes volumes
-            if ($startDate != null) {
-                $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-                        WHERE e.status IN (1, 10) AND e.opportunity = :oppId AND
-                              e.sentTimestamp >=:startDate AND
-                              e.sentTimestamp <= :finishDate";
-                $query = $app->em->createQuery($dql);
-                $query->setParameters([
-                    'oppId' => $opportunity->id,
-                    'startDate' => $startDate,
-                    'finishDate' => $finishDate,
-                ]);
-            } else {
-                $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-                                 WHERE e.status IN (1, 10) AND e.opportunity=:oppId";
-                $query = $app->em->createQuery($dql);
-                $query->setParameters(["oppId" => $opportunity->id]);
-            }
-            $registrations = $query->iterate();
+            $registrations = $this->getRegistrations($opportunity, true);
             /**
              * Mapeamento de fielsds_id pelo label do campo
              */
@@ -3377,25 +3374,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $config = $this->config["config-mci460"];
         $address = $config["fieldMap"]["endereco"];
         foreach ($opportunities as $opportunity) {
-            // pega inscrições via DQL seguindo recomendações do Doctrine para grandes volumes
-            if (isset($startDate)) {
-                $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-                        WHERE e.status IN (1, 10) AND e.opportunity = :oppId AND
-                            e.sentTimestamp >=:startDate AND
-                            e.sentTimestamp <= :finishDate";
-                $query = $app->em->createQuery($dql);
-                $query->setParameters([
-                    'oppId' => $opportunity->id,
-                    'startDate' => $startDate,
-                    'finishDate' => $finishDate,
-                ]);
-            } else {
-                $dql = "SELECT e FROM MapasCulturais\Entities\Registration e
-                                WHERE e.status IN (1, 10) AND e.opportunity=:oppId";
-                $query = $app->em->createQuery($dql);
-                $query->setParameters(["oppId" => $opportunity->id]);
-            }
-            $registrations = $query->iterate();
+            $registration = $this->getRegistrations($opportunity, true);
             /**
              * Mapeamento de fielsds_id pelo label do campo
              */
@@ -3471,7 +3450,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             !str_starts_with($registration->$wantsAccount, "CONTA")) {
             return false;
         }
-        return $this->genericCondition($registration);
+        return true;
     }
 
     private function mci460ConditionDetail04ES($config, $registration)
