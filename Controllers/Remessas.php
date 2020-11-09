@@ -45,7 +45,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     function getOpportunity() {
         $app = App::i();
-
+        
         $opportunity_id = $this->data['opportunity'];
 
         /**
@@ -1034,14 +1034,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     
                 }else{
                     $temp = $default['formoReceipt'];
-                    $formoReceipt = $temp ? $registrations->$temp : false;
+                    $formoReceipt = $registrations->$temp; 
     
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                        $field_id = $default['fieldsWalletDigital']['agency'];
-
+                        $field_id = $default['fieldsWalletDigital']['agency'];                    
                     }else{
                         $field_id = $detahe1['BEN_AGENCIA']['field_id'];
-
                     }
 
                     $agencia = $registrations->$field_id;
@@ -1077,7 +1075,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     
                 }else{
                     $temp = $default['formoReceipt'];
-                    $formoReceipt = $temp ? $registrations->$temp : false; 
+                    $formoReceipt = $registrations->$temp; 
     
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
                         $field_id = $default['fieldsWalletDigital']['agency'];                    
@@ -1127,8 +1125,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     
                 }else{
                     $temp = $default['formoReceipt'];
-                    $formoReceipt = $temp ? $registrations->$temp : false;
-                   
+                    $formoReceipt = $registrations->$temp;
+
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
                         $field_id = $default['fieldsWalletDigital']['account'];                    
                     }else{
@@ -1144,7 +1142,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }else{
                     $account = substr($temp_account[0], 0, -1);
                 }
-               
+                
                 if(!$account){
                     $app->log->info($registrations->number . " Conta bancária não informada");
                     return " ";
@@ -1199,7 +1197,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     
                 }else{
                     $temp = $default['formoReceipt'];
-                    $formoReceipt = $temp ? $registrations->$temp : false;
+                    $formoReceipt = $registrations->$temp;
                     
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
                         $temp = $default['fieldsWalletDigital']['account'];                    
@@ -1427,90 +1425,46 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $recordsOthers = [];
         $field_TipoConta = $default['field_TipoConta'];
         $field_banco = $default['field_banco'];
-        $field_agency = $default['field_agency'];
-        $defaultBank = $default['defaultBank'];
-        $informDefaultBank = $default['informDefaultBank'];       
-        $selfDeclaredBB = $default['selfDeclaredBB'];
-        $typesReceipt = $default['typesReceipt'];
-        $formoReceipt = $default['formoReceipt'];
-        $womanMonoParent = $default['womanMonoParent'];
-        $monoParentIgnore = $default['monoParentIgnore'];
-        $countBanked = 0;
-        $countUnbanked = 0;
-        $countUnbanked = 0;
-        $noFormoReceipt = 0;
+        $defaultBank = $default['defaultBank'];       
+        $correntistabb = $default['correntistabb'];
+        $countMci460 = 0;
+        
+        if($default['ducumentsType']['mci460']){ // Caso exista separação entre bancarizados e desbancarizados
+            
+            if($defaultBank && $defaultBank ==  '001'){
 
-        if($default['ducumentsType']['unbanked']){ // Caso exista separação entre bancarizados e desbancarizados
-            foreach($registrations as $value){
+                foreach ($registrations as $value) {
+                    
+                    if ($value->$field_TipoConta == "Conta corrente" && $value->$correntistabb == "SIM") {
+                        $recordsBBCorrente[] = $value;
 
-                //Remove as inscrições monoparentais caso flegado com false
-                if(!$monoParentIgnore){
-                    if($value->$womanMonoParent=="SIM"){
-                        $app->log->info("\n".$value->number . " - Auto declarada monoparental, configuração setada para ignorar.");
-                        continue;
+                    } else if ($value->$field_TipoConta == "Conta poupança" && $value->$correntistabb == "SIM"){
+                        $recordsBBPoupanca[] = $value;
+                    
+                    }else{
+                        $countMci460 ++;
+                        $recordsOthers = []; 
+                        $app->log->info($value->number . " - Não incluída no CNAB240 pertence ao MCI460.");
                     }
                 }
-                // Veirifica se existe a pergunta se o requerente é correntista BB ou não no formulário. Se sim, pega a resposta  
-                $accountHolderBB = "NÃO";              
-                if($selfDeclaredBB){
-                    $accountHolderBB = trim($value->$selfDeclaredBB);
-                   
-                }
-                
-                //Caso nao exista informações bancárias
-                if(!$value->$formoReceipt && $selfDeclaredBB === "NÃO"){                                   
-                    $app->log->info("\n".$value->number . " - Forma de recebimento não encontrada.");
-                    $noFormoReceipt ++;                   
-                    continue;
-                }
-                
-                //Verifica se a inscrição é bancarizada ou desbancarizada               
-                if(in_array(trim($value->$formoReceipt), $typesReceipt['banked']) || $accountHolderBB === "SIM"){
-                    $Banked = true;     
-                    $countBanked ++;
-
-                }else if(in_array(trim($value->$formoReceipt) , $typesReceipt['unbanked']) || $accountHolderBB === "NÃO"){
-                    $Banked = false;
-                    $countUnbanked ++; 
-                               
-                }
-                
-                if($Banked){                    
-                    if($defaultBank){                          
-                        if($informDefaultBank === "001" || $accountHolderBB === "SIM"){
-                            if (trim($value->$field_TipoConta) == "Conta corrente") { 
-                                $recordsBBCorrente[] = $value;
-        
-                            }  else if (trim($value->$field_TipoConta) == "Conta poupança"){
-                                $recordsBBPoupanca[] = $value;
-        
-                            }else{
-                                $recordsBBCorrente[] = $value;
-                            }
-                        }else{
-                            $recordsOthers[] = $value;
-
+            
+            }else{
+                foreach ($registrations as $value) {
+                    
+                    if ($this->numberBank($value->$field_banco) == "001" && $value->$correntistabb == "SIM") {               
+                        if ($value->$field_TipoConta == "Conta corrente") {
+                            $recordsBBCorrente[] = $value;
+                        } else {
+                            $recordsBBPoupanca[] = $value;
                         }
-                    }else{                        
-                        if(($this->numberBank($value->$field_banco) == "001") || $accountHolderBB == "SIM"){
-                            if (trim($value->$field_TipoConta) === "Conta corrente") { 
-                                $recordsBBCorrente[] = $value;
         
-                            } else if (trim($value->$field_TipoConta) === "Conta poupança"){
-                                $recordsBBPoupanca[] = $value;
-        
-                            }else{
-                                $recordsBBCorrente[] = $value;
-                            }
-                        }else{                            
-                            $recordsOthers[] = $value;
-                        
-                        }
+                    } else {
+                        $countMci460 ++;
+                        $recordsOthers = [];
+                        $app->log->info($value->number . "Não incluída no CNAB240 pertence ao MCI460.");
                     }
-                }else{
-                    continue;
+                } 
                 
-                }
             }
         }else{
             foreach ($registrations as $value) {
@@ -1526,24 +1480,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
             }
         }
-       
-        //Caso exista separação de bancarizados ou desbancarizados, mostra no terminal o resumo
-        if($default['ducumentsType']['unbanked']){           
-            $app->log->info("\nResumo da separação entre bancarizados e desbancarizados.");
-            $app->log->info($countBanked . " BANCARIZADOS");
-            $app->log->info($countUnbanked . " DESBANCARIZADOS");
-        }
 
-        //Mostra no terminal resumo da separação entre CORRENTE BB, POUPANÇA BB OUTROS BANCOS e SEM INFORMAÇÃO BANCÁRIA
-        $app->log->info("\nResumo da separação entre CORRENTE BB, POUPANÇA BB, OUTROS BANCOS e SEM INFORMAÇÃO BANCÁRIA");
-        $app->log->info(count($recordsBBCorrente) . " CORRENTE BB");
-        $app->log->info(count($recordsBBPoupanca) . " POUPANÇA BB");
-        $app->log->info(count($recordsOthers) . " OUTROS BANCOS");
-        $app->log->info($noFormoReceipt . " SEM INFORMAÇÃO BANCÁRIA");
-        sleep(3);
+        //Mostra no terminal a quantidade de docs em cada documento MCI460, CNAB240
+        if($default['ducumentsType']['mci460']){
+            $app->log->info((count($recordsBBPoupanca) + count($recordsBBCorrente)) . " CNAB240");
+            $app->log->info($countMci460 . " MCI460");
+            sleep(5);
+        }
         
         
-        //Verifica se existe registros em algum dos arrays. Caso não exista exibe a mensagem
+        //Verifica se existe registros em algum dos arrays
         $validaExist = array_merge($recordsBBCorrente, $recordsOthers, $recordsBBPoupanca);
         if(empty($validaExist)){
             echo "Não foram encontrados registros analise os logs";
@@ -2414,7 +2360,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $correntistabb = $default['correntistabb'];
         $countMci460 = 0;
 
-        if($default['ducumentsType']['unbanked']){ // Caso exista separação entre bancarizados e desbancarizados
+        if($default['ducumentsType']['mci460']){ // Caso exista separação entre bancarizados e desbancarizados
             
             if($defaultBank && $defaultBank ==  '001'){
 
@@ -2465,7 +2411,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
 
         //Mostra no terminal a quantidade de docs em cada documento MCI460, CNAB240
-        if($default['ducumentsType']['unbanked']){
+        if($default['ducumentsType']['mci460']){
             $app->log->info((count($recordsBBPoupanca) + count($recordsBBCorrente)) . " CNAB240");
             $app->log->info($countMci460 . " MCI460");
             sleep(5);
@@ -2740,17 +2686,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             '341 Itaú Unibanco S.A' => '341',
             '422 Bco Safra S.A' => '422',
             '623 Banco Pan' => '623',
-            'NU PAGAMENTOS S.A' => '260',
-            'BANCO DO BRASIL S.A' => '001',
-            'BANCO INTER' => '077',
-            'CAIXA ECONOMICA FEDERAL' => '104',
-            'BCO BRADESCO S.A' => '237',
-            'ITAÚ UNIBANCO S.A..' => '341',
-            'PAGSEGURO' => '290',
-            'BCO SANTANDER (BRASIL) S.A' => '033',
-            'BCO DO EST. DO PA S.A' => '037',
-            'BCO C6 S.A' => '336'
-
         ];
 
         $return = 0;
