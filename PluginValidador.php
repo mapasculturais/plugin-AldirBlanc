@@ -30,7 +30,13 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
     {
         $slug = $this->getSlug();
         $config += [
+            // se true, só considera a validação deste validador na consolidação
+            'forcar_resultado' => false,
+
+            // se true, só consolida se houver ao menos uma homologação
             'consolidacao_requer_homologacao' => true,
+            
+            // lista de validadores requeridos na consolidação
             'consolidacao_requer_validacoes' => (array) json_decode(env(strtoupper($slug) . '_CONSOLIDACAO_REQ_VALIDACOES', '[]')),
         ];
         parent::__construct($config);
@@ -125,8 +131,12 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
                 }
             }
 
+            if ($can_consolidate) {
+                if ($plugin->config['forcar_resultado']) {
+                    $result = $caller->result;
+                }
             // se não pode consolidar, coloca string 'validado por {nome}' ou 'invalidado por {nome}'
-            if (!$can_consolidate) {
+            } else {
                 $nome = $plugin->getName();
                 $string = "";
                 if($result == '10'){
@@ -146,7 +156,6 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
                     $result = $this->consolidatedResult;
                 }            
             }
-
         });
 
         $app->hook('GET(opportunity.single):before', function () use ($app, $plugin) {
