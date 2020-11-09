@@ -1383,47 +1383,59 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $selfDeclaredBB = $default['selfDeclaredBB'];
         $typesReceipt = $default['typesReceipt'];
         $formoReceipt = $default['formoReceipt'];
+        $womanMonoParent = $default['womanMonoParent'];
+        $monoParentIgnore = $default['monoParentIgnore'];
         $countBanked = 0;
         $countUnbanked = 0;
         $countUnbanked = 0;
         $noFormoReceipt = 0;
+
         if($default['ducumentsType']['unbanked']){ // Caso exista separação entre bancarizados e desbancarizados
             foreach($registrations as $value){
+
+                //Remove as inscrições monoparentais caso flegado com false
+                if(!$monoParentIgnore){
+                    if($value->$womanMonoParent=="SIM"){
+                        $app->log->info("\n".$value->number . " - Auto declarada monoparental, configuração setada para ignorar.");
+                        continue;
+                    }
+                }
+                // Veirifica se existe a pergunta se o requerente é correntista BB ou não no formulário. Se sim, pega a resposta  
+                $accountHolderBB = "NÃO";              
+                if($selfDeclaredBB){
+                    $accountHolderBB = trim($value->$selfDeclaredBB);
+                   
+                }
                 
                 //Caso nao exista informações bancárias
-                if(!$value->$formoReceipt){                   
+                if(!$value->$formoReceipt && $selfDeclaredBB === "NÃO"){                                   
                     $app->log->info("\n".$value->number . " - Forma de recebimento não encontrada.");
                     $noFormoReceipt ++;                   
                     continue;
                 }
                 
                 //Verifica se a inscrição é bancarizada ou desbancarizada               
-                if(in_array(trim($value->$formoReceipt), $typesReceipt['banked'])){
+                if(in_array(trim($value->$formoReceipt), $typesReceipt['banked']) || $accountHolderBB === "SIM"){
                     $Banked = true;     
                     $countBanked ++;
 
-                }else if(in_array(trim($value->$formoReceipt) , $typesReceipt['unbanked'])){
+                }else if(in_array(trim($value->$formoReceipt) , $typesReceipt['unbanked']) || $accountHolderBB === "NÃO"){
                     $Banked = false;
                     $countUnbanked ++; 
                                
                 }
-
                 
-                // Veirifica se existe a pergunta se o requerente é correntista BB ou não no formulário. Se sim, pega a resposta  
-                $accountHolderBB = "NÃO";              
-                if($selfDeclaredBB){
-                    $accountHolderBB = $value->$selfDeclaredBB;
-                }
-
-                if($Banked){
-                    if($defaultBank){                        
-                        if(($defaultBank == $informDefaultBank) || $accountHolderBB == "SIM"){
+                if($Banked){                    
+                    if($defaultBank){                          
+                        if($informDefaultBank === "001" || $accountHolderBB === "SIM"){
                             if (trim($value->$field_TipoConta) == "Conta corrente") { 
                                 $recordsBBCorrente[] = $value;
         
                             }  else if (trim($value->$field_TipoConta) == "Conta poupança"){
                                 $recordsBBPoupanca[] = $value;
         
+                            }else{
+                                $recordsBBCorrente[] = $value;
                             }
                         }else{
                             $recordsOthers[] = $value;
@@ -1431,20 +1443,23 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         }
                     }else{                        
                         if(($this->numberBank($value->$field_banco) == "001") || $accountHolderBB == "SIM"){
-                            if (trim($value->$field_TipoConta) == "Conta corrente") { 
+                            if (trim($value->$field_TipoConta) === "Conta corrente") { 
                                 $recordsBBCorrente[] = $value;
         
-                            } else if (trim($value->$field_TipoConta) == "Conta poupança"){
+                            } else if (trim($value->$field_TipoConta) === "Conta poupança"){
                                 $recordsBBPoupanca[] = $value;
         
+                            }else{
+                                $recordsBBCorrente[] = $value;
                             }
                         }else{                            
                             $recordsOthers[] = $value;
+                        
                         }
                     }
                 }else{
-                    
                     continue;
+                
                 }
             }
         }else{
