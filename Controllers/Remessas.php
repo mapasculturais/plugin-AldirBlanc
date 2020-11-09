@@ -48,6 +48,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         $opportunity_id = $this->data['opportunity'];
 
+        $opportunity_id = $this->data['opportunity'];
+
         /**
          * Pega informações da oportunidade
          */
@@ -844,8 +846,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         return;
     }
-
-    //###################################################################################################################################
 
     /**
      * Implementa o exportador TXT no modelo CNAB 240, para envio de remessas ao banco do Brasil inciso1
@@ -2655,22 +2655,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     }
 
-    /**
-     * Placeholder para o número de seqüência dos arquivos de remessa.
-     */
-    private function sequenceNumber($type)
-    {
-        $n = 0;
-        switch ($type) {
-            case "cnab240": break;
-            case "mci460": break;
-            case "ppg100": break;
-            default: break;
-        }
-        return $n;
-    }
+    //###################################################################################################################################
 
-   /**
+    /**
      * Função para retornar o número do banco, levando como base de pesquisa o nome do banco
      * Todos os textos que entram pelo parâmetro $bankName, são primeiro colocados em lowercase e comparado com o array $bankList também em lowercase
      *
@@ -2714,7 +2701,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return $return;
 
     }
-
     /**
      * Retorna o valor do objeto endereço de uma registration
      *
@@ -2906,6 +2892,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
          return $data;
 
+    }
+
+    /**
+     * Placeholder para o número de seqüência dos arquivos de remessa.
+     */
+    private function sequenceNumber($type)
+    {
+        $n = 0;
+        switch ($type) {
+            case "cnab240": break;
+            case "mci460": break;
+            case "ppg100": break;
+            default: break;
+        }
+        return $n;
     }
 
     /**
@@ -3104,8 +3105,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         // condições do pagamento
         $app = App::i();
-        $payment = $app->em->getRepository("\\RegistrationPayments\\
-                                            Payment")->findOneBy([
+        $payment = $app->repo("\\RegistrationPayments\\Payment")->findOneBy([
             "registration" => $registration->id,
             "status" => 0,
         ]);
@@ -3486,7 +3486,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return false;
     }
 
-    private function mci460ConditionDetail09ES($config, $registration) {
+    private function mci460ConditionDetail09ES($config, $registration)
+    {
         $field = $config["fieldMap"]["email"];
         return (strlen($registration->$field) > 0);
     }
@@ -3517,7 +3518,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return $out;
     }
 
-    private function mci460DateFormatDDMMYYYY($value) {
+    private function mci460DateFormatDDMMYYYY($value)
+    {
         return implode("", array_reverse(explode("-", $value)));
     }
 
@@ -3566,5 +3568,4 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         return $out;
     }
-
 }
