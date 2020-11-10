@@ -61,18 +61,22 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),            
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO2', __DIR__ . '/config-csv-generic-inciso2.php'),
             'csv_generic_inciso3' => require_once env('AB_CSV_GENERIC_INCISO3', __DIR__ . '/config-csv-generic-inciso3.php'),
+            'config-cnab240-inciso1' => require_once env('AB_TXT_CANAB240_INCISO1', __DIR__ . '/config-cnab240-inciso1.php'),
+            'config-cnab240-inciso2' => require_once env('AB_TXT_CANAB240_INCISO2', __DIR__ . '/config-cnab240-inciso2.php'),
 
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
+            'config-mci460' => require_once env('AB_CONFIG_MCI460', __DIR__ . '/config-mci460.php'),
+            'config-ppg10x' => require_once env('AB_CONFIG_PPG10x', __DIR__ . '/config-ppg10x.php'),
 
-            // define o id para dataprev e avaliador generico
-            'avaliador_dataprev_user_id' => env('AB_AVALIADOR_DATAPREV_USER_ID', ''),
-            'avaliador_generico_user_id' => env('AB_AVALIADOR_GENERICO_USER_ID', ''),
+            // define os ids para dataprev e avaliadores genericos
+            'avaliadores_dataprev_user_id' => (array) json_decode(env('AB_AVALIADORES_DATAPREV_USER_ID', '[]')),
+            'avaliadores_genericos_user_id' => (array) json_decode(env('AB_AVALIADORES_GENERICOS_USER_ID', '[]')),
             
-            // define a exibição do resultado das avaliações no status
-            'exibir_resultado_padrao' => env('AB_EXIBIR_RESULTADO_PADRAO', false),
-            'exibir_resultado_dataprev' => env('AB_EXIBIR_RESULTADO_DATAPREV', true),
-            'exibir_resultado_generico' => env('AB_EXIBIR_RESULTADO_GENERICO', false),
-            'exibir_resultado_avaliadores' => env('AB_EXIBIR_RESULTADO_AVALIADORES', false),
+            // define a exibição do resultado das avaliações para cada status (1, 2, 3, 8, 10)
+            'exibir_resultado_padrao' => (array) json_decode(env('AB_EXIBIR_RESULTADO_PADRAO', '["1", "2", "3", "8", "10"]')),
+            'exibir_resultado_dataprev' => (array) json_decode(env('AB_EXIBIR_RESULTADO_DATAPREV', '[]')),
+            'exibir_resultado_generico' => (array) json_decode(env('AB_EXIBIR_RESULTADO_GENERICO', '[]')),
+            'exibir_resultado_avaliadores' => (array) json_decode(env('AB_EXIBIR_RESULTADO_AVALIADORES', '["10"]')),
 
             // mensagens de status padrao
             'msg_status_sent' => env('AB_STATUS_SENT_MESSAGE', 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail.'), // STATUS_SENT = 1
@@ -177,13 +181,84 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $plugin = $this;
+        if($plugin->config['zammad_enable']) {
+            // $app->view->enqueueStyle('app','chat','chat.css');
+        }
 
-        $app->hook('template(panel.opportunities.panel-header):end', function () use ($app) {
-            if (!$app->user->is('admin')) {
-                return;
+         //Botão exportador CNAB240 BB
+         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
+            $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
+            $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
+            $inciso3Ids = [];//$plugin->config['inciso3_opportunity_ids'];
+            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
+            $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
+            $opportunity = $requestedOpportunity->id;            
+            
+
+            if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
+                $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
+                if (in_array($requestedOpportunity->id, $inciso1Ids)){
+                    $inciso = 1;
+
+                }
+                else if (in_array($requestedOpportunity->id, $inciso2Ids)){
+                    $inciso = 2;
+
+                }else if(in_array($requestedOpportunity->id, $inciso3Ids)){
+                    $inciso = 3;
+
+                }
+                $this->part('aldirblanc/cnab240-button', ['inciso' => $inciso, 'opportunity' => $opportunity]);
             }
-            $this->part('aldirblanc/generate-opportunities-button');
         });
+
+        $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
+            $em = $opportunity->getEvaluationMethod();
+            
+            $_evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $registrations]);
+
+            $evaluations_avaliadores = [];
+            $evaluations_status = [];
+            $evaluations_obs = [];
+            
+            foreach ($_evaluations as $eval) {
+                if ($eval->user->aldirblanc_avaliador) {
+                    continue;
+                }
+
+                if (isset($evaluations_status[$eval->registration->number])) {
+                    if ($eval->result < $evaluations_status[$eval->registration->number]) {
+                        $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
+                    }
+                } else {
+                    $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
+                }
+
+                if (isset($evaluations_obs[$eval->registration->number])) {
+                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $eval->evaluationData->obs;
+                } else {
+                    $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs;
+                }
+
+                if (isset($evaluations_avaliadores[$eval->registration->number])) {
+                    $evaluations_avaliadores[$eval->registration->number] .= "\n-------------\n" . $eval->user->profile->name;
+                } else {
+                    $evaluations_avaliadores[$eval->registration->number] = $eval->user->profile->name;
+                }
+            }
+
+
+            $header[] = 'Homologação - avaliadores';
+            $header[] = 'Homologação - status';
+            $header[] = 'Homologação - obs';
+            
+            foreach($body as $i => $line){
+                $body[$i][] = $evaluations_avaliadores[$line[0]] ?? null;
+                $body[$i][] = $evaluations_status[$line[0]] ?? null;
+                $body[$i][] = $evaluations_obs[$line[0]] ?? null;
+            }
+        });
+       
         // modulo de mediacao
         $app->hook('entity(Agent).canUser(<<viewPrivateData>>)', function($user,&$can) use($app){
             
@@ -248,8 +323,32 @@ class Plugin extends \MapasCulturais\Plugin
             }
             //$this->part('aldirblanc/csv-button-mediacao', ['entity' => $requestedOpportunity, 'registrationsByMediator' => $registrationsByMediator]);
         });
+       
+        // botão exportadores desbancarizados
+        $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app) {
+            // condiciona exibição do botão a uma configuração
+            if (!isset($plugin->config['exporta_desbancarizados']) ||
+                !is_array($plugin->config['exporta_desbancarizados']) ||
+                empty($plugin->config['exporta_desbancarizados'])) {
+                return;
+            }
+            $requestedOpportunity = $this->controller->requestedEntity;
+            $opportunity = $requestedOpportunity->id;
+            // exclui qualquer oportunidade que não seja inciso 1 (sujeito a futuras alterações)
+            if ($opportunity != $plugin->config['inciso1_opportunity_id']) {
+                return;
+            }
+            if ($requestedOpportunity->canUser('@control')) {
+                $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
+                $this->part('aldirblanc/bankless-button', [
+                    'inciso' => 1,
+                    'opportunity' => $opportunity,
+                    'exports' => $plugin->config['exporta_desbancarizados'],
+                ]);
+            }
+            return;
+        });
 
-        //botao de export csv
         //Botão exportador genérico
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
             $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
@@ -258,18 +357,7 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
             $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
             $opportunity = $requestedOpportunity->id;
-
-            //Busca oportunidades selecionadas
-            $selecteds = $app->repo('Registration')->findOneBy([
-                'opportunity' => $opportunity,
-                'status' => 10
-            ]);
-
-            $existsSelected = false;
-            if($selecteds){
-                $existsSelected = true;  
-            }
-
+            
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
                 if (in_array($requestedOpportunity->id, $inciso1Ids)){
@@ -281,7 +369,7 @@ class Plugin extends \MapasCulturais\Plugin
                 else if (in_array($requestedOpportunity->id, $inciso3Ids)){
                     $inciso = 3;
                 }
-                $this->part('aldirblanc/csv-generic-button', ['inciso' => $inciso, 'opportunity' => $opportunity, 'existsSelected' => $existsSelected]);
+                $this->part('aldirblanc/csv-generic-button', ['inciso' => $inciso, 'opportunity' => $opportunity]);
             }
         });
 
@@ -572,6 +660,9 @@ class Plugin extends \MapasCulturais\Plugin
                 });
                 });
         </script>
+         <style>.zammad-chat{
+            z-index: 9999!important;
+        }</style>
     
     <?php
             }
@@ -586,7 +677,6 @@ class Plugin extends \MapasCulturais\Plugin
     public function register()
     {
         $app = App::i();
-
 
         $app->registerController('aldirblanc', 'AldirBlanc\Controllers\AldirBlanc');        
         $app->registerController('remessas', 'AldirBlanc\Controllers\Remessas');

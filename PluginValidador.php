@@ -30,7 +30,13 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
     {
         $slug = $this->getSlug();
         $config += [
+            // se true, só considera a validação deste validador na consolidação
+            'forcar_resultado' => false,
+
+            // se true, só consolida se houver ao menos uma homologação
             'consolidacao_requer_homologacao' => true,
+            
+            // lista de validadores requeridos na consolidação
             'consolidacao_requer_validacoes' => (array) json_decode(env(strtoupper($slug) . '_CONSOLIDACAO_REQ_VALIDACOES', '[]')),
         ];
         parent::__construct($config);
@@ -51,6 +57,28 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
         });
 
         $plugin = $this;
+        $user = $this->getUser();
+
+        $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app, $user, $plugin) {
+            $em = $opportunity->getEvaluationMethod();
+            $_evaluations = $app->repo('RegistrationEvaluation')->findBy(['user' => $user, 'registration' => $registrations]);
+
+            $evaluations_status = [];
+            $evaluations_obs = [];
+            foreach($_evaluations as $eval) {
+                $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
+                $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs;
+            }
+
+
+            $header[] = $plugin->getName() . ' - status';
+            $header[] = $plugin->getName() . ' - obs';
+            
+            foreach($body as $i => $line){
+                $body[$i][] = $evaluations_status[$line[0]] ?? null;
+                $body[$i][] = $evaluations_obs[$line[0]] ?? null;
+            }
+        });
         
 
         /**
@@ -103,8 +131,12 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
                 }
             }
 
+            if ($can_consolidate) {
+                if ($plugin->config['forcar_resultado']) {
+                    $result = $caller->result;
+                }
             // se não pode consolidar, coloca string 'validado por {nome}' ou 'invalidado por {nome}'
-            if (!$can_consolidate) {
+            } else {
                 $nome = $plugin->getName();
                 $string = "";
                 if($result == '10'){
@@ -124,7 +156,6 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
                     $result = $this->consolidatedResult;
                 }            
             }
-
         });
 
         $app->hook('GET(opportunity.single):before', function () use ($app, $plugin) {

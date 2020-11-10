@@ -136,7 +136,7 @@ return [
     '4793' => [ 
         'TIPO_PROPONENTE' => 'field_1215',        
         'CPF' => 'field_1238',
-        'NOME_SOCIAL' => 'field_1221',    
+        'NOME_SOCIAL' => ['field_1221','field_1228'],    
         'CNPJ' => null,
         'RAZAO_SOCIAL' => null,                
         'LOGRADOURO' => 'field_1214',
@@ -182,7 +182,7 @@ return [
         'CPF' => 'field_1291',
         'NOME_SOCIAL' => 'field_1293',    
         'CNPJ' => 'field_1279',
-        'RAZAO_SOCIAL' => 'field_1304',                
+        'RAZAO_SOCIAL' => 'field_1307',                
         'LOGRADOURO' => 'field_1277',
         'NUMERO' => null,
         'COMPLEMENTO' => null,
@@ -209,7 +209,8 @@ return [
         'proponentTypes' => [
             'fisica' => 'Pessoa Física',
             'juridica' => 'Pessoa Jurídica',
-            'coletivo' => 'Coletivo'
+            'coletivo' => 'Coletivo',
+            'juridica-mei' => 'Pessoa Jurídica - MEI'
         ]
     ],
     
