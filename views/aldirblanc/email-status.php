@@ -364,21 +364,7 @@
                                         <p>Seguem as informações sobre a inscrição {{inscricao}}!</p>
 
                                         <p>Você também pode visualizar o status da inscrição através do link: <a href="{{urlSite}}/aldirblanc/status/{{inscricao}}" target="_blank">Status da inscrição</a>.</p><br>
-                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
-                                            <tbody>
-                                            <tr>
-                                                <td align="center">
-                                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                                                        <tbody>
-                                                        <tr>
-                                                            <td>  </td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
+                                        
 
                                         <p>Até mais!</p>
                                     </td>
