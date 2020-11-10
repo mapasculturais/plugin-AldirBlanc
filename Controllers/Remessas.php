@@ -803,14 +803,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             "to" => "date",
             "type" => "string"
         ]);
-        $startDate = null;
-        $finishDate = null;
         if (isset($parameters["from"])) {
             if (!isset($parameters["to"])) {
                 throw new Exception("Ao informar filtro de data, os dois limites devem ser informados.");
             }
-            $startDate = $parameters["from"];
-            $finishDate = $parameters["to"];
         }
         // pega oportunidades via ORM
         $opportunities = [];
@@ -830,13 +826,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         switch ($parameters["type"]) {
             case "mci460":
-                $this->exportMCI460($opportunities, $startDate, $finishDate);
+                $this->exportMCI460($opportunities);
                 break;
             case "ppg100":
-                $this->exportPPG100($opportunities, $startDate, $finishDate);
+                $this->exportPPG100($opportunities);
                 break;
             case "addressReport":
-                $this->addressReport($opportunities, $startDate, $finishDate);
+                $this->addressReport($opportunities);
                 break;
             default:
                 throw new Exception("Arquivo desconhecido: " . $parameters["type"]);
@@ -2899,11 +2895,47 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $n = 0;
         switch ($type) {
             case "cnab240": break;
-            case "mci460": break;
-            case "ppg100": break;
+            case "mci460":
+                $n = $this->config["config-mci460"]["serial"];
+                break;
+            case "ppg100":
+                $n = $this->config["config-ppg10x"]["ppg10xSerial"];
+                break;
             default: break;
         }
         return $n;
+    }
+
+    /**
+     * Lê dados de um CSV. Se o parâmetro key for passado, usa a coluna de mesmo
+     * nome como chave do dicionário, caso contrário as linhas são retornadas em
+     * seqüência.
+     */
+    private function getCSVData($file, $separator, $key=null)
+    {
+        $filename = __DIR__ . "/../" . $file;
+        if (!file_exists($filename)) {
+            return false;
+        }
+        $data = [];
+        $stream = fopen($filename, "r");
+        $csv = Reader::createFromStream($stream);
+        $csv->setDelimiter($separator);
+        $csv->setHeaderOffset(0);
+        $stmt = new Statement();
+        $results = $stmt->process($csv);
+        if ($key == null) {
+            foreach ($results as $line) {
+                $data[] = $line;
+            }
+        } else {
+            foreach ($results as $line) {
+                $actualKey = $line[$key];
+                unset($line[$key]);
+                $data[$actualKey] = $line;
+            }
+        }
+        return $data;
     }
 
     /**
@@ -3110,7 +3142,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             case "exists":
                 $value = $this->genericCondition($fieldMap, $registration,
                                                  $condition["operands"][0]);
-                return (($value !== null) && !empty($value));
+                return (($value != null) && !empty($value));
             case "equals":
                 return ($this->genericCondition($fieldMap, $registration,
                                                 $condition["operands"][0]) ==
@@ -3175,7 +3207,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * Funções para o PPG100
      */
 
-    private function exportPPG100($opportunities, $startDate, $finishDate)
+    private function exportPPG100($opportunities)
     {
         $app = App::i();
         $config = $this->config["config-ppg10x"];
@@ -3286,7 +3318,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * removidos sem ajuste nas mesmas.
      */
 
-    private function exportMCI460($opportunities, $startDate, $finishDate)
+    private function exportMCI460($opportunities)
     {
         $app = App::i();
         $config = $this->config["config-mci460"];
@@ -3295,6 +3327,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         $newline = "\r\n";
         set_time_limit(0);
+        // carrega mapeamento de agências
+        $branchMap = $this->getCSVData($config["branchMap"], ",", "CEP");
         // inicializa contadores
         $nLines = 1;
         $nClients = 0;
@@ -3312,17 +3346,22 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $clientsBefore = $nClients;
             while ($registration = $registrations->next()[0]) {
                 // testa se é desbancarizado
-                if (!$this->genericThunk2($config["condition"], $config["fieldMap"], $registration)) {
+                if (!$this->genericCondition($config["fieldMap"], $registration,
+                                             $config["condition"])) {
+                    continue;
+                }
+                // testa se o CEP está mapeado
+                $branchSetex = $this->mci460BranchSetexES($config["fieldMap"],
+                                                          $registration,
+                                                          $branchMap);
+                if (!$branchSetex) {
                     continue;
                 }
                 ++$nClients;
-                $details = $this->genericDetails($config, $registration, [
-                    "sequencialCliente" => $nClients,
-                    "agencia" => 6666, // placeholder
-                    "dvAgencia" => "X", // placeholder
-                    "grupoSetex" => 66, // placeholder
-                    "dvGrupoSetex" => "X", // placeholder
-                ]);
+                $extraData = array_merge(["sequencialCliente" => $nClients],
+                                         $branchSetex);
+                $details = $this->genericDetails($config, $registration,
+                                                 $extraData);
                 $nLines += sizeof($details);
                 $out .= implode($newline, $details) . $newline;
                 $app->em->clear();
@@ -3361,7 +3400,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return;
     }
 
-    private function addressReport($opportunities, $startDate, $finishDate)
+    private function addressReport($opportunities)
     {
         $app = App::i();
         set_time_limit(0);
@@ -3438,19 +3477,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return;
     }
 
-    private function mci460ConditionES($fieldMap, $registration)
-    {
-        $hasAccount = $fieldMap["hasAccount"];
-        $wantsAccount = $fieldMap["wantsAccount"];
-        // condições do formulário
-        if (($registration->$hasAccount == "SIM") ||
-            ($registration->$wantsAccount == null) ||
-            !str_starts_with($registration->$wantsAccount, "CONTA")) {
-            return false;
-        }
-        return true;
-    }
-
     private function mci460ConditionDetail04ES($config, $registration)
     {
         $field = $config["fieldMap"]["conjuge"];
@@ -3463,7 +3489,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return false;
     }
 
-    private function mci460ConditionDetail09ES($config, $registration)
+    private function mci460ConditionDetail08ES($config, $registration)
     {
         $field = $config["fieldMap"]["email"];
         return (strlen($registration->$field) > 0);
@@ -3493,6 +3519,24 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $out .= $this->createString($field);
         }
         return $out;
+    }
+
+    private function mci460BranchSetexES($fieldMap, $registration, $branchMap)
+    {
+        $field = $fieldMap["endereco"];
+        $address = $registration->$field;
+        $zip = is_array($address) ? $address["En_CEP"] : $address->En_CEP;
+        if (!isset($branchMap[$zip])) {
+            return null;
+        }
+        $branchSetex = [];
+        $branch = explode("-", trim($branchMap[$zip]["AGENCIA"]));
+        $branchSetex["agencia"] = $branch[0];
+        $branchSetex["dvAgencia"] = $branch[1];
+        $setex = explode("-", trim($branchMap[$zip]["SETEX"]));
+        $branchSetex["grupoSetex"] = $setex[0];
+        $branchSetex["dvGrupoSetex"] = $setex[1];
+        return $branchSetex;
     }
 
     private function mci460DateFormatDDMMYYYY($value)

@@ -3,6 +3,9 @@
 /**
  * Configuração do exportador do MCI460
  *
+ * serial: temporariamente usado para trocar o número seqüencial do arquivo
+ *         MCI460
+ * branchMap: um CSV usado para mapear CEPs para agências
  * fieldMap: usado para localizar os diversos campos na oportunidade
  * header: configuração do header; lista seqüencial de campos com length, type e
  *         name, mais default se for um campo constante ou function para um
@@ -17,16 +20,20 @@
  *          e name, mais default se for um campo constante; os nomes dos campos
  *          dinâmicos são utilizados como chaves do último parâmetro passado
  *          para o método que gera o trailer
- * condition: function para determinar se o registro entra na remessa
+ * condition: estrutura de verificações para decidir se o registro entra na
+ *            remessa
  *
- * Tudo o que for "condition" ou "function" precisa ser o nome de um método no
- * controller.
+ * Tudo o que for "condition" (interna, não top-level) ou "function" precisa ser
+ * o nome de um método no controller.
  * ToDo: documentar assinaturas para esses métodos.
  */
 return [
+    "serial" => 0,
+    "branchMap" => "branchmap.csv",
     "fieldMap" => [
         "hasAccount" => "field_1",
         "wantsAccount" => "field_18",
+        "singleParent" => "field_10",
         "cpfcnpj" => "field_21",
         "dataNascimento" => "field_24",
         "nomeCliente" => "field_22",
@@ -567,7 +574,7 @@ return [
                     "default" => "",
                 ],
             ],
-            "condition" => "mci460ConditionDetail09ES",
+            "condition" => "mci460ConditionDetail08ES",
         ],
         [ // detail09, primeira referência
             "fields" => [
@@ -672,5 +679,48 @@ return [
             "default" => "",
         ],
     ],
-    "condition" => "mci460ConditionES",
+    "condition" => [
+        "operator" => "and",
+        "operands" => [
+            [
+                "operator" => "not",
+                "operands" => [
+                    [
+                        "operator" => "or",
+                        "operands" => [
+                            [
+                                "operator" => "equals",
+                                "operands" => ["hasAccount", ["const" => "SIM"]],
+                            ],
+                            [
+                                "operator" => "not",
+                                "operands" => [
+                                    [
+                                        "operator" => "exists",
+                                        "operands" => ["wantsAccount"]
+                                    ],
+                                ],
+                            ],
+                            [
+                                "operator" => "not",
+                                "operands" => [
+                                    [
+                                        "operator" => "prefix",
+                                        "operands" => [
+                                            "wantsAccount",
+                                            ["const" => "CONTA"]
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                "operator" => "equals",
+                "operands" => ["singleParent", ["const" => "NÃO"]]
+            ],
+        ],
+    ],
 ];

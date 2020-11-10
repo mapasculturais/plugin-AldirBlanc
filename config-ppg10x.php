@@ -3,6 +3,8 @@
 /**
  * Configuração do exportador do PPG100
  *
+ * ppg100Serial: temporariamente usado para trocar o número seqüencial do
+ *               arquivo PPG100
  * fieldMap: usado para localizar os diversos campos na oportunidade
  * header: configuração do header; lista seqüencial de campos com length, type e
  *         name, mais default se for um campo constante ou function para um
@@ -24,6 +26,7 @@
  * ToDo: documentar assinaturas para esses métodos.
  */
 return [
+    "ppg100Serial" => 0,
     "fieldMap" => [
         "wantsPaymentOrder" => "field_8564",
         "singleParent" => "field_119",
