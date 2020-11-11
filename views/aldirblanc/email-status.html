@@ -364,7 +364,22 @@
                                         <p>Seguem as informações sobre a inscrição {{inscricao}}!</p>
 
                                         <p>Você também pode visualizar o status da inscrição através do link: <a href="{{urlSite}}/aldirblanc/status/{{inscricao}}" target="_blank">Status da inscrição</a>.</p><br>
-                                        
+                                        <div class="status-card status-{{statusNum}}">
+                                            <h2 class="status-card--title">{{statusTitle}}</h2>
+                                            
+                                            {{#justificativaAvaliacao}}
+                                                <p>{{justificativaAvaliacao}}</p>
+                                            {{/justificativaAvaliacao}}
+                                            {{#msgRecurso}}
+                                                <hr>
+                                                <h2 class="status-card--title">Você pode entrar com recurso</h2>
+                                                <p class="status-card--content">{{msgRecurso}}</p>
+                                            {{/msgRecurso}}
+                                            {{#emailRecurso}}
+                                                <p class="status-card--content">Caso queira solicitar recurso envie um email para <a href="mailto:{{emailRecurso}}">{{emailRecurso}}</a></p>
+                                            {{/emailRecurso}}
+
+                                        </div><!-- /.status-card -->
 
                                         <p>Até mais!</p>
                                     </td>
