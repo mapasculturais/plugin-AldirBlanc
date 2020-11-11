@@ -175,6 +175,48 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     }
 
     /**
+     * Envia email com status da inscrição
+     *
+     */
+    function sendEmail(Registration $registration){
+        $app = App::i();
+        $registrationStatusInfo = $this->getRegistrationStatusInfo($registration);
+
+        $mustache = new \Mustache_Engine();
+        $site_name = $app->view->dict('site: name', false);
+        $baseUrl = $app->getBaseUrl();
+        $justificativaAvaliacao = "";
+        foreach ($registrationStatusInfo['justificativaAvaliacao'] as $message) {
+            if (is_array($message) && !empty($this->config['exibir_resultado_padrao'] ) ) {
+               $justificativaAvaliacao .= $message['message'] . "<hr>";
+            }else{
+                $justificativaAvaliacao .= $message .'<hr>';
+            }
+        }
+        $filename = $app->view->resolveFilename("views/aldirblanc", "email-status.html");
+        $template = file_get_contents($filename);
+
+        $params = [
+            "siteName" => $site_name,
+            "urlImageToUseInEmails" => $this->config['logotipo_central'],
+            "user" => $registration->owner->name,
+            "inscricao" => $registration->number, 
+            "statusNum" => $registration->status,
+            "statusTitle" => $registrationStatusInfo['registrationStatusMessage']['title'],
+            "justificativaAvaliacao" => $justificativaAvaliacao,
+            "msgRecurso" => $this->config['msg_recurso'],
+            "emailRecurso" => $this->config['email_recurso'],
+            "baseUrl" => $baseUrl
+        ];
+        $content = $mustache->render($template,$params);
+        $app->createAndSendMailMessage([
+            'from' => $app->config['mailer.from'],
+            'to' => $registration->owner->user->email,
+            'subject' => $site_name . " - Status de inscrição",
+            'body' => $content
+        ]);
+    }
+    /**
      * Retorna Array com informações sobre o status de uma inscrição
      *
      * @return array
