@@ -32,7 +32,9 @@
             border-collapse: separate;
             mso-table-lspace: 0pt;
             mso-table-rspace: 0pt;
-            width: 100%; }
+            width: 100%;
+        }
+
         table td {
             font-family: sans-serif;
             font-size: 14px;
@@ -92,6 +94,7 @@
             text-align: center;
             width: 100%;
         }
+
         .footer td,
         .footer p,
         .footer span,
@@ -132,6 +135,7 @@
             margin: 0;
             margin-bottom: 15px;
         }
+
         p li,
         ul li,
         ol li {
@@ -149,17 +153,23 @@
         ------------------------------------- */
         .btn {
             box-sizing: border-box;
-            width: 100%; }
-        .btn > tbody > tr > td {
-            padding-bottom: 15px; }
+            width: 100%;
+        }
+
+        .btn>tbody>tr>td {
+            padding-bottom: 15px;
+        }
+
         .btn table {
             width: auto;
         }
+
         .btn table td {
             background-color: #ffffff;
             border-radius: 5px;
             text-align: center;
         }
+
         .btn a {
             background-color: #ffffff;
             border: solid 1px #3498db;
@@ -181,8 +191,8 @@
         }
 
         .btn-primary a {
-            background-color:  #3275B6;
-            border-color:  #3275B6;
+            background-color: #3275B6;
+            border-color: #3275B6;
             color: #ffffff;
         }
 
@@ -245,6 +255,139 @@
         }
 
         /* -------------------------------------
+            CARD STATUS STYLES
+        ------------------------------------- */
+
+        .status-card {
+            border-radius: 10px;
+            background-color: #FFFFFF;
+            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3);
+            padding: 20px 10px;
+            background-color: #3275B6;
+            color: #fff;
+            display: block;
+            font-size: 1rem;
+            line-height: 1.4;
+            margin-bottom: 5px;
+            margin-top: 5px;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .status-card--primary,
+        .status-card.status-1 {
+            border-radius: 10px;
+            background-color: #9565D2;
+            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3);
+            padding: 20px 10px;
+            color: #fff;
+            display: block;
+            font-size: 1rem;
+            line-height: 1.4;
+            margin-bottom: 5px;
+            margin-top: 5px;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .status-card--secondary,
+        .status-card.status-10 {
+            border-radius: 10px;
+            background-color: #B4BA00;
+            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3);
+            padding: 20px 10px;
+            color: #fff;
+            display: block;
+            font-size: 1rem;
+            line-height: 1.4;
+            margin-bottom: 5px;
+            margin-top: 5px;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .status-card--tertiary,
+        .status-card.status-2 {
+            border-radius: 10px;
+            background-color: #cc0033;
+            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3);
+            padding: 20px 10px;
+            color: #fff;
+            display: block;
+            font-size: 1rem;
+            line-height: 1.4;
+            margin-bottom: 5px;
+            margin-top: 5px;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .status-card.status-3 {
+            border-radius: 10px;
+            background-color: #cc0033;
+            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3);
+            padding: 20px 10px;
+            color: #fff;
+            display: block;
+            font-size: 1rem;
+            line-height: 1.4;
+            margin-bottom: 5px;
+            margin-top: 5px;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .status-card--quaternary,
+        .status-card.status-8 {
+            border-radius: 10px;
+            background-color: #666666;
+            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3);
+            padding: 20px 10px;
+            color: #fff;
+            display: block;
+            font-size: 1rem;
+            line-height: 1.4;
+            margin-bottom: 5px;
+            margin-top: 5px;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .status-card--title {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: bold;
+            line-height: 1.4;
+            margin: 0 0 10px;
+            padding: 0;
+        }
+
+        .status-card--content {
+            color: #fff;
+            font-size: 14px;
+            font-family: 'Open Sans', "Arial", sans-serif;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .status-card--content a {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .status-card hr {
+            border: 0;
+            border-top: 1px solid #fff;
+            height: 0;
+            margin: 1.5rem 0;
+        }
+
+        .status-card hr:nth-last-of-type(1) {
+            display: none;
+        }
+
+        /* -------------------------------------
             RESPONSIVE AND MOBILE FRIENDLY STYLES
         ------------------------------------- */
         @media only screen and (max-width: 620px) {
@@ -252,6 +395,7 @@
                 font-size: 28px !important;
                 margin-bottom: 10px !important;
             }
+
             table[class=body] p,
             table[class=body] ul,
             table[class=body] ol,
@@ -260,28 +404,35 @@
             table[class=body] a {
                 font-size: 16px !important;
             }
+
             table[class=body] .wrapper,
             table[class=body] .article {
                 padding: 10px !important;
             }
+
             table[class=body] .content {
                 padding: 0 !important;
             }
+
             table[class=body] .container {
                 padding: 0 !important;
                 width: 100% !important;
             }
+
             table[class=body] .main {
                 border-left-width: 0 !important;
                 border-radius: 0 !important;
                 border-right-width: 0 !important;
             }
+
             table[class=body] .btn table {
                 width: 100% !important;
             }
+
             table[class=body] .btn a {
                 width: 100% !important;
             }
+
             table[class=body] .img-responsive {
                 height: auto !important;
                 max-width: 100% !important;
@@ -296,6 +447,7 @@
             .ExternalClass {
                 width: 100%;
             }
+
             .ExternalClass,
             .ExternalClass p,
             .ExternalClass span,
@@ -304,6 +456,7 @@
             .ExternalClass div {
                 line-height: 100%;
             }
+
             .apple-link a {
                 color: inherit !important;
                 font-family: inherit !important;
@@ -312,6 +465,7 @@
                 line-height: inherit !important;
                 text-decoration: none !important;
             }
+
             #MessageViewBody a {
                 color: inherit;
                 text-decoration: none;
@@ -320,79 +474,82 @@
                 font-weight: inherit;
                 line-height: inherit;
             }
+
             .btn-primary table td:hover {
                 background-color: #34495e !important;
             }
+
             .btn-primary a:hover {
                 background-color: #34495e !important;
                 border-color: #34495e !important;
             }
         }
-
     </style>
 </head>
+
 <body class="">
-<span class="preheader"></span>
-<table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body">
-    <tr>
-        <td>&nbsp;</td>
-        <td class="container">
-            <div class="content">
+    <span class="preheader"></span>
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body">
+        <tr>
+            <td>&nbsp;</td>
+            <td class="container">
+                <div class="content">
 
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td align="center" class="wrapper">
-                            <img width="60%" src={{urlImageToUseInEmails}} alt="logo">
-                        </td>
-                    </tr>
-                </table>
-
-                <br>
-                <br>
-
-                <!-- START CENTERED WHITE CONTAINER -->
-                <table role="presentation" class="main">
-
-                    <!-- START MAIN CONTENT AREA -->
-                    <tr>
-                        <td class="wrapper">
-                            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                                <tr>
-                                    <td>
-                                        <p>Olá, {{user}}</p>
-
-                                        <p>Seguem as informações sobre a inscrição {{inscricao}}!</p>
-
-                                        <p>Você também pode visualizar o status da inscrição através do link: <a href="{{urlSite}}/aldirblanc/status/{{inscricao}}" target="_blank">Status da inscrição</a>.</p><br>
-                                        
-
-                                        <p>Até mais!</p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-
-                    <!-- END MAIN CONTENT AREA -->
-                </table>
-                <!-- END CENTERED WHITE CONTAINER -->
-
-                <!-- START FOOTER -->
-                <div class="footer">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                         <tr>
-                            <td class="content-block">
-                                <span class="apple-link"><span></span> {{siteName}} </span><br>
-                                <span class="apple-link"><span ></span> <a href="{{baseUrl}}">{{baseUrl}}</a></span>
+                            <td align="center" class="wrapper">
+                                <img width="60%" src={{urlImageToUseInEmails}} alt="logo">
                             </td>
                         </tr>
                     </table>
+
+                    <br>
+                    <br>
+
+                    <!-- START CENTERED WHITE CONTAINER -->
+                    <table role="presentation" class="main">
+
+                        <!-- START MAIN CONTENT AREA -->
+                        <tr>
+                            <td class="wrapper">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td>
+                                            <p>Olá, {{user}}</p>
+
+                                            <p>Seguem as informações sobre a inscrição {{inscricao}}!</p>
+
+                                            <p>Você também pode visualizar o status da inscrição através do link: <a href="{{urlSite}}/aldirblanc/status/{{inscricao}}" target="_blank">Status da inscrição</a>.</p><br>
+
+
+                                            <p>Até mais!</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <!-- END MAIN CONTENT AREA -->
+                    </table>
+                    <!-- END CENTERED WHITE CONTAINER -->
+
+                    <!-- START FOOTER -->
+                    <div class="footer">
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td class="content-block">
+                                    <span class="apple-link"><span></span> {{siteName}} </span><br>
+                                    <span class="apple-link"><span></span> <a href="{{baseUrl}}">{{baseUrl}}</a></span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <!-- END FOOTER -->
                 </div>
-                <!-- END FOOTER -->
-            </div>
-        </td>
-        <td>&nbsp;</td>
-    </tr>
-</table>
+            </td>
+            <td>&nbsp;</td>
+        </tr>
+    </table>
 </body>
+
 </html>
