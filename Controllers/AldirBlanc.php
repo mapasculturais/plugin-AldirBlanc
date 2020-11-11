@@ -175,6 +175,74 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     }
 
     /**
+     * Endpoint para enviar emails das oportunidades
+     */
+    function ALL_sendEmails(){
+        ini_set('max_execution_time', 0);
+        
+        $this->requireAuthentication();
+
+        if (empty($this->data['opportunity'])) {
+            $this->errorJson('O parâmetro opportunity é obrigatório');
+        }
+
+        $app = App::i();
+
+        $opportunity = $app->repo('Opportunity')->find($this->data['opportunity']);
+
+        if (!$opportunity) {
+            $this->errorJson('Oportunidade não encontrada');
+        }
+
+        $opportunity->checkPermission('@control');
+
+        $inciso1Ids = [$this->config['inciso1_opportunity_id']];
+        $inciso2Ids = array_values($this->config['inciso2_opportunity_ids']);
+        $inciso3Ids = is_array($this->config['inciso3_opportunity_ids']) ? $this->config['inciso3_opportunity_ids'] : [];
+
+        $lab_opportunities = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
+
+        if (!in_array($opportunity->id, $lab_opportunities)) {
+            $this->errorJson("Oportunidade não é da Lei Aldir Blanc");
+        }
+
+        if (empty($this->data['status'])) {
+            $status = '2,3,8,10';
+        } else {
+            $status = intval($this->data['status']);
+            if (!in_array($status, [2,3,8,10])) {
+                $this->errorJson('Os status válidos são 2, 3, 8 ou 10');
+                die;
+            }
+        }
+
+        $registrations = $app->em->getConnection()->fetchAll("
+            SELECT 
+                r.id,
+                r.status,
+                les.value AS last_email_status
+
+            FROM registration r
+                LEFT JOIN
+                    registration_meta les ON 
+                        les.object_id = r.id AND 
+                        les.key = 'lab_last_email_status'
+                    
+            WHERE 
+                r.opportunity_id = {$opportunity->id} AND 
+                r.status IN ({$status}) AND 
+                (les.value IS NULL OR les.value <> r.status::VARCHAR)
+
+            ORDER BY r.sent_timestamp ASC");
+
+        foreach ($registrations as &$reg) {
+            $reg = (object) $reg;
+            $registration = $app->repo('Registration')->find($reg->id);
+            $this->sendEmail($registration);
+        }
+    }
+
+    /**
      * Envia email com status da inscrição
      *
      */
@@ -200,6 +268,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             "siteName" => $site_name,
             "urlImageToUseInEmails" => $this->config['logotipo_central'],
             "user" => $registration->owner->name,
+            "inscricaoId" => $registration->id, 
             "inscricao" => $registration->number, 
             "statusNum" => $registration->status,
             "statusTitle" => $registrationStatusInfo['registrationStatusMessage']['title'],
@@ -209,12 +278,35 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             "baseUrl" => $baseUrl
         ];
         $content = $mustache->render($template,$params);
-        $app->createAndSendMailMessage([
+        $email_params = [
             'from' => $app->config['mailer.from'],
             'to' => $registration->owner->user->email,
             'subject' => $site_name . " - Status de inscrição",
             'body' => $content
-        ]);
+        ];
+
+        $app->log->debug("ENVIANDO EMAIL DE STATUS DA {$registration->number} ({$registrationStatusInfo['registrationStatusMessage']['title']})");
+        $app->createAndSendMailMessage($email_params);
+
+        
+        $sent_emails = $registration->lab_sent_emails ;
+        $sent_emails[] = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'loggedin_user' => [
+                'id' => $app->user->id,
+                'email' => $app->user->email,
+                'name' => $app->user->profile->name 
+            ],
+            'email' => $email_params
+        ];
+
+        $app->disableAccessControl();
+        $registration->lab_sent_emails = $sent_emails;
+
+        $registration->lab_last_email_status = $registration->status;
+
+        $registration->save(true);
+        $app->enableAccessControl();
     }
     /**
      * Retorna Array com informações sobre o status de uma inscrição
@@ -346,6 +438,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         return $agent;
     }
+
+    
 
     /**
     * Redireciona o usuário para o formulário do inciso II

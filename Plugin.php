@@ -701,7 +701,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app->registerFileGroup('aldirblanc', $def_autorizacao);
         $app->registerFileGroup('aldirblanc', $def_documento);
 
-        // registrinado metadados do usuário
+        // registrinado metadados
         $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_contato_tipo', [
             'label' => i::__('Tipo de contato da mediação'),
             'type' => 'select',
@@ -711,6 +711,19 @@ class Plugin extends \MapasCulturais\Plugin
                 'whatsapp' => i::__('Whatsapp'),
                 'sms' => i::__('SMS'),
             ]
+        ]);
+
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'lab_sent_emails', [
+            'label' => i::__('E-mails enviados'),
+            'type' => 'json',
+            'private' => true,
+            'default' => '[]'
+        ]);
+
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'lab_last_email_status', [
+            'label' => i::__('Status do último e-mail enviado'),
+            'type' => 'integer',
+            'private' => true
         ]);
 
         $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_contato', [
