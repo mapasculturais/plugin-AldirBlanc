@@ -65,6 +65,8 @@ class Plugin extends \MapasCulturais\Plugin
             'config-cnab240-inciso2' => require_once env('AB_TXT_CANAB240_INCISO2', __DIR__ . '/config-cnab240-inciso2.php'),
 
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
+            'config-mci460' => require_once env('AB_CONFIG_MCI460', __DIR__ . '/config-mci460.php'),
+            'config-ppg10x' => require_once env('AB_CONFIG_PPG10x', __DIR__ . '/config-ppg10x.php'),
 
             // define os ids para dataprev e avaliadores genericos
             'avaliadores_dataprev_user_id' => (array) json_decode(env('AB_AVALIADORES_DATAPREV_USER_ID', '[]')),
@@ -302,26 +304,32 @@ class Plugin extends \MapasCulturais\Plugin
 
         });
 
-
-        // botao de exportacao csv de inscricoes mediadas
-        $app->hook('template(opportunity.single.header-inscritos):end', function () use ($plugin, $app) {
-
-            $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
-            if (($requestedOpportunity->canUser('@control'))) {
-
-                $registrations = $app->repo('Registration')->findBy(array('opportunity' => $requestedOpportunity->id));
-
-                $registrationsByMediator = [];
-                foreach ($registrations as $registration) {
-
-                    if (array_key_exists('mediador', $registration->getOwner()->getAgentRelationsGrouped())) {
-                        $registrationsByMediator[] = $registration;
-                    }
-                }
-            }
-            //$this->part('aldirblanc/csv-button-mediacao', ['entity' => $requestedOpportunity, 'registrationsByMediator' => $registrationsByMediator]);
-        });
        
+        // botão exportadores desbancarizados
+        $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app) {
+            // condiciona exibição do botão a uma configuração
+            if (!isset($plugin->config['exporta_desbancarizados']) ||
+                !is_array($plugin->config['exporta_desbancarizados']) ||
+                empty($plugin->config['exporta_desbancarizados'])) {
+                return;
+            }
+            $requestedOpportunity = $this->controller->requestedEntity;
+            $opportunity = $requestedOpportunity->id;
+            // exclui qualquer oportunidade que não seja inciso 1 (sujeito a futuras alterações)
+            if ($opportunity != $plugin->config['inciso1_opportunity_id']) {
+                return;
+            }
+            if ($requestedOpportunity->canUser('@control')) {
+                $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
+                $this->part('aldirblanc/bankless-button', [
+                    'inciso' => 1,
+                    'opportunity' => $opportunity,
+                    'exports' => $plugin->config['exporta_desbancarizados'],
+                ]);
+            }
+            return;
+        });
+
         //Botão exportador genérico
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
             $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];

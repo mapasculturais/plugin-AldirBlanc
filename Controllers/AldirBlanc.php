@@ -762,7 +762,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $opportunitiesInciso3 = [];
         if ($this->config['inciso3_enabled']) {
             #TODO inciso 3
-            // $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
+            $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
         $this->render('cadastro', [
                 'inciso1Limite' => $this->config['inciso1_limite'],
@@ -1113,8 +1113,101 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             'opportunities' => array_values($this->config['inciso2_opportunity_ids'])
         ]);
 
+        $conn = $app->em->getConnection();
+
+
+        $enviadas = $conn->fetchAll("
+            SELECT  
+                o.id, 
+                o.name, 
+                count(r.*) as num_inscricoes 
+
+            FROM 
+                registration r, 
+                opportunity o 
+
+            WHERE 
+                o.id = r.opportunity_id AND 
+                o.id IN (
+                        SELECT object_id 
+                        FROM opportunity_meta 
+                        WHERE key = 'aldirblanc_inciso' AND value = '2'
+                ) AND 
+                r.status > 0 AND 
+                o.status > 0 
+
+            GROUP BY 
+                o.name, 
+                o.id 
+
+            ORDER BY 
+                num_inscricoes desc,
+                o.name ASC");
+
+
+
+        $soh_rascunhos = $conn->fetchAll("
+            SELECT  
+                o.id, 
+                o.name, 
+                count(r.*) as num_inscricoes 
+
+            FROM 
+                registration r, 
+                opportunity o 
+
+            WHERE 
+                o.id = r.opportunity_id AND 
+                o.id IN (
+                        SELECT object_id 
+                        FROM opportunity_meta 
+                        WHERE key = 'aldirblanc_inciso' AND value = '2'
+                ) AND 
+                o.id NOT IN (
+                        SELECT opportunity_id 
+                        FROM registration
+                        WHERE status > 0
+                ) AND
+                r.status = 0 AND 
+                o.status > 0 
+
+            GROUP BY 
+                o.name, 
+                o.id 
+
+            ORDER BY 
+                num_inscricoes desc,
+                o.name ASC");
+            
+
+        $sem_inscricao = $conn->fetchAll("
+            SELECT 
+                id, 
+                name
+
+            FROM 
+                opportunity 
+
+            WHERE 
+                id NOT IN (
+                        SELECT opportunity_id 
+                        FROM registration
+                ) AND 
+                id IN (
+                        SELECT object_id 
+                        FROM opportunity_meta 
+                        WHERE key = 'aldirblanc_inciso' AND 
+                        value = '2'
+                )
+
+            ORDER BY name ASC
+        ");
+
         return (object) [
-            'total' => $query->getSingleScalarResult()
+            'total' => $query->getSingleScalarResult(),
+            'enviadas' => $enviadas,
+            'soh_rascunhos' => $soh_rascunhos,
+            'sem_inscricao' => $sem_inscricao
         ];
     }
     function mask($val, $mask) {
