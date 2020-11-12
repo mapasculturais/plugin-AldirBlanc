@@ -577,32 +577,33 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         // monta array de mensagens
         $justificativaAvaliacao = [];
+
+        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
+            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
+        }
+        
         foreach ($evaluations as $evaluation) {
 
             if ($evaluation->getResult() == $registration->status) {
                 
                 if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
                     // resultados do dataprev
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
                 } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
                     // resultados dos avaliadores genericos
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
                 } 
                 
-                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores'])) {
+                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
                     // resultados dos demais avaliadores
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs;
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
                 }
 
             }
             
         }
 
-        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
-            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
-        }
-
-        $this->render('status', ['registration' => $registration, 'registrationStatusMessage' => $registrationStatusMessage, 'justificativaAvaliacao' => $justificativaAvaliacao]);
+        $this->render('status', ['registration' => $registration, 'registrationStatusMessage' => $registrationStatusMessage, 'justificativaAvaliacao' => array_filter($justificativaAvaliacao)]);
     }
 
     /**
@@ -761,7 +762,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $opportunitiesInciso3 = [];
         if ($this->config['inciso3_enabled']) {
             #TODO inciso 3
-            // $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
+            $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
          // redireciona admins para painel
          $opportunities_ids = array_values($this->config['inciso2_opportunity_ids']);
@@ -1128,8 +1129,101 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             'opportunities' => array_values($this->config['inciso2_opportunity_ids'])
         ]);
 
+        $conn = $app->em->getConnection();
+
+
+        $enviadas = $conn->fetchAll("
+            SELECT  
+                o.id, 
+                o.name, 
+                count(r.*) as num_inscricoes 
+
+            FROM 
+                registration r, 
+                opportunity o 
+
+            WHERE 
+                o.id = r.opportunity_id AND 
+                o.id IN (
+                        SELECT object_id 
+                        FROM opportunity_meta 
+                        WHERE key = 'aldirblanc_inciso' AND value = '2'
+                ) AND 
+                r.status > 0 AND 
+                o.status > 0 
+
+            GROUP BY 
+                o.name, 
+                o.id 
+
+            ORDER BY 
+                num_inscricoes desc,
+                o.name ASC");
+
+
+
+        $soh_rascunhos = $conn->fetchAll("
+            SELECT  
+                o.id, 
+                o.name, 
+                count(r.*) as num_inscricoes 
+
+            FROM 
+                registration r, 
+                opportunity o 
+
+            WHERE 
+                o.id = r.opportunity_id AND 
+                o.id IN (
+                        SELECT object_id 
+                        FROM opportunity_meta 
+                        WHERE key = 'aldirblanc_inciso' AND value = '2'
+                ) AND 
+                o.id NOT IN (
+                        SELECT opportunity_id 
+                        FROM registration
+                        WHERE status > 0
+                ) AND
+                r.status = 0 AND 
+                o.status > 0 
+
+            GROUP BY 
+                o.name, 
+                o.id 
+
+            ORDER BY 
+                num_inscricoes desc,
+                o.name ASC");
+            
+
+        $sem_inscricao = $conn->fetchAll("
+            SELECT 
+                id, 
+                name
+
+            FROM 
+                opportunity 
+
+            WHERE 
+                id NOT IN (
+                        SELECT opportunity_id 
+                        FROM registration
+                ) AND 
+                id IN (
+                        SELECT object_id 
+                        FROM opportunity_meta 
+                        WHERE key = 'aldirblanc_inciso' AND 
+                        value = '2'
+                )
+
+            ORDER BY name ASC
+        ");
+
         return (object) [
-            'total' => $query->getSingleScalarResult()
+            'total' => $query->getSingleScalarResult(),
+            'enviadas' => $enviadas,
+            'soh_rascunhos' => $soh_rascunhos,
+            'sem_inscricao' => $sem_inscricao
         ];
     }
     function mask($val, $mask) {
