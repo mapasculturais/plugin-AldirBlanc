@@ -18,6 +18,10 @@ if ($inciso2) :
     $controller = $app->controller('Opportunity');
 ?>
 <style>
+    .oportunidades table {
+        margin: 0 1em;
+    }
+
     .oportunidades .report-item {
         display: inline-block;
     }
@@ -59,7 +63,12 @@ if ($inciso2) :
                             <th>Oportunidade</th>
                             <th>Inscrições</th>
                         </tr>
-                        <?php foreach($inciso2->enviadas as $opp): $opp = (object) $opp; ?>
+                        <?php 
+                        $total = 0;
+                        foreach($inciso2->enviadas as $opp): 
+                            $opp = (object) $opp; 
+                            $total += $opp->num_inscricoes;
+                            ?>
                             <tr>
                                 <td>
                                     <a href="<?= $controller->createUrl('single', [$opp->id]) ?>"><?= $opp->name ?></a>
@@ -67,6 +76,10 @@ if ($inciso2) :
                                 <td class='number'><?= $opp->num_inscricoes ?></td>
                             </tr>
                         <?php endforeach; ?>
+                        <tr>
+                            <td>TOTAL: </td>
+                            <td class='number'><?= $total ?></td>
+                        </tr>
                     </table>
                 </div>
                 <div class="report-item">
@@ -76,7 +89,12 @@ if ($inciso2) :
                             <th>Oportunidade</th>
                             <th>Inscrições</th>
                         </tr>
-                        <?php foreach($inciso2->soh_rascunhos as $opp): $opp = (object) $opp; ?>
+                        <?php 
+                        $total = 0;
+                        foreach($inciso2->soh_rascunhos as $opp): 
+                            $opp = (object) $opp; 
+                            $total += $opp->num_inscricoes;
+                            ?>
                             <tr>
                                 <td>
                                     <a href="<?= $controller->createUrl('single', [$opp->id]) ?>"><?= $opp->name ?></a>
@@ -84,6 +102,10 @@ if ($inciso2) :
                                 <td class='number'><?= $opp->num_inscricoes ?></td>
                             </tr>
                         <?php endforeach; ?>
+                        <tr>
+                            <td>TOTAL: </td>
+                            <td class='number'><?= $total ?></td>
+                        </tr>
                     </table>
                 </div>
 
