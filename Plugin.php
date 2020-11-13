@@ -109,20 +109,45 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->applyHookBoundTo($this, 'aldirblanc.config', [&$config, &$skipConfig]);
 
+        if (isset($_GET['ab_skip_cache'])) {
+            $this->deleteConfigCache();
+        }
 
         if (!$skipConfig) {
-            $cache_id = __METHOD__ . ':' . 'config';
-
-            if (!isset($_GET['ab_skip_cache']) && ($cached = $app->cache->fetch($cache_id)) ) {
-                $config = $cached;
+            if($cache = $this->getConfigCache()){
+                $config = $cache;
             } else {
                 $config = $this->configOpportunitiesIds($config);
-                if (!empty($config['inciso2_opportunity_ids'])) {
-                    $app->cache->save($cache_id, $config, 3600);
-                }
+                $this->setConfigCache($config);
             }
         }
         parent::__construct($config);
+    }
+
+    public function deleteConfigCache() {
+        unlink(PRIVATE_FILES_PATH . 'plugin.AldirBlanc.config.cache.serialized');
+    }
+
+    public function getConfigCache()
+    {
+        $config_cache_filename = PRIVATE_FILES_PATH . 'plugin.AldirBlanc.config.cache.serialized';
+        if (file_exists($config_cache_filename)) {
+            if ($config = unserialize(file_get_contents($config_cache_filename))) {
+                return $config;
+            }
+        }
+
+        return null;
+    }
+
+    public function setConfigCache($config) {
+        $config_cache_filename = PRIVATE_FILES_PATH . 'plugin.AldirBlanc.config.cache.serialized';
+        if ($serialized = serialize($config)) {
+            file_put_contents($config_cache_filename, $serialized);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function configOpportunitiesIds($config)
