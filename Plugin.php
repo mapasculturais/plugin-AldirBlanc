@@ -87,8 +87,7 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_status_notapproved' => env('AB_STATUS_NOTAPPROVED_MESSAGE', 'Não atendeu aos requisitos necessários. Caso não concorde com o resultado, você poderá enviar um novo formulário de solicitação ao benefício - fique atento ao preenchimento dos campos.'), // STATUS_NOTAPPROVED = 3
             'msg_status_waitlist' => env('AB_STATUS_WAITLIST_MESSAGE', 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.'), //STATUS_WAITLIST = 8
 
-            // informacoes para recurso das inscrições com status 2 e 3
-            'email_recurso' => env('AB_EMAIL_RECURSO', ''),
+            // mensagem padão para recurso das inscrições com status 2 e 3
             'msg_recurso' => env('AB_MENSAGEM_RECURSO', ''),
                         
 
@@ -624,6 +623,14 @@ class Plugin extends \MapasCulturais\Plugin
                 $app->redirect($url);
             }
         });
+
+        /**
+         * Carrega campo adicional "Mensagem de Recurso" nas oportunidades
+         * @return void
+         */
+        $app->hook('view.partial(singles/opportunity-registrations--importexport):before', function () use ($plugin, $app) {
+            $this->part('aldirblanc/status-recurso-fields', ['opportunity' => $this->controller->requestedEntity]);
+        });
         
         $app->hook('view.partial(footer):before', function() use($plugin, $app) {
             if($plugin->config['zammad_enable']) {
@@ -785,6 +792,15 @@ class Plugin extends \MapasCulturais\Plugin
                 // @todo: validação que impede a alteração do valor desse metadado
             ]);
         }
+
+        /**
+         * Registra campo adicional "Mensagem de Recurso" nas oportunidades
+         * @return void
+         */
+        $this->registerMetadata('MapasCulturais\Entities\Opportunity', 'aldirblanc_status_recurso', [
+            'label' => i::__('Mensagem para Recurso na tela de Status'),
+            'type' => 'text'
+        ]);
     }
 
     function json($data, $status = 200)
