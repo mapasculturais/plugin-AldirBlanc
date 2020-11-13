@@ -426,16 +426,23 @@ class Plugin extends \MapasCulturais\Plugin
                             $can = true;
                         }
                     }
-
+                    
                     if (!$can) {
                         $can_consolidate = false;
                     }
                 }
             }
+            
+            $tem_validacoes = false;
+            foreach ($evaluations as $eval) {
+                if ($eval->user->aldirblanc_validador) {
+                    $tem_validacoes = true;
+                }
+            }
 
             // se não pode consolidar, coloca a string 'homologado'
             if (!$can_consolidate) {
-                if (!$this->consolidatedResult) {
+                if (!$this->consolidatedResult || count($evaluations) <= 1 || !$tem_validacoes) {
                     $result = 'homologado';
                 } else if (strpos($this->consolidatedResult, 'homologado') === false) {
                     $result = "{$this->consolidatedResult}, homologado";
