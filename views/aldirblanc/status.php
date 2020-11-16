@@ -37,16 +37,35 @@ $_params = [
                 <hr>
             <?php endif; ?>
 
-            <?php if (($registration->status == 3 || $registration->status == 2) && !empty($this->controller->config['msg_recurso'])) : ?>
-                <hr>
-                <h2 class="status-card--title">Você pode entrar com recurso</h2>
-                <p class="status-card--content"><?= $this->controller->config['msg_recurso']; ?></p>
+            <?php
 
-                <?php if (!empty($this->controller->config['email_recurso'])) : ?>
-                    <br>
-                    <p class="status-card--content">Caso queira solicitar recurso envie um email para <a href="mailto:<?php echo $this->controller->config['email_recurso']; ?>"><?php echo $this->controller->config['email_recurso']; ?></a></p>
-                <?php endif; ?>
-            <?php endif; ?>
+            /**
+             * 
+             * Exibe mensagem com informações sobre solicitação de recurso nas inscrições com status 2 (inválida) e 3 (não selecionada)
+             * 
+             * Verifica se existe uma mensagem no campo `Mensagem de Recurso para o Status` da oportunidade.
+             * Se não tiver, verifica na configuração `msg_recurso`.
+             * 
+             */
+            if (($registration->status == 3 || $registration->status == 2)) :
+
+                $statusRecurso = '';
+                if ($registration->opportunity->getMetadata('aldirblanc_status_recurso')) {
+                    $statusRecurso = $registration->opportunity->getMetadata('aldirblanc_status_recurso');
+                } elseif (!empty($this->controller->config['msg_recurso'])) {
+                    $statusRecurso = $this->controller->config['msg_recurso'];
+                }
+
+                if ($statusRecurso) : ?>
+
+                    <hr>
+                    <h2 class="status-card--title">Você pode entrar com recurso</h2>
+                    <p class="status-card--content"><?= $statusRecurso; ?></p>
+
+                <?php endif;
+
+            endif; ?>
+
         </div><!-- /.status-card -->
         <div class="wrap-button">
             <a href="<?php echo $app->createUrl('aldirblanc', 'cadastro'); ?>" class="btn secondary"><?php \MapasCulturais\i::_e("Voltar para os Cadastros"); ?></a>
