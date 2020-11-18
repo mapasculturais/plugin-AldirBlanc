@@ -24,7 +24,10 @@ if (count($cidades) === 0) {
 <section class="lab-main-content cadastro <?= $app->user->is('mediador') ? "mediador" : '' ?>">
     <header>
         <div class="intro-message">
-            <div class="name"> Olá <?= $niceName ? ", " . $niceName : "" ?>! </div>
+            <div class="name"> Olá <?= $niceName ? ", " . $niceName : "" ?>! 
+            <br>
+            Clique <a href="<?=$registrationUrl = $app->createUrl('site');?>"> aqui</a> para retornar à página inicial
+            </div>
         </div>
     </header>
 
