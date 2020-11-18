@@ -566,6 +566,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if(!$registration) {
             $app->pass();
         }
+        if($registration->status == 0) {
+            $app->redirect($this->createUrl('cadastro'));
+        }
         $registration->checkPermission('view');
 
         // retorna a mensagem de acordo com o status
