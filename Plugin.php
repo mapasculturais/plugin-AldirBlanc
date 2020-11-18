@@ -616,7 +616,13 @@ class Plugin extends \MapasCulturais\Plugin
                 $this->addRole('mediador');
             }
         });
-
+        // atualiza roles de mediadores conforme lista de emails
+        $app->hook('template(panel.agents.panel-header):end', function () use($app){
+            if(!$app->user->is('admin')) {
+                return;
+            }
+            $this->part('aldirblanc/generate-mediadores-button');
+        });
         $app->hook('auth.successful', function() use($plugin, $app) {
             $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
             $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
