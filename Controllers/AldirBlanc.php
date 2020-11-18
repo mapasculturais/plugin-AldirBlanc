@@ -708,10 +708,20 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $repo = $app->repo('Registration');
         $ignoreDates = $this->config['mediadores_prolongar_tempo'] && $app->user->is('mediador');
+        
+        // pega inscrições do inciso 1
+        $inciso1 = $this->getOpportunityInciso1();
+        $registrations = $controller->apiQuery([
+            '@select' => 'id', 
+            'opportunity' => "EQ({$inciso1->id})", 
+            'status' => 'GTE(0)'
+        ]);
+        $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+        $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
+        // 
+
         $inciso1_enabled = $this->config['inciso1_enabled'];
         if ($this->config['inciso1_enabled'] || ( $ignoreDates )) {
-            $inciso1 = $this->getOpportunityInciso1();
-             
             if ($app->user->is('mediador')){
                 $allowed = $this->config['lista_mediadores'][$app->user->email] ?? '';
                 
@@ -721,21 +731,26 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
             if($inciso1){
                 $inciso1_enabled = true;
-                $registrations = $controller->apiQuery([
-                    '@select' => 'id', 
-                    'opportunity' => "EQ({$inciso1->id})", 
-                    'status' => 'GTE(0)'
-                ]);
-                $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
-                $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
             }
         }
 
         $opportunitiesInciso2 = [];
         $registrationsInciso2 = [];
         $inciso2_enabled = $this->config['inciso2_enabled'] ;
+        $inciso2_ids = $this->config['inciso2_opportunity_ids'];
+
+        // busca inscrições
+        $inciso2_ids_strings = implode(',', $inciso2_ids);
+        $registrations = $controller->apiQuery([
+            '@select' => 'id', 
+            'opportunity' => "IN({$inciso2_ids_strings})", 
+            'status' => 'GTE(0)'
+        ]);
+        $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+        $registrationsInciso2 = $repo->findBy(['id' => $registrations_ids]);
+        // 
+
         if ($inciso2_enabled || $ignoreDates) {
-            $inciso2_ids = $this->config['inciso2_opportunity_ids'];
             if ($app->user->is('mediador')){
                 $allowed = $this->config['lista_mediadores'][$app->user->email] ?? "";
                 if (!$allowed){
@@ -749,18 +764,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 $inciso2_ids = array_values($inciso2_ids);
             }
 
-            $inciso2_ids = implode(',', $inciso2_ids);
             if($inciso2_ids){
                 $inciso2_enabled = true;
-                $registrations = $controller->apiQuery([
-                    '@select' => 'id', 
-                    'opportunity' => "IN({$inciso2_ids})", 
-                    'status' => 'GTE(0)'
-                ]);
-                $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
-                $registrationsInciso2 = $repo->findBy(['id' => $registrations_ids]);
-                $opportunitiesIdsInciso2 = explode(',',$inciso2_ids);
-                $opportunitiesInciso2 = $app->repo('Opportunity')->findRegistrationWithDateByIds($opportunitiesIdsInciso2); 
+                $opportunitiesInciso2 = $app->repo('Opportunity')->findOpportunitiesWithDateByIds(array_values($inciso2_ids)); 
             }
         }
         $opportunitiesInciso3 = [];
@@ -773,7 +779,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 'inciso2_enabled' => isset($inciso2_ids) && $inciso2_ids ? $inciso2_enabled:false,
                 'inciso1_enabled' => isset($inciso1) &&  $inciso1 ? $inciso1_enabled : false,
                 'inciso3_enabled' => $app->user->is('mediador') ? false : $this->config['inciso3_enabled'],
-                'cidades' => isset($inciso2_ids) && $inciso2_ids ? $this->getCidades($opportunitiesIdsInciso2) : [], 
+                'cidades' => isset($inciso2_ids) && $inciso2_ids ? $this->getCidades($inciso2_ids) : [], 
                 'registrationsInciso1' => isset($inciso1) &&  $inciso1 ? $registrationsInciso1 : [], 
                 'registrationsInciso2' => isset($inciso2_ids) && $inciso2_ids ? $registrationsInciso2 : [], 
                 'summaryStatusName'=>$summaryStatusName, 
