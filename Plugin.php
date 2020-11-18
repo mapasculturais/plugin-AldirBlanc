@@ -328,7 +328,14 @@ class Plugin extends \MapasCulturais\Plugin
             
 
         });
-
+        // Permite mediadores cadastrar fora do prazo
+        $app->hook('entity(Registration).canUser(<<send>>)', function($user,&$can) use($plugin, $app){
+            $allowed_opportunities = $plugin->config['lista_mediadores'][$app->user->email];
+            $allowed =  in_array($this->opportunity->id, $allowed_opportunities );
+            if ( $allowed && $plugin->config['mediadores_prolongar_tempo'] && $app->user->is('mediador') ){
+                $can = true;
+            }
+        });
        
         // botão exportadores desbancarizados
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app) {
