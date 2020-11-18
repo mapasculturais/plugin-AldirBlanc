@@ -628,7 +628,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $app->redirect($this->createUrl('status', [$registration->id]));
         }
         $registration->checkPermission('modify');
-        
+        $ignoreDates = $this->config['mediadores_prolongar_tempo'] && $app->user->is('mediador');
+        $now = new \DateTime('now');
+        $notInTime = ($registration->opportunity->registrationFrom > $now || $registration->opportunity->registrationTo < $now );
+        $showDraft = !($notInTime && !$ignoreDates);
+        if (!$showDraft){
+            $app->redirect($this->createUrl('cadastro'));
+        }
         if (!$registration->termos_aceitos) {
             if ($app->user->is('mediador')) {
                 $this->GET_aceitar_termos();
