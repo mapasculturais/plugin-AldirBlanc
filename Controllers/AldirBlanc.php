@@ -707,8 +707,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $owner_name = $app->user->profile->name;
 
         $repo = $app->repo('Registration');
+        $ignoreDates = $this->config['mediadores_prolongar_tempo'] && $app->user->is('mediador');
         $inciso1_enabled = $this->config['inciso1_enabled'];
-        if ($this->config['inciso1_enabled'] || ($this->config['mediadores_prolongar_tempo'] && $app->user->is('mediador'))) {
+        if ($this->config['inciso1_enabled'] || ( $ignoreDates )) {
             $inciso1 = $this->getOpportunityInciso1();
              
             if ($app->user->is('mediador')){
@@ -732,7 +733,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $opportunitiesInciso2 = [];
         $registrationsInciso2 = [];
-        if ($this->config['inciso2_enabled']) {
+        $inciso2_enabled = $this->config['inciso2_enabled'] ;
+        if ($inciso2_enabled || $ignoreDates) {
             $inciso2_ids = $this->config['inciso2_opportunity_ids'];
             if ($app->user->is('mediador')){
                 $allowed = $this->config['lista_mediadores'][$app->user->email] ?? "";
@@ -749,6 +751,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
             $inciso2_ids = implode(',', $inciso2_ids);
             if($inciso2_ids){
+                $inciso2_enabled = true;
                 $registrations = $controller->apiQuery([
                     '@select' => 'id', 
                     'opportunity' => "IN({$inciso2_ids})", 
@@ -762,13 +765,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         $opportunitiesInciso3 = [];
         if ($this->config['inciso3_enabled']) {
-            #TODO inciso 3
             $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
         $this->render('cadastro', [
                 'inciso1Limite' => $this->config['inciso1_limite'],
                 'inciso2Limite' => $this->config['inciso2_limite'],
-                'inciso2_enabled' => isset($inciso2_ids) && $inciso2_ids ? $this->config['inciso2_enabled']:false,
+                'inciso2_enabled' => isset($inciso2_ids) && $inciso2_ids ? $inciso2_enabled:false,
                 'inciso1_enabled' => isset($inciso1) &&  $inciso1 ? $inciso1_enabled : false,
                 'inciso3_enabled' => $app->user->is('mediador') ? false : $this->config['inciso3_enabled'],
                 'cidades' => isset($inciso2_ids) && $inciso2_ids ? $this->getCidades($opportunitiesIdsInciso2) : [], 
@@ -777,7 +779,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 'summaryStatusName'=>$summaryStatusName, 
                 'niceName' => $owner_name,
                 'opportunitiesInciso2' => isset($inciso2_ids) && $inciso2_ids ? $opportunitiesInciso2 : [],
-                'opportunitiesInciso3' => $app->user->is('mediador') ? [] : $opportunitiesInciso3
+                'opportunitiesInciso3' => $app->user->is('mediador') ? [] : $opportunitiesInciso3,
+                'ignoreDates' => $ignoreDates
             ]);
     }
 

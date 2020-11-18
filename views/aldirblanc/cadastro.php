@@ -7,6 +7,7 @@ use MapasCulturais\Entities\Registration;
 
 $this->jsObject['opportunityId'] = null;
 $this->jsObject['opportunitiesInciso2'] = $opportunitiesInciso2;
+$this->jsObject['ignoreDates'] = $ignoreDates;
 $this->jsObject['serverDate'] = new DateTime();
 
 
