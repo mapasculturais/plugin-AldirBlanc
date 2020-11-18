@@ -59,6 +59,7 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
             'lista_mediadores' => (array) json_decode(env('AB_OPORTUNIDADES_MEDIADORES', '[]')),
+            'mediadores_prolongar_tempo' => env('AB_MEDIADORES_PROLONGAR_TEMPO', false),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),            
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO2', __DIR__ . '/config-csv-generic-inciso2.php'),
             'csv_generic_inciso3' => require_once env('AB_CSV_GENERIC_INCISO3', __DIR__ . '/config-csv-generic-inciso3.php'),
@@ -88,8 +89,7 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_status_notapproved' => env('AB_STATUS_NOTAPPROVED_MESSAGE', 'Não atendeu aos requisitos necessários. Caso não concorde com o resultado, você poderá enviar um novo formulário de solicitação ao benefício - fique atento ao preenchimento dos campos.'), // STATUS_NOTAPPROVED = 3
             'msg_status_waitlist' => env('AB_STATUS_WAITLIST_MESSAGE', 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.'), //STATUS_WAITLIST = 8
 
-            // informacoes para recurso das inscrições com status 2 e 3
-            'email_recurso' => env('AB_EMAIL_RECURSO', ''),
+            // mensagem padão para recurso das inscrições com status 2 e 3
             'msg_recurso' => env('AB_MENSAGEM_RECURSO', ''),
                         
             // só libera para os homologadores as inscrićões que já tenham sido validadas pelos validadores configurados
@@ -109,20 +109,45 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->applyHookBoundTo($this, 'aldirblanc.config', [&$config, &$skipConfig]);
 
+        if (isset($_GET['ab_skip_cache'])) {
+            $this->deleteConfigCache();
+        }
 
         if (!$skipConfig) {
-            $cache_id = __METHOD__ . ':' . 'config';
-
-            if (!isset($_GET['ab_skip_cache']) && ($cached = $app->cache->fetch($cache_id)) ) {
-                $config = $cached;
+            if($cache = $this->getConfigCache()){
+                $config = $cache;
             } else {
                 $config = $this->configOpportunitiesIds($config);
-                if (!empty($config['inciso2_opportunity_ids'])) {
-                    $app->cache->save($cache_id, $config, 3600);
-                }
+                $this->setConfigCache($config);
             }
         }
         parent::__construct($config);
+    }
+
+    public function deleteConfigCache() {
+        unlink(PRIVATE_FILES_PATH . 'plugin.AldirBlanc.config.cache.serialized');
+    }
+
+    public function getConfigCache()
+    {
+        $config_cache_filename = PRIVATE_FILES_PATH . 'plugin.AldirBlanc.config.cache.serialized';
+        if (file_exists($config_cache_filename)) {
+            if ($config = unserialize(file_get_contents($config_cache_filename))) {
+                return $config;
+            }
+        }
+
+        return null;
+    }
+
+    public function setConfigCache($config) {
+        $config_cache_filename = PRIVATE_FILES_PATH . 'plugin.AldirBlanc.config.cache.serialized';
+        if ($serialized = serialize($config)) {
+            file_put_contents($config_cache_filename, $serialized);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function configOpportunitiesIds($config)
@@ -303,7 +328,14 @@ class Plugin extends \MapasCulturais\Plugin
             
 
         });
-
+        // Permite mediadores cadastrar fora do prazo
+        $app->hook('entity(Registration).canUser(<<send>>)', function($user,&$can) use($plugin, $app){
+            $allowed_opportunities = $plugin->config['lista_mediadores'][$app->user->email];
+            $allowed =  in_array($this->opportunity->id, $allowed_opportunities );
+            if ( $allowed && $plugin->config['mediadores_prolongar_tempo'] && $app->user->is('mediador') ){
+                $can = true;
+            }
+        });
        
         // botão exportadores desbancarizados
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app) {
@@ -401,16 +433,23 @@ class Plugin extends \MapasCulturais\Plugin
                             $can = true;
                         }
                     }
-
+                    
                     if (!$can) {
                         $can_consolidate = false;
                     }
                 }
             }
+            
+            $tem_validacoes = false;
+            foreach ($evaluations as $eval) {
+                if ($eval->user->aldirblanc_validador) {
+                    $tem_validacoes = true;
+                }
+            }
 
             // se não pode consolidar, coloca a string 'homologado'
             if (!$can_consolidate) {
-                if (!$this->consolidatedResult) {
+                if (!$this->consolidatedResult || count($evaluations) <= 1 || !$tem_validacoes) {
                     $result = 'homologado';
                 } else if (strpos($this->consolidatedResult, 'homologado') === false) {
                     $result = "{$this->consolidatedResult}, homologado";
@@ -624,6 +663,14 @@ class Plugin extends \MapasCulturais\Plugin
                 $app->redirect($url);
             }
         });
+
+        /**
+         * Carrega campo adicional "Mensagem de Recurso" nas oportunidades
+         * @return void
+         */
+        $app->hook('view.partial(singles/opportunity-registrations--importexport):before', function () use ($plugin, $app) {
+            $this->part('aldirblanc/status-recurso-fields', ['opportunity' => $this->controller->requestedEntity]);
+        });
         
         $app->hook('view.partial(footer):before', function() use($plugin, $app) {
             if($plugin->config['zammad_enable']) {
@@ -785,6 +832,15 @@ class Plugin extends \MapasCulturais\Plugin
                 // @todo: validação que impede a alteração do valor desse metadado
             ]);
         }
+
+        /**
+         * Registra campo adicional "Mensagem de Recurso" nas oportunidades
+         * @return void
+         */
+        $this->registerMetadata('MapasCulturais\Entities\Opportunity', 'aldirblanc_status_recurso', [
+            'label' => i::__('Mensagem para Recurso na tela de Status'),
+            'type' => 'text'
+        ]);
     }
 
     function json($data, $status = 200)

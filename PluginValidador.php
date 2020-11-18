@@ -148,10 +148,23 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
                 } else if($result == '8') {
                     $string = "suplente por {$nome}";
                 }
-                if (!$this->consolidatedResult) {
+                // se não tem valor ainda ou se está atualizando:
+                if (!$this->consolidatedResult || count($evaluations) <= 1) {
                     $result = $string;
                 } else if (strpos($this->consolidatedResult, $nome) === false) {
-                    $result = "{$this->consolidatedResult}, {$string}";
+                    $current_result = $this->consolidatedResult;
+
+                    if($current_result == '10'){
+                        $current_result = "selecionada";
+                    } else if($current_result == '2') {
+                        $current_result = "inválida";
+                    } else if($current_result == '3') {
+                        $current_result = "não selecionada";
+                    } else if($current_result == '8') {
+                        $current_result = "suplente";
+                    }
+                    
+                    $result = "{$current_result}, {$string}";
                 } else {
                     $result = $this->consolidatedResult;
                 }            
