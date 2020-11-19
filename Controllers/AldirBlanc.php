@@ -959,6 +959,26 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->json("Sucesso");
     }
 
+    //Atualiza roles dos mediadores a partir da lista da configuração 
+    function GET_atualizarmediadores() {
+        $this->requireAuthentication();
+
+        $app = App::i();
+
+        if(!$app->user->is('admin')) {
+            $this->errorJson('Permissao negada', 403);
+        }
+        
+        set_time_limit(0);
+        $mediadores = $this->config['lista_mediadores'];
+        $emails = array_keys($mediadores);
+        $users = $app->repo('User')->findBy(['email' => $emails]);
+        foreach ($users as $u){
+            $u->addRole('mediador');
+        }
+        $this->json($users);
+    }
+
 
     /**
      * Tela para login dos mediados

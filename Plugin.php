@@ -330,11 +330,13 @@ class Plugin extends \MapasCulturais\Plugin
         });
         // Permite mediadores cadastrar fora do prazo
         $app->hook('entity(Registration).canUser(<<send>>)', function($user,&$can) use($plugin, $app){
+        if ( $app->user->is('mediador') ){
             $allowed_opportunities = $plugin->config['lista_mediadores'][$app->user->email];
             $allowed =  in_array($this->opportunity->id, $allowed_opportunities );
-            if ( $allowed && $plugin->config['mediadores_prolongar_tempo'] && $app->user->is('mediador') ){
+            if ( $allowed && $plugin->config['mediadores_prolongar_tempo'] ){
                 $can = true;
             }
+        }
         });
        
         // botão exportadores desbancarizados
@@ -623,7 +625,13 @@ class Plugin extends \MapasCulturais\Plugin
                 $this->addRole('mediador');
             }
         });
-
+        // atualiza roles de mediadores conforme lista de emails
+        $app->hook('template(panel.agents.panel-header):end', function () use($app){
+            if(!$app->user->is('admin')) {
+                return;
+            }
+            $this->part('aldirblanc/generate-mediadores-button');
+        });
         $app->hook('auth.successful', function() use($plugin, $app) {
             $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
             $opportunities_ids[] = $plugin->config['inciso1_opportunity_id'];
