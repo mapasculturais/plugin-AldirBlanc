@@ -88,8 +88,11 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_status_notapproved' => env('AB_STATUS_NOTAPPROVED_MESSAGE', 'Não atendeu aos requisitos necessários. Caso não concorde com o resultado, você poderá enviar um novo formulário de solicitação ao benefício - fique atento ao preenchimento dos campos.'), // STATUS_NOTAPPROVED = 3
             'msg_status_waitlist' => env('AB_STATUS_WAITLIST_MESSAGE', 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.'), //STATUS_WAITLIST = 8
 
-            // mensagem padão para recurso das inscrições com status 2 e 3
+            // mensagem padrão para recurso das inscrições com status 2 e 3
             'msg_recurso' => env('AB_MENSAGEM_RECURSO', ''),
+
+            // mensagem para reprocessamento do Dataprev, para ignorar a mensagem retornada pelo Dataprev e exibir a mensagem abaixo
+            'msg_reprocessamento_dataprev' => env('AB_MENSAGEM_REPROCESSAMENTO_DATAPREV', ''),
                         
             // só libera para os homologadores as inscrićões que já tenham sido validadas pelos validadores configurados
             'homologacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '[]')),
