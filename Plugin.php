@@ -247,7 +247,8 @@ class Plugin extends \MapasCulturais\Plugin
             $evaluations_obs = [];
             
             foreach ($_evaluations as $eval) {
-                if ($eval->user->aldirblanc_avaliador) {
+                
+                if (substr($eval->user->email,-10) == '@validador') {
                     continue;
                 }
 
@@ -259,10 +260,12 @@ class Plugin extends \MapasCulturais\Plugin
                     $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
                 }
 
+                $obs = $eval->evaluationData->obs ?? json_encode($eval->evaluationData);
+
                 if (isset($evaluations_obs[$eval->registration->number])) {
-                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $eval->evaluationData->obs;
+                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $obs;
                 } else {
-                    $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs;
+                    $evaluations_obs[$eval->registration->number] = $obs;
                 }
 
                 if (isset($evaluations_avaliadores[$eval->registration->number])) {
@@ -863,6 +866,34 @@ class Plugin extends \MapasCulturais\Plugin
         $app->halt($status, json_encode($data));
     }
 
+    /**
+     * Retorna os ids das oportunidades do inciso III
+     *
+     * @return array
+     */
+    function getOpportunitiesInciso3Ids()
+    {
+        $app = App::i();
+        
+        if ($app->cache->contains(__METHOD__)) {
+            return $app->cache->fetch(__METHOD__);
+        }
+        $project = $app->repo('Project')->find($this->config['project_id']);
+        $projectsIds = $project->getChildrenIds();
+        $projectsIds[] = $project->id;
+        $opportunitiesByProject = $app->repo('ProjectOpportunity')->findBy(['ownerEntity' => $projectsIds, 'status' => 1 ] );
+        $inciso1e2Ids = array_values(array_merge([$this->config['inciso1_opportunity_id']], $this->config['inciso2_opportunity_ids']));
+        $ids = [];
+
+        foreach ($opportunitiesByProject as $opportunity){
+            if ( !in_array($opportunity->id, $inciso1e2Ids) ) {
+                $ids[] = $opportunity->id;
+            }
+        }        
+
+        $app->cache->save(__METHOD__, $ids, 300);
+        return $ids;
+    }
 
     public function createOpportunityInciso1()
     {
