@@ -21,14 +21,18 @@ if($inciso == 1){
 <edit-box id="form-parameters-generic" position="top" title="<?php i::esc_attr_e($title) ?>" cancel-label="Cancelar" close-on-cancel="true">
     <form class="form-export-dataprev" action="<?=$route?>" method="POST">
   
-        <label for="from">Data inícial</label>
-        <input type="date" name="from" id="from">
+        <label for="from"><span style="color: red;">*</span> Data de pagamento</label>
+        <input type="date" name="paymentDate" id="paymentDate">        
+       
         
-        <label for="from">Data final</label>  
-        <input type="date" name="to" id="to">
-
+        <div>  
+        <b>Escolha quais inscrições quer exportar</b> <br>      
+        <input type="radio" name="statusPayment" value="0" checked> Exportar pendentes de pagamento<br>
+        <input type="radio" name="statusPayment" value="3"> Exportar em processo de pagamento<br>
+        <input type="radio" name="statusPayment" value="all"> Exportar todas        
+        </div>
         <input type="hidden" name="opportunity" value="<?=$opportunity?>">
-        # Caso não queira filtrar entre datas, deixe os campos vazios.
+        <p><span style="color: red;">*</span> Obrigatório</p>
         <button class="btn btn-primary download" type="submit">Exportar</button>
     </form>
 </edit-box>

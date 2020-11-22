@@ -26,7 +26,7 @@ return [
     '4788' => [ 
         'TIPO_PROPONENTE' => 'field_1098',        
         'CPF' => 'field_1104',
-        'NOME_SOCIAL' => 'field_1094',    
+        'NOME_SOCIAL' => ['field_1094', 'field_1120'],    
         'CNPJ' => 'field_1118',
         'RAZAO_SOCIAL' => 'field_1117',                
         'LOGRADOURO' => 'field_1121',
@@ -44,11 +44,12 @@ return [
         'OPERACAO_BANCO'  => '',
         'VALOR' => '600',        
         'INCISO' => 1291,
+        'fromToAdress' => false
     ],
     '4789' => [ 
         'TIPO_PROPONENTE' => null,        
         'CPF' => 'field_1126',
-        'NOME_SOCIAL' => 'field_1143',    
+        'NOME_SOCIAL' => ['field_1143','field_1144'],    
         'CNPJ' => null,
         'RAZAO_SOCIAL' => null,                
         'LOGRADOURO' => 'field_1150',
@@ -61,11 +62,12 @@ return [
         'TELEFONE' => 'field_1142',
         'NUM_BANCO' => 'field_1127' ,
         'TIPO_CONTA_BANCO' => 0,        
-        'AGENCIA_BANCO' => 'field_1128',
+        'AGENCIA_BANCO' => 'field_1146',
         'CONTA_BANCO'  => 'field_1152',
         'OPERACAO_BANCO'  => '',
         'VALOR' => '600',        
         'INCISO' => 1291,
+        'fromToAdress' => false
     ],
     '4790' => [ 
         'TIPO_PROPONENTE' => null,        
@@ -88,6 +90,7 @@ return [
         'OPERACAO_BANCO'  => '',
         'VALOR' => '600',        
         'INCISO' => 1291,
+        'fromToAdress' => false
     ],
     '4791' => [ 
         'TIPO_PROPONENTE' => 'field_1302',        
@@ -110,6 +113,7 @@ return [
         'OPERACAO_BANCO'  => '',
         'VALOR' => '600',        
         'INCISO' => 1291,
+        'fromToAdress' => false
     ],
     '4792' => [ 
         'TIPO_PROPONENTE' => null,        
@@ -132,6 +136,7 @@ return [
         'OPERACAO_BANCO'  => '',
         'VALOR' => '600',        
         'INCISO' => 1291,
+        'fromToAdress' => false
     ],
     '4793' => [ 
         'TIPO_PROPONENTE' => 'field_1215',        
@@ -154,11 +159,12 @@ return [
         'OPERACAO_BANCO'  => '',
         'VALOR' => '600',        
         'INCISO' => 1291,
+        'fromToAdress' => false
     ],
     '4794' => [ 
         'TIPO_PROPONENTE' => null,        
         'CPF' => 'field_1251',
-        'NOME_SOCIAL' => 'field_1250',    
+        'NOME_SOCIAL' => ['field_1250','field_1240'],    
         'CNPJ' => 'field_1242',
         'RAZAO_SOCIAL' => 'field_1304',                
         'LOGRADOURO' => 'field_1247',
@@ -176,11 +182,12 @@ return [
         'OPERACAO_BANCO'  => '',
         'VALOR' => '600',        
         'INCISO' => 1291,
+        'fromToAdress' => 'CSV/fromToAdress-4794.csv'
     ],
     '4795' => [ 
         'TIPO_PROPONENTE' => 'field_1294',        
         'CPF' => 'field_1291',
-        'NOME_SOCIAL' => 'field_1293',    
+        'NOME_SOCIAL' => ['field_1293','field_1308'],    
         'CNPJ' => 'field_1279',
         'RAZAO_SOCIAL' => 'field_1307',                
         'LOGRADOURO' => 'field_1277',
@@ -198,6 +205,7 @@ return [
         'OPERACAO_BANCO'  => '',
         'VALOR' => '600',        
         'INCISO' => 1291,
+        'fromToAdress' => 'CSV/fromToAdress-4795.csv'
     ],
     
     

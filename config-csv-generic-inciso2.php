@@ -56,6 +56,7 @@ return [
 
         'VALOR' => '600',        
         'INCISO' => 1288,
+        'fromToAdress' => false
     ],
     'parameters_default' => [],
     'categories' => [
@@ -69,7 +70,8 @@ return [
             'BENEFICIÁRIO COM CNPJ E ESPAÇO FÍSICO',
             'BENEFICIÁRIO COM CNPJ E SEM ESPAÇO FÍSICO'
         ]
-    ]
+        ],
+       
         
 
 ];
