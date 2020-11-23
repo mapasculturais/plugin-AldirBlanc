@@ -733,8 +733,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         ];
 
         //Itera sobre os dados mapeados
+        $inscricoes = $this->inscricoes();
         $csv_data = [];
-        foreach ($registrations as $key_registration => $registration) {           
+        foreach ($registrations as $key_registration => $registration) {
             //Busca as informaçoes de pagamento
             $amount = $this->processesPayment($registration, $app);
 
@@ -1772,7 +1773,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
          */
-        $file_name = 'inciso1-cnab240-'. $$this->getStatus($this->data[$parametersForms['typeExport']]) .$opportunity_id.'-' . md5(json_encode($txt_data)) . '.txt';
+        $file_name = 'inciso1-cnab240-'. $this->getStatus($this->data[$parametersForms['typeExport']]) .$opportunity_id.'-' . md5(json_encode($txt_data)) . '.txt';
 
         $dir = PRIVATE_FILES_PATH . 'aldirblanc/inciso1/remessas/cnab240/';
 
@@ -2842,7 +2843,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'registration' => $register->id
         ]);
         
-       
         if($payment && ($this->data[$parametersForms['typeExport']] === '0')){
             $payment->status = 3;        
             $payment->save(true);
@@ -2974,7 +2974,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     //define de qual form a requisição esta vindo e pega os dados do request
     private function getParametersForms(){
-        //Pega as referências de qual form esta vindo os dados, CNAB ou GENÉRICO
+        //Pega as referências de qual form esta vindo os dados, CNAB ou GENÉRICO        
         if(isset($this->data['generic'])){
             $typeExport = "statusPaymentGeneric";
             $datePayment = 'paymentDateGeneric';
@@ -2982,6 +2982,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }elseif(isset($this->data['canb240'])){
             $typeExport = "statusPaymentCanb240";
             $datePayment = 'paymentDateCanb240';
+
+        }elseif(isset($this->data['mci460'])){
+            $typeExport = "statusPaymentMci460";
+            $datePayment = 'paymentDateMc1460';
         }
 
         return [
@@ -3708,4 +3712,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         return $out;
     }
+
+   
+
 }

@@ -128,7 +128,7 @@ return [
         'MUNICIPIO' => 'field_1195',
         'CEP' => 'field_1195',
         'ESTADO' => 'field_1195',
-        'TELEFONE' => 'field_1112',
+        'TELEFONE' => 'field_1212',
         'NUM_BANCO' => 'field_1202' ,
         'TIPO_CONTA_BANCO' => 0,        
         'AGENCIA_BANCO' => 'field_1203',
@@ -182,7 +182,7 @@ return [
         'OPERACAO_BANCO'  => '',
         'VALOR' => '600',        
         'INCISO' => 1291,
-        'fromToAdress' => 'CSV/fromToAdress-4794.csv'
+        'fromToAdress' => 'CSV/fromToAdress.csv'
     ],
     '4795' => [ 
         'TIPO_PROPONENTE' => 'field_1294',        
@@ -205,7 +205,7 @@ return [
         'OPERACAO_BANCO'  => '',
         'VALOR' => '600',        
         'INCISO' => 1291,
-        'fromToAdress' => 'CSV/fromToAdress-4795.csv'
+        'fromToAdress' => 'CSV/fromToAdress.csv'
     ],
     
     
