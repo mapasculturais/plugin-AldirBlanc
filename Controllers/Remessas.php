@@ -79,25 +79,32 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $startDate = null;
         $paymentDate = null; 
         
+        //Pega as referências de qual form esta vindo os dados, CNAB ou GENÉRICO
+        $parametersForms = $this->getParametersForms();
+        $typeExport = $parametersForms['typeExport'];
+        $datePayment = $parametersForms['datePayment'];
+        
         //Pega os parâmetros de filtro por data
-        if(empty($this->data['paymentDate'])){
+        if(empty($this->data[$datePayment])){
             echo "Informe a data de pagamento que deseja exportar.";
             die();
         }
 
         //Verifica se a data tem um formato correto
-        if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data['paymentDate'])){
+        if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data[$datePayment])){
             throw new \Exception("O formato da data de pagamento é inválido.");
         }else{
-            $paymentDate = new DateTime($this->data['paymentDate']);
+            $paymentDate = new DateTime($this->data[$datePayment]);
             $paymentDate = $paymentDate->format('Y-m-d');
         }
         
         //Pega o status solicitado no formulário
-        if($this->data['statusPayment'] === "all"){
+        if($this->data[$typeExport] === "all"){
             $statusPayment = ['0','1', '2', '3', '10'];
+
         }else{
-            $statusPayment = [$this->data['statusPayment']];
+            $statusPayment = [$this->data[$typeExport]];
+
         }
         
         /**
@@ -159,6 +166,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     public function ALL_genericExportInciso2()
     {
+      
         //Seta o timeout
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '768M');
@@ -180,6 +188,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunity = $this->getOpportunity();
         $opportunity_id = $opportunity->id;
         $registrations = $this->getRegistrations($opportunity);
+        $parametersForms = $this->getParametersForms();
 
         /**
          * Mapeamento de fields_id pelo label do campo
@@ -378,15 +387,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         //Itera sobre os dados mapeados
         $csv_data = [];
         foreach ($registrations as $key_registration => $registration) {
-
+          
             //Pega as informações de pagamento
-            $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-                'registration' => $registration->id,
-                'status' => 0,
-            ]);
-
-            if (!$payment) {
-                $app->log->debug("\nPagamento nao encontrado para " . $registration->id);
+            $amount = $this->processesPayment($registration, $app);
+            if(!$amount){
                 continue;
             }
 
@@ -412,17 +416,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
 
             //Insere o valor a ser pago no CSV
-            $csv_data[$key_registration]['VALOR'] = $payment->amount;
-            $this->processesPayment($registration, $app);
-            
-
+            $csv_data[$key_registration]['VALOR'] = $amount;
         }
 
         /**
          * Salva o arquivo no servidor e faz o dispatch dele em um formato CSV
          * O arquivo e salvo no deretório docker-data/private-files/aldirblanc/inciso2/remessas
          */
-        $file_name = 'inciso2-genCsv-' . $opportunity_id . '-' . md5(json_encode($csv_data)) . '.csv';
+        
+        $file_name = 'inciso2-genCsv-' . $this->getStatus($this->data[$parametersForms['typeExport']]) . $opportunity_id . '-' . md5(json_encode($csv_data)) . '.csv';
 
         $dir = PRIVATE_FILES_PATH . 'aldirblanc/inciso2/remessas/generics/';
 
@@ -485,6 +487,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunity = $this->getOpportunity();
         $opportunity_id = $opportunity->id;
         $registrations = $this->getRegistrations($opportunity);
+        $parametersForms = $this->getParametersForms();
         
         /**
          * Mapeamento de fields_id
@@ -766,7 +769,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          * Salva o arquivo no servidor e faz o dispatch dele em um formato CSV
          * O arquivo e salvo no deretório docker-data/private-files/aldirblanc/inciso2/remessas
          */
-        $file_name = 'inciso3-genCsv-' . $this->getStatus($this->data['statusPayment']) . $opportunity_id . '-' . md5(json_encode($csv_data)) . '.csv';
+        $file_name = 'inciso3-genCsv-' . $this->getStatus($this->data[$parametersForms['typeExport']]) . $opportunity_id . '-' . md5(json_encode($csv_data)) . '.csv';
 
         $dir = PRIVATE_FILES_PATH . 'aldirblanc/inciso2/remessas/generics/';
 
@@ -848,6 +851,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     public function ALL_exportCnab240Inciso1()
     {
+        
         //Seta o timeout
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '768M');
@@ -861,12 +865,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunity = $this->getOpportunity();
         $opportunity_id = $opportunity->id;
         $registrations = $this->getRegistrations($opportunity);
-
+        $parametersForms = $this->getParametersForms();        
+        
         /**
          * Pega os dados das configurações
          */
         $txt_config = $this->config['config-cnab240-inciso1'];
-        $default = $txt_config['parameters_default'];       
+        $default = $txt_config['parameters_default'];           
         $header1 = $txt_config['HEADER1'];
         $header2 = $txt_config['HEADER2'];
         $detahe1 = $txt_config['DETALHE1'];
@@ -874,7 +879,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $trailer1 = $txt_config['TRAILER1'];
         $trailer2 = $txt_config['TRAILER2'];
         $fromToAccounts = $default['fromToAccounts'];
-
         $dePara = $this->readingCsvFromTo($fromToAccounts);
         $cpfCsv = $this->cpfCsv($fromToAccounts);       
        
@@ -1263,8 +1267,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'USO_BANCO_85' => '',
             'VALOR_INTEIRO' => function ($registrations) use ($detahe1, $app) {
                 $payment = $app->em->getRepository('\RegistrationPayments\Payment')->findOneBy([
-                    'registration' => $registrations->id,
-                    'status' => 0,
+                    'registration' => $registrations->id
                 ]);
 
                 $amount =  preg_replace('/[^0-9]/i', '', $payment->amount);
@@ -1540,9 +1543,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
             }
         }
-
         
-       
         //Caso exista separação de bancarizados ou desbancarizados, mostra no terminal o resumo
         if($default['ducumentsType']['unbanked']){           
             $app->log->info("\nResumo da separação entre bancarizados e desbancarizados.");
@@ -1557,8 +1558,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $app->log->info(count($recordsOthers) . " OUTROS BANCOS");
         $app->log->info($noFormoReceipt . " SEM INFORMAÇÃO BANCÁRIA");
         sleep(1);
-        
-
         
         //Verifica se existe registros em algum dos arrays. Caso não exista exibe a mensagem
         $validaExist = array_merge($recordsBBCorrente, $recordsOthers, $recordsBBPoupanca);
@@ -1773,7 +1772,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
          */
-        $file_name = 'inciso1-cnab240- '.$opportunity_id.'-' . md5(json_encode($txt_data)) . '.txt';
+        $file_name = 'inciso1-cnab240-'. $$this->getStatus($this->data[$parametersForms['typeExport']]) .$opportunity_id.'-' . md5(json_encode($txt_data)) . '.txt';
 
         $dir = PRIVATE_FILES_PATH . 'aldirblanc/inciso1/remessas/cnab240/';
 
@@ -2835,19 +2834,32 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * Processa pagamento
      */
     private function processesPayment($register, $app){  
+        
+        $parametersForms = $this->getParametersForms();
+        
         $result = 0;     
         $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
             'registration' => $register->id
         ]);
         
-        if(($payment && $payment->status != 3)){
+       
+        if($payment && ($this->data[$parametersForms['typeExport']] === '0')){
             $payment->status = 3;        
             $payment->save(true);
             $app->log->info($register->number . " - EXPORTADA E PROCESSADA PARA PAGAMENTO"); 
             $result = $payment->amount;
            
-        }else if($payment && $payment->status == 3){
+        }else if($payment && $this->data[$parametersForms['typeExport']] === '3'){
             $app->log->info($register->number . " - JÁ EXPORTADA PARA PAGAMENTO");
+            $result = $payment->amount;
+            
+        }else if($payment && $this->data[$parametersForms['typeExport']] === 'all'){
+            if($payment->status == 0){
+                $app->log->info($register->number . " - PAGAMENTO CADASTRADO - AINDA NÃO EXPORTADO PARA PAGAMENTO");
+            }else if($payment->status == 3){
+                $app->log->info($register->number . " - PAGAMENTO CADASTRADO - JÁ EXPORTADO PARA PAGAMENTO");  
+            }
+           
             $result = $payment->amount;
             
         }else{
@@ -2864,8 +2876,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     private function validatedPayment($register){
         $app = App::i();
         $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-            'registration' => $register->id,
-            'status' => 0,
+            'registration' => $register->id
         ]);
       
         if(!$payment){                   
@@ -2953,11 +2964,30 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         $results = $this->readingCsvFromTo($filename);
         
+        $data = [];
         foreach($results as $key => $value){
             $data[$key] = $value['CPF'];
         }
          return $data;
  
+    }
+
+    //define de qual form a requisição esta vindo e pega os dados do request
+    private function getParametersForms(){
+        //Pega as referências de qual form esta vindo os dados, CNAB ou GENÉRICO
+        if(isset($this->data['generic'])){
+            $typeExport = "statusPaymentGeneric";
+            $datePayment = 'paymentDateGeneric';
+
+        }elseif(isset($this->data['canb240'])){
+            $typeExport = "statusPaymentCanb240";
+            $datePayment = 'paymentDateCanb240';
+        }
+
+        return [
+            'typeExport' => $typeExport,
+            'datePayment' => $datePayment
+        ];
     }
 
     /**

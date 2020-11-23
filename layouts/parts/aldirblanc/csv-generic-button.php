@@ -22,17 +22,16 @@ if($inciso == 1){
     <form class="form-export-dataprev" action="<?=$route?>" method="POST">
   
         <label for="from"><span style="color: red;">*</span> Data de pagamento</label>
-        <input type="date" name="paymentDate" id="paymentDate">        
-       
+        <input type="date" name="paymentDateGeneric" id="paymentDateGeneric"> 
         
         <div>  
         <b>Escolha quais inscrições quer exportar</b> <br>      
-        <input type="radio" name="statusPayment" value="0" checked> Exportar pendentes de pagamento<br>
-        <input type="radio" name="statusPayment" value="3"> Exportar em processo de pagamento<br>
-        <input type="radio" name="statusPayment" value="all"> Exportar todas        
+        <input type="radio" name="statusPaymentGeneric" value="0" checked title="Exporta CSV das inscrições com pagamentos cadastrados na data selecionada. Após exportar nessa modalidade, a inscrição fica com status de (EM PROCESSO DE PAGAMENTO)"> Exportar para pagamento<br>
+        <input type="radio" name="statusPaymentGeneric" value="3" title="Exporta CSV com pagamentos cadastrados na data selecionada, que já foram exportadas anteriormente para pagamento (SEM MUDANÇA DE STATUS)"> Visualizar em processo de pagamento<br>
+        <input type="radio" name="statusPaymentGeneric" value="all" title="Exporta CSV com todas as inscrições com pagamentos cadastrados na data selecionada (SEM MUDANÇA DE STATUS)"> Exportar todas        
         </div>
-        <input type="hidden" name="opportunity" value="<?=$opportunity?>">
+        <input type="hidden" name="opportunity" value="<?=$opportunity?>">        
         <p><span style="color: red;">*</span> Obrigatório</p>
-        <button class="btn btn-primary download" type="submit">Exportar</button>
+        <button class="btn btn-primary download" name = "generic" value="generic" type="submit">Exportar</button>
     </form>
 </edit-box>

@@ -233,7 +233,7 @@ class Plugin extends \MapasCulturais\Plugin
                     $inciso = 3;
 
                 }
-                $this->part('aldirblanc/cnab240-button', ['inciso' => $inciso, 'opportunity' => $opportunity]);
+                $this->part('aldirblanc/cnab240-txt-button', ['inciso' => $inciso, 'opportunity' => $opportunity]);
             }
         });
 
