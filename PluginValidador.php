@@ -67,7 +67,7 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
             $evaluations_obs = [];
             foreach($_evaluations as $eval) {
                 $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
-                $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs;
+                $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs ?? json_encode($eval->evaluationData) ;
             }
 
 
@@ -177,7 +177,13 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
             $opportunity = $this->requestedEntity;
 
             if ($aldirblanc->config['inciso2_enabled']) {
-                $ids = array_merge($ids, $aldirblanc->config['inciso2_opportunity_ids']);
+                $inciso2_ids = $aldirblanc->config['inciso2_opportunity_ids'];
+                $ids = array_merge($ids, $inciso2_ids);
+            }
+
+            if ($aldirblanc->config['inciso3_enabled']) {
+                $inciso3_ids = $aldirblanc->getOpportunitiesInciso3Ids();
+                $ids = array_merge($ids, $inciso3_ids);
             }
 
             if ($aldirblanc->config['inciso1_enabled']) {
