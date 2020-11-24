@@ -184,10 +184,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          * Pega os dados da configuração
          */
 
-        $csv_conf = $this->config['csv_generic_inciso2'];
+        $csv_conf = $this->config['csv_generic_inciso2'];        
         $categories = $csv_conf['categories'];
         $header = $csv_conf['header'];
-
+        $fromToAccounts = $csv_conf['fields']['fromToAccounts'];
+        $dePara = $this->readingCsvFromTo($fromToAccounts);
+        $cpfCsv = $this->cpfCsv($fromToAccounts);    
+        
         $opportunity = $this->getOpportunity();
         $opportunity_id = $opportunity->id;
         $registrations = $this->getRegistrations($opportunity);
@@ -343,9 +346,35 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
                 return $this->normalizeString(preg_replace('/[^0-9]/i', '', $result));
             },
-            'NUM_BANCO' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['NUM_BANCO'];
-                return $this->numberBank($registrations->$field_id);
+            'NUM_BANCO' => function ($registrations) use ($fieldsID , $dePara, $cpfCsv, $categories) {
+                if (in_array($registrations->category, $categories['CPF'])) {
+                    $field_id = $fieldsID['CPF'];
+                }else if (in_array($registrations->category, $categories['CNPJ'])){
+                    $field_id = $fieldsID['CNPJ'];
+                }
+                $cpfBase = 0;
+                if(is_array($field_id)){
+                    foreach($field_id as $value){
+                        if($registrations->$value){
+                            $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$value);
+                            break;
+                        }
+                    }
+                }else{
+                    $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_id);
+                }                
+                $pos = array_search($cpfBase,$cpfCsv);
+                
+                if($pos){                    
+                    $result = $dePara[$pos]['BEN_NUM_BANCO'];
+                    
+                }else{
+                    $field_id = $fieldsID['NUM_BANCO'];
+                    $result = $this->numberBank($registrations->$field_id);
+                }
+
+                return $this->normalizeString($result);
+                
             },
             //  'TIPO_CONTA_BANCO' => function ($registrations) use ($fieldsID){
             //     $field_id = $fieldsID['TIPO_CONTA_BANCO'];
@@ -356,14 +385,62 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //     }
 
             //  },
-            'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $app) {
-                $field_id = $fieldsID['AGENCIA_BANCO'];
-                return $this->normalizeString(substr($registrations->$field_id, 0, 4));
+            'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $app, $dePara, $cpfCsv, $categories) {                
+                if (in_array($registrations->category, $categories['CPF'])) {
+                    $field_id = $fieldsID['CPF'];
+                }else if (in_array($registrations->category, $categories['CNPJ'])){
+                    $field_id = $fieldsID['CNPJ'];
+                }
+                $cpfBase = 0;
+                if(is_array($field_id)){
+                    foreach($field_id as $value){
+                        if($registrations->$value){
+                            $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$value);
+                            break;
+                        }
+                    }
+                }else{
+                    $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_id);
+                }                
+                $pos = array_search($cpfBase,$cpfCsv);
+                
+                if($pos){                    
+                    $result = $dePara[$pos]['BEN_AGENCIA'];
+                    
+                }else{
+                    $field_id = $fieldsID['AGENCIA_BANCO'];
+                    $result =  $registrations->$field_id;
+                }
+                
+                return $this->normalizeString(substr($result, 0, 4));
             },
-            'CONTA_BANCO' => function ($registrations) use ($fieldsID, $app) {
-                $field_id = $fieldsID['CONTA_BANCO'];
+            'CONTA_BANCO' => function ($registrations) use ($fieldsID, $app , $dePara, $cpfCsv, $categories) {
+                if (in_array($registrations->category, $categories['CPF'])) {
+                    $field_id = $fieldsID['CPF'];
+                }else if (in_array($registrations->category, $categories['CNPJ'])){
+                    $field_id = $fieldsID['CNPJ'];
+                }
+                $cpfBase = 0;
+                if(is_array($field_id)){
+                    foreach($field_id as $value){
+                        if($registrations->$value){
+                            $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$value);
+                            break;
+                        }
+                    }
+                }else{
+                    $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_id);
+                }                
+                $pos = array_search($cpfBase,$cpfCsv);
+                
+                if($pos){                    
+                    $result = $dePara[$pos]['BEN_CONTA'];
+                    
+                }else{
+                    $field_id = $fieldsID['CONTA_BANCO'];
 
-                $result = $registrations->$field_id;
+                    $result = $registrations->$field_id;
+                }
 
                 return $this->normalizeString($result);
             },
@@ -486,11 +563,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $proponentTypes = $csv_conf['parameters_default']['proponentTypes'];
         $header = $csv_conf['header'];
 
-        
+       
         $opportunity = $this->getOpportunity();
         $opportunity_id = $opportunity->id;
         $registrations = $this->getRegistrations($opportunity);
         $parametersForms = $this->getParametersForms();
+
+        $fromToAccounts = $csv_conf[$opportunity_id]['fromToAccounts'];
+        $dePara = $this->readingCsvFromTo($fromToAccounts);
+        $cpfCsv = $this->cpfCsv($fromToAccounts);
         
         /**
          * Mapeamento de fields_id
@@ -685,14 +766,46 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 return $this->normalizeString(preg_replace('/[^0-9]/i', '', $result));
             },
-            'NUM_BANCO' => function ($registrations) use ($fieldsID, $app) {
-                $field_id = $fieldsID['NUM_BANCO'];
+            'NUM_BANCO' => function ($registrations) use ($fieldsID, $app, $proponentTypes, $dePara, $cpfCsv) {
+                $temp = $fieldsID['TIPO_PROPONENTE'];
+                if($temp){
+                    $propType = trim($registrations->$temp);
+                    if ($propType === $proponentTypes['fisica'] || empty($propType) || $propType === $proponentTypes['coletivo']) {
+                        $field_temp = $fieldsID['CPF'];
+                    }else if($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])){
+                        $field_temp = $fieldsID['CNPJ'];
+                    }
+                }else{
+                    $field_temp = $fieldsID['CPF'];
+                }
+
+                    $cpfBase = 0;
+                    if(is_array($field_temp)){
+                        foreach($field_temp as $value){
+                            if($registrations->$value){
+                                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$value);
+                                break;
+                            }
+                        }
+                    }else{
+                        $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_temp);
+                    }     
+
+                    $pos = array_search($cpfBase,$cpfCsv);
+                    
+                    if($pos){
+                        $result = $dePara[$pos]['BEN_NUM_BANCO'];
+                    }else{
+                        $field_id = $fieldsID['NUM_BANCO'];
+                        $result = $this->numberBank($registrations->$field_id);
+                    }
                 
-                $result = $this->numberBank($registrations->$field_id);
+                $result = $result;
 
                 if (empty($result)) {
                     $app->log->info("\n".$registrations->number . " Número do banco não encontrado");
                 }
+
                 return $result;
             },
             //  'TIPO_CONTA_BANCO' => function ($registrations) use ($fieldsID){
@@ -704,14 +817,76 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //     }
 
             //  },
-            'AGENCIA_BANCO' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['AGENCIA_BANCO'];
-                return $this->normalizeString(substr($registrations->$field_id, 0, 4));
-            },
-            'CONTA_BANCO' => function ($registrations) use ($fieldsID) {
-                $field_id = $fieldsID['CONTA_BANCO'];
+            'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $proponentTypes, $dePara, $cpfCsv) {
+                $temp = $fieldsID['TIPO_PROPONENTE'];
+                if($temp){
+                    $propType = trim($registrations->$temp);
+                    if ($propType === $proponentTypes['fisica'] || empty($propType) || $propType === $proponentTypes['coletivo']) {
+                        $field_temp = $fieldsID['CPF'];
+                    }else if($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])){
+                        $field_temp = $fieldsID['CNPJ'];
+                    }
+                }else{
+                    $field_temp = $fieldsID['CPF'];
+                }
 
-                $result = $registrations->$field_id;
+                    $cpfBase = 0;
+                    if(is_array($field_temp)){
+                        foreach($field_temp as $value){
+                            if($registrations->$value){
+                                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$value);
+                                break;
+                            }
+                        }
+                    }else{
+                        $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_temp);
+                    }     
+
+                    $pos = array_search($cpfBase,$cpfCsv);
+                    if($pos){
+                        $result = $dePara[$pos]['BEN_AGENCIA'];
+                    }else{
+                        $field_id = $fieldsID['AGENCIA_BANCO'];
+                        $result = $registrations->$field_id;
+                    }
+                    
+              
+                return $result = $this->normalizeString(substr($result, 0, 4));
+            },
+            'CONTA_BANCO' => function ($registrations) use ($fieldsID , $proponentTypes, $dePara, $cpfCsv) {
+                 $temp = $fieldsID['TIPO_PROPONENTE'];
+                if($temp){
+                    $propType = trim($registrations->$temp);
+                    if ($propType === $proponentTypes['fisica'] || empty($propType) || $propType === $proponentTypes['coletivo']) {
+                        $field_temp = $fieldsID['CPF'];
+                    }else if($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])){
+                        $field_temp = $fieldsID['CNPJ'];
+                    }
+                }else{
+                    $field_temp = $fieldsID['CPF'];
+                }
+
+                    $cpfBase = 0;
+                    if(is_array($field_temp)){
+                        foreach($field_temp as $value){
+                            if($registrations->$value){
+                                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$value);
+                                break;
+                            }
+                        }
+                    }else{
+                        $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_temp);
+                    }     
+
+                    $pos = array_search($cpfBase,$cpfCsv);
+                    if($pos){
+                        $result = $dePara[$pos]['BEN_CONTA'];
+                    }else{
+                        $field_id = $fieldsID['CONTA_BANCO'];
+                        $result = $registrations->$field_id;
+                    }                
+               
+                
 
                 return $this->normalizeString($result);
             },
