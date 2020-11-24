@@ -88,10 +88,12 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_status_notapproved' => env('AB_STATUS_NOTAPPROVED_MESSAGE', 'Não atendeu aos requisitos necessários. Caso não concorde com o resultado, você poderá enviar um novo formulário de solicitação ao benefício - fique atento ao preenchimento dos campos.'), // STATUS_NOTAPPROVED = 3
             'msg_status_waitlist' => env('AB_STATUS_WAITLIST_MESSAGE', 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.'), //STATUS_WAITLIST = 8
 
-            // mensagem padão para recurso das inscrições com status 2 e 3
+            // mensagem padrão para recurso das inscrições com status 2 e 3
             'msg_recurso' => env('AB_MENSAGEM_RECURSO', ''),
-                        
 
+            // mensagem para reprocessamento do Dataprev, para ignorar a mensagem retornada pelo Dataprev e exibir a mensagem abaixo
+            'msg_reprocessamento_dataprev' => env('AB_MENSAGEM_REPROCESSAMENTO_DATAPREV', ''),
+                        
             // só libera para os homologadores as inscrićões que já tenham sido validadas pelos validadores configurados
             'homologacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '[]')),
 
@@ -247,7 +249,8 @@ class Plugin extends \MapasCulturais\Plugin
             $evaluations_obs = [];
             
             foreach ($_evaluations as $eval) {
-                if ($eval->user->aldirblanc_avaliador) {
+                
+                if (substr($eval->user->email,-10) == '@validador') {
                     continue;
                 }
 
@@ -259,10 +262,12 @@ class Plugin extends \MapasCulturais\Plugin
                     $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
                 }
 
+                $obs = $eval->evaluationData->obs ?? json_encode($eval->evaluationData);
+
                 if (isset($evaluations_obs[$eval->registration->number])) {
-                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $eval->evaluationData->obs;
+                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $obs;
                 } else {
-                    $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs;
+                    $evaluations_obs[$eval->registration->number] = $obs;
                 }
 
                 if (isset($evaluations_avaliadores[$eval->registration->number])) {
@@ -863,6 +868,34 @@ class Plugin extends \MapasCulturais\Plugin
         $app->halt($status, json_encode($data));
     }
 
+    /**
+     * Retorna os ids das oportunidades do inciso III
+     *
+     * @return array
+     */
+    function getOpportunitiesInciso3Ids()
+    {
+        $app = App::i();
+        
+        if ($app->cache->contains(__METHOD__)) {
+            return $app->cache->fetch(__METHOD__);
+        }
+        $project = $app->repo('Project')->find($this->config['project_id']);
+        $projectsIds = $project->getChildrenIds();
+        $projectsIds[] = $project->id;
+        $opportunitiesByProject = $app->repo('ProjectOpportunity')->findBy(['ownerEntity' => $projectsIds, 'status' => 1 ] );
+        $inciso1e2Ids = array_values(array_merge([$this->config['inciso1_opportunity_id']], $this->config['inciso2_opportunity_ids']));
+        $ids = [];
+
+        foreach ($opportunitiesByProject as $opportunity){
+            if ( !in_array($opportunity->id, $inciso1e2Ids) ) {
+                $ids[] = $opportunity->id;
+            }
+        }        
+
+        $app->cache->save(__METHOD__, $ids, 300);
+        return $ids;
+    }
 
     public function createOpportunityInciso1()
     {

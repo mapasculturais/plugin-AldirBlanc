@@ -591,7 +591,20 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 
                 if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
                     // resultados do dataprev
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                    $avaliacao = $evaluation->getEvaluationData()->obs ?? '';
+                    if (!empty($avaliacao)) {
+                        if (($registration->status == 3 || $registration->status == 2) && substr_count($evaluation->getEvaluationData()->obs, 'Reprocessado')) {
+
+                            if ($this->config['msg_reprocessamento_dataprev']) {
+                                $justificativaAvaliacao[] = $this->config['msg_reprocessamento_dataprev'];
+                            } else {
+                                $justificativaAvaliacao[] = $avaliacao;
+                            }
+                            
+                        } else {
+                            $justificativaAvaliacao[] = $avaliacao;
+                        }
+                    }
                 } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
                     // resultados dos avaliadores genericos
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';

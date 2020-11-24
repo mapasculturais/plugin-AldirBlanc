@@ -733,8 +733,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         ];
 
         //Itera sobre os dados mapeados
+        $inscricoes = $this->inscricoes();
         $csv_data = [];
-        foreach ($registrations as $key_registration => $registration) {           
+        foreach ($registrations as $key_registration => $registration) {
             //Busca as informaçoes de pagamento
             $amount = $this->processesPayment($registration, $app);
 
@@ -2973,9 +2974,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     //define de qual form a requisição esta vindo e pega os dados do request
     private function getParametersForms(){
-        //Pega as referências de qual form esta vindo os dados, CNAB ou GENÉRICO
-        // var_dump($this->config);
-        // exit();
+        //Pega as referências de qual form esta vindo os dados, CNAB ou GENÉRICO        
         if(isset($this->data['generic'])){
             $typeExport = "statusPaymentGeneric";
             $datePayment = 'paymentDateGeneric';
@@ -3014,16 +3013,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     /**
      * Placeholder para o número de seqüência dos arquivos de remessa.
      */
-    private function sequenceNumber($type)
+    private function sequenceNumber()
     {
         $n = 0;
+        $type = isset($this->data["type"]) ? $this->data["type"] : "mci460";
         switch ($type) {
             case "cnab240": break;
             case "mci460":
                 $n = $this->config["config-mci460"]["serial"];
                 break;
             case "ppg100":
-                $n = $this->config["config-ppg10x"]["ppg10xSerial"];
+                $n = $this->config["config-ppg10x"]["ppg100Serial"];
                 break;
             default: break;
         }
@@ -3713,4 +3713,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         return $out;
     }
+
+   
+
 }
