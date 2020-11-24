@@ -85,18 +85,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $datePayment = $parametersForms['datePayment'];
         
         //Pega os parâmetros de filtro por data
-        if(empty($this->data[$datePayment])){
+        if(empty($this->data[$datePayment]) && $this->data[$typeExport] === '0'){
             echo "Informe a data de pagamento que deseja exportar.";
             die();
         }
 
-        //Verifica se a data tem um formato correto
-        if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data[$datePayment])){
-            throw new \Exception("O formato da data de pagamento é inválido.");
-        }else{
-            $paymentDate = new DateTime($this->data[$datePayment]);
-            $paymentDate = $paymentDate->format('Y-m-d');
+        if( $this->data[$typeExport] === '0'){
+            //Verifica se a data tem um formato correto
+            if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data[$datePayment])){
+                throw new \Exception("O formato da data de pagamento é inválido.");
+            }else{
+                $paymentDate = new DateTime($this->data[$datePayment]);
+                $paymentDate = $paymentDate->format('Y-m-d');
+            }
         }
+        
         
         //Pega o status solicitado no formulário
         if($this->data[$typeExport] === "all"){
@@ -852,8 +855,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     public function ALL_exportCnab240Inciso1()
     {
-        
-        //Seta o timeout
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '768M');
 
@@ -1019,9 +1020,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'TIPO_MOVIMENTO' => '',
             'CODIGO_MOVIMENTO' => '',
             'CAMARA_CENTRALIZADORA' => '',
-            'BEN_CODIGO_BANCO' => function ($registrations) use ($detahe1) {
-                $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
-                return $this->numberBank($registrations->$field_id);
+            'BEN_CODIGO_BANCO' => function ($registrations) use ($detahe2, $detahe1, $dePara, $cpfCsv) {
+                $field_cpf = $detahe2['BEN_CPF']['field_id'];
+                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
+                
+                $pos = array_search($cpfBase,$cpfCsv);
+
+                if($pos){                    
+                    $result = $dePara[$pos]['BEN_NUM_BANCO'];
+                    
+                }else{
+                    $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                    $result = $this->numberBank($registrations->$field_id);
+                }
+               
+                return $result;
 
             },
             'BEN_AGENCIA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
@@ -1308,7 +1321,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'BEN_TIPO_DOC' => '',
             'BEN_CPF' => function ($registrations) use ($detahe2) {
                 $field_id = $detahe2['BEN_CPF']['field_id'];
-                $data = $registrations->$field_id;
+                $data = preg_replace('/[^0-9]/i', '',$registrations->$field_id);
                 if (strlen($this->normalizeString($data)) != 11) {
                     $_SESSION['problems'][$registrations->number] = "CPF Inválido";
                 }
@@ -1448,16 +1461,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 if(!$this->validatedPayment($value)){
                     $app->log->info("\n".$value->number . " - Pagamento nao encontrado.");
                     continue;
-                }
+                } 
                 
-                //Remove as inscrições monoparentais caso flegado com false
-                if(!$monoParentIgnore){
-                    if($value->$womanMonoParent=="SIM"){
-                        $app->log->info("\n".$value->number . " - Auto declarada monoparental, configuração setada para ignorar.");
-                        continue;
-                    }
-                }
-
                 // Veirifica se existe a pergunta se o requerente é correntista BB ou não no formulário. Se sim, pega a resposta  
                 $accountHolderBB = "NÃO";              
                 if($selfDeclaredBB){
@@ -1544,7 +1549,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
             }
         }
-        
         //Caso exista separação de bancarizados ou desbancarizados, mostra no terminal o resumo
         if($default['ducumentsType']['unbanked']){           
             $app->log->info("\nResumo da separação entre bancarizados e desbancarizados.");
