@@ -2842,7 +2842,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'registration' => $register->id
         ]);
         
-       
         if($payment && ($this->data[$parametersForms['typeExport']] === '0')){
             $payment->status = 3;        
             $payment->save(true);
@@ -2975,6 +2974,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     //define de qual form a requisição esta vindo e pega os dados do request
     private function getParametersForms(){
         //Pega as referências de qual form esta vindo os dados, CNAB ou GENÉRICO
+        // var_dump($this->config);
+        // exit();
         if(isset($this->data['generic'])){
             $typeExport = "statusPaymentGeneric";
             $datePayment = 'paymentDateGeneric';
@@ -2982,6 +2983,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }elseif(isset($this->data['canb240'])){
             $typeExport = "statusPaymentCanb240";
             $datePayment = 'paymentDateCanb240';
+
+        }elseif(isset($this->data['mci460'])){
+            $typeExport = "statusPaymentMci460";
+            $datePayment = 'paymentDateMc1460';
         }
 
         return [
