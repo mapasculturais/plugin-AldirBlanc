@@ -99,12 +99,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //Verifica se a data tem um formato correto
             if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data[$datePayment])){
                 throw new \Exception("O formato da data de pagamento é inválido.");
-            }else{
-                $paymentDate = new DateTime($this->data[$datePayment]);
-                $paymentDate = $paymentDate->format('Y-m-d');
             }
         }
-        
+
+        if(isset($this->data[$datePayment])){
+            $paymentDate = new DateTime($this->data[$datePayment]);
+            $paymentDate = $paymentDate->format('Y-m-d');
+        }        
         
         //Pega o status solicitado no formulário
         if($this->data[$typeExport] === "all"){
