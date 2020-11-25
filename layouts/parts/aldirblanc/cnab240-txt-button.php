@@ -15,23 +15,23 @@ if($inciso == 1){
 }
 ?>
 
-<a class="btn btn-default download btn-export-cancel"  ng-click="editbox.open('form-parameters-cnab240', $event)" rel="noopener noreferrer">TXT CNAB240 BB</a>
+<a class="btn btn-default download btn-export-cancel"  ng-click="editbox.open('form-parameters-Cnab240', $event)" rel="noopener noreferrer">TXT CNAB240 BB</a>
 
 <!-- Formulário -->
-<edit-box id="form-parameters-cnab240" position="top" title="<?php i::esc_attr_e($title) ?>" cancel-label="Cancelar" close-on-cancel="true">
+<edit-box id="form-parameters-Cnab240" position="top" title="<?php i::esc_attr_e($title) ?>" cancel-label="Cancelar" close-on-cancel="true">
     <form class="form-export-dataprev" action="<?=$route?>" method="POST">
   
     <label for="from"><span style="color: red;">*</span> Data de pagamento</label>
-        <input type="date" name="paymentDateCanb240" id="paymentDateCanb240">
+        <input type="date" name="paymentDateCnab240" id="paymentDateCnab240">
         
         <div>  
         <b>Escolha quais inscrições quer exportar</b> <br>      
-        <input type="radio" name="statusPaymentCanb240" value="0" checked title="Exporta CNAB240 das inscrições com pagamentos cadastrados na data selecionada. Após exportar nessa modalidade, a inscrição fica com status de (EM PROCESSO DE PAGAMENTO)"> Exportar para pagamento<br>
-        <input type="radio" name="statusPaymentCanb240" value="3" title="Exporta CNAB240 com pagamentos cadastrados na data selecionada, que já foram exportadas anteriormente para pagamento (SEM MUDANÇA DE STATUS)"> Visualizar em processo de pagamento<br>
-        <input type="radio" name="statusPaymentCanb240" value="all" title="Exporta CNAB240 com todas as inscrições com pagamentos cadastrados na data selecionada (SEM MUDANÇA DE STATUS)"> Exportar todas        
+        <input type="radio" name="statusPaymentCnab240" value="0" checked title="Exporta CNAB240 das inscrições com pagamentos cadastrados na data selecionada. Após exportar nessa modalidade, a inscrição fica com status de (EM PROCESSO DE PAGAMENTO)"> Exportar para pagamento<br>
+        <input type="radio" name="statusPaymentCnab240" value="3" title="Exporta CNAB240 com pagamentos cadastrados na data selecionada, que já foram exportadas anteriormente para pagamento (SEM MUDANÇA DE STATUS)"> Visualizar em processo de pagamento<br>
+        <input type="radio" name="statusPaymentCnab240" value="all" title="Exporta CNAB240 com todas as inscrições com pagamentos cadastrados na data selecionada (SEM MUDANÇA DE STATUS)"> Exportar todas        
         </div>
         <input type="hidden" name="opportunity" value="<?=$opportunity?>">
         <p><span style="color: red;">*</span> Obrigatório</p>
-        <button class="btn btn-primary download" name = "canb240" value="canb240" type="submit">Exportar</button>
+        <button class="btn btn-primary download" name = "cnab240" value="cnab240" type="submit">Exportar</button>
     </form>
 </edit-box>
