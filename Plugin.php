@@ -241,15 +241,16 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
             $em = $opportunity->getEvaluationMethod();
-            
+
             $_evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $registrations]);
 
             $evaluations_avaliadores = [];
             $evaluations_status = [];
             $evaluations_obs = [];
-            
+            $registrations_mediadas = [];
+
             foreach ($_evaluations as $eval) {
-                
+
                 if (substr($eval->user->email,-10) == '@validador') {
                     continue;
                 }
@@ -277,15 +278,24 @@ class Plugin extends \MapasCulturais\Plugin
                 }
             }
 
+            foreach ($registrations as $r) {
+                if ($r->mediacao_senha && $r->mediacao_contato) {
+                    $registrations_mediadas[$r->number] = 'Sim';
+                } else {
+                    $registrations_mediadas[$r->number] = 'Não';
+                }
+            }
 
             $header[] = 'Homologação - avaliadores';
             $header[] = 'Homologação - status';
             $header[] = 'Homologação - obs';
-            
+            $header[] = 'Inscrição Mediada?';
+
             foreach($body as $i => $line){
                 $body[$i][] = $evaluations_avaliadores[$line[0]] ?? null;
                 $body[$i][] = $evaluations_status[$line[0]] ?? null;
                 $body[$i][] = $evaluations_obs[$line[0]] ?? null;
+                $body[$i][] = $registrations_mediadas[$line[0]] ?? null;
             }
         });
        
