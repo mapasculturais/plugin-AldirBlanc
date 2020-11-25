@@ -380,16 +380,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 return $this->normalizeString($result);
                 
-            },
-            //  'TIPO_CONTA_BANCO' => function ($registrations) use ($fieldsID){
-            //     $field_id = $fieldsID['TIPO_CONTA_BANCO'];
-            //     if($field_id){
-            //         return  $this->normalizeString($registrations->$field_id);
-            //     }else{
-            //         return " ";
-            //     }
-
-            //  },
+            },            
             'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $app, $dePara, $cpfCsv, $categories) {                
                 if (in_array($registrations->category, $categories['CPF'])) {
                     $field_id = $fieldsID['CPF'];
@@ -448,15 +439,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
 
                 return $this->normalizeString($result);
-            },
-            //  'OPERACAO_BANCO' => function ($registrations) use ($fieldsID){
-            //     $field_id = $fieldsID['OPERACAO_BANCO'];
-            //     if($field_id){
-            //     return $registrations->$field_id ? $this->normalizeString($registrations->$field_id) : " ";
-            //     }else{
-            //         return " ";
-            //     }
-            //  },
+            },            
             'VALOR' => '',
             'INSCRICAO_ID' => function ($registrations) use ($fieldsID) {
                 return $this->normalizeString($registrations->number);
@@ -812,16 +795,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
 
                 return $result;
-            },
-            //  'TIPO_CONTA_BANCO' => function ($registrations) use ($fieldsID){
-            //     $field_id = $fieldsID['TIPO_CONTA_BANCO'];
-            //     if($field_id){
-            //         return  $this->normalizeString($registrations->$field_id);
-            //     }else{
-            //         return " ";
-            //     }
-
-            //  },
+            },            
             'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $proponentTypes, $dePara, $cpfCsv) {
                 $temp = $fieldsID['TIPO_PROPONENTE'];
                 if($temp){
@@ -894,15 +868,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
 
                 return $this->normalizeString($result);
-            },
-            //  'OPERACAO_BANCO' => function ($registrations) use ($fieldsID){
-            //     $field_id = $fieldsID['OPERACAO_BANCO'];
-            //     if($field_id){
-            //     return $registrations->$field_id ? $this->normalizeString($registrations->$field_id) : " ";
-            //     }else{
-            //         return " ";
-            //     }
-            //  },
+            },            
             'VALOR' => '',
             'INSCRICAO_ID' => function ($registrations) use ($fieldsID) {
                 return $this->normalizeString($registrations->number);
