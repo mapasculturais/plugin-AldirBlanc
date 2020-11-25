@@ -102,11 +102,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
         }
 
-        if(isset($this->data[$datePayment])){
+        if(isset($this->data[$datePayment]) && !empty($this->data[$datePayment])){
             $paymentDate = new DateTime($this->data[$datePayment]);
             $paymentDate = $paymentDate->format('Y-m-d');
-        }        
-        
+        }
+                
         //Pega o status solicitado no formulário
         if($this->data[$typeExport] === "all"){
             $statusPayment = ['0','1', '2', '3', '10'];
@@ -1779,7 +1779,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //treiller 1
             $lotBBCorrente += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
             $valor = explode(".", $_SESSION['valor']);
-            $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
+            $valor = preg_replace('/[^0-9]/i', '', $valor[0]);            
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotBBCorrente,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
