@@ -236,21 +236,23 @@ class Plugin extends \MapasCulturais\Plugin
                     $inciso = 3;
 
                 }
-                $this->part('aldirblanc/cnab240-button', ['inciso' => $inciso, 'opportunity' => $opportunity]);
+                $this->part('aldirblanc/cnab240-txt-button', ['inciso' => $inciso, 'opportunity' => $opportunity]);
             }
         });
 
         $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
             $em = $opportunity->getEvaluationMethod();
-            
+
             $_evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $registrations]);
 
             $evaluations_avaliadores = [];
             $evaluations_status = [];
             $evaluations_obs = [];
-            
+            $registrations_mediadas = [];
+
             foreach ($_evaluations as $eval) {
-                if ($eval->user->aldirblanc_avaliador) {
+
+                if (substr($eval->user->email,-10) == '@validador') {
                     continue;
                 }
 
@@ -262,10 +264,12 @@ class Plugin extends \MapasCulturais\Plugin
                     $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
                 }
 
+                $obs = $eval->evaluationData->obs ?? json_encode($eval->evaluationData);
+
                 if (isset($evaluations_obs[$eval->registration->number])) {
-                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $eval->evaluationData->obs;
+                    $evaluations_obs[$eval->registration->number] .= "\n-------------\n" . $obs;
                 } else {
-                    $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs;
+                    $evaluations_obs[$eval->registration->number] = $obs;
                 }
 
                 if (isset($evaluations_avaliadores[$eval->registration->number])) {
@@ -275,15 +279,24 @@ class Plugin extends \MapasCulturais\Plugin
                 }
             }
 
+            foreach ($registrations as $r) {
+                if ($r->mediacao_senha && $r->mediacao_contato) {
+                    $registrations_mediadas[$r->number] = 'Sim';
+                } else {
+                    $registrations_mediadas[$r->number] = 'Não';
+                }
+            }
 
             $header[] = 'Homologação - avaliadores';
             $header[] = 'Homologação - status';
             $header[] = 'Homologação - obs';
-            
+            $header[] = 'Inscrição Mediada?';
+
             foreach($body as $i => $line){
                 $body[$i][] = $evaluations_avaliadores[$line[0]] ?? null;
                 $body[$i][] = $evaluations_status[$line[0]] ?? null;
                 $body[$i][] = $evaluations_obs[$line[0]] ?? null;
+                $body[$i][] = $registrations_mediadas[$line[0]] ?? null;
             }
         });
        
@@ -864,6 +877,13 @@ class Plugin extends \MapasCulturais\Plugin
             'label' => i::__('Mensagem para Recurso na tela de Status'),
             'type' => 'text'
         ]);
+        // metadados do agente para processos de abertura de conta
+        $this->registerMetadata('MapasCulturais\Entities\Agent',
+                                'account_creation', [
+            'label' => i::__('Dados para abertura de conta'),
+            'type' => 'json',
+            'private' => true,
+        ]);
     }
 
     function json($data, $status = 200)
@@ -873,6 +893,34 @@ class Plugin extends \MapasCulturais\Plugin
         $app->halt($status, json_encode($data));
     }
 
+    /**
+     * Retorna os ids das oportunidades do inciso III
+     *
+     * @return array
+     */
+    function getOpportunitiesInciso3Ids()
+    {
+        $app = App::i();
+        
+        if ($app->cache->contains(__METHOD__)) {
+            return $app->cache->fetch(__METHOD__);
+        }
+        $project = $app->repo('Project')->find($this->config['project_id']);
+        $projectsIds = $project->getChildrenIds();
+        $projectsIds[] = $project->id;
+        $opportunitiesByProject = $app->repo('ProjectOpportunity')->findBy(['ownerEntity' => $projectsIds, 'status' => 1 ] );
+        $inciso1e2Ids = array_values(array_merge([$this->config['inciso1_opportunity_id']], $this->config['inciso2_opportunity_ids']));
+        $ids = [];
+
+        foreach ($opportunitiesByProject as $opportunity){
+            if ( !in_array($opportunity->id, $inciso1e2Ids) ) {
+                $ids[] = $opportunity->id;
+            }
+        }        
+
+        $app->cache->save(__METHOD__, $ids, 300);
+        return $ids;
+    }
 
     public function createOpportunityInciso1()
     {
