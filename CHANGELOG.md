@@ -6,6 +6,7 @@
 - Fazer com que o status do pagamento mude para 3 ao exportar pagamentos ainda não exportados nos exportadores genéricos, CNAB240 e PPG100 (Ref. [#150] (https://github.com/mapasculturais/plugin-AldirBlanc/issues/150))
 
 - Adiciona coluna na exportação das inscrições informando se foi feita por mediador (Ref. [#35](https://git.hacklab.com.br/mapas/MapasBR/-/issues/35))
+- Corrige exportador CNAB240 para não ignorar casas decimais no somatório dos treillers do lote (Ref. [#151](https://github.com/mapasculturais/plugin-AldirBlanc/issues/151))
 
 ## [2.1.0]
 
