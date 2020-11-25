@@ -248,11 +248,7 @@ class Plugin extends \MapasCulturais\Plugin
             $evaluations_status = [];
             $evaluations_obs = [];
             $registrations_mediadas = [];
-<<<<<<< HEAD
-            
-=======
 
->>>>>>> feature/modulo-mediacao
             foreach ($_evaluations as $eval) {
 
                 if (substr($eval->user->email,-10) == '@validador') {
