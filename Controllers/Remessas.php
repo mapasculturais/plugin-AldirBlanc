@@ -24,6 +24,11 @@ use MapasCulturais\Entities\Opportunity;
 // class AldirBlanc extends \MapasCulturais\Controllers\EntityController {
 class Remessas extends \MapasCulturais\Controllers\Registration
 {
+    const ACCOUNT_CREATION_PENDING = 0;
+    const ACCOUNT_CREATION_PROCESSING = 1;
+    const ACCOUNT_CREATION_FAILED = 2;
+    const ACCOUNT_CREATION_SUCCESS = 10;
+
     protected $config = [];
 
     public function __construct()
@@ -982,14 +987,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $app = App::i();
         $parameters = $this->getURLParameters([
             "opportunity" => "intArray",
-            "from" => "date",
-            "to" => "date",
+            "registrations" => "intArray",
             "type" => "string"
         ]);
-        if (isset($parameters["from"])) {
-            if (!isset($parameters["to"])) {
-                throw new Exception("Ao informar filtro de data, os dois limites devem ser informados.");
-            }
+        if (isset($parameters["registrations"]) &&
+            !$app->user->is("saasSuperAdmin")) {
+            echo("Não autorizado.");
+            die();
         }
         // pega oportunidades via ORM
         $opportunities = [];
@@ -1004,18 +1008,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 die();
             }
         }
+        $registrations = isset($parameters["registrations"]) ?
+                               $parameters["registrations"] : [];
         if (!isset($parameters["type"])) {
-            $parameters["type"] = "mci460";
+            throw new Exception("O parâmetro \"type\" é obrigatório.");
         }
         switch ($parameters["type"]) {
             case "mci460":
-                $this->exportMCI460($opportunities);
+                $this->exportMCI460($opportunities, $registrations);
                 break;
             case "ppg100":
-                $this->exportPPG100($opportunities);
+                $this->exportPPG100($opportunities, $registrations);
                 break;
             case "addressReport":
-                $this->addressReport($opportunities);
+                $this->addressReport($opportunities, $registrations);
                 break;
             default:
                 throw new Exception("Arquivo desconhecido: " . $parameters["type"]);
@@ -3151,25 +3157,22 @@ class Remessas extends \MapasCulturais\Controllers\Registration
  
     }
 
-    //define de qual form a requisição esta vindo e pega os dados do request
-    private function getParametersForms(){
-        //Pega as referências de qual form esta vindo os dados, CNAB ou GENÉRICO        
-        if(isset($this->data['generic'])){
+    // define de qual form a requisição está vindo e pega os dados do request
+    private function getParametersForms() {
+        // pega as referências de qual form estão vindo os dados, CNAB ou GENÉRICO
+        if (isset($this->data["generic"])) {
             $typeExport = "statusPaymentGeneric";
-            $datePayment = 'paymentDateGeneric';
-
-        }elseif(isset($this->data['canb240'])){
-            $typeExport = "statusPaymentCanb240";
-            $datePayment = 'paymentDateCanb240';
-
-        }elseif(isset($this->data['mci460'])){
-            $typeExport = "statusPaymentMci460";
-            $datePayment = 'paymentDateMc1460';
+            $datePayment = "paymentDateGeneric";
+        } elseif(isset($this->data["cnab240"])) {
+            $typeExport = "statusPaymentCnab240";
+            $datePayment = "paymentDateCnab240";
+        } elseif (isset($this->data["type"])) {
+            $typeExport = "statusPayment";
+            $datePayment = "paymentDate";
         }
-
         return [
-            'typeExport' => $typeExport,
-            'datePayment' => $datePayment
+            "typeExport" => $typeExport,
+            "datePayment" => $datePayment
         ];
     }
 
@@ -3194,6 +3197,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     private function sequenceNumber()
     {
+        if (isset($this->data["serial"]) &&
+            is_numeric($this->data["serial"])) {
+            return $this->data["serial"];
+        }
         $n = 0;
         $type = isset($this->data["type"]) ? $this->data["type"] : "mci460";
         switch ($type) {
@@ -3202,7 +3209,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $n = $this->config["config-mci460"]["serial"];
                 break;
             case "ppg100":
-                $n = $this->config["config-ppg10x"]["ppg100Serial"];
+                $n = $this->config["config-ppg10x"]["serial"];
                 break;
             default: break;
         }
@@ -3289,6 +3296,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
         }
         return $parameters;
+    }
+
+   /**
+     * Retorna do banco as inscrições com os IDs da lista, usando o método
+     * iterate.
+     */
+    private function pickRegistrations($registrationList)
+    {
+        $app = App::i();
+        $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r WHERE
+                       r.id IN (:registrationList)";
+        $query = $app->em->createQuery($dql);
+        $query->setParameters(["registrationList" => $registrationList]);
+        $registrations = $query->iterate();
+        return $registrations;
     }
 
     /** #########################################################################
@@ -3491,14 +3513,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return ((10 - ($sum % 10)) % 10);
     }
 
-    private function genericPaymentAmount($registrationID)
+    private function genericPaymentAmount($registration)
     {
-        $app = App::i();
-        $payment = $app->repo("\\RegistrationPayments\\Payment")->findOneBy([
-            "registration" => $registrationID,
-            "status" => 0
-        ]);
-        return ((int) round(($payment->amount * 100), 0));
+        return ((int) round(($this->processesPayment($registration, App::i())->amount * 100), 0));
     }
 
     private function genericTimeHHMM()
@@ -3508,9 +3525,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     /** #########################################################################
      * Funções para o PPG100
+     * Os métodos ppg100* são referenciados pelas configurações e não devem ser
+     * removidos sem ajuste nas mesmas.
      */
 
-    private function exportPPG100($opportunities)
+    private function exportPPG100($opportunities, $registrationList)
     {
         $app = App::i();
         $config = $this->config["config-ppg10x"];
@@ -3527,7 +3546,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunityIDs = [];
         // percorre as oportunidades
         foreach ($opportunities as $opportunity) {
-            $registrations = $this->getRegistrations($opportunity, true);
+            $registrations = empty($registrationList) ?
+                             $this->getRegistrations($opportunity, true) :
+                             $this->pickRegistrations($registrationList);
             /**
              * Mapeamento de fielsds_id pelo label do campo
              */
@@ -3538,9 +3559,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 // testa se é desbancarizado
                 if (!$this->genericCondition($config["fieldMap"], $registration,
                                              $config["condition"])) {
+                    $app->log->info("Ignorando - condição não satisfeita: " .
+                                    $registration->number);
                     continue;
                 }
-                $amount = $this->genericPaymentAmount($registration->id);
+                $amount = $this->genericPaymentAmount($registration);
                 $details = $this->genericDetails($config, $registration, [
                     "numeroRegistro" => ($nLines + 1),
                     "valorCarga" => $amount,
@@ -3569,7 +3592,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          */
         $fileName = "ppg100-" . (new DateTime())->format('Ymd') . "-op" .
                     implode("-", $opportunityIDs) . "-" .
-                    md5(json_encode($out)) . '.txt';
+                    md5(json_encode($out)) . ".txt";
         $dir = PRIVATE_FILES_PATH . "aldirblanc/inciso1/remessas/ppg100/";
         $path = $dir . $fileName;
         if (!is_dir($dir)) {
@@ -3621,13 +3644,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * removidos sem ajuste nas mesmas.
      */
 
-    private function exportMCI460($opportunities)
+    private function exportMCI460($opportunities, $registrationList)
     {
         $app = App::i();
         $config = $this->config["config-mci460"];
         if (!isset($config["condition"])) {
             throw new Exception("Configuração inválida: \"condition\" não configurada.");
         }
+        $exportControl = isset($this->data["statusPayment"]) &&
+                         ($this->data["statusPayment"] == "0");
         $newline = "\r\n";
         set_time_limit(0);
         // carrega mapeamento de agências
@@ -3640,7 +3665,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunityIDs = [];
         // percorre as oportunidades
         foreach ($opportunities as $opportunity) {
-            $registrations = $this->getRegistrations($opportunity, true);
+            $registrations = empty($registrationList) ?
+                             $this->getRegistrations($opportunity, true) :
+                             $this->pickRegistrations($registrationList);
             /**
              * Mapeamento de fielsds_id pelo label do campo
              */
@@ -3648,9 +3675,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             // processa inscrições
             $clientsBefore = $nClients;
             while ($registration = $registrations->next()[0]) {
+                // caso a exportação seja para pagamento, testa se não tem solicitação em aberto
+                if ($exportControl &&
+                    isset($registration->owner->account_creation->status) &&
+                    ($registration->owner->account_creation->status !=
+                     self::ACCOUNT_CREATION_PENDING)) {
+                    $app->log->info("Ignorando - já exportado: " .
+                                     $registration->number);
+                    continue;
+                }
                 // testa se é desbancarizado
                 if (!$this->genericCondition($config["fieldMap"], $registration,
                                              $config["condition"])) {
+                    $app->log->info("Ignorando - condição não satisfeita: " .
+                                    $registration->number);
                     continue;
                 }
                 // testa se o CEP está mapeado
@@ -3658,6 +3696,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                                           $registration,
                                                           $branchMap);
                 if (!$branchSetex) {
+                    $app->log->info("Ignorando - sem agência: " .
+                                     $registration->number);
                     continue;
                 }
                 ++$nClients;
@@ -3666,7 +3706,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $details = $this->genericDetails($config, $registration,
                                                  $extraData);
                 $nLines += sizeof($details);
-                $out .= implode($newline, $details) . $newline;
+                $raw = implode($newline, $details);
+                $out .= $raw . $newline;
+                if ($exportControl) {
+                    $app->log->info("Processando: " . $registration->number);
+                    $registration->owner->account_creation = [
+                        "status" => self::ACCOUNT_CREATION_PROCESSING,
+                        "type" => "mci460",
+                        "sent_raw" => $raw,
+                    ];
+                    $registration->owner->save(true);
+                }
                 $app->em->clear();
             }
             if ($nClients > $clientsBefore) {
@@ -3687,7 +3737,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          */
         $fileName = "mci460-" . (new DateTime())->format('Ymd') . "-op" .
                     implode("-", $opportunityIDs) . "-" .
-                    md5(json_encode($out)) . '.txt';
+                    md5(json_encode($out)) . ".txt";
         $dir = PRIVATE_FILES_PATH . "aldirblanc/inciso1/remessas/mci460/";
         $path = $dir . $fileName;
         if (!is_dir($dir)) {
@@ -3703,7 +3753,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return;
     }
 
-    private function addressReport($opportunities)
+    private function addressReport($opportunities, $registrationList)
     {
         $app = App::i();
         set_time_limit(0);
@@ -3714,14 +3764,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $config = $this->config["config-mci460"];
         $address = $config["fieldMap"]["endereco"];
         foreach ($opportunities as $opportunity) {
-            $registration = $this->getRegistrations($opportunity, true);
+            $registrations = empty($registrationList) ?
+                             $this->getRegistrations($opportunity, true) :
+                             $this->pickRegistrations($registrationList);
             /**
              * Mapeamento de fielsds_id pelo label do campo
              */
             $this->registerRegistrationMetadata($opportunity);
             $linesBefore = sizeof($report);
             while ($registration = $registrations->next()[0]) {
-                if (!$this->genericThunk2($config["condition"], $config["fieldMap"], $registration)) {
+                if (!$this->genericThunk2($config["condition"],
+                                          $config["fieldMap"], $registration)) {
                     continue;
                 }
                 $addressFields = [];
@@ -3760,7 +3813,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          */
         $fileName = "addressReport-" . (new DateTime())->format('Ymd') . "-op" .
                     implode("-", $opportunityIDs) . "-" .
-                    md5(json_encode(array_merge([$header], $report))) . '.csv';
+                    md5(json_encode(array_merge([$header], $report))) . ".csv";
         $dir = PRIVATE_FILES_PATH . "aldirblanc/inciso1/remessas/generics/";
         $path = $dir . $fileName;
         if (!is_dir($dir)) {
@@ -3892,7 +3945,4 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         return $out;
     }
-
-   
-
 }

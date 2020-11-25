@@ -859,6 +859,13 @@ class Plugin extends \MapasCulturais\Plugin
             'label' => i::__('Mensagem para Recurso na tela de Status'),
             'type' => 'text'
         ]);
+        // metadados do agente para processos de abertura de conta
+        $this->registerMetadata('MapasCulturais\Entities\Agent',
+                                'account_creation', [
+            'label' => i::__('Dados para abertura de conta'),
+            'type' => 'json',
+            'private' => true,
+        ]);
     }
 
     function json($data, $status = 200)
