@@ -5,6 +5,8 @@
 - Opção para exportar todas as inscrições que tenham pagamento cadastrados independentemente do status nos exportadores genéricos, CNAB240 e PPG100 (Ref. [#150] (https://github.com/mapasculturais/plugin-AldirBlanc/issues/150))
 - Fazer com que o status do pagamento mude para 3 ao exportar pagamentos ainda não exportados nos exportadores genéricos, CNAB240 e PPG100 (Ref. [#150] (https://github.com/mapasculturais/plugin-AldirBlanc/issues/150))
 
+- Adiciona coluna na exportação das inscrições informando se foi feita por mediador (Ref. [#35](https://git.hacklab.com.br/mapas/MapasBR/-/issues/35))
+
 ## [2.1.0]
 
 - Adiciona quebra de linha nas avaliações nas mensagens de status (Ref. [#12](https://git.hacklab.com.br/mapas/mapas-es/-/issues/12))
