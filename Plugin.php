@@ -236,21 +236,22 @@ class Plugin extends \MapasCulturais\Plugin
                     $inciso = 3;
 
                 }
-                $this->part('aldirblanc/cnab240-button', ['inciso' => $inciso, 'opportunity' => $opportunity]);
+                $this->part('aldirblanc/cnab240-txt-button', ['inciso' => $inciso, 'opportunity' => $opportunity]);
             }
         });
 
         $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
             $em = $opportunity->getEvaluationMethod();
-            
+
             $_evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $registrations]);
 
             $evaluations_avaliadores = [];
             $evaluations_status = [];
             $evaluations_obs = [];
-            
+            $registrations_mediadas = [];
+
             foreach ($_evaluations as $eval) {
-                
+
                 if (substr($eval->user->email,-10) == '@validador') {
                     continue;
                 }
@@ -278,15 +279,24 @@ class Plugin extends \MapasCulturais\Plugin
                 }
             }
 
+            foreach ($registrations as $r) {
+                if ($r->mediacao_senha && $r->mediacao_contato) {
+                    $registrations_mediadas[$r->number] = 'Sim';
+                } else {
+                    $registrations_mediadas[$r->number] = 'Não';
+                }
+            }
 
             $header[] = 'Homologação - avaliadores';
             $header[] = 'Homologação - status';
             $header[] = 'Homologação - obs';
-            
+            $header[] = 'Inscrição Mediada?';
+
             foreach($body as $i => $line){
                 $body[$i][] = $evaluations_avaliadores[$line[0]] ?? null;
                 $body[$i][] = $evaluations_status[$line[0]] ?? null;
                 $body[$i][] = $evaluations_obs[$line[0]] ?? null;
+                $body[$i][] = $registrations_mediadas[$line[0]] ?? null;
             }
         });
        
@@ -905,6 +915,13 @@ class Plugin extends \MapasCulturais\Plugin
         $this->registerMetadata('MapasCulturais\Entities\Opportunity', 'aldirblanc_status_recurso', [
             'label' => i::__('Mensagem para Recurso na tela de Status'),
             'type' => 'text'
+        ]);
+        // metadados do agente para processos de abertura de conta
+        $this->registerMetadata('MapasCulturais\Entities\Agent',
+                                'account_creation', [
+            'label' => i::__('Dados para abertura de conta'),
+            'type' => 'json',
+            'private' => true,
         ]);
     }
 

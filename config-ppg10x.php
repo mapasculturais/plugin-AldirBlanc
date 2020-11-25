@@ -26,7 +26,7 @@
  * ToDo: documentar assinaturas para esses métodos.
  */
 return [
-    "ppg100Serial" => 0,
+    "serial" => 0,
     "fieldMap" => [
         "wantsPaymentOrder" => "field_8564",
         "singleParent" => "field_119",
