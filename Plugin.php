@@ -247,6 +247,7 @@ class Plugin extends \MapasCulturais\Plugin
             $evaluations_avaliadores = [];
             $evaluations_status = [];
             $evaluations_obs = [];
+            $registrations_mediadas = [];
             
             foreach ($_evaluations as $eval) {
                 
@@ -276,16 +277,25 @@ class Plugin extends \MapasCulturais\Plugin
                     $evaluations_avaliadores[$eval->registration->number] = $eval->user->profile->name;
                 }
             }
-
+            
+            foreach($registrations as $r) {
+                if($r->mediacao_senha && $r->mediacao_contato) {
+                    $registrations_mediadas[$r->number] = 'Sim';
+                } else {
+                    $registrations_mediadas[$r->number] = 'Não';
+                }
+            }
 
             $header[] = 'Homologação - avaliadores';
             $header[] = 'Homologação - status';
             $header[] = 'Homologação - obs';
-            
+            $header[] = 'Inscrição Mediada?';
+
             foreach($body as $i => $line){
                 $body[$i][] = $evaluations_avaliadores[$line[0]] ?? null;
                 $body[$i][] = $evaluations_status[$line[0]] ?? null;
                 $body[$i][] = $evaluations_obs[$line[0]] ?? null;
+                $body[$i][] = $registrations_mediadas[$line[0]] ?? null;
             }
         });
        
