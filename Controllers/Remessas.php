@@ -3818,8 +3818,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     {
         $app = App::i();
         set_time_limit(0);
+        $exportControl = isset($this->data["statusPayment"]) &&
+                         ($this->data["statusPayment"] == "0");
         $header = ["Inscrição", "Nome", "Logradouro", "Número", "Complemento",
-                "Bairro", "Município", "Estado", "CEP"];
+                   "Bairro", "Município", "Estado", "CEP"];
         $report = [];
         $opportunityIDs = [];
         $config = $this->config["config-mci460"];
@@ -3834,10 +3836,23 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $this->registerRegistrationMetadata($opportunity);
             $linesBefore = sizeof($report);
             while ($registration = $registrations->next()[0]) {
-                if (!$this->genericThunk2($config["condition"],
-                                          $config["fieldMap"], $registration)) {
+                // caso a exportação seja para pagamento, testa se não tem solicitação em aberto
+                if ($exportControl &&
+                    isset($registration->owner->account_creation->status) &&
+                    ($registration->owner->account_creation->status !=
+                     self::ACCOUNT_CREATION_PENDING)) {
+                    $app->log->info("Ignorando - já exportado: " .
+                                     $registration->number);
                     continue;
                 }
+                // testa se é desbancarizado
+                if (!$this->genericCondition($config["fieldMap"], $registration,
+                                             $config["condition"])) {
+                    $app->log->info("Ignorando - condição não satisfeita: " .
+                                    $registration->number);
+                    continue;
+                }
+                $app->log->info("Incluindo: " . $registration->number);
                 $addressFields = [];
                 $source = $registration->$address;
                 if (is_array($source)) {

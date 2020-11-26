@@ -1,5 +1,6 @@
 ## [Unreleased]
 
+- Corrige bug na exportação da planilha de endereços (Ref. [#156](https://github.com/mapasculturais/plugin-AldirBlanc/issues/156))
 - Corrige bug na exportação do PPG100 e implementa novo número de protocolo (Ref. [#150](https://github.com/mapasculturais/plugin-AldirBlanc/issues/150))
 
 ## [v2.2.0] - 2020-10-25
