@@ -106,7 +106,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $paymentDate = new DateTime($this->data[$datePayment]);
             $paymentDate = $paymentDate->format('Y-m-d');
         }
-                
         //Pega o status solicitado no formulário
         if($this->data[$typeExport] === "all"){
             $statusPayment = ['0','1', '2', '3', '10'];
@@ -1779,7 +1778,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //treiller 1
             $lotBBCorrente += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
             $valor = explode(".", $_SESSION['valor']);
-            $valor = preg_replace('/[^0-9]/i', '', $valor[0]);            
+            $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));              
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotBBCorrente,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
@@ -1835,7 +1834,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //treiller 1
             $lotBBPoupanca += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
             $valor = explode(".", $_SESSION['valor']);
-            $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
+            $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotBBPoupanca,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
@@ -1895,7 +1894,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //treiller 1
             $lotOthers += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
             $valor = explode(".", $_SESSION['valor']);
-            $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
+            $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));          
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotOthers,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
