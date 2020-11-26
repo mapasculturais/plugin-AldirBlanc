@@ -22,7 +22,7 @@ if($inciso == 1){
     <form class="form-export-dataprev" action="<?=$route?>" method="POST">
   
         <label for="from"><span style="color: red;">*</span> Data de pagamento</label>
-        <input type="date" name="paymentDateGeneric" id="paymentDateGeneric"> 
+        <input type="date" name="paymentDateGeneric" id="paymentDateGeneric">
         
         <div>  
         <b>Escolha quais inscrições quer exportar</b> <br>      

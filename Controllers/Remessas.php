@@ -100,13 +100,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //Verifica se a data tem um formato correto
             if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/", $this->data[$datePayment])){
                 throw new \Exception("O formato da data de pagamento é inválido.");
-            }else{
-                $paymentDate = new DateTime($this->data[$datePayment]);
-                $paymentDate = $paymentDate->format('Y-m-d');
             }
         }
-        
-        
+
+        if(isset($this->data[$datePayment]) && !empty($this->data[$datePayment])){
+            $paymentDate = new DateTime($this->data[$datePayment]);
+            $paymentDate = $paymentDate->format('Y-m-d');
+        }
         //Pega o status solicitado no formulário
         if($this->data[$typeExport] === "all"){
             $statusPayment = ['0','1', '2', '3', '10'];
@@ -381,16 +381,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 return $this->normalizeString($result);
                 
-            },
-            //  'TIPO_CONTA_BANCO' => function ($registrations) use ($fieldsID){
-            //     $field_id = $fieldsID['TIPO_CONTA_BANCO'];
-            //     if($field_id){
-            //         return  $this->normalizeString($registrations->$field_id);
-            //     }else{
-            //         return " ";
-            //     }
-
-            //  },
+            },            
             'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $app, $dePara, $cpfCsv, $categories) {                
                 if (in_array($registrations->category, $categories['CPF'])) {
                     $field_id = $fieldsID['CPF'];
@@ -449,15 +440,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
 
                 return $this->normalizeString($result);
-            },
-            //  'OPERACAO_BANCO' => function ($registrations) use ($fieldsID){
-            //     $field_id = $fieldsID['OPERACAO_BANCO'];
-            //     if($field_id){
-            //     return $registrations->$field_id ? $this->normalizeString($registrations->$field_id) : " ";
-            //     }else{
-            //         return " ";
-            //     }
-            //  },
+            },            
             'VALOR' => '',
             'INSCRICAO_ID' => function ($registrations) use ($fieldsID) {
                 return $this->normalizeString($registrations->number);
@@ -813,16 +796,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
 
                 return $result;
-            },
-            //  'TIPO_CONTA_BANCO' => function ($registrations) use ($fieldsID){
-            //     $field_id = $fieldsID['TIPO_CONTA_BANCO'];
-            //     if($field_id){
-            //         return  $this->normalizeString($registrations->$field_id);
-            //     }else{
-            //         return " ";
-            //     }
-
-            //  },
+            },            
             'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $proponentTypes, $dePara, $cpfCsv) {
                 $temp = $fieldsID['TIPO_PROPONENTE'];
                 if($temp){
@@ -895,15 +869,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
 
                 return $this->normalizeString($result);
-            },
-            //  'OPERACAO_BANCO' => function ($registrations) use ($fieldsID){
-            //     $field_id = $fieldsID['OPERACAO_BANCO'];
-            //     if($field_id){
-            //     return $registrations->$field_id ? $this->normalizeString($registrations->$field_id) : " ";
-            //     }else{
-            //         return " ";
-            //     }
-            //  },
+            },            
             'VALOR' => '',
             'INSCRICAO_ID' => function ($registrations) use ($fieldsID) {
                 return $this->normalizeString($registrations->number);
@@ -1813,7 +1779,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //treiller 1
             $lotBBCorrente += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
             $valor = explode(".", $_SESSION['valor']);
-            $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
+            $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));              
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotBBCorrente,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
@@ -1869,7 +1835,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //treiller 1
             $lotBBPoupanca += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
             $valor = explode(".", $_SESSION['valor']);
-            $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
+            $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotBBPoupanca,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
@@ -1929,7 +1895,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             //treiller 1
             $lotOthers += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
             $valor = explode(".", $_SESSION['valor']);
-            $valor = preg_replace('/[^0-9]/i', '', $valor[0]);
+            $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));          
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotOthers,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
