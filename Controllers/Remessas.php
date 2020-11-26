@@ -1781,7 +1781,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));              
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotBBCorrente,
-                'VALOR_TOTAL_DOC_INTEIRO' => $valor,
+                'VALOR_TOTAL_DOC_INTEIRO' => $valor * 100,
 
             ];
 
@@ -1837,7 +1837,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotBBPoupanca,
-                'VALOR_TOTAL_DOC_INTEIRO' => $valor,
+                'VALOR_TOTAL_DOC_INTEIRO' => $valor * 100,
                 'LOTE' => $numLote,
             ];
 
@@ -1897,7 +1897,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));          
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotOthers,
-                'VALOR_TOTAL_DOC_INTEIRO' => $valor,
+                'VALOR_TOTAL_DOC_INTEIRO' => $valor * 100,
                 'LOTE' => $numLote,
             ];
             $txt_data = $this->mountTxt($trailer1, $mappedTrailer1, $txt_data, null, $complement, $app);
