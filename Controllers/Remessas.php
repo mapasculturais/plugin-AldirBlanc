@@ -13,6 +13,7 @@ use MapasCulturais\App;
 use League\Csv\Statement;
 use MapasCulturais\Entities\Registration;
 use MapasCulturais\Entities\Opportunity;
+use RegistrationPayments\Payment;
 
 /**
  * Registration Controller
@@ -3215,6 +3216,45 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     }
 
     /**
+     * Salva dados em um CSV. Se o parâmetro keyOrColumns for um array, assume
+     * que os dados estão corretamente ordenados em data. Caso contrário, assume
+     * que data é um dicionário cujas chaves devem ser armazenadas na coluna
+     * indicada, e os valores são dados organizados com os nomes das demais
+     * colunas.
+     */
+    private function saveCSVData($file, $separator, $keyOrColumns, $data)
+    {
+        $filename = __DIR__ . "/../" . $file;
+        $dir = substr($filename, 0, strrpos($filename, "/"));
+        if (!is_dir($dir)) {
+            mkdir($dir, 0700, true);
+        }
+        $stream = fopen($filename, "w");
+        $csv = Writer::createFromStream($stream);
+        $csv->setDelimiter($separator);
+        if (is_array($keyOrColumns)) {
+            $csv->insertOne($keyOrColumns);
+            $csv->insertAll($data);
+        } else {
+            $keys = array_keys($data);
+            $header = array_merge([$keyOrColumns], array_keys($data[$keys[0]]));
+            $body = [];
+            foreach ($keys as $key) {
+                $entry = [];
+                $data[$key][$keyOrColumns] = $key;
+                foreach ($header as $column) {
+                    $entry[] = $data[$key][$column];
+                }
+                $body[] = $entry;
+            }
+            $csv->insertOne($header);
+            $csv->insertAll($body);
+        }
+        fclose($stream);
+        return;
+    }
+
+    /**
      * Valida e retorna os parâmetros da URL. Recebe um dicionário com os nomes
      * e tipos dos parâmetros. Tipos possíveis: date, int, intArray, string.
     */
@@ -3335,19 +3375,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 // processa campos variáveis
                 if (!isset($field["default"])) {
                     if ($field["type"] === "meta") {
-                        $line .= $this->genericMetaField($config, $field, $registration);
+                        $line .= $this->genericMetaField($config, $field,
+                                                         $registration,
+                                                         $extraData);
                         continue;
                     }
-                    $fieldName = $field["name"];
-                    // campos externos (por exemplo, o contador de clientes)
-                    if (!isset($config["fieldMap"][$fieldName])) {
-                        $field["default"] = $extraData[$fieldName];
-                    } else { // campos do banco de dados
-                        $fieldName = $config["fieldMap"][$fieldName];
-                        $field["default"] = isset($field["function"]) ?
-                                            $this->genericThunk2($field["function"], $registration->$fieldName, null) :
-                                            $registration->$fieldName;
-                    }
+                    $field["default"] = $this->genericField($field, $config["fieldMap"],
+                                                            $registration, $extraData);
                 }
                 $line .= $this->createString($field);
             }
@@ -3356,29 +3390,58 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return $out;
     }
 
+    private function genericField($field, $fieldMap, $registration,
+                                  $extraData)
+    {
+        $fieldName = $field["name"];
+        // campos externos (por exemplo, o contador de clientes)
+        if (!isset($fieldMap[$fieldName])) {
+            return $extraData[$fieldName];
+        }
+        // campos do banco de dados
+        $fieldName = $fieldMap[$fieldName];
+        return (isset($field["function"]) ?
+                $this->genericThunk2($field["function"],
+                                     $registration->$fieldName, null) :
+                $registration->$fieldName);
+    }
+
     /**
      * Retorna um metacampo para o arquivo exportado de acordo com a configuração.
      */
-    private function genericMetaField($config, $metafieldConfig, $registration)
+    private function genericMetaField($config, $metafieldConfig, $registration,
+                                      $extraData)
     {
         $out = "";
+        $fieldMap = $config["fieldMap"];
         $metaname = $metafieldConfig["name"];
         if (isset($metafieldConfig["function"])) {
-            $field = $config["fieldMap"][$metaname];
+            $value = isset($fieldMap[$metaname]) ?
+                     $registration->${$fieldMap[$metaname]} :
+                     $extraData[$metaname];
             return $this->genericThunk2($metafieldConfig["function"],
-                                        $metafieldConfig, $registration->$field);
+                                        $metafieldConfig, $value);
         }
-        // caminho não testado a seguir; todos os metacampos atualmente têm sua própria função geradora
         foreach ($metafieldConfig["fields"] as $field) {
             if (!isset($field["default"])) {
                 $fieldName = $field["name"];
-                if (!isset($config["fieldMap"][$metaname])) {
-                    $field["default"] = $registration->$fieldName;
+                if (!isset($fieldMap[$metaname])) { // metacampo não mapeado
+                    if (isset($extraData[$metaname])) { // metacampo no extraData
+                        $meta = $extraData[$metaname];
+                        $field["default"] = is_array($meta) ? $meta[$fieldName] :
+                                            $meta->$fieldName;
+                    } else { // trata subcampo como campo comum
+                        $field["default"] = $this->genericField($field, $fieldMap,
+                                                                $registration, $extraData);
+                    }
+
                 } else {
-                    $field["default"] = $registration->$metaname->$fieldName;
+                    $meta = $registration->$metaname;
+                    $field["default"] = is_array($meta) ? $meta[$fieldName] :
+                                        $meta->$fieldName;
                 }
             }
-            $out[] .= $this->createString($field);
+            $out .= $this->createString($field);
         }
         return $out;
     }
@@ -3481,7 +3544,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     private function genericPaymentAmount($registration)
     {
-        return ((int) round(($this->processesPayment($registration, App::i())->amount * 100), 0));
+        return ((int) round(($this->processesPayment($registration, App::i()) * 100), 0));
     }
 
     private function genericTimeHHMM()
@@ -3504,9 +3567,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         $newline = "\r\n";
         set_time_limit(0);
+        // carrega mapeamento de identificadores
+        $idMap = $this->getCSVData($config["idMap"], ",", "registrationID");
+        if (!$idMap) {
+            $idMap = [];
+        }
         // inicializa contadores
         $nLines = 1;
         $totalAmount = 0;
+        $newMappings = 0;
         // gera o header
         $out = $this->genericHeader($config) . $newline;
         $opportunityIDs = [];
@@ -3530,9 +3599,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     continue;
                 }
                 $amount = $this->genericPaymentAmount($registration);
+                if (!isset($idMap[$registration->id])) {
+                    ++$newMappings;
+                    $idMap[$registration->id] = [
+                         "idCliente" => (1 + sizeof($idMap)),
+                    ];
+                }
                 $details = $this->genericDetails($config, $registration, [
                     "numeroRegistro" => ($nLines + 1),
                     "valorCarga" => $amount,
+                    "numeroProtocolo" => $idMap[$registration->id],
                 ]);
                 $nLines += sizeof($details);
                 $totalAmount += $amount;
@@ -3553,6 +3629,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             "totalCarga" => $totalAmount,
             "numeroRegistro" => $nLines,
         ]) . $newline;
+        // atualiza o mapeamento de identificadores
+        if ($newMappings > 0) {
+            $this->saveCSVData($config["idMap"], ",", "registrationID", $idMap);
+        }
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $out
          */
@@ -3574,17 +3654,32 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return;
     }
 
+    private function ppg100ActionPA($registrationID)
+    {
+        $app = App::i();
+        $payments = $app->repo("\\RegistrationPayments\\Payment")->findBy([
+            "registration" => $registrationID
+        ]);
+        foreach ($payments as $payment) {
+            if ($payment->status == Payment::STATUS_PAID) {
+                return 5; // 3 no formato antigo
+            }
+        }
+        return 4; // 2 no formato antigo
+    }
+
+    // formato antigo, sem uso se permanecer o novo
     private function ppg100ProtocolNumberPA($fieldSpec, $registrationNumber)
     {
         $out = "";
         foreach ($this->config["config-ppg10x"]["header"] as $field) {
             if ($field["name"] == "codigoParametroCliente") {
-                $idBB = mb_substr(("" . $field["default"]), 0, 4);
+                $idBB = $field["default"];
                 break;
             }
         }
         $components = [
-            "idBB" => $idBB,
+            "idBB" => "$idBB",
             "idCliente" => "$registrationNumber",
         ];
         foreach ($fieldSpec["fields"] as $field) {
