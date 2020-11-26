@@ -2841,7 +2841,204 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         readfile($patch);
 
     }
+     /**
+      * Implementa o importador CNAB240
+      */
 
+      public function ALL_importCnab240(){
+
+        $result = [];
+        $countLine = 1;
+        $countSeg = 1;
+        
+        $file = __DIR__."../../CSV/IEDPAG8241120200.txt";    
+        $data = $this->mappedCnab($file);
+
+        //Pega a linha do header do lote
+        $LOTE1_H = isset($data['LOTE_1']) ? min($data['LOTE_1']) : null;
+        $LOTE2_H = isset($data['LOTE_2']) ? min($data['LOTE_2']) : null;
+        $LOTE3_H = isset($data['LOTE_3']) ? min($data['LOTE_3']) : null;
+
+        //Pela a linha do trailler do lote
+        $LOTE1_T = isset($data['LOTE_1']) ? max($data['LOTE_1']) : null;
+        $LOTE2_T = isset($data['LOTE_2']) ? max($data['LOTE_2']) : null;
+        $LOTE3_T = isset($data['LOTE_3']) ? max($data['LOTE_3']) : null;
+               
+        foreach($data as $key => $value){
+            $seg = null;
+            $cpf = null;
+            if($key === "HEADER_DATA_ARQ"){
+                foreach($value as $key => $r){
+                    //Valida o arquivo
+                    $n = $this->getLineData($r, 230, 231);
+                    $result['AQURIVO'] = $this->validatedCanb($n, $seg, $cpf);
+                   
+                }
+            }else if($key === "LOTE_1_DATA"){                
+                foreach($value as $key => $r){
+                    if($key == $LOTE1_H){ 
+                        //Valida se o lote 2 esta válido
+                        $n = $this->getLineData($r, 230, 231);
+                        $result['LOTE_1'] = $this->validatedCanb($n, $seg, $cpf);
+
+                    }elseif($key == $LOTE1_T){ 
+                       
+
+                    }else{ 
+                        $seg = ($key % 2) == true ? "A" : "B";
+
+                        if($seg === "A"){
+                            //Valida as inscrições
+                            $code = $this->getLineData($r, 230, 231);
+                            $result['LOTE_1'][] = $this->validatedCanb($code, $seg, $cpf);
+                        }else{
+                            $cpf = $this->getLineData($r, 20, 33);
+                            $result['LOTE_1'][] = $this->validatedCanb($code, $seg, $cpf);
+                        }
+                        
+                    }
+                   
+                   
+                }
+            }else if($key === "LOTE_2_DATA"){
+                
+                foreach($value as $key => $r){
+                    
+                    if($key == $LOTE2_H){ 
+                        //Valida se o lote 2 esta válido
+                        $n = $this->getLineData($r, 230, 231);
+                        $result['LOTE_2'] = $this->validatedCanb($n, $seg, $cpf);
+
+                    }elseif($key == $LOTE2_T){ 
+                      
+
+                    }else{ 
+                        if($seg === "A"){
+                            //Valida as inscrições
+                            $n = $this->getLineData($r, 230, 231);
+                            $result['LOTE_1'][] = $this->validatedCanb($n, $seg, $cpf);
+                        }
+                    }
+                   
+                    
+
+                }
+            }else if($key === "LOTE_3_DATA"){
+                foreach($value as $key => $r){
+                    if($key == $LOTE3_H){ 
+                        //Valida se o lote 2 esta válido
+                        $n = $this->getLineData($r, 230, 231);
+                        $result['LOTE_3'] = $this->validatedCanb($n, $seg, $cpf);
+
+                    }elseif($key == $LOTE3_T){
+                      
+
+                    }else{
+                        if($seg === "A"){
+                            //Valida as inscrições
+                            $n = $this->getLineData($r, 230, 231);
+                            $result['LOTE_1'][] = $this->validatedCanb($n, $seg, $cpf);
+                        }
+                    }
+                    
+                }
+            }else if($key === "TREILLER_DATA_ARQ"){
+                
+            }
+           
+        }
+
+        var_dump($result);
+    }
+
+    private function validatedCanb($code, $seg, $cpf){
+        $returnCode = $returnCode = $this->config['config-cnab240-inciso1']['returnCode'];
+        $positive = $returnCode['positive'];
+        $negative = $returnCode['negative'];
+        foreach($positive as $key => $value){
+            if($key === $code){
+                return [
+                    'seg' => $seg,
+                    'cpf' => $cpf,
+                    'status' => true,
+                    'reason' => ''
+                ];
+            }
+        }
+
+        foreach($negative as $key => $value){
+            if($key === $code){
+                return [
+                    'seg' => $seg,
+                    'cpf' => $cpf,
+                    'status' => false,
+                    'reason' => $value
+                ];
+            }
+        }
+    }
+
+      /**
+       * faz o mapeamento do CNAB20... separa os lotes, treiller e header
+       */
+      private function mappedCnab($file){
+        $stream = fopen($file,"r");
+        $result = [];
+        $countLine = 1;
+          while(!feof($stream)){
+              $linha = fgets($stream);
+              if(!empty($linha)){
+                  $value = $this->getLineData($linha, 0, 7);
+                  switch ($value) {
+                      case '00100000':
+                          $result['HEADER_ARQ'][$countLine] = $countLine;
+                          $result['HEADER_DATA_ARQ'][$countLine] = $linha;
+                          break;
+                      case '00100011':
+                      case '00100013':
+                      case '00100015':
+                          $result['LOTE_1'][$countLine] = $countLine;
+                          $result['LOTE_1_DATA'][$countLine] = $linha;
+                          break;
+                      case '00100021':
+                      case '00100023':
+                      case '00100025':
+                          $result['LOTE_2'][$countLine] = $countLine;
+                          $result['LOTE_2_DATA'][$countLine] = $linha;
+                          break;
+                      case '00100031':
+                      case '00100033':
+                      case '00100035':
+                          $result['LOTE_3'][$countLine] = $countLine;
+                          $result['LOTE_3_DATA'][$countLine] = $linha;
+                          break;
+                      case '00199999':
+                          $result['TREILLER_ARQ'][$countLine] = $countLine;
+                          $result['TREILLER_DATA_ARQ'][$countLine] = $linha;
+                          break;
+                      
+                  }
+              }
+
+              $countLine ++;
+          }
+
+          return $result;
+      }
+      private function getLineData($line, $start, $end){              
+        $data = "";
+        $char = strlen($line);       
+        if(!empty($line)){
+            for($i=0; $i<$char; $i++){
+                if($i>=$start && $i<=$end){
+                    $data .= $line[$i];
+                    
+                }
+            }
+        }
+
+        return $data;
+  }
     //###################################################################################################################################
 
     /**
