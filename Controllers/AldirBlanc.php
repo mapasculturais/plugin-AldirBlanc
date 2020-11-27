@@ -585,7 +585,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
         }
         
+        $recursos = [];
+
         foreach ($evaluations as $evaluation) {
+            $validacao = $evaluation->user->aldirblanc_validador ?? null;
+            if ($validacao == 'recurso') {
+                $recursos[] = $evaluation;
+            }
 
             if ($evaluation->getResult() == $registration->status) {
                 
@@ -606,7 +612,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             
         }
 
-        $this->render('status', ['registration' => $registration, 'registrationStatusMessage' => $registrationStatusMessage, 'justificativaAvaliacao' => array_filter($justificativaAvaliacao)]);
+        $this->render('status', [
+            'registration' => $registration, 
+            'registrationStatusMessage' => $registrationStatusMessage, 
+            'justificativaAvaliacao' => array_filter($justificativaAvaliacao),
+            'recursos' => $recursos
+        ]);
     }
 
     /**
