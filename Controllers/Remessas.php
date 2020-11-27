@@ -1385,7 +1385,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $temp_account = explode("-", $temp_account);
                 
                 if(count($temp_account)>1){
-                    $dig = $temp_account[1];
+                    $dig = substr($temp_account[1], -1);
 
                 }else{
                     $dig = substr($temp_account[0], -1);
