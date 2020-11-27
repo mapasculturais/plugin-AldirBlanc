@@ -105,6 +105,11 @@ class Plugin extends \MapasCulturais\Plugin
             'zammad_src_form' => env('AB_ZAMMAD_SRC_FORM', ''),
             'zammad_src_chat' => env('AB_ZAMMAD_SRC_CHAT', ''),
             'zammad_background_color' => env('AB_ZAMMAD_BACKGROUND_COLOR', '#000000'),
+             
+            //pre inscrições
+             'oportunidades_desabilitar_envio' => (array) json_decode(env('AB_OPORTUNIDADES_DESABILITAR_ENVIO', '[]')),
+             'mensagens_envio_desabilitado' => (array) json_decode(env('AB_MENSAGENS_ENVIO_DESABILITADO', '[]')),
+            
         ];
 
         $skipConfig = false;
