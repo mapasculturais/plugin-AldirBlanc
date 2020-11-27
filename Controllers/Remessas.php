@@ -66,7 +66,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         return $opportunity;
     }
-
+    
     /**
      * Retorna as inscrições
      * 
@@ -76,19 +76,24 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     function getRegistrations(Opportunity $opportunity, $asIterator = false) {
         $app = App::i();
+        
         /**
          * Pega os parâmetros do endpoint
          */
         $statusPayment = [];
         $finishDate = null;
         $startDate = null;
-        $paymentDate = null; 
+        $paymentDate = null;
+        $extra = ""; 
+        $params = [];        
         
         //Pega as referências de qual form esta vindo os dados, CNAB ou GENÉRICO
         $parametersForms = $this->getParametersForms();
         $typeExport = $parametersForms['typeExport'];
         $datePayment = $parametersForms['datePayment'];
-        
+        $typeSelect = $parametersForms['typeSelect'];
+        $listSelect = $parametersForms['listSelect'];
+
         //Pega os parâmetros de filtro por data
         if(empty($this->data[$datePayment]) && $this->data[$typeExport] === '0'){
             echo "Informe a data de pagamento que deseja exportar.";
@@ -105,55 +110,52 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if(isset($this->data[$datePayment]) && !empty($this->data[$datePayment])){
             $paymentDate = new DateTime($this->data[$datePayment]);
             $paymentDate = $paymentDate->format('Y-m-d');
+            $extra .=" AND p.paymentDate = :paymentDate ";
+            $params['paymentDate'] = $paymentDate;
         }
+
         //Pega o status solicitado no formulário
         if($this->data[$typeExport] === "all"){
             $statusPayment = ['0','1', '2', '3', '10'];
 
         }else{
             $statusPayment = [$this->data[$typeExport]];
-
+            
+        }
+        
+        //Pega uma lista seleta de inscrições para exportar
+        if(isset($this->data[$typeSelect])){          
+            $reg = array_filter(explode(",", $this->data[$listSelect]));
+            if($this->data[$typeSelect] ==="ignore"){
+                $extra .= " AND r.id NOT IN (:registrations)";
+            }else{
+                $extra .= " AND r.id IN (:registrations)";
+            }
+           
+            $params['registrations']  = $reg;
         }
         
         /**
          * Busca as inscrições com refêrencia ao status passado no formulário
          * 
-         */
-        if ($paymentDate) {
-            $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r 
-                    JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE 
-                    r.status > 0 AND
-                    r.opportunity = :opportunity AND
-                    p.status IN (:statusPayment) AND
-                    p.paymentDate = :paymentDate";
-
-            $query = $app->em->createQuery($dql);
-            
-            $query->setParameters([
-                'opportunity' => $opportunity,
-                'paymentDate' => $paymentDate,
-                'statusPayment' => $statusPayment,
-            ]);
-
-            $registrations = $asIterator ? $query->iterate() : $query->getResult();
-
-        } else {
-
-            $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r 
+         */ 
+        
+        $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r
             JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE 
-            r.status > 0 AND 
-            p.status IN (:statusPayment) AND
-            r.opportunity = :opportunity";
+            r.status > 0 AND
+            r.opportunity = :opportunity AND
+            p.status IN (:statusPayment) ".$extra ;
 
-            $query = $app->em->createQuery($dql);
+        $query = $app->em->createQuery($dql);
 
-            $query->setParameters([
-                'opportunity' => $opportunity,
-                'statusPayment' => $statusPayment,
-            ]);
-
-            $registrations = $asIterator ? $query->iterate() : $query->getResult();
-        }
+        $params += [
+            'opportunity' => $opportunity,                
+            'statusPayment' => $statusPayment
+        ];
+            
+        $query->setParameters($params);        
+        
+        $registrations = $asIterator ? $query->iterate() : $query->getResult();          
 
         if (!$asIterator && empty($registrations)) {
             echo "Não foram encontrados registros.";
@@ -3326,16 +3328,25 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if (isset($this->data["generic"])) {
             $typeExport = "statusPaymentGeneric";
             $datePayment = "paymentDateGeneric";
+            $typeSelect = "genericSelect";
+            $listSelect = "listGeneric";
+
         } elseif(isset($this->data["cnab240"])) {
             $typeExport = "statusPaymentCnab240";
             $datePayment = "paymentDateCnab240";
+            $typeSelect = "cnabSelect";
+            $listSelect = "listCnab";
+
         } elseif (isset($this->data["type"])) {
             $typeExport = "statusPayment";
             $datePayment = "paymentDate";
+
         }
         return [
             "typeExport" => $typeExport,
-            "datePayment" => $datePayment
+            "datePayment" => $datePayment,
+            "typeSelect" => $typeSelect,
+            "listSelect" => $listSelect
         ];
     }
 
