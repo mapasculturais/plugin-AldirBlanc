@@ -402,16 +402,9 @@ class Plugin extends \MapasCulturais\Plugin
          * @TODO: implementar para método de avaliaçào documental
          */
         $app->hook('entity(Registration).consolidateResult', function(&$result, $caller) use($plugin, $app) {
-            // eval(\psy\sh());
             // só aplica o hook para as oportunidades do inciso I e II
-            $ids = [];
-            if ($plugin->config['inciso2_enabled']) {
-                $ids = $plugin->config['inciso2_opportunity_ids'];
-            }
-            
-            if ($plugin->config['inciso1_enabled']) {
-                $ids[] = $plugin->config['inciso1_opportunity_id'];
-            }
+            $ids = $plugin->config['inciso2_opportunity_ids'] ?: [];
+            $ids[] = $plugin->config['inciso1_opportunity_id'];
 
             if (!in_array($this->opportunity->id, $ids)) {
                 return;
@@ -422,6 +415,21 @@ class Plugin extends \MapasCulturais\Plugin
                 return;
             }
 
+            $evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $this, 'status' => 1]);
+
+            $result = $caller->result;
+            
+            foreach ($evaluations as $eval) {
+                if ($eval->user->aldirblanc_avaliador) {
+                    continue;
+                }
+
+                if(intval($eval->result) < intval($result)) {
+                    $result = "$eval->result";
+                }
+            }
+
+            
             // se a consolidação não é para selecionada (statu = 10) pode continuar
             if ($result != '10') {
                 return;
@@ -429,7 +437,6 @@ class Plugin extends \MapasCulturais\Plugin
 
             $can_consolidate = true;
 
-            $evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $this, 'status' => 1]);
 
             /**
              * Se a consolidação requer validações, verifica se existe alguma
@@ -462,7 +469,7 @@ class Plugin extends \MapasCulturais\Plugin
                 if (!$this->consolidatedResult || count($evaluations) <= 1 || !$tem_validacoes) {
                     $result = 'homologado';
                 } else if (strpos($this->consolidatedResult, 'homologado') === false) {
-                    $result = "{$this->consolidatedResult}, homologado";
+                    $result = "homologado, {$this->consolidatedResult}";
                 } else {
                     $result = $this->consolidatedResult;
                 }
