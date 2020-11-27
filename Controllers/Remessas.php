@@ -67,7 +67,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         return $opportunity;
     }
-
+    
     /**
      * Retorna as inscrições
      * 
@@ -77,19 +77,24 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     function getRegistrations(Opportunity $opportunity, $asIterator = false) {
         $app = App::i();
+        
         /**
          * Pega os parâmetros do endpoint
          */
         $statusPayment = [];
         $finishDate = null;
         $startDate = null;
-        $paymentDate = null; 
+        $paymentDate = null;
+        $extra = ""; 
+        $params = [];        
         
         //Pega as referências de qual form esta vindo os dados, CNAB ou GENÉRICO
         $parametersForms = $this->getParametersForms();
         $typeExport = $parametersForms['typeExport'];
         $datePayment = $parametersForms['datePayment'];
-        
+        $typeSelect = $parametersForms['typeSelect'];
+        $listSelect = $parametersForms['listSelect'];
+
         //Pega os parâmetros de filtro por data
         if(empty($this->data[$datePayment]) && $this->data[$typeExport] === '0'){
             echo "Informe a data de pagamento que deseja exportar.";
@@ -106,55 +111,52 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if(isset($this->data[$datePayment]) && !empty($this->data[$datePayment])){
             $paymentDate = new DateTime($this->data[$datePayment]);
             $paymentDate = $paymentDate->format('Y-m-d');
+            $extra .=" AND p.paymentDate = :paymentDate ";
+            $params['paymentDate'] = $paymentDate;
         }
+
         //Pega o status solicitado no formulário
         if($this->data[$typeExport] === "all"){
             $statusPayment = ['0','1', '2', '3', '10'];
 
         }else{
             $statusPayment = [$this->data[$typeExport]];
-
+            
+        }
+        
+        //Pega uma lista seleta de inscrições para exportar
+        if(isset($this->data[$typeSelect])){          
+            $reg = array_filter(explode(",", $this->data[$listSelect]));
+            if($this->data[$typeSelect] ==="ignore"){
+                $extra .= " AND r.id NOT IN (:registrations)";
+            }else{
+                $extra .= " AND r.id IN (:registrations)";
+            }
+           
+            $params['registrations']  = $reg;
         }
         
         /**
          * Busca as inscrições com refêrencia ao status passado no formulário
          * 
-         */
-        if ($paymentDate) {
-            $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r 
-                    JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE 
-                    r.status > 0 AND
-                    r.opportunity = :opportunity AND
-                    p.status IN (:statusPayment) AND
-                    p.paymentDate = :paymentDate";
-
-            $query = $app->em->createQuery($dql);
-            
-            $query->setParameters([
-                'opportunity' => $opportunity,
-                'paymentDate' => $paymentDate,
-                'statusPayment' => $statusPayment,
-            ]);
-
-            $registrations = $asIterator ? $query->iterate() : $query->getResult();
-
-        } else {
-
-            $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r 
+         */ 
+        
+        $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r
             JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE 
-            r.status > 0 AND 
-            p.status IN (:statusPayment) AND
-            r.opportunity = :opportunity";
+            r.status > 0 AND
+            r.opportunity = :opportunity AND
+            p.status IN (:statusPayment) ".$extra ;
 
-            $query = $app->em->createQuery($dql);
+        $query = $app->em->createQuery($dql);
 
-            $query->setParameters([
-                'opportunity' => $opportunity,
-                'statusPayment' => $statusPayment,
-            ]);
-
-            $registrations = $asIterator ? $query->iterate() : $query->getResult();
-        }
+        $params += [
+            'opportunity' => $opportunity,                
+            'statusPayment' => $statusPayment
+        ];
+            
+        $query->setParameters($params);        
+        
+        $registrations = $asIterator ? $query->iterate() : $query->getResult();          
 
         if (!$asIterator && empty($registrations)) {
             echo "Não foram encontrados registros.";
@@ -2842,7 +2844,204 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         readfile($patch);
 
     }
+     /**
+      * Implementa o importador CNAB240
+      */
 
+      public function ALL_importCnab240(){
+
+        $result = [];
+        $countLine = 1;
+        $countSeg = 1;
+        
+        $file = __DIR__."../../CSV/IEDPAG8241120200.txt";    
+        $data = $this->mappedCnab($file);
+
+        //Pega a linha do header do lote
+        $LOTE1_H = isset($data['LOTE_1']) ? min($data['LOTE_1']) : null;
+        $LOTE2_H = isset($data['LOTE_2']) ? min($data['LOTE_2']) : null;
+        $LOTE3_H = isset($data['LOTE_3']) ? min($data['LOTE_3']) : null;
+
+        //Pela a linha do trailler do lote
+        $LOTE1_T = isset($data['LOTE_1']) ? max($data['LOTE_1']) : null;
+        $LOTE2_T = isset($data['LOTE_2']) ? max($data['LOTE_2']) : null;
+        $LOTE3_T = isset($data['LOTE_3']) ? max($data['LOTE_3']) : null;
+               
+        foreach($data as $key => $value){
+            $seg = null;
+            $cpf = null;
+            if($key === "HEADER_DATA_ARQ"){
+                foreach($value as $key => $r){
+                    //Valida o arquivo
+                    $n = $this->getLineData($r, 230, 231);
+                    $result['AQURIVO'] = $this->validatedCanb($n, $seg, $cpf);
+                   
+                }
+            }else if($key === "LOTE_1_DATA"){                
+                foreach($value as $key => $r){
+                    if($key == $LOTE1_H){ 
+                        //Valida se o lote 2 esta válido
+                        $n = $this->getLineData($r, 230, 231);
+                        $result['LOTE_1'] = $this->validatedCanb($n, $seg, $cpf);
+
+                    }elseif($key == $LOTE1_T){ 
+                       
+
+                    }else{ 
+                        $seg = ($key % 2) == true ? "A" : "B";
+
+                        if($seg === "A"){
+                            //Valida as inscrições
+                            $code = $this->getLineData($r, 230, 231);
+                            $result['LOTE_1'][] = $this->validatedCanb($code, $seg, $cpf);
+                        }else{
+                            $cpf = $this->getLineData($r, 20, 33);
+                            $result['LOTE_1'][] = $this->validatedCanb($code, $seg, $cpf);
+                        }
+                        
+                    }
+                   
+                   
+                }
+            }else if($key === "LOTE_2_DATA"){
+                
+                foreach($value as $key => $r){
+                    
+                    if($key == $LOTE2_H){ 
+                        //Valida se o lote 2 esta válido
+                        $n = $this->getLineData($r, 230, 231);
+                        $result['LOTE_2'] = $this->validatedCanb($n, $seg, $cpf);
+
+                    }elseif($key == $LOTE2_T){ 
+                      
+
+                    }else{ 
+                        if($seg === "A"){
+                            //Valida as inscrições
+                            $n = $this->getLineData($r, 230, 231);
+                            $result['LOTE_1'][] = $this->validatedCanb($n, $seg, $cpf);
+                        }
+                    }
+                   
+                    
+
+                }
+            }else if($key === "LOTE_3_DATA"){
+                foreach($value as $key => $r){
+                    if($key == $LOTE3_H){ 
+                        //Valida se o lote 2 esta válido
+                        $n = $this->getLineData($r, 230, 231);
+                        $result['LOTE_3'] = $this->validatedCanb($n, $seg, $cpf);
+
+                    }elseif($key == $LOTE3_T){
+                      
+
+                    }else{
+                        if($seg === "A"){
+                            //Valida as inscrições
+                            $n = $this->getLineData($r, 230, 231);
+                            $result['LOTE_1'][] = $this->validatedCanb($n, $seg, $cpf);
+                        }
+                    }
+                    
+                }
+            }else if($key === "TREILLER_DATA_ARQ"){
+                
+            }
+           
+        }
+
+        var_dump($result);
+    }
+
+    private function validatedCanb($code, $seg, $cpf){
+        $returnCode = $returnCode = $this->config['config-cnab240-inciso1']['returnCode'];
+        $positive = $returnCode['positive'];
+        $negative = $returnCode['negative'];
+        foreach($positive as $key => $value){
+            if($key === $code){
+                return [
+                    'seg' => $seg,
+                    'cpf' => $cpf,
+                    'status' => true,
+                    'reason' => ''
+                ];
+            }
+        }
+
+        foreach($negative as $key => $value){
+            if($key === $code){
+                return [
+                    'seg' => $seg,
+                    'cpf' => $cpf,
+                    'status' => false,
+                    'reason' => $value
+                ];
+            }
+        }
+    }
+
+      /**
+       * faz o mapeamento do CNAB20... separa os lotes, treiller e header
+       */
+      private function mappedCnab($file){
+        $stream = fopen($file,"r");
+        $result = [];
+        $countLine = 1;
+          while(!feof($stream)){
+              $linha = fgets($stream);
+              if(!empty($linha)){
+                  $value = $this->getLineData($linha, 0, 7);
+                  switch ($value) {
+                      case '00100000':
+                          $result['HEADER_ARQ'][$countLine] = $countLine;
+                          $result['HEADER_DATA_ARQ'][$countLine] = $linha;
+                          break;
+                      case '00100011':
+                      case '00100013':
+                      case '00100015':
+                          $result['LOTE_1'][$countLine] = $countLine;
+                          $result['LOTE_1_DATA'][$countLine] = $linha;
+                          break;
+                      case '00100021':
+                      case '00100023':
+                      case '00100025':
+                          $result['LOTE_2'][$countLine] = $countLine;
+                          $result['LOTE_2_DATA'][$countLine] = $linha;
+                          break;
+                      case '00100031':
+                      case '00100033':
+                      case '00100035':
+                          $result['LOTE_3'][$countLine] = $countLine;
+                          $result['LOTE_3_DATA'][$countLine] = $linha;
+                          break;
+                      case '00199999':
+                          $result['TREILLER_ARQ'][$countLine] = $countLine;
+                          $result['TREILLER_DATA_ARQ'][$countLine] = $linha;
+                          break;
+                      
+                  }
+              }
+
+              $countLine ++;
+          }
+
+          return $result;
+      }
+      private function getLineData($line, $start, $end){              
+        $data = "";
+        $char = strlen($line);       
+        if(!empty($line)){
+            for($i=0; $i<$char; $i++){
+                if($i>=$start && $i<=$end){
+                    $data .= $line[$i];
+                    
+                }
+            }
+        }
+
+        return $data;
+  }
     //###################################################################################################################################
 
     /**
@@ -3130,16 +3329,25 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if (isset($this->data["generic"])) {
             $typeExport = "statusPaymentGeneric";
             $datePayment = "paymentDateGeneric";
+            $typeSelect = "genericSelect";
+            $listSelect = "listGeneric";
+
         } elseif(isset($this->data["cnab240"])) {
             $typeExport = "statusPaymentCnab240";
             $datePayment = "paymentDateCnab240";
+            $typeSelect = "cnabSelect";
+            $listSelect = "listCnab";
+
         } elseif (isset($this->data["type"])) {
             $typeExport = "statusPayment";
             $datePayment = "paymentDate";
+
         }
         return [
             "typeExport" => $typeExport,
-            "datePayment" => $datePayment
+            "datePayment" => $datePayment,
+            "typeSelect" => $typeSelect,
+            "listSelect" => $listSelect
         ];
     }
 
