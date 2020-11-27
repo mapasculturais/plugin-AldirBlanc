@@ -5,7 +5,8 @@
 - Insere função nos exportadores CNAB240 e genérico, para exportar uma lista de inscrições passadas pelo usuário (Ref. [#157](https://github.com/mapasculturais/plugin-AldirBlanc/issues/157))
 - Corrige forma de capturar DV da conta em casos de contas digital BB (Ref. [#158](https://github.com/mapasculturais/plugin-AldirBlanc/issues/158))
 - Refatora exportador CNAB240 para o retorno do DV da conta nao ignorar strings EX: DV = X #158 (Ref. [#158](https://github.com/mapasculturais/plugin-AldirBlanc/issues/158))
--Corrige exportador CNAB240 para sempre pegar o ultimo caracter no DV caso ele tenha 2 EX. 57 irá retornar 7 (Ref. [#158](https://github.com/mapasculturais/plugin-AldirBlanc/issues/158))
+- Corrige exportador CNAB240 para sempre pegar o ultimo caracter no DV caso ele tenha 2 EX. 57 irá retornar 7 (Ref. [#158](https://github.com/mapasculturais/plugin-AldirBlanc/issues/158))
+- Corrige nome do input no formulário do CNAB240 (Ref. [#160](https://github.com/mapasculturais/plugin-AldirBlanc/issues/160))
 
 ## [v2.2.0] - 2020-10-25
 
