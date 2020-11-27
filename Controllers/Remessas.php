@@ -1749,6 +1749,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $numLote = 0;
         $totaLotes = 0;
         $totalRegistros = 0;
+        // $numSeqRegistro = 0;
 
         $complement = [];
         $txt_data = $this->mountTxt($header1, $mappedHeader1, $txt_data, null, null, $app);
@@ -1762,6 +1763,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $lotBBCorrente = 0;
         if ($recordsBBCorrente) {
             // Header 2
+            $numSeqRegistro = 0;
             $complement = [];
             $numLote++;
             $complement = [
@@ -1777,7 +1779,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $_SESSION['valor'] = 0;
 
             $totaLotes++;
-            $numSeqRegistro = 0;
+            // $numSeqRegistro = 0;
 
             //Detalhes 1 e 2
 
@@ -1789,6 +1791,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 ];
                 $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
+
+                $numSeqRegistro++;
+                $complement['NUMERO_REGISTRO'] = $numSeqRegistro;
 
                 $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
@@ -1818,6 +1823,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $lotBBPoupanca = 0;
         if ($recordsBBPoupanca) {
             // Header 2
+            $numSeqRegistro = 0;
             $complement = [];
             $numLote++;
             $complement = [
@@ -1832,7 +1838,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $_SESSION['valor'] = 0;
 
             $totaLotes++;
-            $numSeqRegistro = 0;
+            // $numSeqRegistro = 0;
 
             //Detalhes 1 e 2
 
@@ -1845,6 +1851,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
+
+                $numSeqRegistro++;
+                $complement['NUMERO_REGISTRO'] = $numSeqRegistro;
 
                 $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
@@ -1875,6 +1884,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $lotOthers = 0;
         if ($recordsOthers) {
             //Header 2
+            $numSeqRegistro = 0;
             $complement = [];
             $numLote++;
             $complement = [
@@ -1891,7 +1901,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $_SESSION['valor'] = 0;
 
             $totaLotes++;
-            $numSeqRegistro = 0;
+            // $numSeqRegistro = 0;
 
             //Detalhes 1 e 2
 
@@ -1902,8 +1912,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     'NUMERO_REGISTRO' => $numSeqRegistro,
                 ];
                 $txt_data = $this->mountTxt($detahe1, $mappedDeletalhe1, $txt_data, $records, $complement, $app);
-
                 $txt_data .= "\r\n";
+
+                $numSeqRegistro++;
+                $complement['NUMERO_REGISTRO'] = $numSeqRegistro;
 
                 $txt_data = $this->mountTxt($detahe2, $mappedDeletalhe2, $txt_data, $records, $complement, $app);
                 $txt_data .= "\r\n";
