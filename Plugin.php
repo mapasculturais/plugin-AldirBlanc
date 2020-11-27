@@ -88,10 +88,12 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_status_notapproved' => env('AB_STATUS_NOTAPPROVED_MESSAGE', 'Não atendeu aos requisitos necessários. Caso não concorde com o resultado, você poderá enviar um novo formulário de solicitação ao benefício - fique atento ao preenchimento dos campos.'), // STATUS_NOTAPPROVED = 3
             'msg_status_waitlist' => env('AB_STATUS_WAITLIST_MESSAGE', 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.'), //STATUS_WAITLIST = 8
 
-            // mensagem padão para recurso das inscrições com status 2 e 3
+            // mensagem padrão para recurso das inscrições com status 2 e 3
             'msg_recurso' => env('AB_MENSAGEM_RECURSO', ''),
-                        
 
+            // mensagem para reprocessamento do Dataprev, para ignorar a mensagem retornada pelo Dataprev e exibir a mensagem abaixo
+            'msg_reprocessamento_dataprev' => env('AB_MENSAGEM_REPROCESSAMENTO_DATAPREV', ''),
+                        
             // só libera para os homologadores as inscrićões que já tenham sido validadas pelos validadores configurados
             'homologacao_requer_validacao' => (array) json_decode(env('HOMOLOG_REQ_VALIDACOES', '[]')),
 
@@ -103,6 +105,11 @@ class Plugin extends \MapasCulturais\Plugin
             'zammad_src_form' => env('AB_ZAMMAD_SRC_FORM', ''),
             'zammad_src_chat' => env('AB_ZAMMAD_SRC_CHAT', ''),
             'zammad_background_color' => env('AB_ZAMMAD_BACKGROUND_COLOR', '#000000'),
+             
+            //pre inscrições
+             'oportunidades_desabilitar_envio' => (array) json_decode(env('AB_OPORTUNIDADES_DESABILITAR_ENVIO', '[]')),
+             'mensagens_envio_desabilitado' => (array) json_decode(env('AB_MENSAGENS_ENVIO_DESABILITADO', '[]')),
+            
         ];
 
         $skipConfig = false;
@@ -239,15 +246,16 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
             $em = $opportunity->getEvaluationMethod();
-            
+
             $_evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $registrations]);
 
             $evaluations_avaliadores = [];
             $evaluations_status = [];
             $evaluations_obs = [];
-            
+            $registrations_mediadas = [];
+
             foreach ($_evaluations as $eval) {
-                
+
                 if (substr($eval->user->email,-10) == '@validador') {
                     continue;
                 }
@@ -275,15 +283,24 @@ class Plugin extends \MapasCulturais\Plugin
                 }
             }
 
+            foreach ($registrations as $r) {
+                if ($r->mediacao_senha && $r->mediacao_contato) {
+                    $registrations_mediadas[$r->number] = 'Sim';
+                } else {
+                    $registrations_mediadas[$r->number] = 'Não';
+                }
+            }
 
             $header[] = 'Homologação - avaliadores';
             $header[] = 'Homologação - status';
             $header[] = 'Homologação - obs';
-            
+            $header[] = 'Inscrição Mediada?';
+
             foreach($body as $i => $line){
                 $body[$i][] = $evaluations_avaliadores[$line[0]] ?? null;
                 $body[$i][] = $evaluations_status[$line[0]] ?? null;
                 $body[$i][] = $evaluations_obs[$line[0]] ?? null;
+                $body[$i][] = $registrations_mediadas[$line[0]] ?? null;
             }
         });
        
@@ -333,6 +350,13 @@ class Plugin extends \MapasCulturais\Plugin
         });
         // Permite mediadores cadastrar fora do prazo
         $app->hook('entity(Registration).canUser(<<send>>)', function($user,&$can) use($plugin, $app){
+            $oportunidades_desabilitar_envio = $plugin->config['oportunidades_desabilitar_envio'];
+            $cant_send =  in_array($this->opportunity->id, $oportunidades_desabilitar_envio );
+            if ($cant_send){
+                $can = false;
+                return;
+            }
+            
             if ( $app->user->is('mediador') ){
                 $allowed_opportunities = $plugin->config['lista_mediadores'][$app->user->email];
                 if ($allowed_opportunities == []){

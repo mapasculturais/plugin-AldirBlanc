@@ -26,10 +26,10 @@ $_params = [
             <?php if (!empty($justificativaAvaliacao) && sizeof($justificativaAvaliacao) != 0) : ?>
                 <?php foreach ($justificativaAvaliacao as $message) : ?>
                     <?php if (is_array($message) && !empty($this->controller->config['exibir_resultado_padrao'])) : ?>
-                        <?= $message['message']; ?>
+                        <?= nl2br(str_replace(array('\r\n', '\r', '\n'), "<br />", $message['message'])); ?>
                         <hr>
                     <?php else : ?>
-                        <p><?= $message; ?></p>
+                        <p><?= nl2br(str_replace(array('\r\n', '\r', '\n'), "<br />", $message)); ?></p>
                         <hr>
                     <?php endif; ?>
                 <?php endforeach; ?>

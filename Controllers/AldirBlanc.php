@@ -45,9 +45,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $opportunitiesArrayInciso2 = $this->config['inciso2_opportunity_ids'];
         $opportunityInciso1 = $this->config['inciso1_opportunity_id'];
-        if (array_unique($opportunitiesArrayInciso2) != $opportunitiesArrayInciso2 || in_array ($opportunityInciso1, array_values($opportunitiesArrayInciso2) )){
-            throw new \Exception('A mesma oportunidade não pode ser utiilizada para duas cidades ou dois incisos');
-        }
        
         $app->hook('view.render(<<aldirblanc/individual>>):before', function () use ($app) {
             $app->view->includeEditableEntityAssets();
@@ -597,7 +594,20 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 
                 if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
                     // resultados do dataprev
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                    $avaliacao = $evaluation->getEvaluationData()->obs ?? '';
+                    if (!empty($avaliacao)) {
+                        if (($registration->status == 3 || $registration->status == 2) && substr_count($evaluation->getEvaluationData()->obs, 'Reprocessado')) {
+
+                            if ($this->config['msg_reprocessamento_dataprev']) {
+                                $justificativaAvaliacao[] = $this->config['msg_reprocessamento_dataprev'];
+                            } else {
+                                $justificativaAvaliacao[] = $avaliacao;
+                            }
+                            
+                        } else {
+                            $justificativaAvaliacao[] = $avaliacao;
+                        }
+                    }
                 } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
                     // resultados dos avaliadores genericos
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
