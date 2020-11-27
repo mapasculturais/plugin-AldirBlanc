@@ -350,6 +350,13 @@ class Plugin extends \MapasCulturais\Plugin
         });
         // Permite mediadores cadastrar fora do prazo
         $app->hook('entity(Registration).canUser(<<send>>)', function($user,&$can) use($plugin, $app){
+            $oportunidades_desabilitar_envio = $plugin->config['oportunidades_desabilitar_envio'];
+            $cant_send =  in_array($this->opportunity->id, $oportunidades_desabilitar_envio );
+            if ($cant_send){
+                $can = false;
+                return;
+            }
+            
             if ( $app->user->is('mediador') ){
                 $allowed_opportunities = $plugin->config['lista_mediadores'][$app->user->email];
                 if ($allowed_opportunities == []){

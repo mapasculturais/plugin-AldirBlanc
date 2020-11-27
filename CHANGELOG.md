@@ -1,5 +1,6 @@
 ## [Unreleased]
-
+- Adiciona possibilidade mensagem no lugar do botão de enviar inscrição quando desabilitado através da configuração 'mensagens_envio_desabilitado'  (Ref. [#159](https://github.com/mapasculturais/plugin-AldirBlanc/issues/159))
+- Adiciona possibilidade de impedir envios de inscrição de um array de oportunidades através da configuração 'oportunidades_desabilitar_envio' (Ref. [#159](https://github.com/mapasculturais/plugin-AldirBlanc/issues/159))
 - Adiciona coluna na exportação das inscrições informando se foi feita por mediador (Ref. [#35](https://git.hacklab.com.br/mapas/MapasBR/-/issues/35))
 
 ## [2.1.0]
