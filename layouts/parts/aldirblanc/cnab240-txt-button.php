@@ -34,7 +34,7 @@ if($inciso == 1){
                 <b>Selecionar uma lista de inscrições que</b> <br>  
                 <input type="radio" name="cnabSelect" value="only" title=""> Devem ser exportadas</br>
                 <input type="radio" name="cnabSelect" value="ignore" title=""> Devem ser ignoradas </br>
-                <input type="radio" name="genericSelect" title="" checked> Não usar essa função</br>
+                <input type="radio" name="cnabSelect" title="" checked> Não usar essa função</br>
                 <textarea name="listCnab" id="listCnab" cols="30" rows="2" placeholder="Separe por virgula e sem prefixo Ex.: 1256584,6941216854"></textarea> 
             <?php } ?>       
         </div>
