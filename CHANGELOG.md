@@ -3,6 +3,7 @@
 - Corrige bug na exportação da planilha de endereços (Ref. [#156](https://github.com/mapasculturais/plugin-AldirBlanc/issues/156))
 - Corrige bug na exportação do PPG100 e implementa novo número de protocolo (Ref. [#150](https://github.com/mapasculturais/plugin-AldirBlanc/issues/150))
 - Insere função nos exportadores CNAB240 e genérico, para exportar uma lista de inscrições passadas pelo usuário (Ref. [#157](https://github.com/mapasculturais/plugin-AldirBlanc/issues/157))
+- Corrige forma de capturar DV da conta em casos de contas digital BB (Ref. [#158](https://github.com/mapasculturais/plugin-AldirBlanc/issues/158))
 
 ## [v2.2.0] - 2020-10-25
 

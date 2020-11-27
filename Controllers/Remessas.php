@@ -1342,39 +1342,48 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
                 $result = "";
-                $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
                 $field_id = $detahe1['BEN_CONTA']['field_id'];
+                
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
                 
-
-                if($temp){
-                    $numberBank = $this->numberBank($registrations->$temp);
+                /**
+                 * Caso use um banco padrão para recebimento, pega o número do banco das configs
+                 * Caso contrario busca o número do banco na base de dados
+                 */
+                $fieldBanco = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                if($fieldBanco){
+                    $numberBank = $this->numberBank($registrations->$fieldBanco);
                 }else{
-                    $numberBank = $default['defaultBank'];
+                    $numberBank = $default['defaultBank']; 
                 }
-
-
-                $temp = $detahe1['TIPO_CONTA']['field_id'];
-                $typeAccount = $registrations->$temp;
-
+                
+                /**
+                 * Verifica se o CPF do requerente consta na lista de de-para dos bancos
+                 * se existir, pega os dados bancários do arquivo
+                 */
                 $pos = array_search($cpfBase,$cpfCsv);               
                 if($pos){                    
                     $temp_account = $dePara[$pos]['BEN_CONTA'];
                     
                 }else{
-                    $temp = $default['formoReceipt'];
-                    $formoReceipt = $temp ? $registrations->$temp : false;
-                    
+                    /**
+                     * Verifica se existe a opção de forma de recebimento
+                     * Caso exista, e seja CARTEIRA DIGITAL BB pega o field id nas configs em (fieldsWalletDigital)
+                     */
+                    $formaRecebimento = $default['formoReceipt'];
+                    $formoReceipt = $formaRecebimento ? $registrations->$formaRecebimento : false;
+                  
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
                         $temp = $default['fieldsWalletDigital']['account'];                    
                     }else{
                         $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
                     }
-                    $temp_account = $registrations->$field_id;
+                    $temp_account = $registrations->$temp;
                 }
                 
                 $temp_account = explode("-", $temp_account);
+               
                 if(count($temp_account)>1){
                     $dig = $temp_account[1];
 
@@ -1382,6 +1391,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $dig = substr($temp_account[0], -1);
                 }
                 
+                /**
+                 * Pega o tipo de conta que o beneficiário tem Poupança ou corrente
+                 */
+                $fiieldTipoConta = $detahe1['TIPO_CONTA']['field_id'];
+                $typeAccount = $registrations->$fiieldTipoConta;
+
+                /**
+                 * Verifica se o usuário é do banco do Brasil, se sim verifica se a conta é poupança
+                 * Se a conta for poupança e iniciar com o 510, ele mantem conta e DV como estão
+                 * Caso contrario, ele pega o DV do De-Para das configs (savingsDigit)
+                 */
                 if ($numberBank == '001' && $typeAccount == $default['typesAccount']['poupanca']) {                   
                     if (substr($temp_account[0], 0, 3) == "510") {
                         $result = $dig;
@@ -1393,7 +1413,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                     $result = $dig;
                 }
-                
+              
                 $result = $this->normalizeString(preg_replace('/[^0-9]/i', '',$result));
                 return is_string($result) ? strtoupper($result) : $result;
                
