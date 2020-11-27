@@ -1383,7 +1383,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
                 
                 $temp_account = explode("-", $temp_account);
-               
+                
                 if(count($temp_account)>1){
                     $dig = $temp_account[1];
 
@@ -1412,10 +1412,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 } else {
 
                     $result = $dig;
-                }
-              
-                $result = $this->normalizeString(preg_replace('/[^0-9]/i', '',$result));
-                return is_string($result) ? strtoupper($result) : $result;
+                }                
+                
+                return is_string($result) ? strtoupper(trim($result)) : $this->normalizeString(trim($result));
                
             },
             'BEN_DIGITO_CONTA_AGENCIA_80' => '',
@@ -2970,8 +2969,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
            
         }
-
-        var_dump($result);
     }
 
     private function validatedCanb($code, $seg, $cpf){
