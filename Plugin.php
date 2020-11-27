@@ -106,6 +106,11 @@ class Plugin extends \MapasCulturais\Plugin
             'zammad_src_form' => env('AB_ZAMMAD_SRC_FORM', ''),
             'zammad_src_chat' => env('AB_ZAMMAD_SRC_CHAT', ''),
             'zammad_background_color' => env('AB_ZAMMAD_BACKGROUND_COLOR', '#000000'),
+             
+            //pre inscrições
+             'oportunidades_desabilitar_envio' => (array) json_decode(env('AB_OPORTUNIDADES_DESABILITAR_ENVIO', '[]')),
+             'mensagens_envio_desabilitado' => (array) json_decode(env('AB_MENSAGENS_ENVIO_DESABILITADO', '[]')),
+            
         ];
 
         $skipConfig = false;
@@ -347,6 +352,13 @@ class Plugin extends \MapasCulturais\Plugin
         });
         // Permite mediadores cadastrar fora do prazo
         $app->hook('entity(Registration).canUser(<<send>>)', function($user,&$can) use($plugin, $app){
+            $oportunidades_desabilitar_envio = $plugin->config['oportunidades_desabilitar_envio'];
+            $cant_send =  in_array($this->opportunity->id, $oportunidades_desabilitar_envio );
+            if ($cant_send){
+                $can = false;
+                return;
+            }
+            
             if ( $app->user->is('mediador') ){
                 $allowed_opportunities = $plugin->config['lista_mediadores'][$app->user->email];
                 if ($allowed_opportunities == []){
