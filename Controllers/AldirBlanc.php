@@ -1283,4 +1283,17 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return $cpfClean;
     }
     
+    /**
+     * @TODO endpoint para conferência de inscrições para envio Dataprev
+     */
+    public function ALL_opportunitList(){
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '768M');
+        $app = App::i();
+        $conn = $app->em->getConnection();
+        $opportunities = $conn->fetchAll("SELECT o.id, o.name, count(r.*) as num FROM registration r, opportunity o WHERE 
+        o.id = r.opportunity_id AND o.id IN (select object_id from opportunity_meta where key = 'aldirblanc_inciso' AND value = '2') AND 
+        r.status = 1 AND (r.consolidated_result = '0') GROUP BY o.name, o.id ORDER BY o.id ASC");
+        $this->render('inscricoes', ['opportunities' => $opportunities]);
+    }
 }

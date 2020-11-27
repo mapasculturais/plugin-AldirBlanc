@@ -1,4 +1,5 @@
 ## [Unreleased]
+- Implementa endpoint para conferência de oportunidade para envio ao Dataprev
 
 ## [v2.2.0] - 2020-10-25
 
