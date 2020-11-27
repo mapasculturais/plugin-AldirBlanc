@@ -125,7 +125,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         
         //Pega uma lista seleta de inscrições para exportar
-        if(isset($this->data[$typeSelect])){          
+        if(isset($this->data[$typeSelect]) && !empty($this->data[$listSelect])){          
             $reg = array_filter(explode(",", $this->data[$listSelect]));
             if($this->data[$typeSelect] ==="ignore"){
                 $extra .= " AND r.id NOT IN (:registrations)";
