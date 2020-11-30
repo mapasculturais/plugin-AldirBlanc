@@ -803,6 +803,22 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if ($this->config['inciso3_enabled']) {
             $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
+         // redireciona admins para painel
+         $opportunities_ids = array_values($this->config['inciso2_opportunity_ids']);
+         $opportunities_ids[] = $this->config['inciso1_opportunity_id'];
+
+         $opportunities = $app->repo('Opportunity')->findBy(['id' => $opportunities_ids]);
+
+         $evaluation_method_configurations = [];
+
+         foreach($opportunities as $opportunity) {
+             $evaluation_method_configurations[] = $opportunity->evaluationMethodConfiguration;
+
+             if($opportunity->canUser('@control') || $opportunity->canUser('viewEvaluations') || $opportunity->canUser('evaluateRegistrations')) {
+                 $app->redirect($app->createUrl('painel'));
+
+             }
+         }
         $this->render('cadastro', [
                 'inciso1Limite' => $this->config['inciso1_limite'],
                 'inciso2Limite' => $this->config['inciso2_limite'],
