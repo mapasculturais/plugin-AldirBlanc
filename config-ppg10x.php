@@ -26,21 +26,23 @@
  * ToDo: documentar assinaturas para esses métodos.
  */
 return [
-    "ppg100Serial" => 0,
+    "serial" => 0,
+    "idMap" => "CSV/ppgIdMap.csv",
     "fieldMap" => [
         "wantsPaymentOrder" => "field_8564",
         "singleParent" => "field_119",
-		"numeroProtocolo" => "id",
-		"senhaSaque" => "number",
+        //"numeroProtocolo" => "id",
+        "senhaSaque" => "number",
         "cpf" => "field_104",
+        "indicadorAcao" => "id",
     ],
     "header" => [
-		[
-			"length" => 1,
-			"type" => "int",
-			"name" => "tipoRegistro",
-			"default" => 0,
-		],
+        [
+            "length" => 1,
+            "type" => "int",
+            "name" => "tipoRegistro",
+            "default" => 0,
+        ],
         [
             "length" => 8,
             "type" => "int",
@@ -83,12 +85,12 @@ return [
             "name" => "sequencialRemessa",
             "function" => "sequenceNumber",
         ],
-		[
-			"length" => 9,
-			"type" => "text",
-			"name" => "padding",
-			"default" => "",
-		],
+        [
+            "length" => 9,
+            "type" => "text",
+            "name" => "padding",
+            "default" => "",
+        ],
         [
             "length" => 4,
             "type" => "int",
@@ -101,91 +103,97 @@ return [
             "name" => "contaDebito",
             "default" => 0, // preenchimento SECULT
         ],
-		[
-			"length" => 120,
-			"type" => "text",
-			"name" => "padding",
-			"default" => "",
-		],
-		[
-			"length" => 9,
-			"type" => "int",
-			"name" => "numeroRegistro",
-			"default" => 1,
-		],
+        [
+            "length" => 120,
+            "type" => "text",
+            "name" => "padding",
+            "default" => "",
+        ],
+        [
+            "length" => 9,
+            "type" => "int",
+            "name" => "numeroRegistro",
+            "default" => 1,
+        ],
     ],
     "details" => [
         [
             "fields" => [
-				[
-					"length" => 1,
-					"type" => "int",
-					"name" => "tipoRegistro",
-					"default" => 1,
-				],
-				[
-					"length" => 15,
-					"type" => "meta",
-					"name" => "numeroProtocolo",
+                [
+                    "length" => 1,
+                    "type" => "int",
+                    "name" => "tipoRegistro",
+                    "default" => 1,
+                ],
+                [
+                    "length" => 15,
+                    "type" => "meta",
+                    "name" => "numeroProtocolo", // enviar CSV no extraData
                     "fields" => [
+                        [ // apenas no novo formato
+                            "length" => 6,
+                            "type" => "int",
+                            "name" => "padding",
+                            "default" => 0,
+                        ],
                         [
-                            "length" => 4,
+                            "length" => 3, // 3 no novo formato, 4 no antigo
                             "type" => "int",
                             "name" => "idBB",
                             "default" => 0, // preenchimento SECULT
                         ],
                         [
-                            "length" => 10,
+                            "length" => 6, // 6 no novo formato, 10 no antigo
                             "type" => "int",
                             "name" => "idCliente",
                         ],
-                        [
-                            "length" => 1,
-                            "type" => "int",
-                            "name" => "dv",
-						],
-					],
-					"function" => "ppg100ProtocolNumberPA",
-				],
-				[
+                        // [ // apenas no antigo formato
+                        //     "length" => 1,
+                        //     "type" => "int",
+                        //     "name" => "dv",
+                        // ],
+                    ],
+                    //"function" => "ppg100ProtocolNumberPA",
+                ],
+                [
                     "length" => 6,
                     "type" => "int",
 					"name" => "senhaSaque",
 					"function" => "ppg100PIN",
                 ],
-				[
-					"length" => 10,
-					"type" => "text",
-					"name" => "padding",
-					"default" => "",
-				],
+                [
+                    "length" => 10,
+                    "type" => "text",
+                    "name" => "padding",
+                    "default" => "",
+                ],
                 [
                     "length" => 11,
                     "type" => "int",
                     "name" => "cpf",
                 ],
-				[
-					"length" => 11,
-					"type" => "int",
-					"name" => "valorCarga",
-				],
+                [
+                    "length" => 11,
+                    "type" => "int",
+                    "name" => "valorCarga",
+                ],
                 [
                     "length" => 1,
                     "type" => "int",
                     "name" => "indicadorAcao",
-                    "default" => 3, // sempre apenas carga
+                    "function" => "ppg100ActionPA",
                 ],
-				[
-					"length" => 136,
-					"type" => "text",
-					"name" => "padding",
-					"default" => "",
-				],
-				[
-					"length" => 9,
-					"type" => "int",
-					"name" => "numeroRegistro",
-				],
+                [
+                    "length" => 136,
+                    "type" => "text",
+                    "name" => "padding",
+                    "default" => "",
+                ],
+                [
+                    "length" => 9,
+                    "type" => "int",
+                    "name" => "numeroRegistro",
+                ],
             ],
         ],
 	],
@@ -232,10 +240,10 @@ return [
                     ["const" => "Ordem de pagamento"],
                 ],
             ],
-            [
-                "operator" => "equals",
-                "operands" => ["singleParent", ["const" => "NÃO"]]
-            ]
+            // [
+            //     "operator" => "equals",
+            //     "operands" => ["singleParent", ["const" => "NÃO"]]
+            // ]
         ],
     ],
 ];
