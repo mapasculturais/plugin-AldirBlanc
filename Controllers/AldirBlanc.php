@@ -45,9 +45,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $opportunitiesArrayInciso2 = $this->config['inciso2_opportunity_ids'];
         $opportunityInciso1 = $this->config['inciso1_opportunity_id'];
-        if (array_unique($opportunitiesArrayInciso2) != $opportunitiesArrayInciso2 || in_array ($opportunityInciso1, array_values($opportunitiesArrayInciso2) )){
-            throw new \Exception('A mesma oportunidade não pode ser utiilizada para duas cidades ou dois incisos');
-        }
        
         $app->hook('view.render(<<aldirblanc/individual>>):before', function () use ($app) {
             $app->view->includeEditableEntityAssets();
@@ -585,7 +582,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
         }
         
+        $recursos = [];
+
         foreach ($evaluations as $evaluation) {
+            $validacao = $evaluation->user->aldirblanc_validador ?? null;
+            if ($validacao == 'recurso') {
+                $recursos[] = $evaluation;
+            }
 
             if ($evaluation->getResult() == $registration->status) {
                 
@@ -619,7 +622,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             
         }
 
-        $this->render('status', ['registration' => $registration, 'registrationStatusMessage' => $registrationStatusMessage, 'justificativaAvaliacao' => array_filter($justificativaAvaliacao)]);
+        $this->render('status', [
+            'registration' => $registration, 
+            'registrationStatusMessage' => $registrationStatusMessage, 
+            'justificativaAvaliacao' => array_filter($justificativaAvaliacao),
+            'recursos' => $recursos
+        ]);
     }
 
     /**
@@ -795,6 +803,22 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if ($this->config['inciso3_enabled']) {
             $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
+         // redireciona admins para painel
+         $opportunities_ids = array_values($this->config['inciso2_opportunity_ids']);
+         $opportunities_ids[] = $this->config['inciso1_opportunity_id'];
+
+         $opportunities = $app->repo('Opportunity')->findBy(['id' => $opportunities_ids]);
+
+         $evaluation_method_configurations = [];
+
+         foreach($opportunities as $opportunity) {
+             $evaluation_method_configurations[] = $opportunity->evaluationMethodConfiguration;
+
+             if($opportunity->canUser('@control') || $opportunity->canUser('viewEvaluations') || $opportunity->canUser('evaluateRegistrations')) {
+                 $app->redirect($app->createUrl('painel'));
+
+             }
+         }
         $this->render('cadastro', [
                 'inciso1Limite' => $this->config['inciso1_limite'],
                 'inciso2Limite' => $this->config['inciso2_limite'],

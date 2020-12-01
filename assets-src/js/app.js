@@ -36,7 +36,8 @@ $(document).ready(function() {
         coletivo = coletivo.replace(".", "");
         fomalizado = fomalizado.replace(".", "");
 
-        var nomeCidade = $('.js-select-cidade option:selected').text();
+        var nomeCidade = $('.select2-chosen').text();
+        
 
         modal.css("display", "flex").hide().fadeIn(900);
 
