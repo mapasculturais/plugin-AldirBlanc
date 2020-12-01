@@ -6,6 +6,8 @@ use DateTime;
 use Exception;
 use Normalizer;
 use DateInterval;
+use SplFileObject;
+use stdClass;
 use MapasCulturais\i;
 use League\Csv\Reader;
 use League\Csv\Writer;
@@ -989,6 +991,37 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             default:
                 throw new Exception("Arquivo desconhecido: " .
                                     $parameters["type"]);
+        }
+        return;
+    }
+
+    public function GET_importBankless()
+    {
+        $this->requireAuthentication();
+        $app = App::i();
+        $parameters = $this->getURLParameters([
+            "file" => "int",
+            "opportunity" => "intArray",
+        ]);
+        $opportunities = [];
+        if (isset($parameters["opportunity"])) {
+            $opportunities = $app->repo("Opportunity")->findBy([
+                "id" => $parameters["opportunity"],
+            ]);
+        } else {
+            $opportunities = $app->repo("Opportunity")->findAll();
+        }
+        foreach ($opportunities as $opportunity) {
+            $opportunity->checkPermission("@control");
+        }
+        foreach ($opportunities as $opportunity) {
+            $files = $opportunity->getFiles("bankless");
+            foreach ($files as $file) {
+                if ($file->id == $parameters["file"]) {
+                    $this->importGeneric($file->getPath(), $opportunity);
+                    break;
+                }
+            }
         }
         return;
     }
@@ -3816,6 +3849,117 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     }
 
     /** #########################################################################
+     * Funções para importadores - genéricas
+     */
+
+    private function importGeneric($filePath, $opportunityID)
+    {
+        $app = App::i();
+        $config = null;
+        $type = null;
+        $data = [
+            [
+                "filename" => $filePath,
+                "importTS" => (new DateTime())->format("YmdHis"),
+            ],
+        ];
+        foreach (new SplFileObject($filePath) as $line) {
+            if (strlen($line) < 3) {
+                continue;
+            }
+            if ($config == null) {
+                $fileID = substr($line, 13, 8);
+                if (str_starts_with($fileID, "MCIF470")) {
+                    $type = "config-mci460";
+                    $subtype = "return";
+                } else if (str_starts_with($fileID, "PPG101")) {
+                    $type = "config-ppg10x";
+                    $subtype = "return";
+                } else {
+                    $fileID = substr($line, 15, 6);
+                    if (str_starts_with($fileID, "PPG102")) {
+                        $type = "config-ppg10x";
+                        $subtype = "followup";
+                    } else {
+                        echo("Formato de remessa desconhecido.");
+                        die();
+                    }
+                }
+                $config = $this->config[$type][$subtype];
+            }
+            $offset = 0;
+            foreach ($config["topLevel"] as $spec) {
+                $item = substr($line, $offset, $spec["length"]);
+                if (isset($spec["match"])) {
+                    $spec["default"] = $spec["match"];
+                    $test = $this->createString($spec);
+                    if ($item !== $test) {
+                        $app->log->debug("Nonmatch $item (should be $test) ".
+                                         "on line:\n$line");
+                    }
+                }
+                if (isset($spec["map"])) {
+                    $map = $spec["map"];
+                    $lineSpec = $config[$map][$item] ?? $config[$map]["default"];
+                    $data[] = $this->importGenericLine($line, $lineSpec);
+                }
+                $offset += $spec["length"];
+            }
+        }
+        if (sizeof($data) < 3) {
+            echo("Nada a importar.");
+            die();
+        }
+        if ($type == "config-mci460") {
+            $this->importMCI470($data);
+        } else { // if ($type == "config-ppg10x")
+            if ($subtype == "return") {
+                $this->importPPG101($data);
+            } else { // if ($subtype == "followup")
+                $this->importPPG102($data);
+            }
+        }
+        $app->disableAccessControl();
+        $opportunity = $app->repo("Opportunity")->find($opportunityID);
+        $opportunity->refresh();
+        $files = $opportunity->bankless_processed_files;
+        $files->{basename($filePath)} = date("d/m/Y \à\s H:i");
+        $opportunity->bankless_processed_files = $files;
+        $opportunity->save(true);
+        $app->enableAccessControl();
+        $this->finish("ok");
+        return;
+    }
+
+    private function importGenericLine($line, $specs)
+    {
+        $app = App::i();
+        $data = [];
+        $offset = 0;
+        foreach ($specs as $spec) {
+            $item = substr($line, $offset, $spec["length"]);
+            if (isset($spec["match"])) {
+                $spec["default"] = $spec["match"];
+                $test = $this->createString($spec);
+                if ($item !== $test) {
+                    $app->log->debug("Nonmatch $item (should be $test) ".
+                                     "on line:\n$line");
+                }
+            }
+            if (isset($spec["capture"])) {
+                if ($spec["type"] == "text") {
+                    $item = trim($item);
+                } else if ($spec["type"] == "int") {
+                    $item = intval($item);
+                }
+                $data[$spec["capture"]] = $item;
+            }
+            $offset += $spec["length"];
+        }
+        return ["raw" => substr($line, 0, $offset), "payload" => $data];
+    }
+
+    /** #########################################################################
      * Funções para o PPG100
      * Os métodos ppg100* são referenciados pelas configurações e não devem ser
      * removidos sem ajuste nas mesmas.
@@ -3949,6 +4093,88 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return random_int(0, 999999);
     }
 
+    /** #########################################################################
+     * Funções para o PPG101
+     */
+
+    private function importPPG101($data)
+    {
+        $app = App::i();
+        // carrega mapeamento de identificadores
+        $idMap = null;
+        if (isset($this->config["config-ppg10x"]["idMap"]) &&
+            !isset($this->data["ignore_ppg_idmap"])) {
+            $idMap = $this->getCSVData($this->config["config-ppg10x"]["idMap"],
+                                       ",", "idCliente");
+            if (!$idMap) {
+                $app->log->info("Mapeamento de identificadores ausente.");
+                $idMap = [];
+            }
+        }
+        $meta = $data[0];
+        $header = $data[1]["payload"];
+        $footer = $data[sizeof($data) - 1]["payload"];
+        $data = array_splice($data, 2, -1);
+        $app->log->info("Resultado geral: " . $header["fileResultCode"]);
+        $app->log->info("Mensagem geral: " . $header["fileResultMessage"]);
+        $paymentRepo = $app->repo("\\RegistrationPayments\\Payment");
+        set_time_limit(0);
+        foreach ($data as $item) {
+            $entry = $item["payload"];
+            if ($idMap != null) {
+                $registrationID = $idMap[$entry["reference"]]["registrationID"];
+                $payment = $paymentRepo->findOneBy([
+                    "registration" => $registrationID,
+                    "status" => Payment::STATUS_PENDING,
+                ]);
+            } else {
+                $payment = $paymentRepo->find($entry["reference"]);
+                $registrationID = $payment->registration->id;
+            }
+            if (!isset($payment)) {
+                if ($idMap != null) {
+                    $app->log->info("Pagamento não encontrado para inscrição " .
+                                    $registrationID);
+                } else {
+                    $app->log->info("Pagamento não encontrado: " .
+                                    $entry["reference"]);
+                }
+                continue;
+            } else {
+                $app->log->info("Processando pagamento para inscrição " .
+                                 $registrationID);
+            }
+            $payment->status = ($entry["paymentCode"] == 0) ?
+                               4 : //Payment::STATUS_AVAILABLE : // FixMe: colocar nova constante
+                               Payment::STATUS_FAILED;
+            $metadata = is_array($payment->metadata) ? $payment->metadata :
+                        json_decode($payment->metadata);
+            $metadata["ppg100"] = [
+                "raw" => $item["raw"],
+                "processed" => $entry,
+                "filename" => $meta["filename"],
+            ];
+            $payment->metadata = $metadata;
+            $payment->save(true);
+            $app->em->clear();
+        }
+        $app->log->info("Total aceito: " . $footer["countAccepted"]);
+        $app->log->info("Total rejeitado: " . $footer["countRejected"]);
+        return;
+    }
+
+    /** #########################################################################
+     * Funções para o PPG102
+     */
+
+    private function importPPG102($data)
+    {
+        // placeholder
+        foreach ($data as $entry) {
+            var_dump($entry);
+        }
+        return;
+    }
 
     /** ########################################################################
      * Funções para o MCI460
@@ -4249,5 +4475,51 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             break;
         }
         return $out;
+    }
+
+    /** #########################################################################
+     * Funções para o MCI470
+     */
+
+    private function importMCI470($data)
+    {
+       $app = App::i();
+       $meta = $data[0];
+       $footer = $data[sizeof($data) - 1]["payload"];
+       $data = array_splice($data, 2, -1);
+       $registrationRepo = $app->repo("Registration");
+       $app->disableAccessControl();
+       set_time_limit(0);
+       foreach ($data as $item) {
+           $entry = $item["payload"];
+           $registrationID = substr($entry["registrationID"],
+                                    strcspn($entry["registrationID"],
+                                            "0123456789"));
+           $registration = $registrationRepo->find($registrationID);
+           if (!isset($registration)) {
+               $app->log->info("Ignorando: não encontrada $registrationID");
+               continue;
+           }
+           $accountCreation = $registration->owner->account_creation ??
+                              new stdClass();
+           if (($accountCreation->status ?? 1) == 10) {
+               $app->log->info("Ignorando - conta já aberta: $registrationID");
+               continue;
+           }
+           $app->log->info("Processando: $registrationID - " .
+                           json_encode($entry));
+           $accountCreation->status = ($entry["errorClient"] == 0) ?
+                                        self::ACCOUNT_CREATION_SUCCESS :
+                                        self::ACCOUNT_CREATION_FAILED;
+           $accountCreation->received_raw = $item["raw"];
+           $accountCreation->received_filename = $meta["filename"];
+           $accountCreation->processed = $entry;
+           $registration->owner->account_creation = $accountCreation;
+           $registration->owner->save(true);
+           $app->em->clear();
+       }
+       $app->enableAccessControl();
+       $app->log->info("Total registros: " . $footer["countEntries"]);
+       return;
     }
 }

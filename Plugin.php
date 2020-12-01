@@ -423,6 +423,14 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
+        // uploads de desbancarizados
+        $app->hook('template(opportunity.<<single|edit>>.sidebar-right):end', function () {
+            $opportunity = $this->controller->requestedEntity;
+            if ($opportunity->canUser('@control')) {
+                $this->part('aldirblanc/bankless-uploads', ['entity' => $opportunity]);
+            }
+        });
+
         /**
          * só consolida as avaliações para "selecionado" se tiver acontecido as validações (dataprev, etc)
          * 
@@ -898,6 +906,24 @@ class Plugin extends \MapasCulturais\Plugin
             'type' => 'json',
             'private' => true,
         ]);
+        // metadados da oportunidade para suporte a arquivos de desbancarizados
+        $this->registerMetadata('MapasCulturais\Entities\Opportunity',
+                                'bankless_processed_files', [
+            'label' => 'Arquivos de Desbancarizados Processados',
+            'type' => 'json',
+            'private' => true,
+            'default_value' => '{}',
+        ]);
+        // FileGroup para os arquivos de desbancarizados
+        $defBankless = new \MapasCulturais\Definitions\FileGroup(
+            "bankless",
+            ["^text/plain$", "^application/octet-stream$"],
+            "O arquivo enviado não é um retorno de desbancarizados.",
+            false,
+            null,
+            true
+        );
+        $app->registerFileGroup("opportunity", $defBankless);
     }
 
     function json($data, $status = 200)
