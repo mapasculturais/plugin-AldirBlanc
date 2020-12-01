@@ -4145,11 +4145,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                  $registrationID);
             }
             $payment->status = ($entry["paymentCode"] == 0) ?
-                               4 : //Payment::STATUS_AVAILABLE : // FixMe: colocar nova constante
+                               Payment::STATUS_AVAILABLE :
                                Payment::STATUS_FAILED;
             $metadata = is_array($payment->metadata) ? $payment->metadata :
                         json_decode($payment->metadata);
-            $metadata["ppg100"] = [
+            $metadata["ppg101"] = [
                 "raw" => $item["raw"],
                 "processed" => $entry,
                 "filename" => $meta["filename"],
