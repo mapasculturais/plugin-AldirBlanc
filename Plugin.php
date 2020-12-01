@@ -371,7 +371,7 @@ class Plugin extends \MapasCulturais\Plugin
                 }
             }
         });
-       
+
         // botão exportadores desbancarizados
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app) {
             // condiciona exibição do botão a uma configuração
@@ -392,6 +392,7 @@ class Plugin extends \MapasCulturais\Plugin
                     'inciso' => 1,
                     'opportunity' => $opportunity,
                     'exports' => $plugin->config['exporta_desbancarizados'],
+                    'selectList' => true,
                 ]);
             }
             return;

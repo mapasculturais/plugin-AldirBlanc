@@ -27,7 +27,7 @@
  */
 return [
     "serial" => 0,
-    "idMap" => "CSV/ppgIdMap.csv",
+    "idMap" => "CSV/ppgIdMap.csv", // comentar a linha para mapear pelo id do pagamento
     "fieldMap" => [
         "wantsPaymentOrder" => "field_8564",
         "singleParent" => "field_119",
@@ -158,8 +158,8 @@ return [
                 [
                     "length" => 6,
                     "type" => "int",
-					"name" => "senhaSaque",
-					"function" => "ppg100PIN",
+                    "name" => "senhaSaque",
+                    "function" => "ppg100PIN",
                 ],
                 [
                     "length" => 10,
@@ -196,7 +196,7 @@ return [
                 ],
             ],
         ],
-	],
+    ],
     "trailer" => [
         [
             "length" => 1,

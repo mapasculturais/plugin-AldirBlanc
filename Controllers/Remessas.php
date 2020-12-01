@@ -75,7 +75,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * @return \MapasCulturais\Entities\Registration[]
      * @throws Exception 
      */
-    function getRegistrations(Opportunity $opportunity, $asIterator = false) {
+    function getRegistrations(Opportunity $opportunity, $asIterator=false) {
         $app = App::i();
         
         /**
@@ -956,44 +956,39 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $app = App::i();
         $parameters = $this->getURLParameters([
             "opportunity" => "intArray",
-            "registrations" => "intArray",
             "type" => "string"
         ]);
-        if (isset($parameters["registrations"]) &&
-            !$app->user->is("saasSuperAdmin")) {
-            echo("Não autorizado.");
-            die();
-        }
         // pega oportunidades via ORM
         $opportunities = [];
         if (isset($parameters["opportunity"])) {
-            $opportunities = $app->repo("Opportunity")->findBy(["id" => $parameters["opportunity"]]);
+            $opportunities = $app->repo("Opportunity")->findBy([
+                "id" => $parameters["opportunity"],
+            ]);
         } else {
             $opportunities = $app->repo("Opportunity")->findAll();
         }
         foreach ($opportunities as $opportunity) {
-            if (!$opportunity->canUser('@control')) {
+            if (!$opportunity->canUser("@control")) {
                 echo "Não autorizado.";
                 die();
             }
         }
-        $registrations = isset($parameters["registrations"]) ?
-                               $parameters["registrations"] : [];
         if (!isset($parameters["type"])) {
             throw new Exception("O parâmetro \"type\" é obrigatório.");
         }
         switch ($parameters["type"]) {
             case "mci460":
-                $this->exportMCI460($opportunities, $registrations);
+                $this->exportMCI460($opportunities);
                 break;
             case "ppg100":
-                $this->exportPPG100($opportunities, $registrations);
+                $this->exportPPG100($opportunities);
                 break;
             case "addressReport":
-                $this->addressReport($opportunities, $registrations);
+                $this->addressReport($opportunities);
                 break;
             default:
-                throw new Exception("Arquivo desconhecido: " . $parameters["type"]);
+                throw new Exception("Arquivo desconhecido: " .
+                                    $parameters["type"]);
         }
         return;
     }
@@ -3057,6 +3052,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
           return $result;
       }
+
       private function getLineData($line, $start, $end){              
         $data = "";
         $char = strlen($line);       
@@ -3214,35 +3210,35 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     /**
      * Processa pagamento
      */
-    private function processesPayment($register, $app){  
-        
+    private function processesPayment($register, $app, $returnObject=false) {
+
         $parametersForms = $this->getParametersForms();
-        
-        $result = 0;     
+
+        $result = 0;
         $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
             'registration' => $register->id
         ]);
-        
-        if($payment && ($this->data[$parametersForms['typeExport']] === '0')){
-            $payment->status = 3;        
+
+        if ($payment && ($this->data[$parametersForms['typeExport']] === '0')) {
+            $payment->status = 3;
             $payment->save(true);
-            $app->log->info($register->number . " - EXPORTADA E PROCESSADA PARA PAGAMENTO"); 
-            $result = $payment->amount;
-           
-        }else if($payment && $this->data[$parametersForms['typeExport']] === '3'){
+            $app->log->info($register->number . " - EXPORTADA E PROCESSADA PARA PAGAMENTO");
+            $result = $returnObject ? $payment : $payment->amount;
+
+        } else if ($payment && $this->data[$parametersForms['typeExport']] === '3') {
             $app->log->info($register->number . " - JÁ EXPORTADA PARA PAGAMENTO");
-            $result = $payment->amount;
-            
-        }else if($payment && $this->data[$parametersForms['typeExport']] === 'all'){
-            if($payment->status == 0){
+            $result = $returnObject ? $payment : $payment->amount;
+
+        } else if($payment && $this->data[$parametersForms['typeExport']] === 'all') {
+            if ($payment->status == 0) {
                 $app->log->info($register->number . " - PAGAMENTO CADASTRADO - AINDA NÃO EXPORTADO PARA PAGAMENTO");
-            }else if($payment->status == 3){
-                $app->log->info($register->number . " - PAGAMENTO CADASTRADO - JÁ EXPORTADO PARA PAGAMENTO");  
+            } else if ($payment->status == 3) {
+                $app->log->info($register->number . " - PAGAMENTO CADASTRADO - JÁ EXPORTADO PARA PAGAMENTO");
             }
-           
-            $result = $payment->amount;
-            
-        }else{
+
+            $result = $returnObject ? $payment : $payment->amount;
+
+        } else {
             $app->log->info($register->number . " - PAGAMENTO NÃO ENCONTRADO");
             $result = false;
         }
@@ -3370,7 +3366,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         } elseif (isset($this->data["type"])) {
             $typeExport = "statusPayment";
             $datePayment = "paymentDate";
-
+            $typeSelect = "select";
+            $listSelect = "list";
         }
         return [
             "typeExport" => $typeExport,
@@ -3493,7 +3490,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     /**
      * Valida e retorna os parâmetros da URL. Recebe um dicionário com os nomes
-     * e tipos dos parâmetros. Tipos possíveis: date, int, intArray, string.
+     * e tipos dos parâmetros. Tipos possíveis: date, int, intArray, string,
+     * stringArray.
     */
     private function getURLParameters($list)
     {
@@ -3510,7 +3508,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 case "date":
                     if (!preg_match("/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/",
                         $this->data[$name])) {
-                        throw new \Exception("O formato da data em $name é inválido.");
+                        throw new \Exception("O formato da data em $name é " .
+                                             "inválido.");
                     } else {
                         $date = new DateTime($this->data[$name]);
                         $parameters[$name] = $date->format("Y-m-d 00:00");
@@ -3526,34 +3525,37 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $array = explode(",", $this->data[$name]);
                     foreach ($array as $element) {
                         if (!is_numeric($element)) {
-                            throw new Exception("Parâmetro inválido em $name: $element.");
+                            throw new Exception("Parâmetro inválido em " .
+                                                "$name: $element.");
                         }
                     }
                     $parameters[$name] = $array;
                     break;
                 case "string":
                     $parameters[$name] = $this->data[$name];
-                break;
+                    break;
+                case "stringArray":
+                    $parameters[$name] = [];
+                    $array = explode(",", $this->data[$name]);
+                    for ($i = 0; $i < sizeof($array); ++$i) {
+                        $body = $array[$i];
+                        while (str_ends_with($body, "\\")) {
+                            $suffix = ",";
+                            if (($i + 1) < sizeof($array)) {
+                                ++$i;
+                                $suffix .=  $array[$i];
+                            }
+                            $body = substr($body, 0, -1) . $suffix;
+                        }
+                        $parameters[$name][] = $body;
+                    }
+                    break;
                 default:
-                    $app->log->warning("Tipo de parâmetro desconhecido: $type.");
+                    $app->log->warning("Tipo de parâmetro desconhecido: " .
+                                       "$type.");
             }
         }
         return $parameters;
-    }
-
-   /**
-     * Retorna do banco as inscrições com os IDs da lista, usando o método
-     * iterate.
-     */
-    private function pickRegistrations($registrationList)
-    {
-        $app = App::i();
-        $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r WHERE
-                       r.id IN (:registrationList)";
-        $query = $app->em->createQuery($dql);
-        $query->setParameters(["registrationList" => $registrationList]);
-        $registrations = $query->iterate();
-        return $registrations;
     }
 
     /** #########################################################################
@@ -3654,7 +3656,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $metaname = $metafieldConfig["name"];
         if (isset($metafieldConfig["function"])) {
             $value = isset($fieldMap[$metaname]) ?
-                     $registration->${$fieldMap[$metaname]} :
+                     $registration->{$fieldMap[$metaname]} :
                      $extraData[$metaname];
             return $this->genericThunk2($metafieldConfig["function"],
                                         $metafieldConfig, $value);
@@ -3681,6 +3683,30 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $out .= $this->createString($field);
         }
         return $out;
+    }
+
+    /**
+     * Cria o arquivo no servidor com o conteúdo do parâmetro $out e retorna na
+     * resposta do request.
+     */
+    private function genericOutput($out, $type, $part, $opportunityIDs)
+    {
+        $fileName = "$type-" . (new DateTime())->format("Ymd") . "-op" .
+                    implode("-", $opportunityIDs) . "-" .
+                    md5(json_encode($out)) . ".txt";
+        $dir = PRIVATE_FILES_PATH . "aldirblanc/$part/remessas/$type/";
+        $path = $dir . $fileName;
+        if (!is_dir($dir)) {
+            mkdir($dir, 0700, true);
+        }
+        $stream = fopen($path, "w");
+        fwrite($stream, $out);
+        fclose($stream);
+        header("Content-Type: text/utf-8");
+        header("Content-Disposition: attachment; filename=" . $fileName);
+        header("Pragma: no-cache");
+        readfile($path);
+        return;
     }
 
     /**
@@ -3779,9 +3805,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return ((10 - ($sum % 10)) % 10);
     }
 
-    private function genericPaymentAmount($registration)
+    private function genericPaymentAmount($payment)
     {
-        return ((int) round(($this->processesPayment($registration, App::i()) * 100), 0));
+        return ((int) round(($payment->amount * 100), 0));
     }
 
     private function genericTimeHHMM()
@@ -3795,7 +3821,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * removidos sem ajuste nas mesmas.
      */
 
-    private function exportPPG100($opportunities, $registrationList)
+    private function exportPPG100($opportunities)
     {
         $app = App::i();
         $config = $this->config["config-ppg10x"];
@@ -3805,9 +3831,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $newline = "\r\n";
         set_time_limit(0);
         // carrega mapeamento de identificadores
-        $idMap = $this->getCSVData($config["idMap"], ",", "registrationID");
-        if (!$idMap) {
-            $idMap = [];
+        $idMap = null;
+        if (isset($config["idMap"]) &&
+            !isset($this->data["ignore_ppg_idmap"])) {
+            $idMap = $this->getCSVData($config["idMap"], ",", "registrationID");
+            if (!$idMap) {
+                $idMap = [];
+            }
         }
         // inicializa contadores
         $nLines = 1;
@@ -3818,9 +3848,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunityIDs = [];
         // percorre as oportunidades
         foreach ($opportunities as $opportunity) {
-            $registrations = empty($registrationList) ?
-                             $this->getRegistrations($opportunity, true) :
-                             $this->pickRegistrations($registrationList);
+            $registrations = $this->getRegistrations($opportunity, true);
             /**
              * Mapeamento de fielsds_id pelo label do campo
              */
@@ -3835,8 +3863,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                     $registration->number);
                     continue;
                 }
-                $amount = $this->genericPaymentAmount($registration);
-                if (!isset($idMap[$registration->id])) {
+                $payment = $this->processesPayment($registration, $app, true);
+                $amount = $this->genericPaymentAmount($payment);
+                if (($idMap != null) && !isset($idMap[$registration->id])) {
                     ++$newMappings;
                     $idMap[$registration->id] = [
                          "idCliente" => (1 + sizeof($idMap)),
@@ -3845,7 +3874,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $details = $this->genericDetails($config, $registration, [
                     "numeroRegistro" => ($nLines + 1),
                     "valorCarga" => $amount,
-                    "numeroProtocolo" => $idMap[$registration->id],
+                    "numeroProtocolo" => (($idMap != null) ?
+                                          $idMap[$registration->id] :
+                                          ["idCliente" => $payment->id]),
                 ]);
                 $nLines += sizeof($details);
                 $totalAmount += $amount;
@@ -3870,24 +3901,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         if ($newMappings > 0) {
             $this->saveCSVData($config["idMap"], ",", "registrationID", $idMap);
         }
-        /**
-         * cria o arquivo no servidor e insere o conteuto da váriavel $out
-         */
-        $fileName = "ppg100-" . (new DateTime())->format('Ymd') . "-op" .
-                    implode("-", $opportunityIDs) . "-" .
-                    md5(json_encode($out)) . ".txt";
-        $dir = PRIVATE_FILES_PATH . "aldirblanc/inciso1/remessas/ppg100/";
-        $path = $dir . $fileName;
-        if (!is_dir($dir)) {
-            mkdir($dir, 0700, true);
-        }
-        $stream = fopen($path, "w");
-        fwrite($stream, $out);
-        fclose($stream);
-        header("Content-Type: text/utf-8");
-        header("Content-Disposition: attachment; filename=" . $fileName);
-        header("Pragma: no-cache");
-        readfile($path);
+        $this->genericOutput($out, "ppg100", "inciso1", $opportunityIDs);
         return;
     }
 
@@ -3942,7 +3956,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * removidos sem ajuste nas mesmas.
      */
 
-    private function exportMCI460($opportunities, $registrationList)
+    private function exportMCI460($opportunities)
     {
         $app = App::i();
         $config = $this->config["config-mci460"];
@@ -3963,9 +3977,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunityIDs = [];
         // percorre as oportunidades
         foreach ($opportunities as $opportunity) {
-            $registrations = empty($registrationList) ?
-                             $this->getRegistrations($opportunity, true) :
-                             $this->pickRegistrations($registrationList);
+            $registrations = $this->getRegistrations($opportunity, true);
             /**
              * Mapeamento de fielsds_id pelo label do campo
              */
@@ -4030,28 +4042,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             "totalClientes" => $nClients,
             "totalRegistros" => $nLines,
         ]) . $newline;
-        /**
-         * cria o arquivo no servidor e insere o conteuto da váriavel $out
-         */
-        $fileName = "mci460-" . (new DateTime())->format('Ymd') . "-op" .
-                    implode("-", $opportunityIDs) . "-" .
-                    md5(json_encode($out)) . ".txt";
-        $dir = PRIVATE_FILES_PATH . "aldirblanc/inciso1/remessas/mci460/";
-        $path = $dir . $fileName;
-        if (!is_dir($dir)) {
-            mkdir($dir, 0700, true);
-        }
-        $stream = fopen($path, "w");
-        fwrite($stream, $out);
-        fclose($stream);
-        header("Content-Type: text/utf-8");
-        header("Content-Disposition: attachment; filename=" . $fileName);
-        header("Pragma: no-cache");
-        readfile($path);
+        $this->genericOutput($out, "mci460", "inciso1", $opportunityIDs);
         return;
     }
 
-    private function addressReport($opportunities, $registrationList)
+    private function addressReport($opportunities)
     {
         $app = App::i();
         set_time_limit(0);
@@ -4063,10 +4058,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunityIDs = [];
         $config = $this->config["config-mci460"];
         $address = $config["fieldMap"]["endereco"];
+        $name = $config["fieldMap"]["nomeCliente"];
         foreach ($opportunities as $opportunity) {
-            $registrations = empty($registrationList) ?
-                             $this->getRegistrations($opportunity, true) :
-                             $this->pickRegistrations($registrationList);
+            $registrations = $this->getRegistrations($opportunity, true);
             /**
              * Mapeamento de fielsds_id pelo label do campo
              */
@@ -4095,7 +4089,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 if (is_array($source)) {
                     $addressFields[] = $source["En_Nome_Logradouro"];
                     $addressFields[] = $source["En_Num"];
-                    $addressFields[] = isset($source["En_Complemento"]) ? $source["En_Complemento"] : "";
+                    $addressFields[] = $source["En_Complemento"] ?? "";
                     $addressFields[] = $source["En_Bairro"];
                     $addressFields[] = $source["En_Municipio"];
                     $addressFields[] = $source["En_Estado"];
@@ -4103,14 +4097,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 } else {
                     $addressFields[] = $source->En_Nome_Logradouro;
                     $addressFields[] = $source->En_Num;
-                    $addressFields[] = isset($source->En_Complemento) ? $source->En_Complemento : "";
+                    $addressFields[] = $source->En_Complemento ?? "";
                     $addressFields[] = $source->En_Bairro;
                     $addressFields[] = $source->En_Municipio;
                     $addressFields[] = $source->En_Estado;
                     $addressFields[] = $source->En_CEP;
                 }
                 $report[] = array_merge([$registration->number,
-                                        $registration->field_22], $addressFields);
+                                        $registration->$name], $addressFields);
                 $app->em->clear();
             }
             if (sizeof($report) > $linesBefore) {
@@ -4124,7 +4118,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         /**
          * cria o arquivo no servidor e insere o $header e as entradas do $report
          */
-        $fileName = "addressReport-" . (new DateTime())->format('Ymd') . "-op" .
+        $fileName = "addressReport-" . (new DateTime())->format("Ymd") . "-op" .
                     implode("-", $opportunityIDs) . "-" .
                     md5(json_encode(array_merge([$header], $report))) . ".csv";
         $dir = PRIVATE_FILES_PATH . "aldirblanc/inciso1/remessas/generics/";
@@ -4135,9 +4129,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $stream = fopen($path, "w");
         $csv = Writer::createFromStream($stream);
         $csv->insertOne($header);
-        foreach ($report as $line) {
-            $csv->insertOne($line);
-        }
+        $csv->insertAll($report);
         header("Content-Type: application/csv");
         header("Content-Disposition: attachment; filename=" . $fileName);
         header("Pragma: no-cache");

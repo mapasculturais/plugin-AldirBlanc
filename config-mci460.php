@@ -29,7 +29,7 @@
  */
 return [
     "serial" => 0,
-    "branchMap" => "branchmap.csv",
+    "branchMap" => "CSV/branchMap.csv",
     "fieldMap" => [
         "hasAccount" => "field_1",
         "wantsAccount" => "field_18",
@@ -680,9 +680,9 @@ return [
         ],
     ],
     "condition" => [
-        "operator" => "and",
-        "operands" => [
-            [
+        // "operator" => "and",
+        // "operands" => [
+        //     [
                 "operator" => "not",
                 "operands" => [
                     [
@@ -716,11 +716,11 @@ return [
                         ],
                     ],
                 ],
-            ],
-            [
-                "operator" => "equals",
-                "operands" => ["singleParent", ["const" => "NÃO"]]
-            ],
-        ],
+        //     ],
+        //     [
+        //         "operator" => "equals",
+        //         "operands" => ["singleParent", ["const" => "NÃO"]]
+        //     ],
+        // ],
     ],
 ];
