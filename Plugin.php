@@ -217,6 +217,24 @@ class Plugin extends \MapasCulturais\Plugin
             // $app->view->enqueueStyle('app','chat','chat.css');
         }
 
+        // reordena avaliações antes da reconsolidação, colocando as que tem id = registration_id no começo, 
+        // pois indica que foram importadas
+        $app->hook('controller(opportunity).reconsolidateResult', function($opportunity, &$evaluations) {
+
+            usort($evaluations, function($a,$b) {
+                if(preg_replace('#[^\d]+#', '', $a['number']) == $a['id']) {
+                    return -1;
+                } else if(preg_replace('#[^\d]+#', '', $b['number']) == $b['id']) {
+                    return 1;
+                } else {
+                    $_a = (int) $a['id'];
+                    $_b = (int) $b['id'];
+                    return $_a <=> $_b;
+                }
+            });
+
+        });
+
          //Botão exportador CNAB240 BB
          $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
             $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
