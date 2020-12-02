@@ -390,7 +390,7 @@ class Plugin extends \MapasCulturais\Plugin
                 }
             }
         });
-       
+
         // botão exportadores desbancarizados
         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app) {
             // condiciona exibição do botão a uma configuração
@@ -411,6 +411,7 @@ class Plugin extends \MapasCulturais\Plugin
                     'inciso' => 1,
                     'opportunity' => $opportunity,
                     'exports' => $plugin->config['exporta_desbancarizados'],
+                    'selectList' => true,
                 ]);
             }
             return;
@@ -438,6 +439,14 @@ class Plugin extends \MapasCulturais\Plugin
                     $inciso = 3;
                 }
                 $this->part('aldirblanc/csv-generic-button', ['inciso' => $inciso, 'opportunity' => $opportunity, 'selectList'=> $selectList]);
+            }
+        });
+
+        // uploads de desbancarizados
+        $app->hook('template(opportunity.<<single|edit>>.sidebar-right):end', function () {
+            $opportunity = $this->controller->requestedEntity;
+            if ($opportunity->canUser('@control')) {
+                $this->part('aldirblanc/bankless-uploads', ['entity' => $opportunity]);
             }
         });
 
@@ -916,6 +925,24 @@ class Plugin extends \MapasCulturais\Plugin
             'type' => 'json',
             'private' => true,
         ]);
+        // metadados da oportunidade para suporte a arquivos de desbancarizados
+        $this->registerMetadata('MapasCulturais\Entities\Opportunity',
+                                'bankless_processed_files', [
+            'label' => 'Arquivos de Desbancarizados Processados',
+            'type' => 'json',
+            'private' => true,
+            'default_value' => '{}',
+        ]);
+        // FileGroup para os arquivos de desbancarizados
+        $defBankless = new \MapasCulturais\Definitions\FileGroup(
+            "bankless",
+            ["^text/plain$", "^application/octet-stream$"],
+            "O arquivo enviado não é um retorno de desbancarizados.",
+            false,
+            null,
+            true
+        );
+        $app->registerFileGroup("opportunity", $defBankless);
     }
 
     function json($data, $status = 200)
