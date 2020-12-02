@@ -21,13 +21,24 @@ if ($inciso == 1) {
         } ?>
         </select>
         <div>
-            <b>Escolha quais inscrições quer exportar</b> <br>
-            <input type="radio" name="statusPayment" value="0" checked title="Exporta as inscrições com pagamentos cadastrados na data selecionada. Após exportar um arquivo de remessa nessa modalidade, há mudança de status."> Para pagamento<br>
-            <input type="radio" name="statusPayment" value="3" title="Exporta asinscrições com pagamentos cadastrados na data selecionada, que já foram exportadas anteriormente para pagamento."> Em processo de pagamento<br>
+            <label for="statusPayment"><b>Escolha quais inscrições quer exportar</b></label><br>
+            <input type="radio" name="statusPayment" value="0" checked title="Exporta as inscrições com pagamentos cadastrados na data selecionada. Após exportar um arquivo de remessa nessa modalidade, há mudança de status."> Para pagamento <span style="color: red;">*</span><br>
+            <input type="radio" name="statusPayment" value="3" title="Exporta as inscrições com pagamentos cadastrados na data selecionada, que já foram exportadas anteriormente para pagamento."> Em processo de pagamento<br>
             <input type="radio" name="statusPayment" value="all" title="Exporta todas as inscrições com pagamentos cadastrados na data selecionada."> Todas
+            <br>
+            <label for="serial"><b>Número da remessa</b></label>
+            <input style="display: inline;" type="number" name="serial" id="serial" min="0" value="0">
+            <br>
+            <?php if ($selectList) { ?>
+                <label for="select"><b>Selecionar uma lista de inscrições que</b></label><br>
+                <input type="radio" name="select" value="only" title=""> Devem ser exportadas<br>
+                <input type="radio" name="select" value="ignore" title=""> Devem ser ignoradas<br>
+                <input type="radio" name="select" title="" checked> Não usar essa função<br>
+                <textarea name="list" id="list" cols="30" rows="2" placeholder="Separe por virgula e sem prefixo Ex.: 1256584,6941216854"></textarea>
+            <?php } ?>
         </div>
         <input type="hidden" name="opportunity" value="<?=$opportunity?>">
-        <p><span style="color: red;">*</span> Obrigatório</p>
+        <p><span style="color: red;">*</span> Obrigatório informar data de pagamento</p>
         <button class="btn btn-primary download" type="submit">Exportar</button>
     </form>
 </edit-box>
