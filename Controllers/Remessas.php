@@ -3859,7 +3859,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $type = null;
         $data = [
             [
-                "filename" => $filePath,
+                "filename" => basename($filePath),
                 "importTS" => (new DateTime())->format("YmdHis"),
             ],
         ];
@@ -3876,14 +3876,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $type = "config-ppg10x";
                     $subtype = "return";
                 } else {
-                    $fileID = substr($line, 15, 6);
-                    if (str_starts_with($fileID, "PPG102")) {
-                        $type = "config-ppg10x";
-                        $subtype = "followup";
-                    } else {
+                    // WIP: não reconhece PPG102 enquanto não acertarmos o formato do arquivo
+                    // $fileID = substr($line, 15, 6);
+                    // if (str_starts_with($fileID, "PPG102")) {
+                    //     $type = "config-ppg10x";
+                    //     $subtype = "followup";
+                    // } else {
                         echo("Formato de remessa desconhecido.");
                         die();
-                    }
+                    // }
                 }
                 $config = $this->config[$type][$subtype];
             }
@@ -3960,6 +3961,53 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     }
 
     /** #########################################################################
+     * Funções para os PPG10x
+     */
+
+     private function ppg10xIdMap($key)
+     {
+        $config = $this->config["config-ppg10x"];
+        $idMap = null;
+        if (isset($config["idMap"]) &&
+            !isset($this->data["ignore_ppg_idmap"])) {
+            $idMap = $this->getCSVData($config["idMap"], ",", $key);
+            if (!$idMap) {
+                App::i()->log->info("Mapeamento de identificadores ausente.");
+                $idMap = [];
+            }
+        }
+        return $idMap;
+     }
+
+     private function ppg10xResolvePayment($idMap, $reference, $status)
+     {
+        $app = App::i();
+        $paymentRepo = $app->repo("\\RegistrationPayments\\Payment");
+        if ($idMap != null) {
+            $registrationID = $idMap[$reference]["registrationID"];
+            $payment = $paymentRepo->findOneBy([
+                "registration" => $registrationID,
+                "status" => $status,
+            ]);
+        } else {
+            $payment = $paymentRepo->find($reference);
+            $registrationID = $payment->registration->id;
+        }
+        if (!isset($payment)) {
+            if ($idMap != null) {
+                $app->log->info("Pagamento não encontrado para inscrição " .
+                                $registrationID);
+            } else {
+                $app->log->info("Pagamento não encontrado: $reference");
+            }
+        } else {
+            $app->log->info("Processando pagamento para inscrição " .
+                             $registrationID);
+        }
+        return $payment;
+     }
+
+    /** #########################################################################
      * Funções para o PPG100
      * Os métodos ppg100* são referenciados pelas configurações e não devem ser
      * removidos sem ajuste nas mesmas.
@@ -3970,19 +4018,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $app = App::i();
         $config = $this->config["config-ppg10x"];
         if (!isset($config["condition"])) {
-            throw new Exception("Configuração inválida: \"condition\" não configurada");
+            throw new Exception("Configuração inválida: \"condition\" não " .
+                                "configurada");
         }
         $newline = "\r\n";
         set_time_limit(0);
         // carrega mapeamento de identificadores
-        $idMap = null;
-        if (isset($config["idMap"]) &&
-            !isset($this->data["ignore_ppg_idmap"])) {
-            $idMap = $this->getCSVData($config["idMap"], ",", "registrationID");
-            if (!$idMap) {
-                $idMap = [];
-            }
-        }
+        $idMap = $this->ppg10xIdMap("registrationID");
         // inicializa contadores
         $nLines = 1;
         $totalAmount = 0;
@@ -4101,48 +4143,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     {
         $app = App::i();
         // carrega mapeamento de identificadores
-        $idMap = null;
-        if (isset($this->config["config-ppg10x"]["idMap"]) &&
-            !isset($this->data["ignore_ppg_idmap"])) {
-            $idMap = $this->getCSVData($this->config["config-ppg10x"]["idMap"],
-                                       ",", "idCliente");
-            if (!$idMap) {
-                $app->log->info("Mapeamento de identificadores ausente.");
-                $idMap = [];
-            }
-        }
+        $idMap = $this->ppg10xIdMap("idCliente");
         $meta = $data[0];
         $header = $data[1]["payload"];
         $footer = $data[sizeof($data) - 1]["payload"];
         $data = array_splice($data, 2, -1);
         $app->log->info("Resultado geral: " . $header["fileResultCode"]);
         $app->log->info("Mensagem geral: " . $header["fileResultMessage"]);
-        $paymentRepo = $app->repo("\\RegistrationPayments\\Payment");
         set_time_limit(0);
         foreach ($data as $item) {
             $entry = $item["payload"];
-            if ($idMap != null) {
-                $registrationID = $idMap[$entry["reference"]]["registrationID"];
-                $payment = $paymentRepo->findOneBy([
-                    "registration" => $registrationID,
-                    "status" => Payment::STATUS_PENDING,
-                ]);
-            } else {
-                $payment = $paymentRepo->find($entry["reference"]);
-                $registrationID = $payment->registration->id;
-            }
+            $payment = $this->ppg10xResolvePayment($idMap, $entry["reference"],
+                                                   Payment::STATUS_PENDING);
             if (!isset($payment)) {
-                if ($idMap != null) {
-                    $app->log->info("Pagamento não encontrado para inscrição " .
-                                    $registrationID);
-                } else {
-                    $app->log->info("Pagamento não encontrado: " .
-                                    $entry["reference"]);
-                }
                 continue;
-            } else {
-                $app->log->info("Processando pagamento para inscrição " .
-                                 $registrationID);
             }
             $payment->status = ($entry["paymentCode"] == 0) ?
                                Payment::STATUS_AVAILABLE :
@@ -4169,10 +4183,35 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     private function importPPG102($data)
     {
-        // placeholder
-        foreach ($data as $entry) {
-            var_dump($entry);
+        $app = App::i();
+        // carrega mapeamento de identificadores
+        $idMap = $this->ppg10xIdMap("idCliente");
+        $meta = $data[0];
+        $footer = $data[sizeof($data) - 1]["payload"];
+        $data = array_splice($data, 2, -1);
+        set_time_limit(0);
+        foreach ($data as $item) {
+            $entry = $item["payload"];
+            $payment = $this->ppg10xResolvePayment($idMap, $entry["reference"],
+                                                   Payment::STATUS_AVAILABLE);
+            if (!isset($payment)) {
+                continue;
+            }
+            // $payment->status = ($entry["paymentCode"] == 0) ?
+            //                    Payment::STATUS_AVAILABLE :
+            //                    Payment::STATUS_FAILED;
+            $metadata = is_array($payment->metadata) ? $payment->metadata :
+                        json_decode($payment->metadata);
+            $metadata["ppg102"] = [
+                "raw" => $item["raw"],
+                "processed" => $entry,
+                "filename" => $meta["filename"],
+            ];
+            $payment->metadata = $metadata;
+            // $payment->save(true); // WIP: não salvar nada enquanto não acertarmos o formato do arquivo
+            $app->em->clear();
         }
+        $app->log->info("Total de registros: " . $footer["countEntries"]);
         return;
     }
 
@@ -4483,43 +4522,54 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     private function importMCI470($data)
     {
-       $app = App::i();
-       $meta = $data[0];
-       $footer = $data[sizeof($data) - 1]["payload"];
-       $data = array_splice($data, 2, -1);
-       $registrationRepo = $app->repo("Registration");
-       $app->disableAccessControl();
-       set_time_limit(0);
-       foreach ($data as $item) {
-           $entry = $item["payload"];
-           $registrationID = substr($entry["registrationID"],
-                                    strcspn($entry["registrationID"],
-                                            "0123456789"));
-           $registration = $registrationRepo->find($registrationID);
-           if (!isset($registration)) {
-               $app->log->info("Ignorando: não encontrada $registrationID");
-               continue;
-           }
-           $accountCreation = $registration->owner->account_creation ??
-                              new stdClass();
-           if (($accountCreation->status ?? 1) == 10) {
-               $app->log->info("Ignorando - conta já aberta: $registrationID");
-               continue;
-           }
-           $app->log->info("Processando: $registrationID - " .
-                           json_encode($entry));
-           $accountCreation->status = ($entry["errorClient"] == 0) ?
-                                        self::ACCOUNT_CREATION_SUCCESS :
-                                        self::ACCOUNT_CREATION_FAILED;
-           $accountCreation->received_raw = $item["raw"];
-           $accountCreation->received_filename = $meta["filename"];
-           $accountCreation->processed = $entry;
-           $registration->owner->account_creation = $accountCreation;
-           $registration->owner->save(true);
-           $app->em->clear();
-       }
-       $app->enableAccessControl();
-       $app->log->info("Total registros: " . $footer["countEntries"]);
-       return;
+        $app = App::i();
+        $config = $this->config["config-mci460"];
+        $meta = $data[0];
+        $footer = $data[sizeof($data) - 1]["payload"];
+        $data = array_splice($data, 2, -1);
+        $registrationRepo = $app->repo("Registration");
+        $app->disableAccessControl();
+        set_time_limit(0);
+        foreach ($data as $item) {
+            $entry = $item["payload"];
+            $registrationID = substr($entry["registrationID"],
+                                     strcspn($entry["registrationID"],
+                                             "0123456789"));
+            $registration = $registrationRepo->find($registrationID);
+            if (!isset($registration)) {
+                $app->log->info("Ignorando: não encontrada $registrationID");
+                continue;
+            }
+            $accountCreation = $registration->owner->account_creation ??
+                               new stdClass();
+            if (($accountCreation->status ?? 1) == 10) {
+                $app->log->info("Ignorando - conta já aberta: $registrationID");
+                continue;
+            }
+            $app->log->info("Processando: $registrationID - " .
+                            json_encode($entry));
+            $accountCreation->status = ($entry["errorClient"] == 0) ?
+                                       self::ACCOUNT_CREATION_SUCCESS :
+                                       self::ACCOUNT_CREATION_FAILED;
+            $accountCreation->received_raw = $item["raw"];
+            $accountCreation->received_filename = $meta["filename"];
+            $accountCreation->processed = $entry;
+            $registration->owner->account_creation = $accountCreation;
+            if ($accountCreation->status == self::ACCOUNT_CREATION_SUCCESS) {
+                $registration->owner->payment_bank_account_type =
+                    $config["defaults"]["accountType"];
+                $registration->owner->payment_bank_number =
+                    $config["defaults"]["bankNumber"];
+                $registration->owner->payment_bank_branch =
+                    $entry["branch"] . "-" . $entry["branchVC"];
+                $registration->owner->payment_bank_account =
+                    $entry["account"] . "-" . $entry["accountVC"];
+            }
+            $registration->owner->save(true);
+            $app->em->clear();
+        }
+        $app->enableAccessControl();
+        $app->log->info("Total registros: " . $footer["countEntries"]);
+        return;
     }
 }

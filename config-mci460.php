@@ -30,6 +30,10 @@
 return [
     "serial" => 0,
     "branchMap" => "CSV/branchMap.csv",
+    "defaults" => [
+        "bankNumber" => "001",
+        "accountType" => "Conta corrente",
+    ],
     "fieldMap" => [
         "hasAccount" => "field_1",
         "wantsAccount" => "field_18",
