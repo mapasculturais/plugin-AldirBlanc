@@ -303,7 +303,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $app->disableAccessControl();
         $registration->lab_sent_emails = $sent_emails;
-
         $registration->lab_last_email_status = $registration->status;
 
         $registration->save(true);
@@ -806,12 +805,14 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
             
         }
-
+       
+        $mensagemPpg = ($registration->lab_ppg_email && $this->config['exibir_msg_ppg']) ? $this->config['msg_ppg_status_pre'] . $registration->owner->user->email . '. ' . $this->config['msg_ppg_status_pos'] : '';
         $this->render('status', [
             'registration' => $registration, 
             'registrationStatusMessage' => $registrationStatusMessage, 
             'justificativaAvaliacao' => array_filter($justificativaAvaliacao),
-            'recursos' => $recursos
+            'recursos' => $recursos,
+            'mensagem_ppg' =>$mensagemPpg
         ]);
     }
 
@@ -1342,7 +1343,14 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $fileData = $this->readPpg($txt,$ret,$csv);
         if($fileData){
             foreach ($fileData as $line){
-                $this->enviaEmailPpg($line);
+                $aprovado = !intval($line['aprov']);
+                if ($line['inscricao']->lab_ppg_email){
+                    $app->log->debug("EMAIL JA ENVIADO PARA {$line['inscricao']->number}");
+                }elseif ($aprovado) {
+                    $this->enviaEmailPpg($line);
+                }elseif(!$aprovado){
+                    $app->log->debug("NÃO APROVADO {$line['inscricao']->number}");
+                }
             }
         }
     }
@@ -1380,7 +1388,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         while ($line = fgets($fh)) {
             if (substr($line, 0, 1 ) == 1) {
 
-                $senha = substr($line, 17, 6 );
+                $senha = substr($line, 16, 6 );
                 $id = intval(substr($line, 10, 6 ));
                 $data[$id]['senha'] = $senha;
             }
@@ -1417,7 +1425,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $filename = $app->view->resolveFilename("views/aldirblanc", "email-ppg.html");
         $template = file_get_contents($filename);
         $registration = $data['inscricao'];
-
+        $mensagem = $this->config['msg_ppg_email'];
         $params = [
             "siteName" => $site_name,
             "urlImageToUseInEmails" => $this->config['logotipo_central'],
@@ -1425,7 +1433,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             "inscricao" => $registration->number, 
             "protocolo" => $data['prot'], 
             "senha" => $data['senha'], 
-            "baseUrl" => $baseUrl
+            "baseUrl" => $baseUrl,
+            "mensagem" => $mensagem
         ];
         $content = $mustache->render($template,$params);
         $email_params = [
@@ -1450,9 +1459,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             ];
             $app->disableAccessControl();
             $registration->lab_sent_emails = $sent_emails;
-    
-            $registration->lab_last_email_status = $registration->status;
-    
+            $registration->lab_ppg_email = true;
             $registration->save(true);
             $app->enableAccessControl();
         }
