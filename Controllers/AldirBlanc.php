@@ -1255,27 +1255,27 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         ];
 
         $app->log->debug("ENVIANDO EMAIL PPG da {$registration->number}");
-        $app->createAndSendMailMessage($email_params);
+        $emailSent = $app->createAndSendMailMessage($email_params);
+        if ($emailSent){
+            $sent_emails = $registration->lab_sent_emails ;
+            $sent_emails[] = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'loggedin_user' => [
+                    'id' => $app->user->id,
+                    'email' => $app->user->email,
+                    'name' => $app->user->profile->name 
+                ],
+                'email' => 'email - ppg'
+            ];
+            $app->disableAccessControl();
+            $registration->lab_sent_emails = $sent_emails;
+    
+            $registration->lab_last_email_status = $registration->status;
+    
+            $registration->save(true);
+            $app->enableAccessControl();
+        }
 
-
-        $sent_emails = $registration->lab_sent_emails ;
-        $sent_emails[] = [
-            'timestamp' => date('Y-m-d H:i:s'),
-            'loggedin_user' => [
-                'id' => $app->user->id,
-                'email' => $app->user->email,
-                'name' => $app->user->profile->name 
-            ],
-            'email' => 'email - ppg'
-        ];
-
-        $app->disableAccessControl();
-        $registration->lab_sent_emails = $sent_emails;
-
-        $registration->lab_last_email_status = $registration->status;
-
-        $registration->save(true);
-        $app->enableAccessControl();
     }
 
     function getInciso1ReportData() {
