@@ -457,12 +457,12 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
         // Upload do ppg inciso 1
-        $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin){
-            $opportunity = $this->controller->requestedEntity; 
-            if($opportunity->canUser('@control') && $opportunity->id == $plugin->config['inciso1_opportunity_id'] ) {
-                $this->part('aldirblanc/upload-ppg', ['opportunity' => $opportunity]);
-            }
-        });
+        // $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin){
+        //     $opportunity = $this->controller->requestedEntity; 
+        //     if($opportunity->canUser('@control') && $opportunity->id == $plugin->config['inciso1_opportunity_id'] ) {
+        //         $this->part('aldirblanc/upload-ppg', ['opportunity' => $opportunity]);
+        //     }
+        // });
 
         /**
          * só consolida as avaliações para "selecionado" se tiver acontecido as validações (dataprev, etc)
