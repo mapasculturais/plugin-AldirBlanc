@@ -115,7 +115,9 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_ppg_status_pre' => env('AB_MENSAGEM_PPG_STATUS_PRE', 'O pagamento da primeira parcela do seu benefício está disponível para saque. Enviamos o número de protocolo, senha e orientações para o saque para o email '),
             'msg_ppg_status_pos' => env('AB_MENSAGEM_PPG_STATUS_POS', 'O assunto do email enviado é “[Lei Aldir Blanc] Pagamento do benefício”. Se não encontrá-lo na caixa de entrada, faça uma busca por este assunto para ver se ele não foi para outras caixas.'),
             'exibir_msg_ppg' => env('AB_MENSAGEM_PPG_STATUS_EXIBIR', true),
-             
+            'ppg_file_path_txt' => env('AB_EMAIL_PPG_FILE_PATH_TXT', ''),
+            'ppg_file_path_ret' => env('AB_EMAIL_PPG_FILE_PATH_RET', ''),
+            'ppg_file_path_csv' => env('AB_EMAIL_PPG_FILE_PATH_CSV', ''),
         ];
 
         $skipConfig = false;

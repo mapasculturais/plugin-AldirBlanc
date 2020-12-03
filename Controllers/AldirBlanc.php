@@ -1337,9 +1337,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if(!$app->user->is('admin')) {
             $this->errorJson('Permissao negada', 403);
         }
-        $txt = __DIR__."/../ppg100-20201127-op009-17bfe9512dcd1776d438719f7eb9a0b0.txt";
-        $ret = __DIR__."/../PPG101327112020190157.ret";
-        $csv = __DIR__."/../ppgIdMap.csv";
+        $txt = $this->config['ppg_file_path_txt'];
+        $ret = $this->config['ppg_file_path_ret'];
+        $csv = $this->config['ppg_file_path_csv'];
         $fileData = $this->readPpg($txt,$ret,$csv);
         if($fileData){
             foreach ($fileData as $line){
