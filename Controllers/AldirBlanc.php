@@ -10,6 +10,10 @@ use MapasCulturais\Entities\Registration;
 use MapasCulturais\Entities\RegistrationSpaceRelation as RegistrationSpaceRelationEntity;
 use MapasCulturais\Entities\User;
 use MapasCulturais\Exceptions\PermissionDenied;
+use League\Csv\Reader;
+use League\Csv\Writer;
+use League\Csv\Statement;
+
 
 /**
  * Registration Controller
@@ -1142,6 +1146,136 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         
         $this->render('reporte', $data);
+    }
+    function GET_email_ppg() {
+        $this->requireAuthentication();
+
+        $app = App::i();
+
+        if(!$app->user->is('admin')) {
+            $this->errorJson('Permissao negada', 403);
+        }
+        $txt = __DIR__."/../ppg100-20201127-op009-17bfe9512dcd1776d438719f7eb9a0b0.txt";
+        $ret = __DIR__."/../PPG101327112020190157.ret";
+        $csv = __DIR__."/../ppgIdMap.csv";
+        $fileData = $this->readPpg($txt,$ret,$csv);
+        if($fileData){
+            foreach ($fileData as $line){
+                $this->enviaEmailPpg($line);
+            }
+        }
+    }
+    
+    
+
+    private function readPpg($txt,$ret,$csv){
+        $app = App::i();
+
+        // Verifica se os arquivos existem
+        if(!file_exists($ret) || !file_exists($txt) || !file_exists($csv)){
+            return false;
+        }
+        $data = [];
+         //Abre o arquivo em modo de leitura
+         
+        $fh = fopen($ret,'r');
+        $count = 0;
+        while ($line = fgets($fh)) {
+            if (substr($line, 0, 1 ) == 1) {
+                $prot = substr($line, 1, 15 );
+                $id = intval(substr($line, 10, 6 ));
+                $aprov = substr($line, 16, 5);
+                $msg = substr($line, 21, 40);
+                $data[$id] = [
+                    'prot' => $prot,
+                    'aprov' => $aprov,
+                    'msg' => $msg,
+                ];
+            }
+        }
+        fclose($fh);
+        $fh = fopen($txt,'r');
+        $count = 0;
+        while ($line = fgets($fh)) {
+            if (substr($line, 0, 1 ) == 1) {
+
+                $senha = substr($line, 17, 6 );
+                $id = intval(substr($line, 10, 6 ));
+                $data[$id]['senha'] = $senha;
+            }
+        }
+        fclose($fh);
+        $stream = fopen($csv, "r");
+
+        //Faz a leitura do arquivo
+        $csvObj = Reader::createFromStream($stream);
+
+        //Define o limitador do arqivo (, ou ;)
+        $csvObj->setDelimiter(",");
+
+        //Seta em que linha deve se iniciar a leitura
+        $header_temp = $csvObj->setHeaderOffset(0);
+
+        //Faz o processamento dos dados
+        $stmt = (new Statement());
+        $results = $stmt->process($csvObj);
+        foreach($results as $key => $value){
+            $id = intval($value['idCliente']);
+            $inscricao = $value['registrationID'];
+            $data[$id]['inscricao'] = $app->repo('Registration')->find($inscricao);
+        }
+        return $data;
+ 
+    }
+    // envia email com dados ppg
+    private function enviaEmailPpg($data){
+        $app = App::i();
+        $mustache = new \Mustache_Engine();
+        $site_name = $app->view->dict('site: name', false);
+        $baseUrl = $app->getBaseUrl();
+        $filename = $app->view->resolveFilename("views/aldirblanc", "email-ppg.html");
+        $template = file_get_contents($filename);
+        $registration = $data['inscricao'];
+
+        $params = [
+            "siteName" => $site_name,
+            "urlImageToUseInEmails" => $this->config['logotipo_central'],
+            "user" => $registration->owner->name,
+            "inscricao" => $registration->number, 
+            "protocolo" => $data['prot'], 
+            "senha" => $data['senha'], 
+            "baseUrl" => $baseUrl
+        ];
+        $content = $mustache->render($template,$params);
+        $email_params = [
+            'from' => $app->config['mailer.from'],
+            'to' => $registration->owner->user->email,
+            'subject' => $site_name . " - Dados Bancários",
+            'body' => $content
+        ];
+
+        $app->log->debug("ENVIANDO EMAIL PPG da {$registration->number}");
+        $app->createAndSendMailMessage($email_params);
+
+
+        $sent_emails = $registration->lab_sent_emails ;
+        $sent_emails[] = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'loggedin_user' => [
+                'id' => $app->user->id,
+                'email' => $app->user->email,
+                'name' => $app->user->profile->name 
+            ],
+            'email' => 'email - ppg'
+        ];
+
+        $app->disableAccessControl();
+        $registration->lab_sent_emails = $sent_emails;
+
+        $registration->lab_last_email_status = $registration->status;
+
+        $registration->save(true);
+        $app->enableAccessControl();
     }
 
     function getInciso1ReportData() {
