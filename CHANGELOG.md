@@ -1,4 +1,5 @@
 ## [Unreleased]
+- Adiciona ao formulário de avaliação dos incisos I e II a informação da consolidação atual das avaliações da inscrição
 
 ## [v2.3.1] - 2020-12-01
 - Implementa os importadores para o MCI470 e PPG101 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
