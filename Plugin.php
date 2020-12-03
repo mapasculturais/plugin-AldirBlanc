@@ -4,6 +4,7 @@ namespace AldirBlanc;
 
 use MapasCulturais\App;
 use MapasCulturais\Definitions\Role;
+use MapasCulturais\Entities\Registration;
 use MapasCulturais\i;
 
 // @todo refatorar autoloader de plugins para resolver classes em pastas
@@ -217,6 +218,18 @@ class Plugin extends \MapasCulturais\Plugin
         if($plugin->config['zammad_enable']) {
             // $app->view->enqueueStyle('app','chat','chat.css');
         }
+
+        // adiciona informações do status das validações ao formulário de avaliação
+        $app->hook('template(registration.view.evaluationForm.simple):before', function(Registration $registration, $opportunity) use($plugin, $app) {
+            $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
+            $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
+            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids);
+            if (in_array($opportunity->id, $opportunities_ids) && $registration->consolidatedResult) {
+                $em = $registration->getEvaluationMethod();
+                $result = $em->valueToString($registration->consolidatedResult);
+                echo "<div class='alert warning'> Status das avaliações: <strong>{$result}</strong></div>";
+            }
+        });
 
         // reordena avaliações antes da reconsolidação, colocando as que tem id = registration_id no começo, 
         // pois indica que foram importadas

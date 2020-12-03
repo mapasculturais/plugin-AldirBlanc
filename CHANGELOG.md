@@ -1,5 +1,8 @@
 ## [Unreleased]
+
 - Implementa endpoint para conferência de oportunidade para envio ao Dataprev
+- Adiciona ao formulário de avaliação dos incisos I e II a informação da consolidação atual das avaliações da inscrição [#163](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
+- Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 
 ## [v2.3.1] - 2020-12-01
 - Implementa os importadores para o MCI470 e PPG101 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
