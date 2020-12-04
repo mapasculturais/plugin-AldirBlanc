@@ -1362,7 +1362,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         // Verifica se os arquivos existem
         if(!file_exists($ret) || !file_exists($txt) || !file_exists($csv)){
-            return false;
+            $this->errorJson('Algum arquivo não existe', 403);
         }
         $data = [];
          //Abre o arquivo em modo de leitura
