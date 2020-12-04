@@ -10,6 +10,10 @@ use MapasCulturais\Entities\Registration;
 use MapasCulturais\Entities\RegistrationSpaceRelation as RegistrationSpaceRelationEntity;
 use MapasCulturais\Entities\User;
 use MapasCulturais\Exceptions\PermissionDenied;
+use League\Csv\Reader;
+use League\Csv\Writer;
+use League\Csv\Statement;
+
 
 /**
  * Registration Controller
@@ -172,6 +176,183 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     }
 
     /**
+     * Endpoint para enviar emails das oportunidades
+     */
+    function ALL_sendEmails(){
+        ini_set('max_execution_time', 0);
+        
+        $this->requireAuthentication();
+
+        if (empty($this->data['opportunity'])) {
+            $this->errorJson('O parâmetro opportunity é obrigatório');
+        }
+
+        $app = App::i();
+
+        $opportunity = $app->repo('Opportunity')->find($this->data['opportunity']);
+
+        if (!$opportunity) {
+            $this->errorJson('Oportunidade não encontrada');
+        }
+
+        $opportunity->checkPermission('@control');
+
+        $inciso1Ids = [$this->config['inciso1_opportunity_id']];
+        $inciso2Ids = array_values($this->config['inciso2_opportunity_ids']);
+        $inciso3Ids = is_array($this->config['inciso3_opportunity_ids']) ? $this->config['inciso3_opportunity_ids'] : [];
+
+        $lab_opportunities = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
+
+        if (!in_array($opportunity->id, $lab_opportunities)) {
+            $this->errorJson("Oportunidade não é da Lei Aldir Blanc");
+        }
+
+        if (empty($this->data['status'])) {
+            $status = '2,3,8,10';
+        } else {
+            $status = intval($this->data['status']);
+            if (!in_array($status, [2,3,8,10])) {
+                $this->errorJson('Os status válidos são 2, 3, 8 ou 10');
+                die;
+            }
+        }
+
+        $registrations = $app->em->getConnection()->fetchAll("
+            SELECT 
+                r.id,
+                r.status,
+                les.value AS last_email_status
+
+            FROM registration r
+                LEFT JOIN
+                    registration_meta les ON 
+                        les.object_id = r.id AND 
+                        les.key = 'lab_last_email_status'
+                    
+            WHERE 
+                r.opportunity_id = {$opportunity->id} AND 
+                r.status IN ({$status}) AND 
+                (les.value IS NULL OR les.value <> r.status::VARCHAR)
+
+            ORDER BY r.sent_timestamp ASC");
+
+        foreach ($registrations as &$reg) {
+            $reg = (object) $reg;
+            $registration = $app->repo('Registration')->find($reg->id);
+            $this->sendEmail($registration);
+        }
+    }
+
+    /**
+     * Envia email com status da inscrição
+     *
+     */
+    function sendEmail(Registration $registration){
+        $app = App::i();
+        $registrationStatusInfo = $this->getRegistrationStatusInfo($registration);
+
+        $mustache = new \Mustache_Engine();
+        $site_name = $app->view->dict('site: name', false);
+        $baseUrl = $app->getBaseUrl();
+        $justificativaAvaliacao = "";
+        foreach ($registrationStatusInfo['justificativaAvaliacao'] as $message) {
+            if (is_array($message) && !empty($this->config['exibir_resultado_padrao'] ) ) {
+               $justificativaAvaliacao .= $message['message'] . "<hr>";
+            }else{
+                $justificativaAvaliacao .= $message .'<hr>';
+            }
+        }
+        $filename = $app->view->resolveFilename("views/aldirblanc", "email-status.html");
+        $template = file_get_contents($filename);
+
+        $params = [
+            "siteName" => $site_name,
+            "urlImageToUseInEmails" => $this->config['logotipo_central'],
+            "user" => $registration->owner->name,
+            "inscricaoId" => $registration->id, 
+            "inscricao" => $registration->number, 
+            "statusNum" => $registration->status,
+            "statusTitle" => $registrationStatusInfo['registrationStatusMessage']['title'],
+            "justificativaAvaliacao" => $justificativaAvaliacao,
+            "msgRecurso" => $this->config['msg_recurso'],
+            "emailRecurso" => $this->config['email_recurso'],
+            "baseUrl" => $baseUrl
+        ];
+        $content = $mustache->render($template,$params);
+        $email_params = [
+            'from' => $app->config['mailer.from'],
+            'to' => $registration->owner->user->email,
+            'subject' => $site_name . " - Status de inscrição",
+            'body' => $content
+        ];
+
+        $app->log->debug("ENVIANDO EMAIL DE STATUS DA {$registration->number} ({$registrationStatusInfo['registrationStatusMessage']['title']})");
+        $app->createAndSendMailMessage($email_params);
+
+        
+        $sent_emails = $registration->lab_sent_emails ;
+        $sent_emails[] = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'loggedin_user' => [
+                'id' => $app->user->id,
+                'email' => $app->user->email,
+                'name' => $app->user->profile->name 
+            ],
+            'email' => $email_params
+        ];
+
+        $app->disableAccessControl();
+        $registration->lab_sent_emails = $sent_emails;
+        $registration->lab_last_email_status = $registration->status;
+
+        $registration->save(true);
+        $app->enableAccessControl();
+    }
+    /**
+     * Retorna Array com informações sobre o status de uma inscrição
+     *
+     * @return array
+     */
+    function getRegistrationStatusInfo(Registration $registration){
+        $app = App::i();
+        // retorna a mensagem de acordo com o status
+        $getStatusMessages = $this->getStatusMessages();
+        $registrationStatusInfo=[];
+        $registrationStatusInfo['registrationStatusMessage'] = $getStatusMessages[$registration->status];
+        // retorna as avaliações da inscrição
+        $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
+        
+        // monta array de mensagens
+        $justificativaAvaliacao = [];
+
+        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
+            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
+        }
+        
+        foreach ($evaluations as $evaluation) {
+
+            if ($evaluation->getResult() == $registration->status) {
+                
+                if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
+                    // resultados do dataprev
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
+                    // resultados dos avaliadores genericos
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                } 
+                
+                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
+                    // resultados dos demais avaliadores
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                }
+
+            }
+            
+        }
+        $registrationStatusInfo['justificativaAvaliacao'] = $justificativaAvaliacao;
+        return $registrationStatusInfo;
+    }
+    /**
      * Retorna array associativo com mensagens para cada status da inscrição
      *
      * @return array
@@ -257,6 +438,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         return $agent;
     }
+
+    
 
     /**
     * Redireciona o usuário para o formulário do inciso II
@@ -567,6 +750,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $app->redirect($this->createUrl('cadastro'));
         }
         $registration->checkPermission('view');
+        $registrationStatusInfo = $this->getRegistrationStatusInfo($registration);
 
         // retorna a mensagem de acordo com o status
         $getStatusMessages = $this->getStatusMessages();
@@ -621,12 +805,14 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
             
         }
-
+       
+        $mensagemPpg = ($registration->lab_ppg_email && $this->config['exibir_msg_ppg']) ? $this->config['msg_ppg_status_pre'] . $registration->owner->user->email . '. ' . $this->config['msg_ppg_status_pos'] : '';
         $this->render('status', [
             'registration' => $registration, 
             'registrationStatusMessage' => $registrationStatusMessage, 
             'justificativaAvaliacao' => array_filter($justificativaAvaliacao),
-            'recursos' => $recursos
+            'recursos' => $recursos,
+            'mensagem_ppg' =>$mensagemPpg
         ]);
     }
 
@@ -1142,6 +1328,142 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
         
         $this->render('reporte', $data);
+    }
+    function GET_email_ppg() {
+        $this->requireAuthentication();
+
+        $app = App::i();
+
+        if(!$app->user->is('admin')) {
+            $this->errorJson('Permissao negada', 403);
+        }
+        $txt = $this->config['ppg_file_path_txt'];
+        $ret = $this->config['ppg_file_path_ret'];
+        $csv = $this->config['ppg_file_path_csv'];
+        $fileData = $this->readPpg($txt,$ret,$csv);
+        if($fileData){
+            foreach ($fileData as $line){
+                $aprovado = !intval($line['aprov']);
+                if ($line['inscricao']->lab_ppg_email){
+                    $app->log->debug("EMAIL JA ENVIADO PARA {$line['inscricao']->number}");
+                }elseif ($aprovado) {
+                    $this->enviaEmailPpg($line);
+                }elseif(!$aprovado){
+                    $app->log->debug("NÃO APROVADO {$line['inscricao']->number}");
+                }
+            }
+        }
+    }
+    
+    
+
+    private function readPpg($txt,$ret,$csv){
+        $app = App::i();
+
+        // Verifica se os arquivos existem
+        if(!file_exists($ret) || !file_exists($txt) || !file_exists($csv)){
+            $this->errorJson('Algum arquivo não existe', 403);
+        }
+        $data = [];
+         //Abre o arquivo em modo de leitura
+         
+        $fh = fopen($ret,'r');
+        $count = 0;
+        while ($line = fgets($fh)) {
+            if (substr($line, 0, 1 ) == 1) {
+                $prot = substr($line, 1, 15 );
+                $id = intval(substr($line, 10, 6 ));
+                $aprov = substr($line, 16, 5);
+                $msg = substr($line, 21, 40);
+                $data[$id] = [
+                    'prot' => $prot,
+                    'aprov' => $aprov,
+                    'msg' => $msg,
+                ];
+            }
+        }
+        fclose($fh);
+        $fh = fopen($txt,'r');
+        $count = 0;
+        while ($line = fgets($fh)) {
+            if (substr($line, 0, 1 ) == 1) {
+
+                $senha = substr($line, 16, 6 );
+                $id = intval(substr($line, 10, 6 ));
+                $data[$id]['senha'] = $senha;
+            }
+        }
+        fclose($fh);
+        $stream = fopen($csv, "r");
+
+        //Faz a leitura do arquivo
+        $csvObj = Reader::createFromStream($stream);
+
+        //Define o limitador do arqivo (, ou ;)
+        $csvObj->setDelimiter(",");
+
+        //Seta em que linha deve se iniciar a leitura
+        $header_temp = $csvObj->setHeaderOffset(0);
+
+        //Faz o processamento dos dados
+        $stmt = (new Statement());
+        $results = $stmt->process($csvObj);
+        foreach($results as $key => $value){
+            $id = intval($value['idCliente']);
+            $inscricao = $value['registrationID'];
+            $data[$id]['inscricao'] = $app->repo('Registration')->find($inscricao);
+        }
+        return $data;
+ 
+    }
+    // envia email com dados ppg
+    private function enviaEmailPpg($data){
+        $app = App::i();
+        $mustache = new \Mustache_Engine();
+        $site_name = $app->view->dict('site: name', false);
+        $baseUrl = $app->getBaseUrl();
+        $filename = $app->view->resolveFilename("views/aldirblanc", "email-ppg.html");
+        $template = file_get_contents($filename);
+        $registration = $data['inscricao'];
+        $mensagem = $this->config['msg_ppg_email'];
+        $params = [
+            "siteName" => $site_name,
+            "urlImageToUseInEmails" => $this->config['logotipo_central'],
+            "user" => $registration->owner->name,
+            "inscricao" => $registration->number, 
+            "protocolo" => $data['prot'], 
+            "senha" => $data['senha'], 
+            "baseUrl" => $baseUrl,
+            "mensagem" => $mensagem
+        ];
+        $content = $mustache->render($template,$params);
+        $email_params = [
+            'from' => $app->config['mailer.from'],
+            'to' => $registration->owner->user->email,
+            'subject' => $site_name . " - Dados Bancários",
+            'body' => $content
+        ];
+
+        $app->log->debug("ENVIANDO EMAIL PPG da {$registration->number}");
+        $emailSent = $app->createAndSendMailMessage($email_params);
+        if ($emailSent){
+            $sent_emails = $registration->lab_sent_emails ;
+            $sent_emails[] = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'loggedin_user' => [
+                    'id' => $app->user->id,
+                    'email' => $app->user->email,
+                    'name' => $app->user->profile->name 
+                ],
+                'email' => 'email - ppg'
+            ];
+            $app->disableAccessControl();
+            $registration->lab_sent_emails = $sent_emails;
+            $registration->lab_ppg_email = true;
+            $registration->save(true);
+            $app->enableAccessControl();
+        }
+
     }
 
     function getInciso1ReportData() {

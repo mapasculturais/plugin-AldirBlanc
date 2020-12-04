@@ -109,9 +109,17 @@ class Plugin extends \MapasCulturais\Plugin
             'zammad_background_color' => env('AB_ZAMMAD_BACKGROUND_COLOR', '#000000'),
              
             //pre inscrições
-             'oportunidades_desabilitar_envio' => (array) json_decode(env('AB_OPORTUNIDADES_DESABILITAR_ENVIO', '[]')),
-             'mensagens_envio_desabilitado' => (array) json_decode(env('AB_MENSAGENS_ENVIO_DESABILITADO', '[]')),
+            'oportunidades_desabilitar_envio' => (array) json_decode(env('AB_OPORTUNIDADES_DESABILITAR_ENVIO', '[]')),
+            'mensagens_envio_desabilitado' => (array) json_decode(env('AB_MENSAGENS_ENVIO_DESABILITADO', '[]')),
             
+            // Emails PPG
+            'msg_ppg_email' => env('AB_MENSAGEM_PPG_EMAIL', 'O pagamento da primeira parcela (R$ 1.000,00) do benefício está disponível para saque em qualquer caixa eletrônico do Banco do Brasil ou 24horas. Para realizar o saque, você precisa do número de protocolo e senha abaixo.<br><br> No caixa eletrônico, selecione no menu “opções sem cartão”, na sequência escolha “Saques” e depois “Benefícios Emergenciais”. Para finalizar, informe o número do protocolo e a senha. <br><br> É importante que você saque o valor completo disponível, pois só após este saque poderemos disponibilizar as próximas parcelas. <br><br> Assim que realizar o saque, entre em contato com nosso suporte no email de suporte e informe que o saque foi realizado com sucesso para que possamos liberar a próxima parcela.'),
+            'msg_ppg_status_pre' => env('AB_MENSAGEM_PPG_STATUS_PRE', 'O pagamento da primeira parcela do seu benefício está disponível para saque. Enviamos o número de protocolo, senha e orientações para o saque para o email '),
+            'msg_ppg_status_pos' => env('AB_MENSAGEM_PPG_STATUS_POS', 'O assunto do email enviado é “[Lei Aldir Blanc] Pagamento do benefício”. Se não encontrá-lo na caixa de entrada, faça uma busca por este assunto para ver se ele não foi para outras caixas.'),
+            'exibir_msg_ppg' => env('AB_MENSAGEM_PPG_STATUS_EXIBIR', true),
+            'ppg_file_path_txt' => env('AB_EMAIL_PPG_FILE_PATH_TXT', ''),
+            'ppg_file_path_ret' => env('AB_EMAIL_PPG_FILE_PATH_RET', ''),
+            'ppg_file_path_csv' => env('AB_EMAIL_PPG_FILE_PATH_CSV', ''),
         ];
 
         $skipConfig = false;
@@ -462,6 +470,13 @@ class Plugin extends \MapasCulturais\Plugin
                 $this->part('aldirblanc/bankless-uploads', ['entity' => $opportunity]);
             }
         });
+        // Upload do ppg inciso 1
+        // $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin){
+        //     $opportunity = $this->controller->requestedEntity; 
+        //     if($opportunity->canUser('@control') && $opportunity->id == $plugin->config['inciso1_opportunity_id'] ) {
+        //         $this->part('aldirblanc/upload-ppg', ['opportunity' => $opportunity]);
+        //     }
+        // });
 
         /**
          * só consolida as avaliações para "selecionado" se tiver acontecido as validações (dataprev, etc)
@@ -819,7 +834,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app->registerFileGroup('aldirblanc', $def_autorizacao);
         $app->registerFileGroup('aldirblanc', $def_documento);
 
-        // registrinado metadados do usuário
+        // registrinado metadados
         $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_contato_tipo', [
             'label' => i::__('Tipo de contato da mediação'),
             'type' => 'select',
@@ -829,6 +844,24 @@ class Plugin extends \MapasCulturais\Plugin
                 'whatsapp' => i::__('Whatsapp'),
                 'sms' => i::__('SMS'),
             ]
+        ]);
+
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'lab_sent_emails', [
+            'label' => i::__('E-mails enviados'),
+            'type' => 'json',
+            'private' => true,
+            'default' => '[]'
+        ]);
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'lab_ppg_email', [
+            'label' => i::__('E-mails PPG'),
+            'type' => 'json',
+            'private' => true,
+            'default' => '[]'
+        ]);
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'lab_last_email_status', [
+            'label' => i::__('Status do último e-mail enviado'),
+            'type' => 'integer',
+            'private' => true
         ]);
 
         $this->registerMetadata('MapasCulturais\Entities\Registration', 'mediacao_contato', [

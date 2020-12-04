@@ -36,6 +36,11 @@ $_params = [
             <?php else : ?>
                 <hr>
             <?php endif; ?>
+            <?php if ($mensagem_ppg != '') : ?>
+                <?= $mensagem_ppg ?>
+                <hr>
+            <?php endif; ?>
+
 
             <?php
 
