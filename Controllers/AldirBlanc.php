@@ -1330,6 +1330,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->render('reporte', $data);
     }
     function GET_email_ppg() {
+        
         $this->requireAuthentication();
 
         $app = App::i();
@@ -1337,6 +1338,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if(!$app->user->is('admin')) {
             $this->errorJson('Permissao negada', 403);
         }
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '-1');
+        
         $txt = $this->config['ppg_file_path_txt'];
         $ret = $this->config['ppg_file_path_ret'];
         $csv = $this->config['ppg_file_path_csv'];
