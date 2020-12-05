@@ -1653,13 +1653,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         if($default['ducumentsType']['unbanked']){ // Caso exista separação entre bancarizados e desbancarizados
             foreach($registrations as $value){
-                
+
                 //Caso nao exista pagamento para a inscrição, ele a ignora e notifica na tela                
                 if(!$this->validatedPayment($value)){
                     $app->log->info("\n".$value->number . " - Pagamento nao encontrado.");
                     continue;
                 } 
-                
+
                 // Veirifica se existe a pergunta se o requerente é correntista BB ou não no formulário. Se sim, pega a resposta  
                 $accountHolderBB = "NÃO";              
                 if($selfDeclaredBB){
@@ -2617,7 +2617,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             if($defaultBank && $defaultBank ==  '001'){
 
                 foreach ($registrations as $value) {   
-                    
                     if ($value->$field_TipoConta == "Conta corrente" && $value->$correntistabb == "SIM") {
                         $recordsBBCorrente[] = $value;
 
@@ -3009,6 +3008,82 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
            
         }
+    }
+
+    /**
+     * 
+     * Retorna dados da conta do usuário quando aberta pela SECULT-ES
+     * ou false quando a conta ainda não foi criada e/ou o usuário não tenha solicitado a abertura
+     * 
+     * @param $registration
+     * @param $return account | account-vc | branch | branch-vc | account-type | bank-number
+     * 
+     */
+
+    public function getAccountOpenedSecult($registration, $return = 'account') {
+
+        // Verifica se a opção 'CONTA BANCÁRIA NO BANCO DO BRASIL ABERTA PELA SECULT' foi selecionada
+        $selectAccountBySecult = false;
+        foreach ($registration->metadata as $key => $value) {
+            if (false !== strpos($value, 'CONTA BANCÁRIA NO BANCO DO BRASIL ABERTA PELA SECULT')) {
+                $selectAccountBySecult = true;
+            }
+        }
+
+        // Verifica se a conta já foi aberta pela SECULT
+        $accountOpenedBySecult = false;
+        $accountCreationMetadata = $registration->owner->metadata['account_creation'] ?? false;
+        if ($accountCreationMetadata) {
+            $accountCreationMetadata = json_decode($accountCreationMetadata, true);
+            $accountCreationStatus = $accountCreationMetadata['status'] ?? false;
+            if ($accountCreationStatus == 10) {
+                $accountOpenedBySecult = true;
+            }
+        }
+
+        // Selecionou a opção 'CONTA BANCÁRIA NO BANCO DO BRASIL ABERTA PELA SECULT'
+        if ($selectAccountBySecult && $accountOpenedBySecult) {
+
+            if ($return == 'account') {
+
+                return $accountCreationMetadata['processed']['account'] ?? null;
+
+            } elseif ($return == 'account-vc') {
+
+                return $accountCreationMetadata['processed']['accountVC'] ?? null;
+                
+            } elseif ($return == 'branch') {
+                
+                return $accountCreationMetadata['processed']['branch'] ?? null;
+
+            } elseif ($return == 'branch-vc') {
+
+                return $accountCreationMetadata['processed']['branchVC'] ?? null;
+
+            } elseif ($return == 'account-type') {
+
+                return $registration->owner->metadata['payment_bank_account_type'] ?? null;
+
+            } elseif ($return == 'bank-number') {
+
+                return $registration->owner->metadata['payment_bank_number'] ?? null;
+
+            } else {
+
+                throw new \Exception("O parâmetro '" . $return . "' é inválido.");
+
+            }
+
+        } else {
+
+            /**
+             * Não optou pela abertura de conta através da SECULT
+             * ou se optou, a conta ainda não foi criada
+             */
+            return false;
+
+        }
+
     }
 
     private function validatedCanb($code, $seg, $cpf){
