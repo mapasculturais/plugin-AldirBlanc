@@ -1231,13 +1231,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
                         $field_id = $default['fieldsWalletDigital']['agency'];
+                        $agencia = $registrations->$field_id;
 
+                    }else if ($this->getAccountOpenedSecult($registrations, 'complete-branch')){
+                        $agencia = $this->getAccountOpenedSecult($registrations, 'complete-branch');
                     }else{
                         $field_id = $detahe1['BEN_AGENCIA']['field_id'];
+                        $agencia = $registrations->$field_id;
 
                     }
 
-                    $agencia = $registrations->$field_id;
                 }
                 
                 
@@ -1274,11 +1277,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
                         $field_id = $default['fieldsWalletDigital']['agency'];                    
+                        $agencia = $registrations->$field_id;
+                    }else if ($this->getAccountOpenedSecult($registrations, 'complete-branch')){
+                        $agencia = $this->getAccountOpenedSecult($registrations, 'complete-branch');
                     }else{
                         $field_id = $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
+                        $agencia = $registrations->$field_id;
                     }
 
-                    $agencia = $registrations->$field_id;
                 }
                 
                 
@@ -1324,11 +1330,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                    
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
                         $field_id = $default['fieldsWalletDigital']['account'];                    
+                        $temp_account = $registrations->$field_id;
+                    }else if ($this->getAccountOpenedSecult($registrations, 'complete-account')){
+                        $temp_account = $this->getAccountOpenedSecult($registrations, 'complete-account');
                     }else{
                         $field_id = $detahe1['BEN_CONTA']['field_id'];
+                        $temp_account = $registrations->$field_id;
                     }
 
-                    $temp_account = $registrations->$field_id;
                 }
                 
                 $temp_account = explode("-", $temp_account);
@@ -1377,11 +1386,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
                 /**
                  * Caso use um banco padrão para recebimento, pega o número do banco das configs
+                 * Caso seja uma conta aberta pela SECULT pega o número nos metadados do agent (owner)
                  * Caso contrario busca o número do banco na base de dados
                  */
                 $fieldBanco = $detahe1['BEN_CODIGO_BANCO']['field_id'];
                 if($fieldBanco){
                     $numberBank = $this->numberBank($registrations->$fieldBanco);
+                }else if ($this->getAccountOpenedSecult($registrations, 'bank-number')){
+                    $numberBank = $this->getAccountOpenedSecult($registrations, 'bank-number');
                 }else{
                     $numberBank = $default['defaultBank']; 
                 }
@@ -1403,11 +1415,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $formoReceipt = $formaRecebimento ? $registrations->$formaRecebimento : false;
                   
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                        $temp = $default['fieldsWalletDigital']['account'];                    
+                        $temp = $default['fieldsWalletDigital']['account'];   
+                        $temp_account = $registrations->$temp;
+                    }else if ($this->getAccountOpenedSecult($registrations, 'complete-account')){
+                        $temp_account = $this->getAccountOpenedSecult($registrations, 'complete-account');
                     }else{
                         $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
+                        $temp_account = $registrations->$temp;
                     }
-                    $temp_account = $registrations->$temp;
                 }
                 
                 $temp_account = explode("-", $temp_account);
@@ -1422,8 +1437,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 /**
                  * Pega o tipo de conta que o beneficiário tem Poupança ou corrente
                  */
-                $fiieldTipoConta = $detahe1['TIPO_CONTA']['field_id'];
-                $typeAccount = $registrations->$fiieldTipoConta;
+                if ($this->getAccountOpenedSecult($registrations)) {
+                    $typeAccount = $this->getAccountOpenedSecult($registrations, 'account-type');
+                } else {
+                    $fiieldTipoConta = $detahe1['TIPO_CONTA']['field_id'];
+                    $typeAccount = $registrations->$fiieldTipoConta;
+                }
 
                 /**
                  * Verifica se o usuário é do banco do Brasil, se sim verifica se a conta é poupança
@@ -1651,6 +1670,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $countUnbanked = 0;
         $noFormoReceipt = 0;
 
+        $countBanked = 0;
+        $countUnbanked = 0; 
+
         if($default['ducumentsType']['unbanked']){ // Caso exista separação entre bancarizados e desbancarizados
             foreach($registrations as $value){
 
@@ -1674,22 +1696,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     continue;
                 }
                 
-                //Verifica se a inscrição é bancarizada ou desbancarizada               
-                if(in_array(trim($value->$formoReceipt), $typesReceipt['banked']) || $accountHolderBB === "SIM"){
-                    $Banked = true;     
-                    $countBanked ++;
+                //Verifica se a inscrição é bancarizada ou desbancarizada
+                $Banked = $this->isBanked($value, $formoReceipt, $typesReceipt, $accountHolderBB);
 
-                }else if(in_array(trim($value->$formoReceipt) , $typesReceipt['unbanked']) || $accountHolderBB === "NÃO"){
-                    $Banked = false;
-                    $countUnbanked ++; 
-                               
-                }
-               
                 if($Banked){
+                    $countBanked++;
                     if($defaultBank){                          
                         if($informDefaultBank === "001" || $accountHolderBB === "SIM"){
                             
-                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB") { 
+                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB" || $this->getAccountOpenedSecult($value)) { 
                                 $recordsBBCorrente[] = $value;
                                 
                             }  else if (trim($value->$field_TipoConta) === "Conta poupança"){
@@ -1706,7 +1721,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }else{    
                                            
                         if(($this->numberBank($value->$field_banco) == "001") || $accountHolderBB == "SIM"){
-                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB") { 
+                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB" || $this->getAccountOpenedSecult($value)) { 
                                 $recordsBBCorrente[] = $value;
         
                             } else if (trim($value->$field_TipoConta) === "Conta poupança"){
@@ -1721,20 +1736,24 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         }
                     }
                 }else{
+                    $countUnbanked++; 
                     continue;
-                
                 }
             }
         }else{
           
             foreach ($registrations as $value) {
+                $countBanked++;
                 //Caso nao exista pagamento para a inscrição, ele a ignora e notifica na tela
                 if(!$this->validatedPayment($value)){
                     $app->log->info("\n".$value->number . " - Pagamento nao encontrado.");
                     continue;
                 }
 
-                if ($this->numberBank($value->$field_banco) == "001") {               
+                if ($this->getAccountOpenedSecult($value)) {
+                    $recordsBBCorrente[] = $value;
+                  
+                } else if ($this->numberBank($value->$field_banco) == "001") {               
                     if ($value->$field_TipoConta == "Conta corrente") {
                         $recordsBBCorrente[] = $value;
                     } else {
@@ -3052,6 +3071,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 return $accountCreationMetadata['processed']['accountVC'] ?? null;
                 
+            } elseif ($return == 'complete-account') {
+
+                return ($accountCreationMetadata['processed']['account'] ?? null) . '-' .
+                        ($accountCreationMetadata['processed']['accountVC'] ?? null);
+                
             } elseif ($return == 'branch') {
                 
                 return $accountCreationMetadata['processed']['branch'] ?? null;
@@ -3059,6 +3083,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             } elseif ($return == 'branch-vc') {
 
                 return $accountCreationMetadata['processed']['branchVC'] ?? null;
+
+            } elseif ($return == 'complete-branch') {
+
+                return ($accountCreationMetadata['processed']['branch'] ?? null) . '-' .
+                        ($accountCreationMetadata['processed']['branchVC'] ?? null);
 
             } elseif ($return == 'account-type') {
 
@@ -4646,5 +4675,31 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $app->enableAccessControl();
         $app->log->info("Total registros: " . $footer["countEntries"]);
         return;
+    }
+
+    /**
+     * Verifica se um registro é bancarizado
+     * 
+     * @return boolean
+     */
+    public function isBanked($registration, $formoReceipt, $typesReceipt, $accountHolderBB) {
+        if(in_array(trim($registration->$formoReceipt), $typesReceipt['banked']) || $accountHolderBB === "SIM"){
+            return true;
+        }
+        
+        if(in_array(trim($registration->$formoReceipt) , $typesReceipt['unbanked'])){
+            $accountOpenedSecult = $this->getAccountOpenedSecult($registration);
+            if ($accountOpenedSecult) {
+                return true;     
+            } else {
+                return false;
+            }
+        }
+
+        if ($accountHolderBB === "NÃO"){
+            return false;
+        }
+
+        return false;
     }
 }
