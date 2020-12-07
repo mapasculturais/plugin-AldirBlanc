@@ -59,16 +59,16 @@ $_params = [
                 $data_recurso = $registration->lab_data_limite_recurso ?? false;
 
                 if ($statusRecurso) { 
-                    if ($data_recurso) {
-                        $date = (new DateTime($data_recurso))->format('d/m/Y');
-                        echo "Você pode entrar com recurso até o dia {$date}";
-                    }
+                    if ($data_recurso >= date ('Y-m-d')) {
+                        $date = (new DateTime($data_recurso))->format('d/m/Y');                        
+                        ?>
+                            <hr>
+                            <h2 class="status-card--title">Você pode entrar com recurso até o dia <?= $date ?></h2>
+                            <p class="status-card--content"><?= $statusRecurso; ?></p>
+                        <?php
+                    } 
                 
-                ?>
-                    <hr>
-                    <h2 class="status-card--title">Você pode entrar com recurso</h2>
-                    <p class="status-card--content"><?= $statusRecurso; ?></p>
-                <?php 
+                
                 }
             } ?>
 
