@@ -896,6 +896,18 @@ class Plugin extends \MapasCulturais\Plugin
             'private' => true,
         ]);
 
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'lab_data_de_publicacao', [
+            'label' => i::__('Data de publicação'),
+            'type' => 'date',
+            'private' => true,
+        ]);
+
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'lab_data_limite_recurso', [
+            'label' => i::__('Data de publicação'),
+            'type' => 'date',
+            'private' => true,
+        ]);
+
         if ($this->config['inciso1_enabled']) {
             /**
              * Id da inscrição no insico I
