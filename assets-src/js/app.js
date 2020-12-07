@@ -36,7 +36,8 @@ $(document).ready(function() {
         coletivo = coletivo.replace(".", "");
         fomalizado = fomalizado.replace(".", "");
 
-        var nomeCidade = $('.js-select-cidade option:selected').text();
+        var nomeCidade = $('.select2-chosen').text();
+        
 
         modal.css("display", "flex").hide().fadeIn(900);
 
@@ -84,13 +85,14 @@ $(document).ready(function() {
         }
         
         let cityObj = MapasCulturais.opportunitiesInciso2.filter(city => city.id == selectedCityId)[0]
-        if (!(MapasCulturais.serverDate.date >= cityObj.registrationFrom.date && MapasCulturais.serverDate.date <= cityObj.registrationTo.date)) {
+        if (!(MapasCulturais.serverDate.date >= cityObj.registrationFrom.date && MapasCulturais.serverDate.date <= cityObj.registrationTo.date) && !MapasCulturais.ignoreDates) {
             modalTitle = cityObj.name;
 
             msg = `Infelizmente não será possivel realizar sua inscrição:
             <br>
             <br>
-            > Data de inicio das inscrições: <strong> ${new Date(cityObj.registrationFrom.date).toLocaleDateString("pt-BR")} </strong>
+            
+            > Data de inicio das inscri ções: <strong> ${new Date(cityObj.registrationFrom.date).toLocaleDateString("pt-BR")} </strong>
             <br>
             <br>
             > Data de fim das inscrições: <strong> ${new Date(cityObj.registrationTo.date).toLocaleDateString("pt-BR")} </strong>`

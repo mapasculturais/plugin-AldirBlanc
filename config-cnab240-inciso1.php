@@ -29,31 +29,31 @@ return [
     'HEADER1' => [
         'BANCO' => [ // Numero do banco da entidade pagadora, deve ser confirmado de qual banco sairá o recurso, casso seja Banco Do Brasil seria 001
             'length' => 3,
-            'default' => null,
+            'default' => '001',
             'field_id' => null,
             'type' => 'int',
         ],
         'LOTE' => [ // Valor default segundo planilha = 0000
             'length' => 4,
-            'default' => null,
+            'default' => '0000',
             'field_id' => null,
             'type' => 'int',
         ],
         'REGISTRO' => [ //Valor default segundo planilha = 0
             'length' => 1,
-            'default' => null,
+            'default' => '0',
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_12' => [// Inserido 9 espaçõs vazios
+        'USO_BANCO_12' => [// Inserido 9 espaços vazios
             'length' => 9,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'INSCRICAO_TIPO' => [ // CPF ou CNPJ da entidade pagadora (1 = CPF ou 2 = CNPJ) deve ser perguntado ao banco
+        'INSCRICAO_TIPO' => [ // CPF ou CNPJ da fonte pagadora (1 = CPF ou 2 = CNPJ) deve ser perguntado ao banco
             'length' => 1,
-            'default' => null,
+            'default' => '2',
             'field_id' => null,
             'type' => 'int',
         ],
@@ -63,52 +63,52 @@ return [
             'field_id' => null,
             'type' => 'int',
         ],
-        'CONVENIO_BB1' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
+        'CONVENIO_BB1' => [ // Número do convênio da fonte pagadora junto ao BB. Deve-ser verificar com secretaria da cultura
             'length' => 9,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'CONVENIO_BB2' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
+        'CONVENIO_BB2' => [ // Campo deve ser por defalt 0126, como orientado no particularidades BB
             'length' => 4,
-            'default' => null,
+            'default' => '0126',
             'field_id' => null,
             'type' => 'int',
         ],
-        'CONVENIO_BB3' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
+        'CONVENIO_BB3' => [ // Campo defalt null, nesse caso será inserido 5 espaços em branco conforme orientação particularidades BB
             'length' => 5,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'CONVENIO_BB4' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
+        'CONVENIO_BB4' => [ // Campo dedicado a testes, Em teoria quando um arquivo for enviado ao BB como TESTE deve-se insetir as letras TS na chave default do array
             'length' => 2,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'AGENCIA' => [ //Agência bancária da instituição em questão
+        'AGENCIA' => [ //Agência bancária de fonte pagadora
             'length' => 5,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
-        'AGENCIA_DIGITO' => [ //Gidito da agência bancária da instituição em questão
+        'AGENCIA_DIGITO' => [ //Dígito da agência bancária da fonte pacadora
             'length' => 1,
-            'default' => null,
-            'field_id' => null,
+            'default' => '8',
+            'field_id' => 'mapped',
             'type' => 'string',
         ],
-        'CONTA' => [ //Conta bancária da instituição em questão
+        'CONTA' => [ //Conta bancária da fonte pagadora
             'length' => 12,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
-        'CONTA_DIGITO' => [ //Digito da conta bancária da instituição em questão
+        'CONTA_DIGITO' => [ //Digito da conta bancária da fonte pagadora
             'length' => 1,
-            'default' => '9',
-            'field_id' => null,
+            'default' => '0',
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'USO_BANCO_20' => [ //Não usar, uso exclusivo do banco
@@ -117,15 +117,15 @@ return [
             'field_id' => null,
             'type' => 'int',
         ],
-        'NOME_EMPRESA' => [ //Nome da empresa ou instituição em questão
+        'NOME_EMPRESA' => [ //Nome da fonte pagadora
             'length' => 30,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'NOME_BANCO' => [ //Agência bancária da instituição em questão
+        'NOME_BANCO' => [ //Nome do banco que fará o pagamento. Nesse caso por default será BANCO DO BRASIL S. A.
             'length' => 30,
-            'default' => null,
+            'default' => 'BANCO DO BRASIL S. A.',
             'field_id' => null,
             'type' => 'string',
         ],
@@ -135,37 +135,37 @@ return [
             'field_id' => null,
             'type' => 'string',
         ],
-        'CODIGO_REMESSA' => [ // Por default fomos orientado a deixar sempre 1
+        'CODIGO_REMESSA' => [ // Parametro que define o tipo do arquivo (Arquivo Remessa = '1', Arquivo Retorno = '2')
             'length' => 1,
-            'default' => null,
+            'default' => '1',
             'field_id' => null,
             'type' => 'int',
         ],
-        'DATA_GER_ARQUIVO' => [ // Data de geração do arqiovo
+        'DATA_GER_ARQUIVO' => [ // Data de geração do arquivo dado mapeado, será inserido a data corrente do dia da geração do arquivo.
             'length' => 8,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
-        'HORA_GER_ARQUIVO' => [ //Horario de geração do arquivo
+        'HORA_GER_ARQUIVO' => [ //Horario de geração do arquivo, dado mapeado, será inserido o horário corrente do dia da geração do arquivo.
             'length' => 6,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
-        'NUM_SERQUNCIAL_ARQUIVO' => [ //Número sequancial autoincremente. Esse numero e o número sequencial do documento segundo registro da empresa ou entidade
+        'NUM_SERQUNCIAL_ARQUIVO' => [ // nformação a cargo da empresa. O campo não é criticado pelo sistema do Banco do Brasil. Informar Zeros OU um número sequencial, incrementando a cada novo arquivo header de arquivo.
             'length' => 6,
-            'default' => null,
+            'default' => '000001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'LAYOUT_ARQUIVO' => [ // Por Default sempre iremos preencher com 030
+        'LAYOUT_ARQUIVO' => [ // Por default sempre preencher com 030
             'length' => 3,
-            'default' => null,
+            'default' => '030',
             'field_id' => null,
             'type' => 'int',
         ],
-        'DENCIDADE_GER_ARQUIVO' => [ // Por Default sempre iremos preencher com 5 numeros zero
+        'DENCIDADE_GER_ARQUIVO' => [ // Por default preencher com 5 numeros zero
             'length' => 5,
             'default' => null,
             'field_id' => null,
@@ -185,45 +185,45 @@ return [
         ],
     ],
     'HEADER2' => [
-        'BANCO' => [ // Numero do banco que sera usado para debitos dos montantes
+        'BANCO' => [ // Numero do banco que fará os pagamentos. Nesse caso 001 referente ao Banco do Brasil.
             'length' => 3,
-            'default' => null,
+            'default' => '001',
             'field_id' => null,
             'type' => 'int',
         ],
         'LOTE' => [
             'length' => 4,
-            'default' => null,
+            'default' => '0001', //Manter sempre 0001, o exportador ja faz o incremento a cada lote
             'field_id' => null,
             'type' => 'int',
         ],
-        'REGISTRO' => [
+        'REGISTRO' => [ //Manter por default 1, como informado no particularidades
             'length' => 1,
-            'default' => null,
+            'default' => '1',
             'field_id' => null,
             'type' => 'int',
         ],
-        'OPERACAO' => [
+        'OPERACAO' => [ //Manter por default C, como informado no particularidades
             'length' => 1,
-            'default' => null,
+            'default' => 'C',
             'field_id' => null,
             'type' => 'string',
         ],
-        'SERVICO' => [ // para secretarias estaduais sempre deve ser 98 caso seja municípios deve ser confirmardo com banco
+        'SERVICO' => [ // para secretarias estaduais sempre deve ser 98 caso seja municípios deve ser confirmardo com bancon Ref.: Particularidade (Pagamento a Fornecedor = '20', Pagamento de Salário = '30', Pagamentos Diversos = '98')
             'length' => 2,
-            'default' => null,
+            'default' => '98',
             'field_id' => null,
             'type' => 'int',
         ],
         'FORMA_LANCAMENTO' => [
             'length' => 2,
-            'default' => null,
+            'default' => null, // A separação desse dado hoje ocorre de forma automática dúvidas analisar particularidades BB
             'field_id' =>  null,
             'type' => 'int',
         ],
-        'LAYOUT_LOTE' => [ // Por default fomos orientados a deichar sempre 020
+        'LAYOUT_LOTE' => [ // Por default fomos orientados a deichar sempre 020, porem o campo não e criticado pelo BB segundo particularidades
             'length' => 3,
-            'default' => null,
+            'default' => '020',
             'field_id' => null,
             'type' => 'int',
         ],
@@ -233,7 +233,7 @@ return [
             'field_id' => null,
             'type' => 'string',
         ],
-        'INSCRICAO_TIPO' => [ // CPF ou CNPJ da entidade pagadora (1 = CPF ou 2 = CNPJ) deve ser perguntado ao banco 
+        'INSCRICAO_TIPO' => [ // CPF ou CNPJ da entidade pagadora (1 = CPF ou 2 = CNPJ) 
             'length' => 1,
             'default' => null,
             'field_id' => null,
@@ -245,52 +245,58 @@ return [
             'field_id' => null,
             'type' => 'int',
         ],        
-        'CONVENIO_BB1' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
+        'CONVENIO_BB1' => [ // Número do convênio da fonte pagadora junto ao BB. Deve-ser verificar com secretaria da cultura
             'length' => 9,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'CONVENIO_BB2' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
+        'CONVENIO_BB2' => [ // Campo deve ser por defalt 0126, como orientado no particularidades BB
             'length' => 4,
-            'default' => null,
+            'default' => '0126',
             'field_id' => null,
             'type' => 'int',
         ],
-        'CONVENIO_BB3' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
+        'CONVENIO_BB3' => [ // Campo defalt null, nesse caso será inserido 5 espaços em branco conforme orientação particularidades BB
             'length' => 5,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'CONVENIO_BB4' => [ // Campo CONVÊnio na plinilha do rodiro => ref PDF particularidades BB
+        'CONVENIO_BB4' => [ // Campo dedicado a testes, Em teoria quando um arquivo for enviado ao BB como TESTE deve-se insetir as letras TS na chave default do array
             'length' => 2,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'AGENCIA' => [ //Agẽncia bancária da instituição ou empresa em questão
+        'AGENCIA' => [ //Agência bancária de fonte pagadora
             'length' => 5,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
-        'AGENCIA_DIGITO' => [ //Digito da agẽncia bancária da instituição ou empresa em questão
-            'length' => 1,
+        'AGENCIA' => [ //Agência bancária de fonte pagadora
+            'length' => 5,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
+            'type' => 'int',
+        ],
+        'AGENCIA_DIGITO' => [ //Dígito da agência bancária da fonte pacadora
+            'length' => 1,
+            'default' => '8',
+            'field_id' => 'mapped',
             'type' => 'string',
         ],
-        'CONTA' => [ //COnta da instituição ou empresa em questão
+        'CONTA' => [ //Conta bancária da fonte pagadora
             'length' => 12,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
-        'CONTA_DIGITO' => [ //Digito conta da instituição ou empresa em questão
+        'CONTA_DIGITO' => [ //Digito da conta bancária da fonte pagadora
             'length' => 1,
-            'default' => null,
-            'field_id' => null,
+            'default' => '0',
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'USO_BANCO_51' => [ //Não usar, uso exclusivo do banco
@@ -299,10 +305,10 @@ return [
             'field_id' => null,
             'type' => 'int',
         ],
-        'NOME_EMPRESA' => [
+        'NOME_EMPRESA' => [ // Nome da fonte pagadora
             'length' => 30,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'string',
         ],
         'USO_BANCO_40' => [ //Não usar, uso exclusivo do banco
@@ -311,37 +317,37 @@ return [
             'field_id' => null,
             'type' => 'string',
         ],
-        'LOGRADOURO' => [ // Logradouro do endereço da instituição ou empresa em questão
+        'LOGRADOURO' => [ // Logradouro do endereço da fonte pagadora
             'length' => 30,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'NUMERO' => [ // Número do endereço da instituição ou empresa em questão
+        'NUMERO' => [ // Número do endereço da fonte pagadora
             'length' => 5,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'COMPLEMENTO' => [ // Complemento do endereço da instituição ou empresa em questão
+        'COMPLEMENTO' => [ // Complemento do endereço da fonte pagadora
             'length' => 15,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'CIDADE' => [ // Cidade do endereço da instituição ou empresa em questão
+        'CIDADE' => [ // Cidade do endereço da fonte pagadora
             'length' => 20,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'CEP' => [  // CEP do endereço da instituição ou empresa em questão
+        'CEP' => [  // CEP do endereço da fonte pagadora
             'length' => 8,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'ESTADO' => [  // Estado do endereço da instituição ou empresa em questão
+        'ESTADO' => [  // Estado do endereço da fonte pagadora
             'length' => 2,
             'default' => null,
             'field_id' => null,
@@ -361,163 +367,163 @@ return [
         ],
     ],    
     'DETALHE1' => [
-        'BANCO' => [ // Informação 
+        'BANCO' => [ // Banco que faŕa o pagamento, nesse caso por default 001 que se refere ao Banco do Brasil 
             'length' => 3,
-            'default' => null,
+            'default' => '001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'LOTE' => [
+        'LOTE' => [ //Informação de qual lote o registro pertence, deve-se colocar aqui nas configs sempre 0001, o incremento acontece no exportador
             'length' => 4,
-            'default' => null,
+            'default' => '0001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'REGISTRO' => [
+        'REGISTRO' => [ // Por default manter sempre 3, por orientação do particularidades
             'length' => 1,
-            'default' => null,
+            'default' => '3',
             'field_id' => null,
             'type' => 'int',
         ],
-        'NUMERO_REGISTRO' => [
+        'NUMERO_REGISTRO' => [ // Manter aqui nas configs sempre 00001, o incremento acontece no exportador
             'length' => 5,
-            'default' => null,
+            'default' => '00001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'SEGMENTO' => [
+        'SEGMENTO' => [ // Por defaalt sempre manter A, por orientação do particularidades
             'length' => 1,
             'default' => 'A',
             'field_id' => null,
             'type' => 'string',
         ],
-        'TIPO_MOVIMENTO' => [
+        'TIPO_MOVIMENTO' => [ // Nesse caso deve ser default 0 REF.: particularidades (Inclusão = '0', Exclusão = '9') 
             'length' => 1,
-            'default' => null,
+            'default' => '0',
             'field_id' => null,
             'type' => 'int',
         ],
-        'CODIGO_MOVIMENTO' => [
+        'CODIGO_MOVIMENTO' => [ // Nesse caso deve ser default 00 REF.: particularidades (Inclusão = '00', Exclusão = '99') 
             'length' => 2,
-            'default' => null,
+            'default' => '00',
             'field_id' => null,
             'type' => 'int',
         ],       
-        'CAMARA_CENTRALIZADORA' => [
+        'CAMARA_CENTRALIZADORA' => [ //Por defalt deixar sempre 000 segundo Planilha
+            'length' => 3,
+            'default' => '000',
+            'field_id' => null,
+            'type' => 'int',
+        ],
+        'BEN_CODIGO_BANCO' => [ // Field_id do campo da instituição bancária do beneficiário
             'length' => 3,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'BEN_CODIGO_BANCO' => [
-            'length' => 3,
-            'default' => null,
-            'field_id' => null,
-            'type' => 'int',
-        ],
-        'BEN_AGENCIA' => [
+        'BEN_AGENCIA' => [ // Field_id  do campo da agência bancária do beneficiário
             'length' => 5,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'BEN_AGENCIA_DIGITO' => [
+        'BEN_AGENCIA_DIGITO' => [ // Field_id do campo do dígito da agência bancária do beneficiário
             'length' => 1,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'BEN_CONTA' => [
+        'BEN_CONTA' => [ // Field_id do campo da conta bancária do beneficiário
             'length' => 12,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'BEN_CONTA_DIGITO' => [
+        'BEN_CONTA_DIGITO' => [ // Field_id do campo do dígito da conta bancária do beneficiário
             'length' => 1,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'BEN_DIGITO_CONTA_AGENCIA_80' => [
+        'BEN_DIGITO_CONTA_AGENCIA_80' => [ //Por default manter sempre como null
             'length' => 1,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'BEN_NOME' => [
+        'BEN_NOME' => [ // Field_id do campo nome do beneficiário
             'length' => 30,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'BEN_DOC_ATRIB_EMPRESA_82' => [
+        'BEN_DOC_ATRIB_EMPRESA_82' => [ //por default sempre deixar null
             'length' => 20,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'DATA_PAGAMENTO' => [
+        'DATA_PAGAMENTO' => [ //Data que será realizada o pagamento, valor preencido automaticamente no exportador
             'length' => 8,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
-        'TIPO_MOEDA' => [
+        'TIPO_MOEDA' => [ //Tipo de moeda usada, por default manter BRL
             'length' => 3,
             'default' => 'BRL',
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_85' => [
+        'USO_BANCO_85' => [ //Uso do banco, não utilizar
             'length' => 15,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'VALOR_INTEIRO' => [
+        'VALOR_INTEIRO' => [ //Valor que será pago para o requerente, campo preenchido automáticamente no exportador
             'length' => 15,
             'default' => null,
-            'field_id' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],        
-        'USO_BANCO_88' => [
+        'USO_BANCO_88' => [ //Uso do banco, não utilizar
             'length' => 20,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_89' => [
+        'USO_BANCO_89' => [ //Uso do banco, não utilizar
             'length' => 23,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_90' => [
+        'USO_BANCO_90' => [ //Uso do banco, não utilizar
             'length' => 42,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'CODIGO_FINALIDADE_TED' => [
+        'CODIGO_FINALIDADE_TED' => [ // preenchido automaticamente pelo exportador, (Contas corrente/poupança BB = especço em banco, outros bancos = 10)
+            'length' => 5,
+            'default' => null,
+            'field_id' => 'mapped',
+            'type' => 'string',
+        ],
+        'USO_BANCO_92' => [  //Uso do banco, não utilizar
             'length' => 5,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_92' => [
-            'length' => 5,
-            'default' => null,
-            'field_id' => null,
-            'type' => 'string',
-        ],
-        'USO_BANCO_93' => [
+        'USO_BANCO_93' => [  //Uso do banco, não utilizar
             'length' => 11,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'TIPO_CONTA' => [
+        'TIPO_CONTA' => [ // Field_id do campo que contenha o tipo de conta do benefíciario, (Corrente, Poupança)
             'length' => 11,
             'default' => null,
             'field_id' => null,
@@ -527,115 +533,115 @@ return [
 
     ],
     'DETALHE2' => [
-        'BANCO' => [
+        'BANCO' => [ // banco que ferá o pagamento do benefício, nesse caso 001 que se refere ao Banco do Brasil
             'length' => 3,
-            'default' => null,
+            'default' => '001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'LOTE' => [
+        'LOTE' => [ //por default manter sempre 0001, o incremento do lote e feito automaticamente no exportador
             'length' => 4,
-            'default' => null,
+            'default' => '0001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'REGISTRO' => [
+        'REGISTRO' => [ //por default manter sempre 3 por orientação particularidades BB
             'length' => 1,
             'default' => '3',
             'field_id' => null,
             'type' => 'int',
         ],
-        'NUMERO_REGISTRO' => [
+        'NUMERO_REGISTRO' => [ //por default manter sempre 00001, o incremento do lote e feito automaticamente no exportador
             'length' => 5,
-            'default' => null,
+            'default' => '00001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'SEGMENTO' => [
+        'SEGMENTO' => [   //por default manter sempre B por orientação particularidades BB
             'length' => 1,
             'default' => 'B',
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_104' => [
+        'USO_BANCO_104' => [ //Uso do banco, não usar
             'length' => 3,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'BEN_TIPO_DOC' => [
+        'BEN_TIPO_DOC' => [ // Tipo de documento do requerente, CPF ou CNPJ, (1 = CPF, 2 = CNPJ)
             'length' => 1,
             'default' => 1,
             'field_id' => null,
             'type' => 'int',
         ],
-        'BEN_CPF' => [
+        'BEN_CPF' => [ // Field_id do campo do CPF ou CNPJ do beneficiário, se atentar ao respondido no BEN_TIPO_DOC
             'length' => 14,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'BEN_ENDERECO_LOGRADOURO' => [
+        'BEN_ENDERECO_LOGRADOURO' => [ // Field_id do campo do logradouro do beneficiário
             'length' => 30,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'BEN_ENDERECO_NUMERO' => [
+        'BEN_ENDERECO_NUMERO' => [ // Field_id do campo do numero endereço do beneficiário
             'length' => 5,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'BEN_ENDERECO_COMPLEMENTO' => [
+        'BEN_ENDERECO_COMPLEMENTO' => [// Field_id do campo do complemento endereço do beneficiário
             'length' => 15,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],        
-        'BEN_ENDERECO_BAIRRO' => [
+        'BEN_ENDERECO_BAIRRO' => [ // Field_id do campo do bairro do beneficiário
             'length' => 15,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],        
-        'BEN_ENDERECO_CIDADE' => [
+        'BEN_ENDERECO_CIDADE' => [ // Field_id do campo do cidade do beneficiário
             'length' => 20,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'BEN_ENDERECO_CEP' => [
+        'BEN_ENDERECO_CEP' => [ //Field_id do campo do CEP do beneficiário
             'length' => 8,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'BEN_ENDERECO_ESTADO' => [
+        'BEN_ENDERECO_ESTADO' => [ // Field_id do campo do estado do beneficiário
             'length' => 2,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_114' => [
+        'USO_BANCO_114' => [ // usuo do banco, nao utilizar
             'length' => 83,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_115' => [
+        'USO_BANCO_115' => [ // usuo do banco, nao utilizar
             'length' => 15,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_116' => [
+        'USO_BANCO_116' => [ // usuo do banco, nao utilizar
             'length' => 7,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_117' => [
+        'USO_BANCO_117' => [ // usuo do banco, nao utilizar
             'length' => 8,
             'default' => null,
             'field_id' => null,
@@ -643,105 +649,105 @@ return [
         ],
     ],
     'TRAILER1' => [
-        'BANCO' => [
+        'BANCO' => [ //Banco que fará o pagamento do benefício. Nesse caso 001 que faz referência ao Banco do Brasil
             'length' => 3,
-            'default' => null,
+            'default' => '001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'LOTE' => [
+        'LOTE' => [ // Por default manter 0001, incremento acontece no exportador
             'length' => 4,
-            'default' => null,
+            'default' => '0001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'REGISTRO' => [
+        'REGISTRO' => [ //Por default sempre manter 5, por orientação do particularidades BB
             'length' => 1,
             'default' => '5',
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_126' => [
+        'USO_BANCO_126' => [ // Uso do banco, nao utilizar
             'length' => 9,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'QUANTIDADE_REGISTROS_127' => [
+        'QUANTIDADE_REGISTROS_127' => [ //Soma da quantidade de registro existentes no lote
             'length' => 6,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'VALOR_TOTAL_DOC_INTEIRO' => [
+        'VALOR_TOTAL_DOC_INTEIRO' => [ //Soma do valor total a ser pago no lote
             'length' => 18,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_130' => [
+        'USO_BANCO_130' => [// Uso do banco, nao utilizar
             'length' => 24,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_131' => [
+        'USO_BANCO_131' => [// Uso do banco, nao utilizar
             'length' => 165,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'USO_BANCO_132' => [
+        'USO_BANCO_132' => [// Uso do banco, nao utilizar
             'length' => 10,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
     ],
-    'TRAILER2' => [
+    'TRAILER2' => [//Banco que fará o pagamento do benefício. Nesse caso 001 que faz referência ao Banco do Brasil
         'BANCO' => [
             'length' => 3,
-            'default' => null,
+            'default' => '001',
             'field_id' => null,
             'type' => 'int',
         ],
-        'LOTE' => [
+        'LOTE' => [ //Por default inserir 9999 por orientação do particularidades BB
             'length' => 4,
-            'default' => null,
+            'default' => '9999',
             'field_id' => null,
             'type' => 'int',
         ],
-        'REGISTRO' => [
+        'REGISTRO' => [ //Por default inserir 9 por orientação do particularidades BB
             'length' => 1,
-            'default' => null,
+            'default' => '9',
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_141' => [
+        'USO_BANCO_141' => [ //Uso do abnco, nao utilizar
             'length' => 9,
             'default' => null,
             'field_id' => null,
             'type' => 'string',
         ],
-        'QUANTIDADE_LOTES-ARQUIVO' => [
+        'QUANTIDADE_LOTES-ARQUIVO' => [ //Soma total de lotes no arquivo. A separação e feita em no maximo 3 (c/c BB, C/poupança BB, Outros bancos). Então o numero maior será 3
             'length' => 6,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'QUANTIDADE_REGISTROS_ARQUIVOS' => [
+        'QUANTIDADE_REGISTROS_ARQUIVOS' => [ //Soma total de linhas do arquivo
             'length' => 6,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],       
-        'USO_BANCO_144' => [
+        'USO_BANCO_144' => [ //Uso do banco, nao utilizar
             'length' => 6,
             'default' => null,
             'field_id' => null,
             'type' => 'int',
         ],
-        'USO_BANCO_145' => [
+        'USO_BANCO_145' => [ //Uso do banco, nao utilizar
             'length' => 205,
             'default' => null,
             'field_id' => null,
@@ -750,16 +756,17 @@ return [
     ],
     'parameters_default' => [
         'status' => 1,
-        'defaultBank' => '001', // Obrigatório informar se mci460 = true caso contrario setar como null
-        'typesAccount' => [
+        'defaultBank' => false, // caso exista banco padrão para pagamento, alterar flag => (true = sim, false = não);
+        'informDefaultBank' => false, // Caso exista um banco padrão para pagamento, informar numero do banco aqui 
+        'typesAccount' => [ //Tipos de contas existentes no formulário
             'corrente' => 'Conta corrente',
             'poupanca' => 'Conta poupança',
         ],
-        'ducumentsType' => [ 
+        'ducumentsType' => [  // Documentos que existirá(cnab240 = Bancarizados, unbanked = Desbancarizados)
             "cnab240" => true,
-            "mci460" => false // Se caso for utilizar o MCI460 setar aqui como true 
+            "unbanked" => true 
         ],
-        'correntistabb' => null,
+        'selfDeclaredBB' => false, // Preencher esse campo, caso exista a pergunta se o requerente é correntista BB ou Não
         'formoReceipt' => null, // Campo para informar onde buscar opções de recebimento EX.: CARTEIRA DIGITAL BB ou CONTA BANCÁRIA NO BANCO DO BRASIL ABERTA PELA SECULT-ES
         'savingsDigit' => [
             '0' => '3',
@@ -773,16 +780,168 @@ return [
             '8' => '0',
             '9' => '1',
             'X' => '2',
-            
         ],
-        'field_TipoConta' => null,// Define onde deve buscar o banco para verificar 
-        'field_banco' => null, 
-        'fieldsWalletDigital' =>[
-            'agency' => null,
-            'account' =>  null
+        'field_TipoConta' => null,// Field_id que busca o tipo de do benefíciario conta corrente ou poupança
+        'field_banco' => null, // Field_id que busca o banco do benefpiciario
+        'field_agency' => null,
+        'fieldsWalletDigital' =>[ //Caso exista campos para carteira digital BB, inserir aqui o field_id 
+            'agency' => false,
+            'account' =>  false
         ],
+        'monoParentIgnore' => true, //caso queira barrar o envio de pessoas monoparentais no arquivo, deixar setado com true, em outros casos setar false
         'womanMonoParent' => null,
-        'deParaContasbb' => 'deParaContasbb.csv' // Caso exista um arquivo vom numero de contas   
+        'fromToAccounts' => 'CSV/fromToAccounts.csv', // Caso exista um arquivo para captura de contas bancárioas, colocar o aqruivo na raiz AldirBlanc e passar o caminho aqui 
+        'typesReceipt'=> [//Faz a separação de bancarizado e desbancarixado, informar segundo campos do formulário
+            'banked' => [
+                'Depósito bancário',
+                'CARTEIRA DIGITAL BB'
+            ],
+            'unbanked' => [
+                'Ordem de pagamento para saque nos caixas da rede 24H',
+                'CONTA BANCÁRIA NO BANCO DO BRASIL ABERTA PELA SECULT-ES'
+            ]
+        ]
     ],
+    'returnCode' => [
+        'positive' =>[
+            '00' => 'Este código indica que o pagamento foi confirmado',
+            '03' => 'Débito Autorizado pela Agência - Efetuado',
+            'BD' => 'Inclusão Efetuada com Sucesso',
+            'BE' => 'Alteração Efetuada com Sucesso',
+            'BF' => 'Exclusão Efetuada com Sucesso',
+            'BN' => 'Operação de Consignação Incluída com Sucesso',
+            'BO' => 'Operação de Consignação Alterada com Sucesso',
+            'BP' => 'Operação de Consignação Excluída com Sucesso',
+            'BQ' => 'Operação de Consignação Liquidada com Sucesso',
+            'BR' => 'Reativação Efetuada com Sucesso',
+            'BS' => 'Suspensão Efetuada com Sucesso',
+            'ZC' => 'Confirmação de Antecipação de Valor',
+            'ZD' => 'Antecipação parcial de valor',
+        ],
+        'negative'=> [
+            'IR' => 'Não averbação de contrato – quantidade de parcelas/competências informadas ultrapassou a data limite da extinção de cota do dependente titular de benefícios',
+            '01' => 'Insuficiência de Fundos - Débito Não Efetuado',
+            '02' => 'Crédito ou Débito Cancelado pelo Pagador/Credor',
+            'AA' => 'Controle Inválido',
+            'AB' => 'Tipo de Operação Inválido',
+            'AC' => 'Tipo de Serviço Inválido',
+            'AD' => 'Forma de Lançamento Inválida',
+            'AE' => 'Tipo/Número de Inscrição Inválido',
+            'AF' => 'Código de Convênio Inválido',
+            'AG' => 'Agência/Conta Corrente/DV Inválido',
+            'AH' => 'No Seqüencial do Registro no Lote Inválido',
+            'AI' => 'Código de Segmento de Detalhe Inválido',
+            'AJ' => 'Tipo de Movimento Inválido',
+            'AK' => 'Código da Câmara de Compensação do Banco Favorecido/Depositário Inválido',
+            'AL' => 'Código do Banco Favorecido ou Depositário Inválido',
+            'AM' => 'Agência Mantenedora da Conta Corrente do Favorecido Inválida',
+            'AN' => 'Conta Corrente/DV do Favorecido Inválido',
+            'AO' => 'Nome do Favorecido Não Informado',
+            'AP' => 'Data Lançamento Inválido',
+            'AQ' => 'Tipo/Quantidade da Moeda Inválido',
+            'AR' => 'Valor do Lançamento Inválido',
+            'AS' => 'Aviso ao Favorecido - Identificação Inválida',
+            'AT' => 'Tipo/Número de Inscrição do Favorecido Inválido',
+            'AU' => 'Logradouro do Favorecido Não Informado',
+            'AV' => 'No do Local do Favorecido Não Informado',
+            'AW' => 'Cidade do Favorecido Não Informada',
+            'AX' => 'CEP/Complemento do Favorecido Inválido',
+            'AY' => 'Sigla do Estado do Favorecido Inválida',
+            'AZ' => 'Código/Nome do Banco Depositário Inválido',
+            'BA' => 'Código/Nome da Agência Depositária Não Informado',
+            'BB' => 'Seu Número Inválido',
+            'BC' => 'Nosso Número Inválido',
+            'BG' => 'Agência/Conta Impedida Legalmente',
+            'BH' => 'Empresa não pagou salário',
+            'BI' => 'Falecimento do mutuário',
+            'BK' => 'Empresa não enviou remessa no vencimento',
+            'BL' => 'Valor da parcela inválida',
+            'BM' => 'Identificação do contrato inválida',
+            'CA' => 'Código de Barras - Código do Banco Inválido',
+            'CB' => 'Código de Barras - Código da Moeda Inválido',
+            'CC' => 'Código de Barras - Dígito Verificador Geral Inválido',
+            'CD' => 'Código de Barras - Valor do Título Inválido',
+            'CE' => 'Código de Barras - Campo Livre Inválido',
+            'CF' => 'Valor do Documento Inválido',
+            'CG' => 'Valor do Abatimento Inválido',
+            'CH' => 'Valor do Desconto Inválido',
+            'CI' => 'Valor de Mora Inválido',
+            'CJ' => 'Valor da Multa Inválido',
+            'CK' => 'Valor do IR Inválido',
+            'CL' => 'Valor do ISS Inválido',
+            'CM' => 'Valor do IOF Inválido',
+            'CN' => 'Valor de Outras Deduções Inválido',
+            'CO' => 'Valor de Outros Acréscimos Inválido',
+            'CP' => 'Valor do INSS Inválido',
+            'HA' => 'Lote Não Aceito',
+            'HB' => 'Inscrição da Empresa Inválida para o Contrato',
+            'HC' => 'Convênio com a Empresa Inexistente/Inválido para o Contrato',
+            'HD' => 'Agência/Conta Corrente da Empresa Inexistente/Inválido para o Contrato',
+            'HE' => 'Tipo de Serviço Inválido para o Contrato',
+            'HF' => 'Conta Corrente da Empresa com Saldo Insuficiente',
+            'HG' => 'Lote de Serviço Fora de Seqüência',
+            'HH' => 'Lote de Serviço Inválido',
+            'HI' => 'Arquivo não aceito',
+            'HJ' => 'Tipo de Registro Inválido',
+            'HK' => 'Código Remessa / Retorno Inválido',
+            'HL' => 'Versão de layout inválida',
+            'HM' => 'Mutuário não identificado',
+            'HN' => 'Tipo do beneficio não permite empréstimo',
+            'HO' => 'Beneficio cessado/suspenso',
+            'HP' => 'Beneficio possui representante legal',
+            'HQ' => 'Beneficio é do tipo PA (Pensão alimentícia)',
+            'HR' => 'Quantidade de contratos permitida excedida',
+            'HS' => 'Beneficio não pertence ao Banco informado',
+            'HT' => 'Início do desconto informado já ultrapassado',
+            'HU' => 'Número da parcela inválida',
+            'HV' => 'Quantidade de parcela inválida',
+            'HW' => 'Margem consignável excedida para o mutuário dentro do prazo do contrato',
+            'HX' => 'Empréstimo já cadastrado',
+            'HY' => 'Empréstimo inexistente',
+            'HZ' => 'Empréstimo já encerrado',
+            'H1' => 'Arquivo sem trailer',
+            'H2' => 'Mutuário sem crédito na competência',
+            'H3' => 'Não descontado – outros motivos',
+            'H4' => 'Retorno de Crédito não pago',
+            'H5' => 'Cancelamento de empréstimo retroativo',
+            'H6' => 'Outros Motivos de Glosa',
+            'H7' => 'Margem consignável excedida para o mutuário acima do prazo do contrato',
+            'H8' => 'Mutuário desligado do empregador',
+            'H9' => 'Mutuário afastado por licença',
+            'IA' => 'Primeiro nome do mutuário diferente do primeiro nome do movimento do censo ou diferente da base de Titular do Benefício',
+            'IB' => 'Benefício suspenso/cessado pela APS ou Sisobi',
+            'IC' => 'Benefício suspenso por dependência de cálculo',
+            'ID' => 'Benefício suspenso/cessado pela inspetoria/auditoria',
+            'IE' => 'Benefício bloqueado para empréstimo pelo beneficiário',
+            'IF' => 'Benefício bloqueado para empréstimo por TBM',
+            'IG' => 'Benefício está em fase de concessão de PA ou desdobramento',
+            'IH' => 'Benefício cessado por óbito',
+            'II' => 'Benefício cessado por fraude',
+            'IJ' => 'Benefício cessado por concessão de outro benefício',
+            'IK' => 'Benefício cessado: estatutário transferido para órgão de origem',
+            'IL' => 'Empréstimo suspenso pela APS',
+            'IM' => 'Empréstimo cancelado pelo banco',
+            'IN' => 'Crédito transformado em PAB',
+            'IO' => 'Término da consignação foi alterado',
+            'IP' => 'Fim do empréstimo ocorreu durante período de suspensão ou concessão',
+            'IQ' => 'Empréstimo suspenso pelo banco',
+            'TA' => 'Lote Não Aceito - Totais do Lote com Diferença',
+            'YA' => 'Título Não Encontrado',
+            'YB' => 'Identificador Registro Opcional Inválido',
+            'YC' => 'Código Padrão Inválido',
+            'YD' => 'Código de Ocorrência Inválido',
+            'YE' => 'Complemento de Ocorrência Inválido',
+            'YF' => 'Alegação já Informada',
+            'ZA' => 'Agência / Conta do Favorecido Substituída Observação: As ocorrências iniciadas com ZA tem caráter informativo para o cliente',
+            'ZB' => 'Divergência entre o primeiro e último nome do beneficiário versus primeiro e último nome na Receita Federal',
+            'ZE' => 'Título bloqueado na base',
+            'ZF' => 'Sistema em contingência – título valor maior que referência',
+            'ZG' => 'Sistema em contingência – título vencido',
+            'ZH' => 'Sistema em contingência – título indexado',
+            'ZI' => 'Beneficiário divergente',
+            'ZJ' => 'Limite de pagamentos parciais excedido',
+            'ZK' => 'Boleto já liquidado',
+        ],
+    ]
     
 ];
