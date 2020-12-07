@@ -56,7 +56,14 @@ $_params = [
                     $statusRecurso = $this->controller->config['msg_recurso'];
                 }
 
+                $data_recurso = $registration->lab_data_limite_recurso ?? false;
+
                 if ($statusRecurso) { 
+                    if ($data_recurso) {
+                        $date = (new DateTime($data_recurso))->format('d/m/Y');
+                        echo "Você pode entrar com recurso até o dia {$date}";
+                    }
+                
                 ?>
                     <hr>
                     <h2 class="status-card--title">Você pode entrar com recurso</h2>
