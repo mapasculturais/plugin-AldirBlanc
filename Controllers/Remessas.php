@@ -1231,13 +1231,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
                         $field_id = $default['fieldsWalletDigital']['agency'];
+                        $agencia = $registrations->$field_id;
 
+                    }else if ($this->getAccountOpenedSecult($registrations, 'complete-branch')){
+                        $agencia = $this->getAccountOpenedSecult($registrations, 'complete-branch');
                     }else{
                         $field_id = $detahe1['BEN_AGENCIA']['field_id'];
+                        $agencia = $registrations->$field_id;
 
                     }
 
-                    $agencia = $registrations->$field_id;
                 }
                 
                 
@@ -1274,11 +1277,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
                         $field_id = $default['fieldsWalletDigital']['agency'];                    
+                        $agencia = $registrations->$field_id;
+                    }else if ($this->getAccountOpenedSecult($registrations, 'complete-branch')){
+                        $agencia = $this->getAccountOpenedSecult($registrations, 'complete-branch');
                     }else{
                         $field_id = $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
+                        $agencia = $registrations->$field_id;
                     }
 
-                    $agencia = $registrations->$field_id;
                 }
                 
                 
@@ -1324,11 +1330,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                    
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
                         $field_id = $default['fieldsWalletDigital']['account'];                    
+                        $temp_account = $registrations->$field_id;
+                    }else if ($this->getAccountOpenedSecult($registrations, 'complete-account')){
+                        $temp_account = $this->getAccountOpenedSecult($registrations, 'complete-account');
                     }else{
                         $field_id = $detahe1['BEN_CONTA']['field_id'];
+                        $temp_account = $registrations->$field_id;
                     }
 
-                    $temp_account = $registrations->$field_id;
                 }
                 
                 $temp_account = explode("-", $temp_account);
@@ -1377,11 +1386,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
                 /**
                  * Caso use um banco padrão para recebimento, pega o número do banco das configs
+                 * Caso seja uma conta aberta pela SECULT pega o número nos metadados do agent (owner)
                  * Caso contrario busca o número do banco na base de dados
                  */
                 $fieldBanco = $detahe1['BEN_CODIGO_BANCO']['field_id'];
                 if($fieldBanco){
                     $numberBank = $this->numberBank($registrations->$fieldBanco);
+                }else if ($this->getAccountOpenedSecult($registrations, 'bank-number')){
+                    $numberBank = $this->getAccountOpenedSecult($registrations, 'bank-number');
                 }else{
                     $numberBank = $default['defaultBank']; 
                 }
@@ -1403,11 +1415,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $formoReceipt = $formaRecebimento ? $registrations->$formaRecebimento : false;
                   
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                        $temp = $default['fieldsWalletDigital']['account'];                    
+                        $temp = $default['fieldsWalletDigital']['account'];   
+                        $temp_account = $registrations->$temp;
+                    }else if ($this->getAccountOpenedSecult($registrations, 'complete-account')){
+                        $temp_account = $this->getAccountOpenedSecult($registrations, 'complete-account');
                     }else{
                         $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
+                        $temp_account = $registrations->$temp;
                     }
-                    $temp_account = $registrations->$temp;
                 }
                 
                 $temp_account = explode("-", $temp_account);
@@ -1422,8 +1437,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 /**
                  * Pega o tipo de conta que o beneficiário tem Poupança ou corrente
                  */
-                $fiieldTipoConta = $detahe1['TIPO_CONTA']['field_id'];
-                $typeAccount = $registrations->$fiieldTipoConta;
+                if ($this->getAccountOpenedSecult($registrations)) {
+                    $typeAccount = $this->getAccountOpenedSecult($registrations, 'account-type');
+                } else {
+                    $fiieldTipoConta = $detahe1['TIPO_CONTA']['field_id'];
+                    $typeAccount = $registrations->$fiieldTipoConta;
+                }
 
                 /**
                  * Verifica se o usuário é do banco do Brasil, se sim verifica se a conta é poupança
@@ -1651,15 +1670,18 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $countUnbanked = 0;
         $noFormoReceipt = 0;
 
+        $countBanked = 0;
+        $countUnbanked = 0; 
+
         if($default['ducumentsType']['unbanked']){ // Caso exista separação entre bancarizados e desbancarizados
             foreach($registrations as $value){
-                
+
                 //Caso nao exista pagamento para a inscrição, ele a ignora e notifica na tela                
                 if(!$this->validatedPayment($value)){
                     $app->log->info("\n".$value->number . " - Pagamento nao encontrado.");
                     continue;
                 } 
-                
+
                 // Veirifica se existe a pergunta se o requerente é correntista BB ou não no formulário. Se sim, pega a resposta  
                 $accountHolderBB = "NÃO";              
                 if($selfDeclaredBB){
@@ -1674,22 +1696,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     continue;
                 }
                 
-                //Verifica se a inscrição é bancarizada ou desbancarizada               
-                if(in_array(trim($value->$formoReceipt), $typesReceipt['banked']) || $accountHolderBB === "SIM"){
-                    $Banked = true;     
-                    $countBanked ++;
+                //Verifica se a inscrição é bancarizada ou desbancarizada
+                $Banked = $this->isBanked($value, $formoReceipt, $typesReceipt, $accountHolderBB);
 
-                }else if(in_array(trim($value->$formoReceipt) , $typesReceipt['unbanked']) || $accountHolderBB === "NÃO"){
-                    $Banked = false;
-                    $countUnbanked ++; 
-                               
-                }
-               
                 if($Banked){
+                    $countBanked++;
                     if($defaultBank){                          
                         if($informDefaultBank === "001" || $accountHolderBB === "SIM"){
                             
-                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB") { 
+                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB" || $this->getAccountOpenedSecult($value)) { 
                                 $recordsBBCorrente[] = $value;
                                 
                             }  else if (trim($value->$field_TipoConta) === "Conta poupança"){
@@ -1706,7 +1721,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }else{    
                                            
                         if(($this->numberBank($value->$field_banco) == "001") || $accountHolderBB == "SIM"){
-                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB") { 
+                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB" || $this->getAccountOpenedSecult($value)) { 
                                 $recordsBBCorrente[] = $value;
         
                             } else if (trim($value->$field_TipoConta) === "Conta poupança"){
@@ -1721,20 +1736,24 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         }
                     }
                 }else{
+                    $countUnbanked++; 
                     continue;
-                
                 }
             }
         }else{
           
             foreach ($registrations as $value) {
+                $countBanked++;
                 //Caso nao exista pagamento para a inscrição, ele a ignora e notifica na tela
                 if(!$this->validatedPayment($value)){
                     $app->log->info("\n".$value->number . " - Pagamento nao encontrado.");
                     continue;
                 }
 
-                if ($this->numberBank($value->$field_banco) == "001") {               
+                if ($this->getAccountOpenedSecult($value)) {
+                    $recordsBBCorrente[] = $value;
+                  
+                } else if ($this->numberBank($value->$field_banco) == "001") {               
                     if ($value->$field_TipoConta == "Conta corrente") {
                         $recordsBBCorrente[] = $value;
                     } else {
@@ -2617,7 +2636,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             if($defaultBank && $defaultBank ==  '001'){
 
                 foreach ($registrations as $value) {   
-                    
                     if ($value->$field_TipoConta == "Conta corrente" && $value->$correntistabb == "SIM") {
                         $recordsBBCorrente[] = $value;
 
@@ -3009,6 +3027,92 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
            
         }
+    }
+
+    /**
+     * 
+     * Retorna dados da conta do usuário quando aberta pela SECULT-ES
+     * ou false quando a conta ainda não foi criada e/ou o usuário não tenha solicitado a abertura
+     * 
+     * @param $registration
+     * @param $return account | account-vc | branch | branch-vc | account-type | bank-number
+     * 
+     */
+
+    public function getAccountOpenedSecult($registration, $return = 'account') {
+
+        // Verifica se a opção 'CONTA BANCÁRIA NO BANCO DO BRASIL ABERTA PELA SECULT' foi selecionada
+        $selectAccountBySecult = false;
+        foreach ($registration->metadata as $key => $value) {
+            if (false !== strpos($value, 'CONTA BANCÁRIA NO BANCO DO BRASIL ABERTA PELA SECULT')) {
+                $selectAccountBySecult = true;
+            }
+        }
+
+        // Verifica se a conta já foi aberta pela SECULT
+        $accountOpenedBySecult = false;
+        $accountCreationMetadata = $registration->owner->metadata['account_creation'] ?? false;
+        if ($accountCreationMetadata) {
+            $accountCreationMetadata = json_decode($accountCreationMetadata, true);
+            $accountCreationStatus = $accountCreationMetadata['status'] ?? false;
+            if ($accountCreationStatus == 10) {
+                $accountOpenedBySecult = true;
+            }
+        }
+
+        // Selecionou a opção 'CONTA BANCÁRIA NO BANCO DO BRASIL ABERTA PELA SECULT'
+        if ($selectAccountBySecult && $accountOpenedBySecult) {
+
+            if ($return == 'account') {
+
+                return $accountCreationMetadata['processed']['account'] ?? null;
+
+            } elseif ($return == 'account-vc') {
+
+                return $accountCreationMetadata['processed']['accountVC'] ?? null;
+                
+            } elseif ($return == 'complete-account') {
+
+                return ($accountCreationMetadata['processed']['account'] ?? null) . '-' .
+                        ($accountCreationMetadata['processed']['accountVC'] ?? null);
+                
+            } elseif ($return == 'branch') {
+                
+                return $accountCreationMetadata['processed']['branch'] ?? null;
+
+            } elseif ($return == 'branch-vc') {
+
+                return $accountCreationMetadata['processed']['branchVC'] ?? null;
+
+            } elseif ($return == 'complete-branch') {
+
+                return ($accountCreationMetadata['processed']['branch'] ?? null) . '-' .
+                        ($accountCreationMetadata['processed']['branchVC'] ?? null);
+
+            } elseif ($return == 'account-type') {
+
+                return $registration->owner->metadata['payment_bank_account_type'] ?? null;
+
+            } elseif ($return == 'bank-number') {
+
+                return $registration->owner->metadata['payment_bank_number'] ?? null;
+
+            } else {
+
+                throw new \Exception("O parâmetro '" . $return . "' é inválido.");
+
+            }
+
+        } else {
+
+            /**
+             * Não optou pela abertura de conta através da SECULT
+             * ou se optou, a conta ainda não foi criada
+             */
+            return false;
+
+        }
+
     }
 
     private function validatedCanb($code, $seg, $cpf){
@@ -3859,7 +3963,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $type = null;
         $data = [
             [
-                "filename" => $filePath,
+                "filename" => basename($filePath),
                 "importTS" => (new DateTime())->format("YmdHis"),
             ],
         ];
@@ -3876,14 +3980,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $type = "config-ppg10x";
                     $subtype = "return";
                 } else {
-                    $fileID = substr($line, 15, 6);
-                    if (str_starts_with($fileID, "PPG102")) {
-                        $type = "config-ppg10x";
-                        $subtype = "followup";
-                    } else {
+                    // WIP: não reconhece PPG102 enquanto não acertarmos o formato do arquivo
+                    // $fileID = substr($line, 15, 6);
+                    // if (str_starts_with($fileID, "PPG102")) {
+                    //     $type = "config-ppg10x";
+                    //     $subtype = "followup";
+                    // } else {
                         echo("Formato de remessa desconhecido.");
                         die();
-                    }
+                    // }
                 }
                 $config = $this->config[$type][$subtype];
             }
@@ -3960,6 +4065,53 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     }
 
     /** #########################################################################
+     * Funções para os PPG10x
+     */
+
+     private function ppg10xIdMap($key)
+     {
+        $config = $this->config["config-ppg10x"];
+        $idMap = null;
+        if (isset($config["idMap"]) &&
+            !isset($this->data["ignore_ppg_idmap"])) {
+            $idMap = $this->getCSVData($config["idMap"], ",", $key);
+            if (!$idMap) {
+                App::i()->log->info("Mapeamento de identificadores ausente.");
+                $idMap = [];
+            }
+        }
+        return $idMap;
+     }
+
+     private function ppg10xResolvePayment($idMap, $reference, $status)
+     {
+        $app = App::i();
+        $paymentRepo = $app->repo("\\RegistrationPayments\\Payment");
+        if ($idMap != null) {
+            $registrationID = $idMap[$reference]["registrationID"];
+            $payment = $paymentRepo->findOneBy([
+                "registration" => $registrationID,
+                "status" => $status,
+            ]);
+        } else {
+            $payment = $paymentRepo->find($reference);
+            $registrationID = $payment->registration->id;
+        }
+        if (!isset($payment)) {
+            if ($idMap != null) {
+                $app->log->info("Pagamento não encontrado para inscrição " .
+                                $registrationID);
+            } else {
+                $app->log->info("Pagamento não encontrado: $reference");
+            }
+        } else {
+            $app->log->info("Processando pagamento para inscrição " .
+                             $registrationID);
+        }
+        return $payment;
+     }
+
+    /** #########################################################################
      * Funções para o PPG100
      * Os métodos ppg100* são referenciados pelas configurações e não devem ser
      * removidos sem ajuste nas mesmas.
@@ -3970,19 +4122,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $app = App::i();
         $config = $this->config["config-ppg10x"];
         if (!isset($config["condition"])) {
-            throw new Exception("Configuração inválida: \"condition\" não configurada");
+            throw new Exception("Configuração inválida: \"condition\" não " .
+                                "configurada");
         }
         $newline = "\r\n";
         set_time_limit(0);
         // carrega mapeamento de identificadores
-        $idMap = null;
-        if (isset($config["idMap"]) &&
-            !isset($this->data["ignore_ppg_idmap"])) {
-            $idMap = $this->getCSVData($config["idMap"], ",", "registrationID");
-            if (!$idMap) {
-                $idMap = [];
-            }
-        }
+        $idMap = $this->ppg10xIdMap("registrationID");
         // inicializa contadores
         $nLines = 1;
         $totalAmount = 0;
@@ -4101,48 +4247,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     {
         $app = App::i();
         // carrega mapeamento de identificadores
-        $idMap = null;
-        if (isset($this->config["config-ppg10x"]["idMap"]) &&
-            !isset($this->data["ignore_ppg_idmap"])) {
-            $idMap = $this->getCSVData($this->config["config-ppg10x"]["idMap"],
-                                       ",", "idCliente");
-            if (!$idMap) {
-                $app->log->info("Mapeamento de identificadores ausente.");
-                $idMap = [];
-            }
-        }
+        $idMap = $this->ppg10xIdMap("idCliente");
         $meta = $data[0];
         $header = $data[1]["payload"];
         $footer = $data[sizeof($data) - 1]["payload"];
         $data = array_splice($data, 2, -1);
         $app->log->info("Resultado geral: " . $header["fileResultCode"]);
         $app->log->info("Mensagem geral: " . $header["fileResultMessage"]);
-        $paymentRepo = $app->repo("\\RegistrationPayments\\Payment");
         set_time_limit(0);
         foreach ($data as $item) {
             $entry = $item["payload"];
-            if ($idMap != null) {
-                $registrationID = $idMap[$entry["reference"]]["registrationID"];
-                $payment = $paymentRepo->findOneBy([
-                    "registration" => $registrationID,
-                    "status" => Payment::STATUS_PENDING,
-                ]);
-            } else {
-                $payment = $paymentRepo->find($entry["reference"]);
-                $registrationID = $payment->registration->id;
-            }
+            $payment = $this->ppg10xResolvePayment($idMap, $entry["reference"],
+                                                   Payment::STATUS_PENDING);
             if (!isset($payment)) {
-                if ($idMap != null) {
-                    $app->log->info("Pagamento não encontrado para inscrição " .
-                                    $registrationID);
-                } else {
-                    $app->log->info("Pagamento não encontrado: " .
-                                    $entry["reference"]);
-                }
                 continue;
-            } else {
-                $app->log->info("Processando pagamento para inscrição " .
-                                 $registrationID);
             }
             $payment->status = ($entry["paymentCode"] == 0) ?
                                Payment::STATUS_AVAILABLE :
@@ -4169,10 +4287,35 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     private function importPPG102($data)
     {
-        // placeholder
-        foreach ($data as $entry) {
-            var_dump($entry);
+        $app = App::i();
+        // carrega mapeamento de identificadores
+        $idMap = $this->ppg10xIdMap("idCliente");
+        $meta = $data[0];
+        $footer = $data[sizeof($data) - 1]["payload"];
+        $data = array_splice($data, 2, -1);
+        set_time_limit(0);
+        foreach ($data as $item) {
+            $entry = $item["payload"];
+            $payment = $this->ppg10xResolvePayment($idMap, $entry["reference"],
+                                                   Payment::STATUS_AVAILABLE);
+            if (!isset($payment)) {
+                continue;
+            }
+            // $payment->status = ($entry["paymentCode"] == 0) ?
+            //                    Payment::STATUS_AVAILABLE :
+            //                    Payment::STATUS_FAILED;
+            $metadata = is_array($payment->metadata) ? $payment->metadata :
+                        json_decode($payment->metadata);
+            $metadata["ppg102"] = [
+                "raw" => $item["raw"],
+                "processed" => $entry,
+                "filename" => $meta["filename"],
+            ];
+            $payment->metadata = $metadata;
+            // $payment->save(true); // WIP: não salvar nada enquanto não acertarmos o formato do arquivo
+            $app->em->clear();
         }
+        $app->log->info("Total de registros: " . $footer["countEntries"]);
         return;
     }
 
@@ -4483,43 +4626,80 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     private function importMCI470($data)
     {
-       $app = App::i();
-       $meta = $data[0];
-       $footer = $data[sizeof($data) - 1]["payload"];
-       $data = array_splice($data, 2, -1);
-       $registrationRepo = $app->repo("Registration");
-       $app->disableAccessControl();
-       set_time_limit(0);
-       foreach ($data as $item) {
-           $entry = $item["payload"];
-           $registrationID = substr($entry["registrationID"],
-                                    strcspn($entry["registrationID"],
-                                            "0123456789"));
-           $registration = $registrationRepo->find($registrationID);
-           if (!isset($registration)) {
-               $app->log->info("Ignorando: não encontrada $registrationID");
-               continue;
-           }
-           $accountCreation = $registration->owner->account_creation ??
-                              new stdClass();
-           if (($accountCreation->status ?? 1) == 10) {
-               $app->log->info("Ignorando - conta já aberta: $registrationID");
-               continue;
-           }
-           $app->log->info("Processando: $registrationID - " .
-                           json_encode($entry));
-           $accountCreation->status = ($entry["errorClient"] == 0) ?
-                                        self::ACCOUNT_CREATION_SUCCESS :
-                                        self::ACCOUNT_CREATION_FAILED;
-           $accountCreation->received_raw = $item["raw"];
-           $accountCreation->received_filename = $meta["filename"];
-           $accountCreation->processed = $entry;
-           $registration->owner->account_creation = $accountCreation;
-           $registration->owner->save(true);
-           $app->em->clear();
-       }
-       $app->enableAccessControl();
-       $app->log->info("Total registros: " . $footer["countEntries"]);
-       return;
+        $app = App::i();
+        $config = $this->config["config-mci460"];
+        $meta = $data[0];
+        $footer = $data[sizeof($data) - 1]["payload"];
+        $data = array_splice($data, 2, -1);
+        $registrationRepo = $app->repo("Registration");
+        $app->disableAccessControl();
+        set_time_limit(0);
+        foreach ($data as $item) {
+            $entry = $item["payload"];
+            $registrationID = substr($entry["registrationID"],
+                                     strcspn($entry["registrationID"],
+                                             "0123456789"));
+            $registration = $registrationRepo->find($registrationID);
+            if (!isset($registration)) {
+                $app->log->info("Ignorando: não encontrada $registrationID");
+                continue;
+            }
+            $accountCreation = $registration->owner->account_creation ??
+                               new stdClass();
+            if (($accountCreation->status ?? 1) == 10) {
+                $app->log->info("Ignorando - conta já aberta: $registrationID");
+                continue;
+            }
+            $app->log->info("Processando: $registrationID - " .
+                            json_encode($entry));
+            $accountCreation->status = ($entry["errorClient"] == 0) ?
+                                       self::ACCOUNT_CREATION_SUCCESS :
+                                       self::ACCOUNT_CREATION_FAILED;
+            $accountCreation->received_raw = $item["raw"];
+            $accountCreation->received_filename = $meta["filename"];
+            $accountCreation->processed = $entry;
+            $registration->owner->account_creation = $accountCreation;
+            if ($accountCreation->status == self::ACCOUNT_CREATION_SUCCESS) {
+                $registration->owner->payment_bank_account_type =
+                    $config["defaults"]["accountType"];
+                $registration->owner->payment_bank_number =
+                    $config["defaults"]["bankNumber"];
+                $registration->owner->payment_bank_branch =
+                    $entry["branch"] . "-" . $entry["branchVC"];
+                $registration->owner->payment_bank_account =
+                    $entry["account"] . "-" . $entry["accountVC"];
+            }
+            $registration->owner->save(true);
+            $app->em->clear();
+        }
+        $app->enableAccessControl();
+        $app->log->info("Total registros: " . $footer["countEntries"]);
+        return;
+    }
+
+    /**
+     * Verifica se um registro é bancarizado
+     * 
+     * @return boolean
+     */
+    public function isBanked($registration, $formoReceipt, $typesReceipt, $accountHolderBB) {
+        if(in_array(trim($registration->$formoReceipt), $typesReceipt['banked']) || $accountHolderBB === "SIM"){
+            return true;
+        }
+        
+        if(in_array(trim($registration->$formoReceipt) , $typesReceipt['unbanked'])){
+            $accountOpenedSecult = $this->getAccountOpenedSecult($registration);
+            if ($accountOpenedSecult) {
+                return true;     
+            } else {
+                return false;
+            }
+        }
+
+        if ($accountHolderBB === "NÃO"){
+            return false;
+        }
+
+        return false;
     }
 }
