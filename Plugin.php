@@ -236,9 +236,9 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
 
-        $app->hook('entity(Registration).status(<<notapproved|invalid>>)', function() use($app) {
+        $app->hook('entity(Registration).status(<<notapproved|invalid>>)', function() use($app, $plugin) {
             $date = new \DateTime();
-            $date->add(date_interval_create_from_date_string($this->_config['dias_para_recurso'] . ' days'));
+            $date->add(date_interval_create_from_date_string($plugin->config['dias_para_recurso'] . ' days'));
             
             $this->lab_data_limite_recurso = $date->format('Y-m-d');
             
