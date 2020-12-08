@@ -2,6 +2,9 @@
 - Adiciona ao formulário de avaliação dos incisos I e II a informação da consolidação atual das avaliações da inscrição [#163](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
 - Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Refatorando CNAB240 do Inciso 1 para receber desbancarizados com as contas criadas pela Secult
+- Refatorar CNAB240 para exportar valores quebrados EX.: 2.904,80 (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
+- Refatorar calculo da data de pagamento para 5 dias após o envio (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
+- Inserir Número da inscrição no logradouro para que a mesma retorne nos arquivos de retorno BB (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
 
 ## [v2.3.1] - 2020-12-01
 - Implementa os importadores para o MCI470 e PPG101 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
