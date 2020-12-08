@@ -1149,7 +1149,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         foreach($registrations as $r) {
             if(!$r->lab_data_limite_recurso){
                 $emailenviado = $this->enviaEmailRecusadas($r, $dataLimite); 
-                die;
+                
             }
         }
         
