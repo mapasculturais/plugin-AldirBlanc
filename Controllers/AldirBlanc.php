@@ -1005,13 +1005,18 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
              }
          }
+        $cidades = $this->getCidades($inciso2_ids);
+        if ($app->user->is('mediador') && $this->config['mediadores_oportunidade_unica'] != ''){
+            $cidades['Outras'] = $this->config['mediadores_oportunidade_unica'];
+        }
+
         $this->render('cadastro', [
                 'inciso1Limite' => $this->config['inciso1_limite'],
                 'inciso2Limite' => $this->config['inciso2_limite'],
                 'inciso2_enabled' => isset($inciso2_ids) && $inciso2_ids ? $inciso2_enabled:false,
                 'inciso1_enabled' => isset($inciso1) &&  $inciso1 ? $inciso1_enabled : false,
                 'inciso3_enabled' => $app->user->is('mediador') ? false : $this->config['inciso3_enabled'],
-                'cidades' => isset($inciso2_ids) && $inciso2_ids ? $this->getCidades($inciso2_ids) : [], 
+                'cidades' => isset($inciso2_ids) && $inciso2_ids ? $cidades : [], 
                 'registrationsInciso1' => isset($inciso1) &&  $inciso1 ? $registrationsInciso1 : [], 
                 'registrationsInciso2' => isset($inciso2_ids) && $inciso2_ids ? $registrationsInciso2 : [], 
                 'summaryStatusName'=>$summaryStatusName, 
