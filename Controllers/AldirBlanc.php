@@ -982,6 +982,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
             if($inciso2_ids){
                 $inciso2_enabled = true;
+                if (!$app->user->is('mediador') || $this->config['mediadores_oportunidade_unica'] != ''){
+                    unset($inciso2_ids['Outras']);
+                }
                 $opportunitiesInciso2 = $app->repo('Opportunity')->findOpportunitiesWithDateByIds(array_values($inciso2_ids)); 
             }
         }
