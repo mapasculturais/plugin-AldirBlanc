@@ -1454,7 +1454,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'BEN_DOC_ATRIB_EMPRESA_82' => '',
             'DATA_PAGAMENTO' => function ($registrations) use ($detahe1) {
                 $date = new DateTime();                
-                $date->add(new DateInterval('P1D'));
+                $date->add(new DateInterval('P5D'));
                 $weekday = $date->format('D');
 
                 $weekdayList = [
@@ -1481,11 +1481,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     'registration' => $registrations->id
                 ]);
 
-                $amount =  preg_replace('/[^0-9]/i', '', $payment->amount);
-                return number_format($amount, 2, '.', '');
-
-                
-                
+                return preg_replace('/[^0-9]/i', '',number_format($payment->amount,2,",","."));
             },
             'USO_BANCO_88' => '',
             'USO_BANCO_89' => '',
@@ -1525,15 +1521,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 return $data;
             },
             'BEN_ENDERECO_LOGRADOURO' => function ($registrations) use ($detahe2, $app) {
-                $field_id = $detahe2['BEN_ENDERECO_LOGRADOURO']['field_id'];
-                $length = $detahe2['BEN_ENDERECO_LOGRADOURO']['length'];
-                $data = $registrations->$field_id;
-                $result = $data['En_Nome_Logradouro'];
-                
-                $result = substr($result, 0, $length);
-
-                return $result;
-
+                return strtoupper($this->normalizeString($registrations->number));
             },
             'BEN_ENDERECO_NUMERO' => function ($registrations) use ($detahe2, $app) {
                 $field_id = $detahe2['BEN_ENDERECO_NUMERO']['field_id'];
@@ -1832,8 +1820,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             //treiller 1
             $lotBBCorrente += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
-            $valor = explode(".", $_SESSION['valor']);
-            $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));              
+            $valor = $_SESSION['valor'];             
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotBBCorrente,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
@@ -1892,8 +1879,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             //treiller 1
             $lotBBPoupanca += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
-            $valor = explode(".", $_SESSION['valor']);
-            $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));
+            $valor = $_SESSION['valor'];
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotBBPoupanca,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
@@ -1955,8 +1941,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             //treiller 1
             $lotOthers += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
-            $valor = explode(".", $_SESSION['valor']);
-            $valor = preg_replace('/[^0-9]/i', '', number_format($valor[0],2,",","."));          
+            $valor = $_SESSION['valor'];         
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotOthers,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
