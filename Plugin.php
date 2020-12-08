@@ -50,7 +50,6 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_inciso2_disabled' => env('AB_INCISO2_DISABLE_MESSAGE','A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!'),
             'link_suporte' => env('AB_LINK_SUPORTE',null),
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS',null),
-            'mediados_owner' => env('AB_MEDIADOS_OWNER',''),
             'texto_categoria_espaco-formalizado' => env('AB_TXT_CAT_ESPACO_FORMALIZADO', '<strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.' ),
             'texto_categoria_espaco-nao-formalizado' => env('AB_TXT_CAT_ESPACO_NAO_FORMALIZADO', '<strong>Espaço artístico e cultural mantido por coletivo ou grupo cultural (sem CNPJ) ou por pessoa física (CPF)</strong> para espaço do tipo <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.' ),
             'texto_categoria_coletivo-formalizado' => env('AB_TXT_CAT_COLETIVO_FORMALIZADO', '<strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo <strong>Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital</strong>.' ),
@@ -58,8 +57,6 @@ class Plugin extends \MapasCulturais\Plugin
             'texto_cadastro_espaco'  => env('AB_TXT_CADASTRO_ESPACO', 'Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado.'),
             'texto_cadastro_coletivo'  => env('AB_TXT_CADASTRO_COLETIVO', 'Espaço público (praça, rua, escola, quadra ou prédio custeado pelo poder público) ou espaço virtual de cultura digital.'),
             'texto_cadastro_cpf'  => env('AB_TXT_CADASTRO_CPF', 'Coletivo ou grupo cultural (sem CNPJ). Pessoa física (CPF) que mantêm espaço artístico'),
-            'lista_mediadores' => (array) json_decode(env('AB_OPORTUNIDADES_MEDIADORES', '[]')),
-            'mediadores_prolongar_tempo' => env('AB_MEDIADORES_PROLONGAR_TEMPO', false),
             'texto_cadastro_cnpj'  => env('AB_TXT_CADASTRO_CNPJ', 'Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ.'),            
             'csv_generic_inciso2' => require_once env('AB_CSV_GENERIC_INCISO2', __DIR__ . '/config-csv-generic-inciso2.php'),
             'csv_generic_inciso3' => require_once env('AB_CSV_GENERIC_INCISO3', __DIR__ . '/config-csv-generic-inciso3.php'),
@@ -69,6 +66,12 @@ class Plugin extends \MapasCulturais\Plugin
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
             'config-mci460' => require_once env('AB_CONFIG_MCI460', __DIR__ . '/config-mci460.php'),
             'config-ppg10x' => require_once env('AB_CONFIG_PPG10x', __DIR__ . '/config-ppg10x.php'),
+
+            // mediadores
+            'mediados_owner' => env('AB_MEDIADOS_OWNER',''),
+            'lista_mediadores' => (array) json_decode(env('AB_OPORTUNIDADES_MEDIADORES', '[]')),
+            'mediadores_prolongar_tempo' => env('AB_MEDIADORES_PROLONGAR_TEMPO', false),
+            'mediadores_oportunidade_unica' => env('AB_MEDIADORES_OPORTUNIDADE_UNICA', ''),
 
             // define os ids para dataprev e avaliadores genericos
             'avaliadores_dataprev_user_id' => (array) json_decode(env('AB_AVALIADORES_DATAPREV_USER_ID', '[]')),
