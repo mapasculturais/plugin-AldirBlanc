@@ -66,7 +66,15 @@ $_params = [
                             <h2 class="status-card--title">Você pode entrar com recurso até o dia <?= $date ?></h2>
                             <p class="status-card--content"><?= $statusRecurso; ?></p>
                         <?php
-                    } 
+                    } else {
+                        
+                        $date = (new DateTime($data_recurso))->format('d/m/Y');                        
+                        ?>
+                            <hr>
+                            <h2 class="status-card--title"> <?= $date ?> O período para solicitação de recurso foi encerrado</h2>
+                            <p class="status-card--content"><?= $statusRecurso; ?></p>
+                        <?php
+                    }
                 
                 
                 }
