@@ -10,6 +10,7 @@ use MapasCulturais\Entities\Registration;
 use MapasCulturais\Entities\RegistrationSpaceRelation as RegistrationSpaceRelationEntity;
 use MapasCulturais\Entities\User;
 use MapasCulturais\Exceptions\PermissionDenied;
+use DateTime;
 
 /**
  * Registration Controller
@@ -1124,7 +1125,81 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     }
     
- 
+    function GET_email_recusadas() {
+        
+        $this->requireAuthentication();
+
+        $app = App::i();
+
+        if(!$app->user->is('admin')) {
+            $this->errorJson('Permissao negada', 403);
+        }
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '-1');
+                
+        // Pega inscrições inválidas ou não selecionadas do Inciso 1
+        // lab_data_limite_recurso verificar se esse metadado existe 
+        // se não existir enviar e-mail e adicionar metadado 
+        // definir a data adicionando metadado de acordo com a configuração do plugin
+        $inciso1Id = $this->config['inciso1_opportunity_id'];
+        $registrations = $app->repo('Registration')->findBy(['opportunity' => $inciso1Id, 'status' => [2, 3]]);
+        $dias = $this->config['dias_para_recurso'];
+        $dataLimite = new DateTime('now');
+        $dataLimite->modify('+' . $dias . ' day');
+        foreach($registrations as $r) {
+            if(!$r->lab_data_limite_recurso){
+                $emailenviado = $this->enviaEmailRecusadas($r, $dataLimite); 
+                die;
+            }
+        }
+        
+    }
+    function enviaEmailRecusadas($registration, $dataLimite){
+        $app = App::i();
+        $mustache = new \Mustache_Engine(); //pega um template e add variaveis (sendo usado linha 22)
+        $site_name = $app->view->dict('site: name', false);
+        $baseUrl = $app->getBaseUrl();
+        $filename = $app->view->resolveFilename("views/aldirblanc", "email-recusadas.html");
+        $template = file_get_contents($filename);        
+        $params = [
+            "siteName" => $site_name,
+            "urlImageToUseInEmails" => $this->config['logotipo_central'],
+            "user" => $registration->owner->name,
+            "inscricao" => $registration->number,            
+            "baseUrl" => $baseUrl,
+            "dataLimite" => $dataLimite->format('d/m/Y')
+        ];
+       
+        
+        $content = $mustache->render($template,$params); 
+        $email_params = [
+            'from' => $app->config['mailer.from'],
+            'to' => $registration->agentsData['owner']["emailPrivado"],
+            'subject' => $site_name . " - Dados Para Recurso",
+            'body' => $content
+];
+
+        $app->log->debug("ENVIANDO EMAIL RECUSADAS da {$registration->number}");
+        $emailSent = $app->createAndSendMailMessage($email_params);
+        if ($emailSent){
+            $sent_emails = $registration->lab_sent_emails ;
+            $sent_emails[] = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'loggedin_user' => [
+                    'id' => $app->user->id,
+                    'email' => $app->user->email,
+                    'name' => $app->user->profile->name 
+                ],
+                'email' => 'email - recusadas'
+            ];
+            $app->disableAccessControl();
+            $registration->lab_sent_emails = $sent_emails;
+            $registration->lab_data_limite_recurso = $dataLimite->format('Y-m-d 00:00');
+            $registration->save(true);
+            $app->enableAccessControl();
+            
+        }
+    }
     /* REPORTE */
     function GET_reporte() {
 
