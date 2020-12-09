@@ -1,51 +1,276 @@
 BANK;NUMBER
-"BCO ITAÚ BBA S.A.	184";184
-"ITAÚ UNIBANCO S.A.	341";341
-"BANCO DO BRASIL S.A. 001";001
-"001 Bco Do Brasil S.A";001
-"CAIXA ECONOMICA FEDERAL 104";104
-"003 Bco Da Amazonia S.A";003
-"004 Bco Do Nordeste Do Brasil S.A";004
-"021 Bco Banestes S.A";021
-"033 Bco Santander (Brasil) S.A";033
-"037 Bco Do Est. Do Pa S.A";037
-"041 Bco Do Estado Do Rs S.A";041
-"047 Bco Do Est. De Se S.A";047
-"070 Brb - Bco De Brasilia S.A";070
-"077 Banco Inter";077
-"077 - Banco Inter";077
-"BANCO INTER     77";077
-"BANCO INTER 77";077
-"083 Bco Da China Brasil S.A";083
-"104 Caixa Economica Federal";104
-"208 Banco Btg Pactual S.A";208
-"212 Banco Original";212
-"237 Bco Bradesco S.A";237
-"318 Bco Bmg S.A";318
-"341 Itaú Unibanco S.A";341
-"422 Bco Safra S.A";422
-"623 Banco Pan";623
-"NU PAGAMENTOS S.A";260
-"BANCO DO BRASIL S.A";001
-"BANCO INTER";077
-"CAIXA ECONOMICA FEDERAL";104
-"BCO BRADESCO S.A";237
-"ITAÚ UNIBANCO S.A..";341
-"PAGSEGURO";290
-"BCO SANTANDER (BRASIL) S.A";033
-"BCO DO EST. DO PA S.A";037
-"BCO C6 S.A";336
-"NU PAGAMENTOS S.A. (Nubank)	260";260
-"BCO BRADESCO S.A.       237";237
-"BCO VOTORANTIM S.A.     655";655
-"BCO SANTANDER (BRASIL) S.A.     33";033
-"BCO VOTORANTIM S.A. 655";655
-"BANCO INTER77";077
-"BANCO ORIGINAL 212";212
-"BCO SANTANDER (BRASIL) S.A. 33";033
-"BCO BRADESCO S.A.	237";237
-"BANCO ORIGINAL	212";212
-"BCO VOTORANTIM S.A.	655";655
-"BCO SANTANDER (BRASIL) S.A.	33";033
-"001 Bco Do Brasil S.A	";001
-"Bco Do Brasil SA";001
+BCO ITAÚ BBA S.A.	184;184
+ITAÚ UNIBANCO S.A.	341;341
+BANCO DO BRASIL S.A. 001;001
+001 Bco Do Brasil S.A;001
+CAIXA ECONOMICA FEDERAL 104;104
+003 Bco Da Amazonia S.A;003
+004 Bco Do Nordeste Do Brasil S.A;004
+021 Bco Banestes S.A;021
+033 Bco Santander (Brasil) S.A;033
+037 Bco Do Est. Do Pa S.A;037
+041 Bco Do Estado Do Rs S.A;041
+047 Bco Do Est. De Se S.A;047
+070 Brb - Bco De Brasilia S.A;070
+077 Banco Inter;077
+077 - Banco Inter;077
+BANCO INTER     77;077
+BANCO INTER 77;077
+083 Bco Da China Brasil S.A;083
+104 Caixa Economica Federal;104
+208 Banco Btg Pactual S.A;208
+212 Banco Original;212
+237 Bco Bradesco S.A;237
+318 Bco Bmg S.A;318
+341 Itaú Unibanco S.A;341
+422 Bco Safra S.A;422
+623 Banco Pan;623
+NU PAGAMENTOS S.A;260
+BANCO DO BRASIL S.A;001
+BANCO INTER;077
+CAIXA ECONOMICA FEDERAL;104
+BCO BRADESCO S.A;237
+ITAÚ UNIBANCO S.A..;341
+PAGSEGURO;290
+BCO SANTANDER (BRASIL) S.A;033
+BCO DO EST. DO PA S.A;037
+BCO C6 S.A;336
+NU PAGAMENTOS S.A. (Nubank)	260;260
+BCO BRADESCO S.A.       237;237
+BCO VOTORANTIM S.A.     655;655
+BCO SANTANDER (BRASIL) S.A.     33;033
+BCO VOTORANTIM S.A. 655;655
+BANCO INTER77;077
+BANCO ORIGINAL 212;212
+BCO SANTANDER (BRASIL) S.A. 33;033
+BCO BRADESCO S.A.	237;237
+BANCO ORIGINAL	212;212
+BCO VOTORANTIM S.A.	655;655
+BCO SANTANDER (BRASIL) S.A.	33;033
+001 Bco Do Brasil S.A	;001
+Bco Do Brasil SA;001
+1 Banco Do Brasil S.A (BB);001 
+237 Bradesco S.A;237 
+260 Nu Pagamentos S.A (Nubank;260
+290 Pagseguro Internet S.A;290 
+323 Mercado Pago – Conta Do Mercado Livre;323 
+341 Itaú Unibanco S.A;341 
+104 Caixa Econômica Federal (CEF;104
+33 Banco Santander Brasil S.;033
+212 Banco Original S.A;212 
+422 Banco Safra S.A;422 
+745 Banco Citibank S.A;745 
+4 Banco Do Nordeste Do Brasil S.A;004
+7 Bndes (Banco Nacional Do Desenvolvimento Social);007
+136 Unicred Cooperativa;136 
+102 Xp Investimentos S.A;102 
+237 Next Ban;237
+637 Banco Sofisa S.A (Sofisa Direto;637
+77 Banco Inter S.A;077
+335 Banco Digio S.A;335 
+756 Bancoob (Banco Cooperativo Do Brasil);756 
+655 Banco Votorantim S.A;655 
+735 Neon Pagamentos S.;735
+41 Banrisul – Banco Do Estado Do Rio Grande Do Sul S.A;041
+389 Banco Mercantil Do Brasil S.;389
+70 Banco De Brasília (Brb);070
+741 Banco Ribeirão Preto;741 
+739 Banco Cetelem S.A;739 
+743 Banco Semear S.A;743 
+100 Planner Corretora De Valores S.;100
+96 Banco B3 S.A;096
+747 Banco Rabobank Internacional Do Brasil S.A;747 
+748 Sicredi S.A;748 
+752 Bnp Paribas Brasil S.A;752 
+399 Kirton Bank;399 
+108 Portocred S.A;108 
+757 Banco Keb Hana Do Brasil S.A;757 
+340 Super Pagamentos S/A Superdita;340
+84 Uniprime Norte Do Paran;084
+180 Cm Capital Markets Cctvm Ltd;180
+66 Banco Morgan Stanley S.;066
+15 Ubs Brasil Cctvm S.A;015
+143 Treviso Cc S.A;143 
+62 Hipercard Bm S.A;062
+74 Bco. J.Safra S.A;074
+99 Uniprime Central Ccc Ltd;099
+25 Banco Alfa S.A.;025
+75 Bco Abn Amro S.A;075
+40 Banco Cargill S.A;040
+191 Nova Futura Ctvm Ltda;191 
+64 Goldman Sachs Do Brasil Bm S.;064
+97 Ccc Noroeste Brasileiro Ltd;097
+16 Ccm Desp Trâns Sc E Rs;016
+12 Banco Inbursa;012
+3 Banco Da Amazonia S.A;003
+60 Confidence Cc S.A;060
+37 Banco Do Estado Do Pará S.;037
+159 Casa Credito S.A;159 
+172 Albatross Ccv S.A;172 
+85 Coop Central Ailos;085
+114 Central Cooperativa De Crédito No Estado Do Espírito Santo;114 
+36 Banco Bbi S.A;036
+320 Banco Ccb Brasil S.A;320 
+189 Hs Financeira;189 
+105 Lecca Cfi S.A;105 
+76 Banco Kdb Brasil S.A.;076
+82 Banco Topázio S.A;082
+286 Ccr De Ouro;286 
+93 Pólocred Scmepp Ltda;093
+273 Ccr De São Miguel Do Oest;273
+157 Icap Do Brasil Ctvm Ltd;157
+183 Socred S.A;183 
+14 Natixis Brasil S.A;014
+130 Caruana Scfi;130 
+127 Codepe Cvc S.A;127 
+79 Banco Original Do Agronegócio S.;079
+81 Bbn Banco Brasileiro De Negocios S.A;081
+118 Standard Chartered Bi S.;118
+133 Cresol Confederação;133 
+121 Banco Agibank S.A;121 
+83 Banco Da China Brasil S.;083
+138 Get Money Cc Ltda;138 
+24 Bco Bandepe S.A;024
+95 Banco Confidence De Câmbio S.;095
+94 Banco Finaxis;094
+276 Senff S.A;276 
+137 Multimoney Cc Ltda;137 
+92 Brk S.A;092
+47 Banco Bco Do Estado De Sergipe S.A;047
+144 Bexs Banco De Cambio S.A;144
+126 Br Partners Bi;126 
+301 Bpp Instituição De Pagamentos S.A;301 
+173 Brl Trust Dtvm Sa;173 
+119 Banco Western Union;119 
+254 Parana Banco S.A;254 
+268 Barigui Ch;268 
+107 Banco Bocom Bbm S.;107 
+412 Banco Capital S.A;412 
+124 Banco Woori Bank Do Brasil S.;124
+149 Facta S.A. Cfi;149 
+197 Stone Pagamentos S.A;197 
+142 Broker Brasil Cc Ltda;142 
+389 Banco Mercantil Do Brasil S.A;389
+634 Banco Triangulo S.A (Banco Triângulo);634 
+545 Senso Ccvm S.A;545 
+132 Icbc Do Brasil Bm S.A;132 
+298 Vips Cc Ltda;298 
+129 Ubs Brasil Bi S.A;129 
+128 Ms Bank S.A Banco De Câmbi;128
+194 Parmetal Dtvm Ltda;194 
+310 Vortx Dtvm Ltda;310 
+163 Commerzbank Brasil S.A Banco Múltiplo;163 
+280 Avista S.A;280 
+146 Guitta Cc Ltda;146 
+279 Ccr De Primavera Do Lest;279
+182 Dacasa Financeira S/;182
+278 Genial Investimentos Cvm S.;278
+271 Ib Cctvm Ltda;271 
+21 Banco Banestes S.A;021
+246 Banco Abc Brasil S.A;246 
+751 Scotiabank Brasil;751 
+208 Banco Btg Pactual S.A;208 
+746 Banco Modal S.A;746 
+241 Banco Classico S.A;241 
+612 Banco Guanabara S.A;612 
+604 Banco Industrial Do Brasil S.;604
+505 Banco Credit Suisse (Brl) S.;505
+196 Banco Fair Cc S.A;196 
+300 Banco La Nacion Argentin;300
+266 Banco Cedula S.A;266 
+376 Banco J.P. Morgan S.A;376 
+473 Banco Caixa Geral Brasil S.;473
+120 Banco Rodobens S.A;120 
+265 Banco Fator S.A;265 
+188 Ativa S.A Investimento;188
+134 Bgc Liquidez Dtvm Ltd;134
+641 Banco Alvorada S.A;641 
+243 Banco Máxima S.A;243 
+78 Haitong Bi Do Brasil S.A;078
+111 Banco Oliveira Trust Dtvm S.;111
+17 Bny Mellon Banco S.A;017
+174 Pernambucanas Financ S.;174
+495 La Provincia Buenos Aires Banc;495 
+125 Brasil Plural S.A Banco;125 
+488 Jpmorgan Chase Bank;488 
+65 Banco Andbank S.A;065
+492 Ing Bank N.V;492 
+250 Banco Bcv;250 
+145 Levycam Ccv Ltda;145 
+494 Banco Rep Oriental Urugua;494 
+253 Bexs Cc S.A;253 
+213 Bco Arbi S.A;213 
+139 Intesa Sanpaolo Brasil S.;139
+18 Banco Tricury S.A;018
+630 Banco Intercap S.A;630 
+224 Banco Fibra S.A;224 
+600 Banco Luso Brasileiro S.;600 
+623 Banco Pan;623 
+456 Banco Mufg Brasil S.A;456 
+464 Banco Sumitomo Mitsui Brasil S.;464 
+613 Omni Banco S.A;613 
+653 Banco Indusval S.A;653 
+69 Banco Crefisa S.A;096
+370 Banco Mizuho S.A;370 
+249 Banco Investcred Unibanco S.;249 
+318 Banco Bmg S.A;318 
+626 Banco Ficsa S.A;626 
+270 Sagitur Cc Ltda;270 
+366 Banco Societe Generale Brasi;366 
+113 Magliano S.A;113 
+131 Tullett Prebon Brasil Cvc Ltd;131
+11 C.Suisse Hedging-Griffo Cv S.A (Credit Suisse);011
+611 Banco Paulista;611 
+755 Bofa Merrill Lynch Bm S.;755 
+89 Ccr Reg Mogiana;089
+643 Banco Pine S.A;643 
+140 Easynvest – Título Cv S.;140
+707 Banco Daycoval S.A;707 
+288 Carol Dtvm Ltda;288 
+101 Renascenca Dtvm Ltda;101 
+487 Deutsche Bank S.A Banco Alemã;487
+233 Banco Cifra;233 
+177 Guide;177 
+633 Banco Rendimento S.A;633 
+218 Banco Bs2 S.A;218 
+292 Bs2 Distribuidora De Títulos E Investimentos;292 
+169 Banco Olé Bonsucesso Consignado S.A;169 
+293 Lastro Rdv Dtvm Ltda;293 
+285 Frente Cc Ltda;285 
+80 B&T Cc Ltda;080
+753 Novo Banco Continental S.A B;753
+222 Banco Crédit Agricole Br S.;222 
+754 Banco Sistema;754 
+98 Credialiança Ccr;098
+610 Banco Vr S.A;610 
+712 Banco Ourinvest S.A;712 
+10 Credicoamo;010
+283 Rb Capital Investimentos Dtvm Ltda;283 
+217 Banco John Deere S.A;217 
+117 Advanced Cc Ltda;117 
+336 Banco C6 S.A – C6 Ban;336
+654 Banco A.J. Renner S.A;654 
+348 Banco Xp S/A;348 
+190 Servicoop;190 
+63 Banco Bradescard;063
+122 Banco Bradesco Berj S.;122
+394 Banco Bradesco Financiamentos S.A;394 
+184 Banco Itaú Bba S.A;184 
+477 Citibank N.A;477 
+29 Banco Itaú Consignado S.;029
+269 Hsbc Banco De Investiment;269
+204 Banco Bradesco Cartoes S.;204
+479 Banco Itaubank S.A;479 
+652 Itaú Unibanco Holding Bm S.;652 
+91 Unicred Central R;091
+237 Bradesco S.A;237
+260 Nu Pagamentos S.A (Nubank) 290 Pagseguro Internet S.A;260
+37 Bradesco S.A  ;237
+1 Banco Do Brasil S.A (BB)  ;001
+260 Nu Pagamentos S.A (Nubank)  290 Pagseguro Internet S.A  ;260
+'237 Bradesco S.A  ';237
+341 Itaú Unibanco S.A  ;341
+104 Caixa Econômica Federal (CEF)  33 Banco Santander Brasil S.A  212 Banco Original S.A  ;104
+'33 Banco Santander Brasil S.A';033
+'748 Sicredi S.A  ';748
+'237 Next Bank';237
