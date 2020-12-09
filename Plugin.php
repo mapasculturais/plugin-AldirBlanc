@@ -92,7 +92,9 @@ class Plugin extends \MapasCulturais\Plugin
             // mensagem padrão para recurso das inscrições com status 2 e 3
             'msg_recurso' => env('AB_MENSAGEM_RECURSO', ''),
 
+            // configurações dos recursos
             'dias_para_recurso' => env('AB_DIAS_PARA_RECURSO', 5),
+            'de_para_avaliacoes' => (array) json_decode(env('AB_DE_PARA_AVALIACOES', '[]')),
 
             // mensagem para reprocessamento do Dataprev, para ignorar a mensagem retornada pelo Dataprev e exibir a mensagem abaixo
             'msg_reprocessamento_dataprev' => env('AB_MENSAGEM_REPROCESSAMENTO_DATAPREV', ''),

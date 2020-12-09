@@ -1328,12 +1328,11 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $dataLimite = new DateTime('now');
         $dataLimite->modify('+' . $dias . ' day');
         foreach($registrations as $r) {
-            if(!$r->lab_data_limite_recurso){
-                $emailenviado = $this->enviaEmailRecusadas($r, $dataLimite); 
-                
+            if(!$r->lab_data_limite_recurso){                                             
+                $emailenviado = $this->enviaEmailRecusadas($r, $dataLimite);  
+
             }
-        }
-        
+        }        
     }
     function enviaEmailRecusadas($registration, $dataLimite){
         $app = App::i();
@@ -1341,7 +1340,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $site_name = $app->view->dict('site: name', false);
         $baseUrl = $app->getBaseUrl();
         $filename = $app->view->resolveFilename("views/aldirblanc", "email-recusadas.html");
-        $template = file_get_contents($filename);        
+        $template = file_get_contents($filename); 
+        $avaliacoes = $this->processaDeParaAvaliacoes($registration);       
         $params = [
             "siteName" => $site_name,
             "urlImageToUseInEmails" => $this->config['logotipo_central'],
@@ -1381,6 +1381,35 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             
         }
     }
+    // Criar uma função que recebe uma inscrição e busca nas avaliacoes dela
+    // passa pelo de_para e retorna a mensagem a ser enviada
+   
+    function processaDeParaAvaliacoes ($registration){
+        $app = App::i();
+        $avaliacoes = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
+        $configDePara = $this->config['de_para_avaliacoes'] ?? ''; //pegando config do Plugin.php
+        if(!empty($configDePara)){ 
+            foreach($avaliacoes as $a){
+                if ($a->result == 2 || $a->result == 3){
+                    $novaAvaliacao = '';
+                    $evaluationData = $a->getEvaluationData();
+                    $obs = $evaluationData->obs;                    
+                    foreach($configDePara as $key => $value) {
+                        $pos = strpos($obs, $key);                        
+                        if ($pos !== false) {
+                            $novaAvaliacao .= $value . '. ';
+                        }   
+                    }          
+                    if (!empty($novaAvaliacao)) {
+                        $evaluationData->obs = $novaAvaliacao;
+                        $a->setEvaluationData($evaluationData);
+                    }  
+                }                             
+            }           
+        }
+        return $avaliacoes;
+    }
+
     /* REPORTE */
     function GET_reporte() {
 
