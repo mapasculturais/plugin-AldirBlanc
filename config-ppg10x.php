@@ -181,7 +181,7 @@ return [
                     "length" => 1,
                     "type" => "int",
                     "name" => "indicadorAcao",
-                    "function" => "ppg100ActionPA",
+                    "default" => 4, // sempre abertura e carga pois cada pagamento é um protocolo
                 ],
                 [
                     "length" => 136,
