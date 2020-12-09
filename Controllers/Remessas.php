@@ -171,6 +171,471 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     /**
      * Implementa um exportador genérico, que de momento tem a intenção de antender os municipios que não vão enviar o arquivo de remessa
      * diretamente ao banco do Brasil.
+     *
+     *
+     * http://localhost:8080/remessas/genericExportInciso1/opportunity:12/
+     *
+     * O Parâmetro opportunity e identificado e incluido no endpiont automáricamente
+     *
+     */
+    public function ALL_genericExportInciso1()
+    {
+        //Seta o timeout
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '768M');
+
+        /**
+         * Verifica se o usuário está autenticado
+         */
+        $this->requireAuthentication();
+        $app = App::i();
+
+        /**
+         * Pega os dados da configuração
+         */
+
+        $csv_conf = $this->config['csv_generic_inciso1'];
+        $searchType = $csv_conf['parameters_default']['searchType'];
+        $proponentTypes = $csv_conf['parameters_default']['proponentTypes'];
+        $header = $csv_conf['header'];
+
+       
+        $opportunity = $this->getOpportunity();
+        $opportunity_id = $opportunity->id;
+        $registrations = $this->getRegistrations($opportunity);
+        $parametersForms = $this->getParametersForms();
+
+        $fromToAccounts = $csv_conf[$opportunity_id]['fromToAccounts'];
+        $dePara = $this->readingCsvFromTo($fromToAccounts);
+        $cpfCsv = $this->cpfCsv($fromToAccounts);
+        
+        /**
+         * Mapeamento de fields_id
+         */
+        $fieldsID = [];
+        if ($searchType == 'field_id') {
+            $fieldsID = $csv_conf[$opportunity_id];
+        } else {
+
+            /**
+             * Monta a estrutura de field_id's e as coloca dentro de um array organizado para a busca dos dados
+             *
+             * Será feito uma comparação de string, coloque no arquivo de configuração
+             * exatamente o texto do label desejado
+             */
+
+            foreach ($opportunity->registrationFieldConfigurations as $field) {
+                $field_labelMap["field_" . $field->id] = trim($field->title);
+            }
+
+            foreach ($csv_conf['fields'] as $key_csv_conf => $field) {
+                if (is_array($field)) {
+                    $fields = array_unique($field);
+                    if (count($fields) == 1) {
+                        foreach ($field as $key => $value) {
+                            $field_temp = array_keys($field_labelMap, $value);
+
+                        }
+
+                    } else {
+                        $field_temp = [];
+                        foreach ($field as $key => $value) {
+                            $field_temp[] = array_search(trim($value), $field_labelMap);
+
+                        }
+                    }
+                    $fieldsID[$key_csv_conf] = $field_temp;
+
+                } else {
+                    $field_temp = array_search(trim($field), $field_labelMap);
+                    $fieldsID[$key_csv_conf] = $field_temp ? $field_temp : $field;
+
+                }
+            }
+        }
+
+        /**
+         * Busca os dados em seus respecitivos registros com os fields mapeados
+         */
+        $mappedRecords = [
+            'TIPO_IDENTIFICACAO' => function ($registrations) use ($fieldsID, $app, $proponentTypes) {
+                $field_id = $fieldsID['TIPO_IDENTIFICACAO'];
+                if(is_array($field_id)){
+                    $doc = 0;
+                    foreach($field_id as $value){
+                        if($registrations->$value){
+                            $doc = str_replace(['.', '-', '/', ' '], '', $registrations->$value);
+                            break;
+                        }
+                    }
+                }else{
+                    $doc = $registrations->$field_id;
+                }
+
+                if(strlen($doc)<=11){
+                    return 1; //CPF
+                }else{
+                    return 2; //CNPJ
+                }
+            },
+            'TIPO_CREDOR' => function ($registrations) use ($fieldsID, $app, $proponentTypes) {
+                return 1; //Outros                
+            },
+            'EMAIL' => function ($registrations) use ($fieldsID, $app, $proponentTypes) {
+                $result = $registrations->owner->getMetadata('emailPublico');
+                return trim(strtolower($result));                            
+            },
+            'NATUREZA_JURIDICA' => function ($registrations) use ($fieldsID, $app, $proponentTypes) {                
+                return "nulo";
+
+            },
+            'CPF' => function ($registrations) use ($fieldsID, $app, $proponentTypes) {
+                $temp = $fieldsID['TIPO_PROPONENTE'];
+                $field_id = $fieldsID['CPF'];
+                $result = " ";
+                if ($temp) {
+                    $propType = trim($registrations->$temp);
+                    if ($propType === $proponentTypes['fisica'] || empty($propType) || $propType === $proponentTypes['coletivo']) {
+                        $result = $this->normalizeString($registrations->$field_id);
+                        
+                        if (strlen($result) != 11) {
+                            $app->log->info("\n".$registrations->number . " CPF inválido");
+                        }
+                    } 
+                } else {
+                    $result = $this->normalizeString($registrations->$field_id);
+                }
+
+                return str_replace(['.', '-', '/', ' '], '', $result);
+            },           
+            'NOME_SOCIAL' => function ($registrations) use ($fieldsID, $proponentTypes) {
+                $temp = $fieldsID['TIPO_PROPONENTE'];
+                $field_id = $fieldsID['NOME_SOCIAL'];                
+                $propType = $temp ? trim($registrations->$temp) : null;
+                
+                $result = " ";
+                if ($propType == trim($proponentTypes['fisica']) || empty($propType) || $propType == trim($proponentTypes['coletivo'])) {
+                    if(is_array($field_id)){
+                        foreach($field_id as $value){
+                            if($registrations->$value){
+                                $result = $registrations->$value;
+                                break; 
+                            }
+                        }
+                    }else{
+                        $result = $registrations->$field_id;  
+
+                    }
+                }
+                
+                return trim($this->normalizeString($result));
+            },
+            'CNPJ' => function ($registrations) use ($fieldsID, $app, $proponentTypes) {
+                $temp = $fieldsID['TIPO_PROPONENTE'];
+                $field_id = $fieldsID['CNPJ'];
+                $result = " ";
+
+                $propType = $temp ? trim($registrations->$temp) : null; 
+                
+                if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
+                    if (is_array($field_id)) {                            
+                        foreach ($field_id as $key => $value) {
+                            if ($registrations->$value) {
+                                $result = str_replace(['.', '-', '/', ' '], '', $registrations->$value);
+                                break;
+                            }
+                        }
+                        
+                        $result = $this->normalizeString($result);
+                    } else {
+
+                        $result = $this->normalizeString($registrations->$field_id);
+                    }
+
+                    if (strlen($result) != 14) {
+                        $app->log->info("\n".$registrations->number . " CNPJ inválido");
+                    }
+                }
+                
+                return str_replace(['.', '-', '/', ' '], '', $result);
+
+            },
+            'RAZAO_SOCIAL' => function ($registrations) use ($fieldsID, $proponentTypes) {
+                $temp = $fieldsID['TIPO_PROPONENTE'];
+                $field_id = $fieldsID['RAZAO_SOCIAL'];
+
+                $result = " ";
+                $propType = $temp ? trim($registrations->$temp) : null;               
+
+                if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
+                    if (is_array($field_id)) {                           
+                        foreach ($field_id as $key => $value) {
+                            if ($registrations->$value) {
+                                $result = $registrations->$value;
+                            }
+
+                        }                           
+                    } else {
+                        $result = $registrations->$field_id;
+
+                    }
+                } 
+                
+                return $this->normalizeString($result);
+
+            },
+            'LOGRADOURO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('LOGRADOURO', 'En_Nome_Logradouro', $fieldsID, $registrations, $app, null);                
+                return $result;
+
+            },
+            'NUMERO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('NUMERO', 'En_Num', $fieldsID, $registrations, $app, 5);
+                return $result ? substr($result, 0, 5) : " ";
+
+            },
+            'COMPLEMENTO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('COMPLEMENTO', 'En_Complemento', $fieldsID, $registrations, $app, 20);
+                return $result ? substr($result, 0, 20) : " ";
+
+            },
+            'BAIRRO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('BAIRRO', 'En_Bairro', $fieldsID, $registrations, $app, null);
+                return $result;
+            },
+            'MUNICIPIO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('MUNICIPIO', 'En_Municipio', $fieldsID, $registrations, $app, null);
+                return $result;               
+
+            },
+            'CEP' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('CEP', 'En_CEP', $fieldsID, $registrations, $app, null);
+                return $result;
+            
+            },
+            'ESTADO' => function ($registrations) use ($fieldsID, $app) {
+                $result = $this->getAddress('ESTADO', 'En_Estado', $fieldsID, $registrations, $app, null);
+                return $result;
+            
+            },
+            'TELEFONE' => function ($registrations) use ($fieldsID) {
+                $field_id = $fieldsID['TELEFONE'];
+                if (is_array($field_id)) {
+                    foreach ($field_id as $valor) {
+                        if ($registrations->$valor) {
+                            $result = $this->normalizeString($registrations->$valor);
+                            break;
+                        }
+                    }
+                } else {
+                    $result = $registrations->$field_id;
+                }
+
+                return $this->normalizeString(preg_replace('/[^0-9]/i', '', $result));
+            },
+            'NUM_BANCO' => function ($registrations) use ($fieldsID, $app, $proponentTypes, $dePara, $cpfCsv) {                
+                $temp = $fieldsID['TIPO_PROPONENTE'];
+                if($temp){
+                    $propType = trim($registrations->$temp);
+                    if ($propType === $proponentTypes['fisica'] || empty($propType) || $propType === $proponentTypes['coletivo']) {
+                        $field_temp = $fieldsID['CPF'];
+                    }else if($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])){
+                        $field_temp = $fieldsID['CNPJ'];
+                    }
+                }else{
+                    $field_temp = $fieldsID['CPF'];
+                }
+
+                    $cpfBase = 0;
+                    if(is_array($field_temp)){
+                        foreach($field_temp as $value){
+                            if($registrations->$value){
+                                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$value);
+                                break;
+                            }
+                        }
+                    }else{
+                        $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_temp);
+                    }   
+                    
+                    
+
+                    $pos = array_search($cpfBase,$cpfCsv);
+                    
+                    if($pos){
+                        $result = $dePara[$pos]['BEN_NUM_BANCO'];
+                    }else{
+                        $field_id = $fieldsID['NUM_BANCO'];
+                        $result = $this->numberBank($registrations->$field_id);
+                    }
+                
+                $result = $result;
+
+                if (empty($result)) {
+                    $app->log->info("\n".$registrations->number . " Número do banco não encontrado");
+                }
+               
+                return $result;
+            },            
+            'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $proponentTypes, $dePara, $cpfCsv) {
+                $temp = $fieldsID['TIPO_PROPONENTE'];
+                if($temp){
+                    $propType = trim($registrations->$temp);
+                    if ($propType === $proponentTypes['fisica'] || empty($propType) || $propType === $proponentTypes['coletivo']) {
+                        $field_temp = $fieldsID['CPF'];
+                    }else if($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])){
+                        $field_temp = $fieldsID['CNPJ'];
+                    }
+                }else{
+                    $field_temp = $fieldsID['CPF'];
+                }
+
+                    $cpfBase = 0;
+                    if(is_array($field_temp)){
+                        foreach($field_temp as $value){
+                            if($registrations->$value){
+                                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$value);
+                                break;
+                            }
+                        }
+                    }else{
+                        $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_temp);
+                    }     
+
+                    $pos = array_search($cpfBase,$cpfCsv);
+                    if($pos){
+                        $result = $dePara[$pos]['BEN_AGENCIA'];
+                    }else{
+                        $field_id = $fieldsID['AGENCIA_BANCO'];
+                        $result = $registrations->$field_id;
+                    }
+                    
+              
+                return $result = $this->normalizeString(substr($result, 0, 4));
+            },
+            'CONTA_BANCO' => function ($registrations) use ($fieldsID , $proponentTypes, $dePara, $cpfCsv) {
+                 $temp = $fieldsID['TIPO_PROPONENTE'];
+                if($temp){
+                    $propType = trim($registrations->$temp);
+                    if ($propType === $proponentTypes['fisica'] || empty($propType) || $propType === $proponentTypes['coletivo']) {
+                        $field_temp = $fieldsID['CPF'];
+                    }else if($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])){
+                        $field_temp = $fieldsID['CNPJ'];
+                    }
+                }else{
+                    $field_temp = $fieldsID['CPF'];
+                }
+
+                    $cpfBase = 0;
+                    if(is_array($field_temp)){
+                        foreach($field_temp as $value){
+                            if($registrations->$value){
+                                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$value);
+                                break;
+                            }
+                        }
+                    }else{
+                        $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_temp);
+                    }     
+
+                    $pos = array_search($cpfBase,$cpfCsv);
+                    if($pos){
+                        $result = $dePara[$pos]['BEN_CONTA'];
+                    }else{
+                        $field_id = $fieldsID['CONTA_BANCO'];
+                        $result = $registrations->$field_id;
+                    }                
+               
+                
+
+                return $this->normalizeString($result);
+            }, 
+            'VALOR' => '',           
+            'SITUACAO' => function ($registrations) use ($fieldsID) {
+                return 1;
+
+            },
+            'INSCRICAO_ID' => function ($registrations) use ($fieldsID) {
+                return $this->normalizeString($registrations->number);
+
+            },
+            'INCISO' => function ($registrations) use ($fieldsID) {
+                $field_id = $fieldsID['INCISO'];
+                return $this->normalizeString($field_id);
+            },
+
+        ];
+
+        //Itera sobre os dados mapeados
+        $inscricoes = $this->inscricoes();
+        $csv_data = [];
+        foreach ($registrations as $key_registration => $registration) {
+            //Busca as informaçoes de pagamento
+            $amount = $this->processesPayment($registration, $app);
+
+            foreach ($mappedRecords as $key_fields => $field) {
+                if (is_callable($field)) {
+                    $csv_data[$key_registration][$key_fields] = $field($registration);
+
+                } else if (is_string($field) && strlen($field) > 0) {
+                    if ($registration->$field) {
+                        $csv_data[$key_registration][$key_fields] = $registration->$field;
+                    } else {
+                        $csv_data[$key_registration][$key_fields] = $field;
+                    }
+
+                } else {
+                    if (strstr($field, 'field_')) {
+                        $csv_data[$key_registration][$key_fields] = null;
+                    } else {
+                        $csv_data[$key_registration][$key_fields] = $field;
+                    }
+
+                }
+            }
+
+            //Insere o valor a ser pago no CSV
+            $csv_data[$key_registration]['VALOR'] = $amount;
+            
+            
+        }
+        
+        /**
+         * Salva o arquivo no servidor e faz o dispatch dele em um formato CSV
+         * O arquivo e salvo no deretório docker-data/private-files/aldirblanc/inciso2/remessas
+         */
+        $file_name = 'inciso1-genCsv-' . $this->getStatus($this->data[$parametersForms['typeExport']]) . $opportunity_id . '-' . md5(json_encode($csv_data)) . '.csv';
+
+        $dir = PRIVATE_FILES_PATH . 'aldirblanc/inciso1/remessas/generics/';
+
+        $patch = $dir . $file_name;
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0700, true);
+        }
+        $stream = fopen($patch, 'w');
+
+        $csv = Writer::createFromStream($stream);
+
+        $csv->setDelimiter(';');
+
+        $csv->insertOne($header);
+
+        foreach ($csv_data as $key_csv => $csv_line) {
+            $csv->insertOne($csv_line);
+        }
+
+        header('Content-Type: application/csv');
+        header('Content-Disposition: attachment; filename=' . $file_name);
+        header('Pragma: no-cache');
+        readfile($patch);
+
+    }
+
+
+    /**
+     * Implementa um exportador genérico, que de momento tem a intenção de antender os municipios que não vão enviar o arquivo de remessa
+     * diretamente ao banco do Brasil.
      * http://localhost:8080/remessas/genericExportInciso2/opportunity:12/
      *
      *
