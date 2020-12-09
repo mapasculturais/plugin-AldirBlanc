@@ -455,7 +455,13 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
         // uploads de desbancarizados
-        $app->hook('template(opportunity.<<single|edit>>.sidebar-right):end', function () {
+        $app->hook('template(opportunity.<<single|edit>>.sidebar-right):end', function () use ($plugin) {
+            // condiciona exibição da área de uploads à configuração que controla o botão de exportação
+            if (!isset($plugin->config['exporta_desbancarizados']) ||
+                !is_array($plugin->config['exporta_desbancarizados']) ||
+                empty($plugin->config['exporta_desbancarizados'])) {
+                return;
+            }
             $opportunity = $this->controller->requestedEntity;
             if ($opportunity->canUser('@control')) {
                 $this->part('aldirblanc/bankless-uploads', ['entity' => $opportunity]);
