@@ -2900,8 +2900,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $result = [];
         $countLine = 1;
         $countSeg = 1;
+        $config = $returnCode = $this->config['config-import-cnab240']['configs'];
         
-        $file = __DIR__."../../CSV/IEDPAG8241120200.txt";    
+        $file = __DIR__."../../CSV/arquivo.txt";    
         $data = $this->mappedCnab($file);
 
         //Pega a linha do header do lote
@@ -2909,40 +2910,40 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $LOTE2_H = isset($data['LOTE_2']) ? min($data['LOTE_2']) : null;
         $LOTE3_H = isset($data['LOTE_3']) ? min($data['LOTE_3']) : null;
 
-        //Pela a linha do trailler do lote
+        //Pega a linha do trailler do lote
         $LOTE1_T = isset($data['LOTE_1']) ? max($data['LOTE_1']) : null;
         $LOTE2_T = isset($data['LOTE_2']) ? max($data['LOTE_2']) : null;
         $LOTE3_T = isset($data['LOTE_3']) ? max($data['LOTE_3']) : null;
-               
+        
+        //Faz a busca nos dados do retorno e monta o array $result com todos os dados 
         foreach($data as $key_data => $value){
             $seg = null;
             $cpf = null;
             $inscri = null;
+            $lote = null;
             if($key_data === "HEADER_DATA_ARQ"){
                 foreach($value as $key_r => $r){
                     //Valida o arquivo
                     $n = $this->getLineData($r, 230, 231);
-                    $result['AQURIVO'] = $this->validatedCanb($n, $seg, $cpf, $inscri);
+                    $result['AQURIVO']['ARQUIVO_STATUS']  = $this->validatedCanb($n, $seg, $cpf, $inscri, $lote);
                    
                 }
             }else if($key_data === "LOTE_1_DATA"){
-                $cont = 1;                
+                $cont = 1;
+                $lote = 'Corrente BB';                   
                 foreach($value as $key_r => $r){
                     if($key_r == $LOTE1_H){ 
                         //Valida se o lote 1 esta válido
                         $n = $this->getLineData($r, 230, 231);
-                        $result['LOTE_1'] = $this->validatedCanb($n, $seg, $cpf, $inscri);
+                        $result['LOTE_1']['LOTE_STATUS']  = $this->validatedCanb($n, $seg, $cpf, $inscri, $lote);
 
-                    }elseif($key_r == $LOTE1_T){ 
-                       
-
-                    }else{ 
+                    }elseif($key_r == $LOTE1_T){}else{ 
                         $seg = ($key_r % 2) == true ? "A" : "B";
 
                         if($seg === "A"){
                             //Valida as inscrições
                             $code = $this->getLineData($r, 230, 231);
-                            $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri);
+                            $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri, $lote);
                         }
                         else{
 
@@ -2950,21 +2951,25 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             $tipo = $this->getLineData($r, 17, 17);
                             
                             //Pega o CPF da inscrição
-                            $cpf_cnpj = $this->getLineData($r, 18, 33);
-                            $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri);
+                            $cpf_cnpj = $this->getLineData($r, 19, 31);
+                            $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
                                                      
                             $cpf_cnpj = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($cpf_cnpj, -11));
-                            
-                            //Pega a inscrição
-                            $inscri = $this->getLineData($r, 210, 224) ? $this->getLineData($r, 33, 62) : false;
-                            if(!$inscri){
-                                
-                                $inscri = $conn->fetchColumn("select id from registration where agents_data like :cpf",['cpf' => '%"documento":"' . $cpf_cnpj . '"%']);
+                            if($this->getLineData($r, 210, 224) != ""){
+                                $inscri = $this->getLineData($r, 210, 224);
 
-                                // var_dump($documento);
-                                // exit;
+                            }elseif($this->getLineData($r, 33, 62)!=""){
+                                $inscri = $this->getLineData($r, 33, 62);
+
+                            }else{
+                                $inscri = $conn->fetchColumn("select object_id,value from registration_meta where key = 'field_{$ref}' and value like '%{$cpf_cnpj}%'");
                             }
-                            $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri);
+                            
+                            
+                            //$inscri = $conn->fetchColumn("select id from registration where agents_data like :cpf",['cpf' => '%"documento":"' . $cpf_cnpj . '"%']);
+
+                            
+                            $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri, $lote);
                         }
 
                         if($seg === "B"){
@@ -2976,30 +2981,41 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
             }else if($key_data === "LOTE_2_DATA"){
                 
-                $cont = 1;                
+                $cont = 1;
+                $lote = 'Poupança BB';                
                 foreach($value as $key_r => $r){
                     if($key_r == $LOTE2_H){ 
                         //Valida se o lote 2 esta válido
                         $n = $this->getLineData($r, 230, 231);
-                        $result['LOTE_2'] = $this->validatedCanb($n, $seg, $cpf, $inscri);
+                        $result['LOTE_2']['LOTE_STATUS'] = $this->validatedCanb($n, $seg, $cpf, $inscri, $lote);
 
-                    }elseif($key_r == $LOTE2_T){ 
-                       
-
-                    }else{ 
+                    }elseif($key_r == $LOTE2_T){}else{ 
                         $seg = ($key_r % 2) == true ? "A" : "B";
 
                         if($seg === "A"){
                             //Valida as inscrições
                             $code = $this->getLineData($r, 230, 231);
-                            $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri);
+                            $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri, $lote);
                         }
                         else{
-                            $cpf = $this->getLineData($r, 18, 30);
-                            $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri);
-
-                            $inscri = $this->getLineData($r, 210, 224);
-                            $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri);
+                            //Pega o tipo de documento CPF ou CNPJ
+                            $tipo = $this->getLineData($r, 17, 17);
+                            
+                            //Pega o CPF da inscrição
+                            $cpf_cnpj = $this->getLineData($r, 19, 31);
+                            $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
+                                                     
+                            $cpf_cnpj = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($cpf_cnpj, -11));
+                            
+                            //Pega a inscrição
+                            $inscri = $this->getLineData($r, 210, 224) ?? $this->getLineData($r, 33, 62) ?? false;
+                           
+                            if(!$inscri){
+                                
+                                $inscri = $conn->fetchColumn("select id from registration where agents_data like :cpf",['cpf' => '%"documento":"' . $cpf_cnpj . '"%']);
+                                
+                            }
+                            $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri, $lote);
                         }
 
                         if($seg === "B"){
@@ -3009,30 +3025,40 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }
                 }
             }else if($key_data === "LOTE_3_DATA"){
-                $cont = 1;                
+                $cont = 1;
+                $lote = 'Outros Bancos';               
                 foreach($value as $key_r => $r){
                     if($key_r == $LOTE3_H){ 
                         //Valida se o lote 3 esta válido
                         $n = $this->getLineData($r, 230, 231);
-                        $result['LOTE_3'] = $this->validatedCanb($n, $seg, $cpf, $inscri);
+                        $result['LOTE_3']['LOTE_STATUS'] = $this->validatedCanb($n, $seg, $cpf, $inscri, $lote);
 
-                    }elseif($key_r == $LOTE3_T){ 
-                       
-
-                    }else{ 
+                    }elseif($key_r == $LOTE3_T){}else{ 
                         $seg = ($key_r % 2) == true ? "A" : "B";
 
                         if($seg === "A"){
                             //Valida as inscrições
                             $code = $this->getLineData($r, 230, 231);
-                            $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri);
+                            $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri, $lote);
                         }
                         else{
-                            $reg = $this->getLineData($r, 18, 30);
-                            $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri);
-
-                            $inscri = $this->getLineData($r, 210, 224);
-                            $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri);
+                            //Pega o tipo de documento CPF ou CNPJ
+                            $tipo = $this->getLineData($r, 17, 17);
+                            
+                            //Pega o CPF da inscrição
+                            $cpf_cnpj = $this->getLineData($r, 19, 31);
+                            $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
+                                                     
+                            $cpf_cnpj = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($cpf_cnpj, -11));
+                            
+                            //Pega a inscrição
+                            $inscri = $this->getLineData($r, 210, 224) ?? $this->getLineData($r, 33, 62) ?? false;
+                            if(!$inscri){
+                                
+                                $inscri = $conn->fetchColumn("select id from registration where agents_data like :cpf",['cpf' => '%"documento":"' . $cpf_cnpj . '"%']);
+                                
+                            }
+                            $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri, $lote);
                         }
 
                         if($seg === "B"){
@@ -3041,23 +3067,94 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         
                     }
                 }
-            }else if($key_data === "TREILLER_DATA_ARQ"){
-                
-            }
+            }else if($key_data === "TREILLER_DATA_ARQ"){}
            
         }
 
-        var_dump($result);
-    }   
+        //Arrays que serão realmente avaliados no processmento do retorno
+        $check = ['LOTE_1', 'LOTE_2', 'LOTE_3'];
+        
+        //Faz o processamento do retono na base do Mapas
+        $csv_data = [];
+        foreach($result as $key_result => $value){
+            
+            if(in_array($key_result, $check)){
 
-    private function validatedCanb($code, $seg, $cpf, $inscri){
-        $returnCode = $returnCode = $this->config['config-cnab240-inciso1']['returnCode'];
+                foreach($value as $key_value => $r){
+
+                    if($key_value != "LOTE_STATUS"){
+
+                        // $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
+                        //     'registration' => preg_replace('/[^\d\-]/', '',$r['inscricao'])
+                        // ]);
+                        
+                        //Monta o csv de resumo do processamento
+                        $r['status'] = $r['status'] ? 'PAGAMENTO EFETUADO' : 'PAGAMENTO RECUSADO';
+                        $csv_data[] = $r;                      
+                        
+                     
+                    }
+                }
+            }
+        }
+        
+        $file_name = 'resumo-importacao-cnab240-'.$app->view->dict('site: name', false) . md5(json_encode($csv_data)) . '.csv';
+
+        $dir =  PRIVATE_FILES_PATH . 'aldirblanc/remessas/imports/';
+
+        $patch = $dir . $file_name;
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0700, true);
+        }
+
+        $stream = fopen($patch, 'w');
+
+        $csv = Writer::createFromStream($stream);
+
+        $csv->setDelimiter(';');
+        $header = $this->hearderCsvCnab();
+        $csv->insertOne($header);
+
+        foreach ($csv_data as $key_csv => $csv_line) {            
+            $csv->insertOne($csv_line);
+        }
+
+        header('Content-Type: application/csv');
+        header('Content-Disposition: attachment; filename=' . $file_name);
+        header('Pragma: no-cache');
+        readfile($patch);
+    } 
+    
+    
+    
+    //###################################################################################################################################
+
+    /**
+     * Header do CSV de consolidação importador CNAB240
+     */
+
+     private function hearderCsvCnab(){
+         return [
+             'TIPO',
+             'INSCRICAO',
+             'CPF',
+             'STATUS',
+             'LEITURA'
+         ];
+     }
+    /**
+     * Processa o retorno do CNAB240 e faz a validação de processado ou não
+     */
+    private function validatedCanb($code, $seg, $cpf, $inscri, $lote){
+        $returnCode = $returnCode = $this->config['config-import-cnab240']['returnCode'];
         $positive = $returnCode['positive'];
         $negative = $returnCode['negative'];
         foreach($positive as $key => $value){
             if($key === $code){
                 return [
-                    'seg' => $seg,
+                    //'seg' => $seg,
+                    'lote' => $lote,
                     'inscricao' => $inscri,
                     'cpf' => $cpf,
                     'status' => true,
@@ -3069,65 +3166,65 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         foreach($negative as $key => $value){
             if($key === $code){
                 return [
-                    'seg' => $seg,
+                    'lote' => $lote,
                     'inscricao' => $inscri,
                     'cpf' => $cpf,
-                    'status' => false,
+                    'status' => true,
                     'reason' => $value
                 ];
             }
         }
     }
 
-      /**
-       * faz o mapeamento do CNAB20... separa os lotes, treiller e header
-       */
-      private function mappedCnab($file){
+    /**
+     * faz o mapeamento do CNAB20... separa os lotes, treiller e header
+     */
+    private function mappedCnab($file){
         $stream = fopen($file,"r");
         $result = [];
         $countLine = 1;
-          while(!feof($stream)){
-              $linha = fgets($stream);
-              if(!empty($linha)){
-                  $value = $this->getLineData($linha, 0, 7);
-                  switch ($value) {
-                      case '00100000':
-                          $result['HEADER_ARQ'][$countLine] = $countLine;
-                          $result['HEADER_DATA_ARQ'][$countLine] = $linha;
-                          break;
-                      case '00100011':
-                      case '00100013':
-                      case '00100015':
-                          $result['LOTE_1'][$countLine] = $countLine;
-                          $result['LOTE_1_DATA'][$countLine] = $linha;
-                          break;
-                      case '00100021':
-                      case '00100023':
-                      case '00100025':
-                          $result['LOTE_2'][$countLine] = $countLine;
-                          $result['LOTE_2_DATA'][$countLine] = $linha;
-                          break;
-                      case '00100031':
-                      case '00100033':
-                      case '00100035':
-                          $result['LOTE_3'][$countLine] = $countLine;
-                          $result['LOTE_3_DATA'][$countLine] = $linha;
-                          break;
-                      case '00199999':
-                          $result['TREILLER_ARQ'][$countLine] = $countLine;
-                          $result['TREILLER_DATA_ARQ'][$countLine] = $linha;
-                          break;
-                      
-                  }
-              }
-
-              $countLine ++;
-          }
-
-          return $result;
-      }
-
-      private function getLineData($line, $start, $end){              
+        while(!feof($stream)){
+            $linha = fgets($stream);
+            if(!empty($linha)){
+                $value = $this->getLineData($linha, 0, 7);
+                switch ($value) {
+                    case '00100000':
+                        $result['HEADER_ARQ'][$countLine] = $countLine;
+                        $result['HEADER_DATA_ARQ'][$countLine] = $linha;
+                        break;
+                    case '00100011':
+                    case '00100013':
+                    case '00100015':
+                        $result['LOTE_1'][$countLine] = $countLine;
+                        $result['LOTE_1_DATA'][$countLine] = $linha;
+                        break;
+                    case '00100021':
+                    case '00100023':
+                    case '00100025':
+                        $result['LOTE_2'][$countLine] = $countLine;
+                        $result['LOTE_2_DATA'][$countLine] = $linha;
+                        break;
+                    case '00100031':
+                    case '00100033':
+                    case '00100035':
+                        $result['LOTE_3'][$countLine] = $countLine;
+                        $result['LOTE_3_DATA'][$countLine] = $linha;
+                        break;
+                    case '00199999':
+                        $result['TREILLER_ARQ'][$countLine] = $countLine;
+                        $result['TREILLER_DATA_ARQ'][$countLine] = $linha;
+                        break;                    
+                }
+            }
+            $countLine ++;
+        }
+        return $result;
+    }
+    
+    /**
+     * Pega o registro dentro de uma determinada posição do CNAB240
+     */
+    private function getLineData($line, $start, $end){
         $data = "";
         $char = strlen($line);       
         if(!empty($line)){
@@ -3139,9 +3236,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
         }
 
-        return trim($data) ?? false;
-  }
-    //###################################################################################################################################
+        return trim($data);
+    }    
 
     /**
      * Função para retornar o número do banco, levando como base de pesquisa o nome do banco
