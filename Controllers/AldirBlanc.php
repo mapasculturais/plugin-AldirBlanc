@@ -10,14 +10,11 @@ use MapasCulturais\Entities\Registration;
 use MapasCulturais\Entities\RegistrationSpaceRelation as RegistrationSpaceRelationEntity;
 use MapasCulturais\Entities\User;
 use MapasCulturais\Exceptions\PermissionDenied;
-<<<<<<< HEAD
 use League\Csv\Reader;
 use League\Csv\Writer;
 use League\Csv\Statement;
 
-=======
 use DateTime;
->>>>>>> feature/data-recurso
 
 /**
  * Registration Controller
