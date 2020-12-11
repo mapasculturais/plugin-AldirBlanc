@@ -1316,24 +1316,20 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $this->errorJson('Permissao negada', 403);
         }
         ini_set('max_execution_time', 0);
-        ini_set('memory_limit', '-1');
-                
-        // Pega inscrições inválidas ou não selecionadas do Inciso 1
-        // lab_data_limite_recurso verificar se esse metadado existe 
-        // se não existir enviar e-mail e adicionar metadado 
-        // definir a data adicionando metadado de acordo com a configuração do plugin
+        ini_set('memory_limit', '-1');                
+        
         $inciso1Id = $this->config['inciso1_opportunity_id'];
         $registrations = $app->repo('Registration')->findBy(['opportunity' => $inciso1Id, 'status' => [2, 3]]);
         $dias = $this->config['dias_para_recurso'];
         $dataLimite = new DateTime('now');
-        $dataLimite->modify('+' . $dias . ' day');
+        $dataLimite->modify('+' . $dias . ' day');     
         foreach($registrations as $r) {
             if(!$r->lab_data_limite_recurso){                                             
-                $emailenviado = $this->enviaEmailRecusadas($r, $dataLimite);  
-
-            }
+                $emailenviado = $this->enviaEmailRecusadas($r, $dataLimite);                
+            }                     
         }        
     }
+   
     function enviaEmailRecusadas($registration, $dataLimite){
         $app = App::i();
         $mustache = new \Mustache_Engine(); //pega um template e add variaveis (sendo usado linha 22)
@@ -1341,16 +1337,17 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $baseUrl = $app->getBaseUrl();
         $filename = $app->view->resolveFilename("views/aldirblanc", "email-recusadas.html");
         $template = file_get_contents($filename); 
-        $avaliacoes = $this->processaDeParaAvaliacoes($registration);       
+        $avaliacoes = $this->processaDeParaAvaliacoesRecusadas($registration);
+            
         $params = [
             "siteName" => $site_name,
             "urlImageToUseInEmails" => $this->config['logotipo_central'],
             "user" => $registration->owner->name,
             "inscricao" => $registration->number,            
-            "baseUrl" => $baseUrl,
-            "dataLimite" => $dataLimite->format('d/m/Y')
-        ];
-       
+            "baseUrl" => $baseUrl,            
+            "dataLimite" => $dataLimite->format('d/m/Y'),
+            "avaliacoes" => $avaliacoes
+        ];         
         
         $content = $mustache->render($template,$params); 
         $email_params = [
@@ -1358,10 +1355,16 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             'to' => $registration->agentsData['owner']["emailPrivado"],
             'subject' => $site_name . " - Dados Para Recurso",
             'body' => $content
-];
+        ];
 
-        $app->log->debug("ENVIANDO EMAIL RECUSADAS da {$registration->number}");
-        $emailSent = $app->createAndSendMailMessage($email_params);
+        $emailSent = '';
+        if (!empty($avaliacoes)){ //if e else força o código a enviar os emails para inscrições que passaram pelo de->para
+            $app->log->debug("ENVIANDO EMAIL RECUSADAS da {$registration->number}");
+            $emailSent = $app->createAndSendMailMessage($email_params);
+        } else {
+            $app->log->debug("NÃO FORAM ENCONTRADAS AVALIAÇÕES COM DE->PARA da {$registration->number}");
+        }
+
         if ($emailSent){
             $sent_emails = $registration->lab_sent_emails ;
             $sent_emails[] = [
@@ -1373,14 +1376,15 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 ],
                 'email' => 'email - recusadas'
             ];
+
             $app->disableAccessControl();
             $registration->lab_sent_emails = $sent_emails;
             $registration->lab_data_limite_recurso = $dataLimite->format('Y-m-d 00:00');
             $registration->save(true);
-            $app->enableAccessControl();
-            
+            $app->enableAccessControl();            
         }
     }
+
     // Criar uma função que recebe uma inscrição e busca nas avaliacoes dela
     // passa pelo de_para e retorna a mensagem a ser enviada
    
@@ -1408,6 +1412,30 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }           
         }
         return $avaliacoes;
+    }
+
+    function processaDeParaAvaliacoesRecusadas($registration) {
+        
+        $app = App::i();
+        $avaliacoes = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
+        $configDePara = $this->config['de_para_avaliacoes'] ?? '';
+        $avaliacoesProcessadas = [];
+        
+        if(!empty($configDePara)){ 
+            foreach($avaliacoes as $a){
+                if ($a->result == 2 || $a->result == 3){                    
+                    $evaluationData = $a->getEvaluationData();
+                    $obs = $evaluationData->obs;                    
+                    foreach($configDePara as $key => $value) {
+                        $pos = strpos($obs, $key);                        
+                        if ($pos !== false && !in_array($value, $avaliacoesProcessadas)) {                            
+                            $avaliacoesProcessadas[] = $value;
+                        }
+                    }
+                }
+            }
+        }
+        return $avaliacoesProcessadas;
     }
 
     /* REPORTE */
