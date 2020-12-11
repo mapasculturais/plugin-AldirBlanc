@@ -1042,10 +1042,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
         $app = App::i();
 
+        //Captura se deve ser gerado um arquivo do tipo teste
+        $typeFile =  null;
+        if(isset($this->data['typeFile'])){
+            $typeFile = $this->data['typeFile'];
+        }
+
         $opportunity = $this->getOpportunity();
         $opportunity_id = $opportunity->id;
         $registrations = $this->getRegistrations($opportunity);
-        $parametersForms = $this->getParametersForms();        
+        $parametersForms = $this->getParametersForms();
         
         /**
          * Pega os dados das configurações
@@ -1072,7 +1078,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CONVENIO_BB1' => '',
             'CONVENIO_BB2' => '',
             'CONVENIO_BB3' => '',
-            'CONVENIO_BB4' => '',
+            'CONVENIO_BB4' => function ($registrations) use ($typeFile) {
+                if($typeFile == "TS"){
+                    return "TS";
+                }else{
+                    return "";
+                }
+            }, 
             'AGENCIA' => function ($registrations) use ($header1) {
                 $result = "";
                 $field_id = $header1['AGENCIA'];
@@ -1141,7 +1153,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CONVENIO_BB1' => '',
             'CONVENIO_BB2' => '',
             'CONVENIO_BB3' => '',
-            'CONVENIO_BB4' => '',
+            'CONVENIO_BB4' => function ($registrations) use ($typeFile) {
+                if($typeFile == "TS"){
+                    return "TS";
+                }else{
+                    return "";
+                }
+            },
             'AGENCIA' => function ($registrations) use ($header2) {
                 $result = "";
                 $field_id = $header2['AGENCIA'];
@@ -1197,7 +1215,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'SEGMENTO' => '',
             'TIPO_MOVIMENTO' => '',
             'CODIGO_MOVIMENTO' => '',
-            'CAMARA_CENTRALIZADORA' => '',
+            'CAMARA_CENTRALIZADORA' => function ($registrations) use ($detahe1) {
+                $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                $numberBank = $this->numberBank($registrations->$field_id);
+                if($numberBank === "001"){
+                    $result = "000";
+
+                }else{
+                    $result = "018";
+                    
+                }
+                return $result;
+
+            },
             'BEN_CODIGO_BANCO' => function ($registrations) use ($detahe2, $detahe1, $dePara, $cpfCsv) {
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
@@ -1346,15 +1376,24 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
                 if($typeAccount == $default['typesAccount']['poupanca']){
 
-                    if (($numberBank == '001') && (substr($account, 0, 3) != "510")) {
+                    if (($numberBank == '001') && (substr($account, 0, 2) != "51")) {
 
-                        $result = "510" . $account;
-                         
+                        $account_temp = "51" . $account;
+
+                        if(strlen($account_temp) < 9){
+                            $result = "51".str_pad($account, 9, 0, STR_PAD_LEFT);
+                        
+                        }else{
+                            $result = "51" . $account;
+
+                        }
                     }else{
                         $result = $account;
+
                     }
                 }else{
                     $result = $account;
+
                 }
                 
                 $result = preg_replace('/[^0-9]/i', '',$result);
@@ -1511,7 +1550,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'NUMERO_REGISTRO' => '',
             'SEGMENTO' => '',
             'USO_BANCO_104' => '',
-            'BEN_TIPO_DOC' => '',
+            'BEN_TIPO_DOC' => function ($registrations) use ($detahe2) {
+                $field_id = $detahe2['BEN_CPF']['field_id'];
+                $data = preg_replace('/[^0-9]/i', '',$registrations->$field_id);
+                if (strlen($this->normalizeString($data)) <= 11) {
+                    return 1;
+                }else{
+                    return 2;
+                }
+               
+            },
             'BEN_CPF' => function ($registrations) use ($detahe2) {
                 $field_id = $detahe2['BEN_CPF']['field_id'];
                 $data = preg_replace('/[^0-9]/i', '',$registrations->$field_id);
@@ -1902,7 +1950,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $complement = [];
             $numLote++;
             $complement = [
-                'FORMA_LANCAMENTO' => 03,
+                'FORMA_LANCAMENTO' => 41,
                 'LOTE' => $numLote,
             ];
 
@@ -2182,7 +2230,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'SEGMENTO' => '',
             'TIPO_MOVIMENTO' => '',
             'CODIGO_MOVIMENTO' => '',
-            'CAMARA_CENTRALIZADORA' => '',
+            'CAMARA_CENTRALIZADORA' => function ($registrations) use ($detahe1) {
+                $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                $numberBank = $this->numberBank($registrations->$field_id);
+                if($numberBank === "001"){
+                    $result = "000";
+
+                }else{
+                    $result = "018";
+                    
+                }
+                return $result;
+
+            },
             'BEN_CODIGO_BANCO' => function ($registrations) use ($detahe1) {
                 $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
                 return $this->numberBank($registrations->$field_id);

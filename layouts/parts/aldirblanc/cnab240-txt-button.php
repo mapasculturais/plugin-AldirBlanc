@@ -40,6 +40,8 @@ if($inciso == 1){
         </div>
 
         <input type="hidden" name="opportunity" value="<?=$opportunity?>">
+        <input type="radio" name="typeFile" value="TS" title=""> Gerar arquivo para teste TS</br>
+        <input type="radio" name="typeFile" title="" checked> Gerar arquivo para pagamento</br>
         <p><span style="color: red;">*</span> Obrigatório informar data de pagamento</p>
         <button class="btn btn-primary download" name = "cnab240" value="cnab240" type="submit">Exportar</button>
     </form>
