@@ -96,6 +96,10 @@ class Plugin extends \MapasCulturais\Plugin
             // mensagem padrão para recurso das inscrições com status 2 e 3
             'msg_recurso' => env('AB_MENSAGEM_RECURSO', ''),
 
+            // configurações dos recursos
+            'dias_para_recurso' => env('AB_DIAS_PARA_RECURSO', 5),
+            'de_para_avaliacoes' => (array) json_decode(env('AB_DE_PARA_AVALIACOES', '[]')),
+
             // mensagem para reprocessamento do Dataprev, para ignorar a mensagem retornada pelo Dataprev e exibir a mensagem abaixo
             'msg_reprocessamento_dataprev' => env('AB_MENSAGEM_REPROCESSAMENTO_DATAPREV', ''),
                         
@@ -230,6 +234,32 @@ class Plugin extends \MapasCulturais\Plugin
             // $app->view->enqueueStyle('app','chat','chat.css');
         }
 
+        // define o valor do metadado da data de publicação
+
+        $app->hook('entity(Registration).status(<<*>>)', function() use($app) {
+            $app->disableAccessControl();
+            $lab_status_log = (array) $this->lab_status_log;
+            $lab_status_log[] = [
+                'status' => $this->status,
+                'date' => date('Y-m-d H:i:s'),
+                'user' => $app->user->id
+            ];
+            $this->lab_status_log = $lab_status_log;
+            $this->save();
+            $app->enableAccessControl();
+        });
+
+
+        $app->hook('entity(Registration).status(<<notapproved|invalid>>)', function() use($app, $plugin) {
+            $date = new \DateTime();
+            $date->add(date_interval_create_from_date_string($plugin->config['dias_para_recurso'] . ' days'));
+            
+            $this->lab_data_limite_recurso = $date->format('Y-m-d');
+            
+            $app->disableAccessControl();
+            $this->save();
+            $app->enableAccessControl();
+        });
         // adiciona informações do status das validações ao formulário de avaliação
         $app->hook('template(registration.view.evaluationForm.simple):before', function(Registration $registration, $opportunity) use($plugin, $app) {
             $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
@@ -941,6 +971,19 @@ class Plugin extends \MapasCulturais\Plugin
         $this->registerMetadata('MapasCulturais\Entities\Registration', 'inciso', [
             'label' => i::__('Inciso'),
             'type' => 'number',
+            'private' => true,
+        ]);
+
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'lab_status_log', [
+            'label' => i::__('Data de publicação'),
+            'type' => 'json',
+            'private' => true,
+            'default' => '[]'
+        ]);
+
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'lab_data_limite_recurso', [
+            'label' => i::__('Data de publicação'),
+            'type' => 'date',
             'private' => true,
         ]);
 

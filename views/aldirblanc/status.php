@@ -61,12 +61,27 @@ $_params = [
                     $statusRecurso = $this->controller->config['msg_recurso'];
                 }
 
+                $data_recurso = $registration->lab_data_limite_recurso ?? false;
+
                 if ($statusRecurso) { 
-                ?>
-                    <hr>
-                    <h2 class="status-card--title">Você pode entrar com recurso</h2>
-                    <p class="status-card--content"><?= $statusRecurso; ?></p>
-                <?php 
+                    if ($data_recurso >= date ('Y-m-d')) {
+                        $date = (new DateTime($data_recurso))->format('d/m/Y');                        
+                        ?>
+                            <hr>
+                            <h2 class="status-card--title">Você pode entrar com recurso até o dia <?= $date ?></h2>
+                            <p class="status-card--content"><?= $statusRecurso; ?></p>
+                        <?php
+                    } else {
+                        
+                        $date = (new DateTime($data_recurso))->format('d/m/Y');                        
+                        ?>
+                            <hr>
+                            <h2 class="status-card--title"> <?= $date ?> O período para solicitação de recurso foi encerrado</h2>
+                            <p class="status-card--content"><?= $statusRecurso; ?></p>
+                        <?php
+                    }
+                
+                
                 }
             } ?>
 

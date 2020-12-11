@@ -10,10 +10,14 @@ use MapasCulturais\Entities\Registration;
 use MapasCulturais\Entities\RegistrationSpaceRelation as RegistrationSpaceRelationEntity;
 use MapasCulturais\Entities\User;
 use MapasCulturais\Exceptions\PermissionDenied;
+<<<<<<< HEAD
 use League\Csv\Reader;
 use League\Csv\Writer;
 use League\Csv\Statement;
 
+=======
+use DateTime;
+>>>>>>> feature/data-recurso
 
 /**
  * Registration Controller
@@ -1318,7 +1322,160 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     }
     
- 
+    function GET_email_recusadas() {
+        
+        $this->requireAuthentication();
+
+        $app = App::i();
+
+        if(!$app->user->is('admin')) {
+            $this->errorJson('Permissao negada', 403);
+        }
+        
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '-1');
+        
+        $inciso1Id = $this->config['inciso1_opportunity_id'];
+        $registrations = $app->repo('Registration')->findBy(['opportunity' => $inciso1Id, 'status' => [2, 3]]);
+        $dias = $this->config['dias_para_recurso'];
+        $dataLimite = new DateTime('now');
+        $dataLimite->modify('+' . $dias . ' day');     
+        foreach($registrations as $r) {
+            if(!$r->lab_data_limite_recurso){                                             
+                $emailenviado = $this->enviaEmailRecusadas($r, $dataLimite);
+            }
+        }
+    }
+   
+    function enviaEmailRecusadas($registration, $dataLimite){
+        $app = App::i();
+        $mustache = new \Mustache_Engine(); //pega um template e add variaveis (sendo usado linha 22)
+        $site_name = $app->view->dict('site: name', false);
+        $baseUrl = $app->getBaseUrl();
+        $filename = $app->view->resolveFilename("views/aldirblanc", "email-recusadas.html");
+        $template = file_get_contents($filename); 
+        $avaliacoes = $this->processaDeParaAvaliacoesRecusadas($registration);
+            
+        $params = [
+            "siteName" => $site_name,
+            "urlImageToUseInEmails" => $this->config['logotipo_central'],
+            "user" => $registration->owner->name,
+            "inscricao" => $registration->number,            
+            "baseUrl" => $baseUrl,            
+            "dataLimite" => $dataLimite->format('d/m/Y'),
+            "avaliacoes" => $avaliacoes
+        ];         
+        
+        $content = $mustache->render($template,$params); 
+        $email_params = [
+            'from' => $app->config['mailer.from'],
+            'to' => $registration->agentsData['owner']["emailPrivado"],
+            'subject' => $site_name . " - Dados Para Recurso",
+            'body' => $content
+        ];
+
+        $emailSent = '';
+        
+        // Envia e-mail apenas para inscrições que possuem avaliações tratadas pela config `de_para_avaliacoes`
+        if (!empty($avaliacoes)){
+            $app->log->debug("ENVIANDO EMAIL RECUSADAS, INSCRIÇÃO {$registration->number} ...");
+            $emailSent = $app->createAndSendMailMessage($email_params);
+        } else {
+            $app->log->debug("NÃO FORAM ENCONTRADAS AVALIAÇÕES COM DE->PARA da {$registration->number}");
+        }
+
+        if ($emailSent){
+
+            $app->log->debug("E-MAIL ENVIADO COM SUCESSO!");
+            $app->log->debug("==================================================================");
+
+            $sent_emails = $registration->lab_sent_emails;
+            $sent_emails[] = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'loggedin_user' => [
+                    'id' => $app->user->id,
+                    'email' => $app->user->email,
+                    'name' => $app->user->profile->name 
+                ],
+                'email' => 'email - recusadas'
+            ];
+
+            $app->disableAccessControl();
+            $registration->lab_sent_emails = $sent_emails;
+            $registration->lab_data_limite_recurso = $dataLimite->format('Y-m-d 00:00');
+            $registration->save(true);
+            $app->enableAccessControl();
+
+        } else {
+
+            $app->log->debug("ERRO AO TENTAR ENVIAR E-MAIL DA INSCRIÇÃO {$registration->number}");
+            $app->log->debug("==================================================================");
+
+        }
+    }
+
+    /**
+     * 
+     * Função para retornar todas as avalições das inscrições recusadas
+     * passando pela config `de_para_avaliacoes`
+     * 
+     */
+    function processaDeParaAvaliacoes ($registration){
+        $app = App::i();
+        $avaliacoes = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
+        $configDePara = $this->config['de_para_avaliacoes'] ?? '';
+        if(!empty($configDePara)){ 
+            foreach($avaliacoes as $a){
+                if ($a->result == 2 || $a->result == 3){
+                    $novaAvaliacao = '';
+                    $evaluationData = $a->getEvaluationData();
+                    $obs = $evaluationData->obs;                    
+                    foreach($configDePara as $key => $value) {
+                        $pos = strpos($obs, $key);                        
+                        if ($pos !== false) {
+                            $novaAvaliacao .= $value . '. ';
+                        }   
+                    }          
+                    if (!empty($novaAvaliacao)) {
+                        $evaluationData->obs = $novaAvaliacao;
+                        $a->setEvaluationData($evaluationData);
+                    }  
+                }                             
+            }           
+        }
+        return $avaliacoes;
+    }
+
+    /**
+     * 
+     * Função para retornar apenas as avalições das inscrições recusadas
+     * e que foram alteradas pela config `de_para_avaliacoes`
+     * 
+     */
+    function processaDeParaAvaliacoesRecusadas($registration) {
+        
+        $app = App::i();
+        $avaliacoes = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
+        $configDePara = $this->config['de_para_avaliacoes'] ?? '';
+        $avaliacoesProcessadas = [];
+        
+        if(!empty($configDePara)){ 
+            foreach($avaliacoes as $a){
+                if ($a->result == 2 || $a->result == 3){                    
+                    $evaluationData = $a->getEvaluationData();
+                    $obs = $evaluationData->obs;                    
+                    foreach($configDePara as $key => $value) {
+                        $pos = strpos($obs, $key);                        
+                        if ($pos !== false && !in_array($value, $avaliacoesProcessadas)) {                            
+                            $avaliacoesProcessadas[] = $value;
+                        }
+                    }
+                }
+            }
+        }
+        return $avaliacoesProcessadas;
+    }
+
     /* REPORTE */
     function GET_reporte() {
 
