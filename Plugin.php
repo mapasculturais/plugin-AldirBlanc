@@ -260,7 +260,7 @@ class Plugin extends \MapasCulturais\Plugin
             $opportunity = $requestedOpportunity->id;
 
             //Configura em que incisos deve ser exibido o botão do CNAB240. deixar o array vazio para nao exibir
-            $exibirBtnIncisos = [1];            
+            $exibirBtnIncisos = [];            
             
             $selectList = false;            
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
