@@ -4042,7 +4042,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $config = $this->config["config-ppg10x"];
         $idMap = null;
         if (isset($config["idMap"]) &&
-            !isset($this->data["ignore_ppg_idmap"])) {
+            isset($this->data["use_ppg_idmap"])) {
             $idMap = $this->getCSVData($config["idMap"], ",", $key);
             if (!$idMap) {
                 App::i()->log->info("Mapeamento de identificadores ausente.");
@@ -4064,7 +4064,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             ]);
         } else {
             $payment = $paymentRepo->find($reference);
-            $registrationID = $payment->registration->id;
+            if (isset($payment)) {
+                $registrationID = $payment->registration->id;
+            }
         }
         if (!isset($payment)) {
             if ($idMap != null) {
@@ -4203,9 +4205,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             if (!isset($payment)) {
                 continue;
             }
-            $payment->status = ($entry["paymentCode"] == 0) ?
-                               Payment::STATUS_AVAILABLE :
-                               Payment::STATUS_FAILED;
+            $status = ($entry["paymentCode"] == 0) ? Payment::STATUS_AVAILABLE :
+                      Payment::STATUS_FAILED;
+            if ($payment->status != $status) { // o setter não lida bem com sobrescrever o mesmo valor
+                $payment->status = $status;
+            }
             $metadata = is_array($payment->metadata) ? $payment->metadata :
                         json_decode($payment->metadata);
             $metadata["ppg101"] = [
