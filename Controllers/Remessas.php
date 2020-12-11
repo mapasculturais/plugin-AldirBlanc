@@ -119,7 +119,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         //Pega o status solicitado no formulário
         if($this->data[$typeExport] === "all"){
-            $statusPayment = ['0','1', '2', '3', '10'];
+            $statusPayment = ['0','1', '2', '3', '8', '10'];
 
         }else{
             $statusPayment = [$this->data[$typeExport]];
@@ -144,10 +144,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          */ 
         
         $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r
-            JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE 
+            JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE
             r.status > 0 AND
             r.opportunity = :opportunity AND
-            p.status IN (:statusPayment) ".$extra ;
+            p.status IN (:statusPayment) " . $extra . " GROUP BY r";
 
         $query = $app->em->createQuery($dql);
 
@@ -1507,10 +1507,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $this->requireAuthentication();
         $app = App::i();
 
+        //Captura se deve ser gerado um arquivo do tipo teste
+        $typeFile =  null;
+        if(isset($this->data['typeFile'])){
+            $typeFile = $this->data['typeFile'];
+        }
+
         $opportunity = $this->getOpportunity();
         $opportunity_id = $opportunity->id;
         $registrations = $this->getRegistrations($opportunity);
-        $parametersForms = $this->getParametersForms();        
+        $parametersForms = $this->getParametersForms();
         
         /**
          * Pega os dados das configurações
@@ -1537,7 +1543,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CONVENIO_BB1' => '',
             'CONVENIO_BB2' => '',
             'CONVENIO_BB3' => '',
-            'CONVENIO_BB4' => '',
+            'CONVENIO_BB4' => function ($registrations) use ($typeFile) {
+                if($typeFile == "TS"){
+                    return "TS";
+                }else{
+                    return "";
+                }
+            }, 
             'AGENCIA' => function ($registrations) use ($header1) {
                 $result = "";
                 $field_id = $header1['AGENCIA'];
@@ -1606,7 +1618,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CONVENIO_BB1' => '',
             'CONVENIO_BB2' => '',
             'CONVENIO_BB3' => '',
-            'CONVENIO_BB4' => '',
+            'CONVENIO_BB4' => function ($registrations) use ($typeFile) {
+                if($typeFile == "TS"){
+                    return "TS";
+                }else{
+                    return "";
+                }
+            },
             'AGENCIA' => function ($registrations) use ($header2) {
                 $result = "";
                 $field_id = $header2['AGENCIA'];
@@ -1662,7 +1680,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'SEGMENTO' => '',
             'TIPO_MOVIMENTO' => '',
             'CODIGO_MOVIMENTO' => '',
-            'CAMARA_CENTRALIZADORA' => '',
+            'CAMARA_CENTRALIZADORA' => function ($registrations) use ($detahe1) {
+                $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                $numberBank = $this->numberBank($registrations->$field_id);
+                if($numberBank === "001"){
+                    $result = "000";
+
+                }else{
+                    $result = "018";
+                    
+                }
+                return $result;
+
+            },
             'BEN_CODIGO_BANCO' => function ($registrations) use ($detahe2, $detahe1, $dePara, $cpfCsv) {
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
@@ -1811,15 +1841,24 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
                 if($typeAccount == $default['typesAccount']['poupanca']){
 
-                    if (($numberBank == '001') && (substr($account, 0, 3) != "510")) {
+                    if (($numberBank == '001') && (substr($account, 0, 2) != "51")) {
 
-                        $result = "510" . $account;
-                         
+                        $account_temp = "51" . $account;
+
+                        if(strlen($account_temp) < 9){
+                            $result = "51".str_pad($account, 9, 0, STR_PAD_LEFT);
+                        
+                        }else{
+                            $result = "51" . $account;
+
+                        }
                     }else{
                         $result = $account;
+
                     }
                 }else{
                     $result = $account;
+
                 }
                 
                 $result = preg_replace('/[^0-9]/i', '',$result);
@@ -1976,7 +2015,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'NUMERO_REGISTRO' => '',
             'SEGMENTO' => '',
             'USO_BANCO_104' => '',
-            'BEN_TIPO_DOC' => '',
+            'BEN_TIPO_DOC' => function ($registrations) use ($detahe2) {
+                $field_id = $detahe2['BEN_CPF']['field_id'];
+                $data = preg_replace('/[^0-9]/i', '',$registrations->$field_id);
+                if (strlen($this->normalizeString($data)) <= 11) {
+                    return 1;
+                }else{
+                    return 2;
+                }
+               
+            },
             'BEN_CPF' => function ($registrations) use ($detahe2) {
                 $field_id = $detahe2['BEN_CPF']['field_id'];
                 $data = preg_replace('/[^0-9]/i', '',$registrations->$field_id);
@@ -2367,7 +2415,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $complement = [];
             $numLote++;
             $complement = [
-                'FORMA_LANCAMENTO' => 03,
+                'FORMA_LANCAMENTO' => 41,
                 'LOTE' => $numLote,
             ];
 
@@ -2647,7 +2695,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'SEGMENTO' => '',
             'TIPO_MOVIMENTO' => '',
             'CODIGO_MOVIMENTO' => '',
-            'CAMARA_CENTRALIZADORA' => '',
+            'CAMARA_CENTRALIZADORA' => function ($registrations) use ($detahe1) {
+                $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                $numberBank = $this->numberBank($registrations->$field_id);
+                if($numberBank === "001"){
+                    $result = "000";
+
+                }else{
+                    $result = "018";
+                    
+                }
+                return $result;
+
+            },
             'BEN_CODIGO_BANCO' => function ($registrations) use ($detahe1) {
                 $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
                 return $this->numberBank($registrations->$field_id);
@@ -3691,26 +3751,54 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     }
 
     /**
+     * Processa os pagamentos para uma inscrição. Para uso com foreach.
+     */
+    private function getNextPayment($registration)
+    {
+        $app = App::i();
+        $repo = $app->repo("\\RegistrationPayments\\Payment");
+        $keys = $this->getParametersForms();
+        $date = $keys["datePayment"];
+        $select = ["registration" => $registration->id];
+        if (isset($this->data[$date])) {
+            $select["paymentDate"] = new DateTime($this->data[$date]);
+        }
+        $payments = $repo->findBy($select);
+        foreach ($payments as $payment) {
+            if ($this->processSinglePayment($registration, $app, $keys,
+                                            $payment)) {
+                yield $payment;
+            }
+        }
+        return;
+    }
+
+    /**
      * Processa pagamento
      */
-    private function processesPayment($register, $app, $returnObject=false) {
-
-        $parametersForms = $this->getParametersForms();
-
-        $result = 0;
+    private function processesPayment($register, $app)
+    {
         $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
             'registration' => $register->id
         ]);
+        return $this->processSinglePayment($register, $app,
+                                           $this->getParametersForms(),
+                                           $payment);
+    }
 
+    private function processSinglePayment($register, $app, $parametersForms,
+                                          $payment)
+    {
+        $result = 0;
         if ($payment && ($this->data[$parametersForms['typeExport']] === '0')) {
             $payment->status = 3;
             $payment->save(true);
             $app->log->info($register->number . " - EXPORTADA E PROCESSADA PARA PAGAMENTO");
-            $result = $returnObject ? $payment : $payment->amount;
+            $result = $payment->amount;
 
         } else if ($payment && $this->data[$parametersForms['typeExport']] === '3') {
             $app->log->info($register->number . " - JÁ EXPORTADA PARA PAGAMENTO");
-            $result = $returnObject ? $payment : $payment->amount;
+            $result = $payment->amount;
 
         } else if($payment && $this->data[$parametersForms['typeExport']] === 'all') {
             if ($payment->status == 0) {
@@ -3719,7 +3807,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $app->log->info($register->number . " - PAGAMENTO CADASTRADO - JÁ EXPORTADO PARA PAGAMENTO");
             }
 
-            $result = $returnObject ? $payment : $payment->amount;
+            $result = $payment->amount;
 
         } else {
             $app->log->info($register->number . " - PAGAMENTO NÃO ENCONTRADO");
@@ -4473,12 +4561,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         $newline = "\r\n";
         set_time_limit(0);
-        // carrega mapeamento de identificadores
-        $idMap = $this->ppg10xIdMap("registrationID");
         // inicializa contadores
         $nLines = 1;
         $totalAmount = 0;
-        $newMappings = 0;
         // gera o header
         $out = $this->genericHeader($config) . $newline;
         $opportunityIDs = [];
@@ -4499,24 +4584,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                     $registration->number);
                     continue;
                 }
-                $payment = $this->processesPayment($registration, $app, true);
-                $amount = $this->genericPaymentAmount($payment);
-                if (($idMap != null) && !isset($idMap[$registration->id])) {
-                    ++$newMappings;
-                    $idMap[$registration->id] = [
-                         "idCliente" => (1 + sizeof($idMap)),
-                    ];
+                foreach ($this->getNextPayment($registration) as $payment) {
+                    $amount = $this->genericPaymentAmount($payment);
+                    $details = $this->genericDetails($config, $registration, [
+                        "numeroRegistro" => ($nLines + 1),
+                        "valorCarga" => $amount,
+                        "numeroProtocolo" => ["idCliente" => $payment->id],
+                    ]);
+                    $nLines += sizeof($details);
+                    $totalAmount += $amount;
+                    $out .= implode($newline, $details) . $newline;
                 }
-                $details = $this->genericDetails($config, $registration, [
-                    "numeroRegistro" => ($nLines + 1),
-                    "valorCarga" => $amount,
-                    "numeroProtocolo" => (($idMap != null) ?
-                                          $idMap[$registration->id] :
-                                          ["idCliente" => $payment->id]),
-                ]);
-                $nLines += sizeof($details);
-                $totalAmount += $amount;
-                $out .= implode($newline, $details) . $newline;
                 $app->em->clear();
             }
             if ($nLines > $linesBefore) {
@@ -4533,26 +4611,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             "totalCarga" => $totalAmount,
             "numeroRegistro" => $nLines,
         ]) . $newline;
-        // atualiza o mapeamento de identificadores
-        if ($newMappings > 0) {
-            $this->saveCSVData($config["idMap"], ",", "registrationID", $idMap);
-        }
         $this->genericOutput($out, "ppg100", "inciso1", $opportunityIDs);
         return;
-    }
-
-    private function ppg100ActionPA($registrationID)
-    {
-        $app = App::i();
-        $payments = $app->repo("\\RegistrationPayments\\Payment")->findBy([
-            "registration" => $registrationID
-        ]);
-        foreach ($payments as $payment) {
-            if ($payment->status == Payment::STATUS_PAID) {
-                return 5; // 3 no formato antigo
-            }
-        }
-        return 4; // 2 no formato antigo
     }
 
     // formato antigo, sem uso se permanecer o novo
