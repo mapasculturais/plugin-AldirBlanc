@@ -1,9 +1,17 @@
 ## [Unreleased]
+- Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
+- Padroniza exibição da área de upload de desbancarizados [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
+- Adiciona suporte a múltiplos pagamentos no mesmo arquivo PPG100 [#169](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
 - Adiciona ao formulário de avaliação dos incisos I e II a informação da consolidação atual das avaliações da inscrição [#163](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
 - Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Refatorar CNAB240 para exportar valores quebrados EX.: 2.904,80 (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
 - Refatorar calculo da data de pagamento para 5 dias após o envio (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
 - Inserir Número da inscrição no logradouro para que a mesma retorne nos arquivos de retorno BB (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
+- Corrige código de Câmara centralizadora para outros banco para 018 no CNAB240 (Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
+- Corrige Forma de lançamento para lote de outros bancos para 041 no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
+- Corrige prefixo para casos de conta corrente de 510 para 51 no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
+- Inserire opção de fazer exportação de arquivos teste (TS) no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
+- Inserire configurações para habilitar e desabilitar botão do CNAB240 nos incisos no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
 
 ## [v2.3.1] - 2020-12-01
 - Implementa os importadores para o MCI470 e PPG101 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
