@@ -1,13 +1,10 @@
 ## [Unreleased]
-- Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
+- Corrige bug de armazenamento dos metadados no importador do MCI470 [#171](https://github.com/mapasculturais/plugin-AldirBlanc/issues/171)
 - Padroniza exibição da área de upload de desbancarizados [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Adiciona suporte a múltiplos pagamentos no mesmo arquivo PPG100 [#169](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
 - Adiciona ao formulário de avaliação dos incisos I e II a informação da consolidação atual das avaliações da inscrição [#163](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
 - Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Refatorando CNAB240 do Inciso 1 para receber desbancarizados com as contas criadas pela Secult
-- Refatorar CNAB240 para exportar valores quebrados EX.: 2.904,80 (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
-- Refatorar calculo da data de pagamento para 5 dias após o envio (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
-- Inserir Número da inscrição no logradouro para que a mesma retorne nos arquivos de retorno BB (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
 - Refatorar CNAB240 para exportar valores quebrados EX.: 2.904,80 (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
 - Refatorar calculo da data de pagamento para 5 dias após o envio (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
 - Inserir Número da inscrição no logradouro para que a mesma retorne nos arquivos de retorno BB (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
@@ -20,7 +17,7 @@
 ## [v2.3.1] - 2020-12-01
 - Implementa os importadores para o MCI470 e PPG101 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Reordena as avaliações antes da reconsolidação do resultado das inscrições, para colocar as avaliações que foram importadas (as que têm id igual ao id da inscrição) para serem processadas primeiro;
-- Redireciona usuários com controle sobre alguma oportunidade ou avaliadores de alguma oportunidade para o painel ao acessar a tela de cadastro. [#161]https://github.com/mapasculturais/plugin-AldirBlanc/issues/161 
+- Redireciona usuários com controle sobre alguma oportunidade ou avaliadores de alguma oportunidade para o painel ao acessar a tela de cadastro. [#161]https://github.com/mapasculturais/plugin-AldirBlanc/issues/161
 
 ## [v2.3.0] - 2020-10-27
 
