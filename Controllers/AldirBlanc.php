@@ -1315,8 +1315,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if(!$app->user->is('admin')) {
             $this->errorJson('Permissao negada', 403);
         }
+        
         ini_set('max_execution_time', 0);
-        ini_set('memory_limit', '-1');                
+        ini_set('memory_limit', '-1');
         
         $inciso1Id = $this->config['inciso1_opportunity_id'];
         $registrations = $app->repo('Registration')->findBy(['opportunity' => $inciso1Id, 'status' => [2, 3]]);
@@ -1325,9 +1326,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $dataLimite->modify('+' . $dias . ' day');     
         foreach($registrations as $r) {
             if(!$r->lab_data_limite_recurso){                                             
-                $emailenviado = $this->enviaEmailRecusadas($r, $dataLimite);                
-            }                     
-        }        
+                $emailenviado = $this->enviaEmailRecusadas($r, $dataLimite);
+            }
+        }
     }
    
     function enviaEmailRecusadas($registration, $dataLimite){
@@ -1358,15 +1359,21 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         ];
 
         $emailSent = '';
-        if (!empty($avaliacoes)){ //if e else força o código a enviar os emails para inscrições que passaram pelo de->para
-            $app->log->debug("ENVIANDO EMAIL RECUSADAS da {$registration->number}");
+        
+        // Envia e-mail apenas para inscrições que possuem avaliações tratadas pela config `de_para_avaliacoes`
+        if (!empty($avaliacoes)){
+            $app->log->debug("ENVIANDO EMAIL RECUSADAS, INSCRIÇÃO {$registration->number} ...");
             $emailSent = $app->createAndSendMailMessage($email_params);
         } else {
             $app->log->debug("NÃO FORAM ENCONTRADAS AVALIAÇÕES COM DE->PARA da {$registration->number}");
         }
 
         if ($emailSent){
-            $sent_emails = $registration->lab_sent_emails ;
+
+            $app->log->debug("E-MAIL ENVIADO COM SUCESSO!");
+            $app->log->debug("==================================================================");
+
+            $sent_emails = $registration->lab_sent_emails;
             $sent_emails[] = [
                 'timestamp' => date('Y-m-d H:i:s'),
                 'loggedin_user' => [
@@ -1381,17 +1388,26 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $registration->lab_sent_emails = $sent_emails;
             $registration->lab_data_limite_recurso = $dataLimite->format('Y-m-d 00:00');
             $registration->save(true);
-            $app->enableAccessControl();            
+            $app->enableAccessControl();
+
+        } else {
+
+            $app->log->debug("ERRO AO TENTAR ENVIAR E-MAIL DA INSCRIÇÃO {$registration->number}");
+            $app->log->debug("==================================================================");
+
         }
     }
 
-    // Criar uma função que recebe uma inscrição e busca nas avaliacoes dela
-    // passa pelo de_para e retorna a mensagem a ser enviada
-   
+    /**
+     * 
+     * Função para retornar todas as avalições das inscrições recusadas
+     * passando pela config `de_para_avaliacoes`
+     * 
+     */
     function processaDeParaAvaliacoes ($registration){
         $app = App::i();
         $avaliacoes = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
-        $configDePara = $this->config['de_para_avaliacoes'] ?? ''; //pegando config do Plugin.php
+        $configDePara = $this->config['de_para_avaliacoes'] ?? '';
         if(!empty($configDePara)){ 
             foreach($avaliacoes as $a){
                 if ($a->result == 2 || $a->result == 3){
@@ -1414,6 +1430,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return $avaliacoes;
     }
 
+    /**
+     * 
+     * Função para retornar apenas as avalições das inscrições recusadas
+     * e que foram alteradas pela config `de_para_avaliacoes`
+     * 
+     */
     function processaDeParaAvaliacoesRecusadas($registration) {
         
         $app = App::i();
