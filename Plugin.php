@@ -255,7 +255,10 @@ class Plugin extends \MapasCulturais\Plugin
             $inciso3Ids = [];//$plugin->config['inciso3_opportunity_ids'];
             $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
             $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
-            $opportunity = $requestedOpportunity->id;            
+            $opportunity = $requestedOpportunity->id;
+
+            //Configura em que incisos deve ser exibido o botão do CNAB240. deixar o array vazio para nao exibir
+            $exibirBtnIncisos = [1];            
             
             $selectList = false;            
             if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
@@ -272,7 +275,9 @@ class Plugin extends \MapasCulturais\Plugin
                     $inciso = 3;
 
                 }
-                $this->part('aldirblanc/cnab240-txt-button', ['inciso' => $inciso, 'opportunity' => $opportunity, 'selectList' => $selectList]);
+                if(in_array($inciso, $exibirBtnIncisos)){ //<= Configurar para exibir o botão do CNAB 240
+                    $this->part('aldirblanc/cnab240-txt-button', ['inciso' => $inciso, 'opportunity' => $opportunity, 'selectList' => $selectList, 'exibirBtnIncisos' =>$exibirBtnIncisos]);
+                }
             }
         });
 
@@ -455,7 +460,13 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
         // uploads de desbancarizados
-        $app->hook('template(opportunity.<<single|edit>>.sidebar-right):end', function () {
+        $app->hook('template(opportunity.<<single|edit>>.sidebar-right):end', function () use ($plugin) {
+            // condiciona exibição da área de uploads à configuração que controla o botão de exportação
+            if (!isset($plugin->config['exporta_desbancarizados']) ||
+                !is_array($plugin->config['exporta_desbancarizados']) ||
+                empty($plugin->config['exporta_desbancarizados'])) {
+                return;
+            }
             $opportunity = $this->controller->requestedEntity;
             if ($opportunity->canUser('@control')) {
                 $this->part('aldirblanc/bankless-uploads', ['entity' => $opportunity]);
