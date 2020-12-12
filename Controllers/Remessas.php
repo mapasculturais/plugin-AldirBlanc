@@ -1381,7 +1381,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $account_temp = "51" . $account;
 
                         if(strlen($account_temp) < 9){
-                            $result = "51".str_pad($account, 9, 0, STR_PAD_LEFT);
+                            $result = "51".str_pad($account, 7, 0, STR_PAD_LEFT);
                         
                         }else{
                             $result = "51" . $account;
@@ -1524,6 +1524,24 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'USO_BANCO_88' => '',
             'USO_BANCO_89' => '',
+            'OUTRAS_INFO_233A' => function ($registrations) use ($detahe1, $default) {
+                $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+
+                $field_conta = $detahe1['TIPO_CONTA']['field_id'];
+                $typeAccount = $registrations->$field_conta;               
+
+                if($temp){
+                    $numberBank = $this->numberBank($registrations->$temp);
+                }else{
+                    $numberBank = $default['defaultBank'];
+                }
+                
+                if ($numberBank == "001" && $typeAccount == $default['typesAccount']['poupanca']) {
+                    return '11';
+                }else{
+                    return "";
+                }
+            },
             'USO_BANCO_90' => '',
             'CODIGO_FINALIDADE_TED' => function ($registrations) use ($detahe1, $default) {
                 $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
