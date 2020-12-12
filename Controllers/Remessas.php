@@ -4042,7 +4042,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $config = $this->config["config-ppg10x"];
         $idMap = null;
         if (isset($config["idMap"]) &&
-            !isset($this->data["ignore_ppg_idmap"])) {
+            isset($this->data["use_ppg_idmap"])) {
             $idMap = $this->getCSVData($config["idMap"], ",", $key);
             if (!$idMap) {
                 App::i()->log->info("Mapeamento de identificadores ausente.");
@@ -4064,7 +4064,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             ]);
         } else {
             $payment = $paymentRepo->find($reference);
-            $registrationID = $payment->registration->id;
+            if (isset($payment)) {
+                $registrationID = $payment->registration->id;
+            }
         }
         if (!isset($payment)) {
             if ($idMap != null) {
@@ -4203,9 +4205,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             if (!isset($payment)) {
                 continue;
             }
-            $payment->status = ($entry["paymentCode"] == 0) ?
-                               Payment::STATUS_AVAILABLE :
-                               Payment::STATUS_FAILED;
+            $status = ($entry["paymentCode"] == 0) ? Payment::STATUS_AVAILABLE :
+                      Payment::STATUS_FAILED;
+            if ($payment->status != $status) { // o setter não lida bem com sobrescrever o mesmo valor
+                $payment->status = $status;
+            }
             $metadata = is_array($payment->metadata) ? $payment->metadata :
                         json_decode($payment->metadata);
             $metadata["ppg101"] = [
@@ -4587,13 +4591,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
             $accountCreation = $registration->owner->account_creation ??
                                new stdClass();
-            if (($accountCreation->status ?? 1) == 10) {
+            if ((($accountCreation->status ?? 1) == 10) &&
+                (!isset($this->data["force_update"]) ||
+                 (basename($accountCreation->received_filename) !=
+                  $meta["filename"]))) {
                 $app->log->info("Ignorando - conta já aberta: $registrationID");
                 continue;
             }
             $app->log->info("Processando: $registrationID - " .
                             json_encode($entry));
-            $accountCreation->status = ($entry["errorClient"] == 0) ?
+            $accountCreation->status = (($entry["errorClient"] == 0) &&
+                                        ($entry["errorAccount"] == 0)) ?
                                        self::ACCOUNT_CREATION_SUCCESS :
                                        self::ACCOUNT_CREATION_FAILED;
             $accountCreation->received_raw = $item["raw"];
@@ -4607,7 +4615,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $config["defaults"]["bankNumber"];
                 $registration->owner->payment_bank_branch =
                     $entry["branch"] . "-" . $entry["branchVC"];
-                $registration->owner->payment_bank_account =
+                $registration->owner->payment_bank_account_number =
                     $entry["account"] . "-" . $entry["accountVC"];
             }
             $registration->owner->save(true);

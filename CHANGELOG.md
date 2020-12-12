@@ -1,9 +1,9 @@
 ## [Unreleased]
-
+- Altera referência padrão dos PPG10x para ID do pagamento [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
+- Corrige bug de armazenamento dos metadados no importador do MCI470 [#171](https://github.com/mapasculturais/plugin-AldirBlanc/issues/171)
+- Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Padroniza exibição da área de upload de desbancarizados [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Adiciona suporte a múltiplos pagamentos no mesmo arquivo PPG100 [#169](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
-- Implementa endpoint para conferência de oportunidade para envio ao Dataprev
-- Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Adiciona ao formulário de avaliação dos incisos I e II a informação da consolidação atual das avaliações da inscrição [#163](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
 - Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Refatorar CNAB240 para exportar valores quebrados EX.: 2.904,80 (Ref. [#167](https://github.com/mapasculturais/plugin-AldirBlanc/issues/167))
