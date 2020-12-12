@@ -804,10 +804,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             
         }
 
+        $avaliacoesRecusadas = $this->processaDeParaAvaliacoesRecusadas($registration);
+
         $this->render('status', [
             'registration' => $registration, 
             'registrationStatusMessage' => $registrationStatusMessage, 
             'justificativaAvaliacao' => array_filter($justificativaAvaliacao),
+            'avaliacoesRecusadas' => $avaliacoesRecusadas,
             'recursos' => $recursos
         ]);
     }
@@ -1442,12 +1445,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $avaliacoes = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
         $configDePara = $this->config['de_para_avaliacoes'] ?? '';
         $avaliacoesProcessadas = [];
-        
+                         
         if(!empty($configDePara)){ 
             foreach($avaliacoes as $a){
                 if ($a->result == 2 || $a->result == 3){                    
                     $evaluationData = $a->getEvaluationData();
-                    $obs = $evaluationData->obs;                    
+                    $obs = $evaluationData->obs;           
                     foreach($configDePara as $key => $value) {
                         $pos = strpos($obs, $key);                        
                         if ($pos !== false && !in_array($value, $avaliacoesProcessadas)) {                            
