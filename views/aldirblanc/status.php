@@ -54,19 +54,42 @@ $_params = [
              */
             if (!$recursos && ($registration->status == 3 || $registration->status == 2)) {
                 $statusRecurso = '';
+                
+                $data_recurso = $registration->lab_data_limite_recurso ?? false;
 
-                if ($registration->opportunity->getMetadata('aldirblanc_status_recurso')) {
+                if (!empty($avaliacoesRecusadas) && $data_recurso >= date ('Y-m-d')){
+                    $statusRecurso = $avaliacoesRecusadas; 
+                }elseif ($registration->opportunity->getMetadata('aldirblanc_status_recurso')) {
                     $statusRecurso = $registration->opportunity->getMetadata('aldirblanc_status_recurso');
                 } elseif (!empty($this->controller->config['msg_recurso'])) {
                     $statusRecurso = $this->controller->config['msg_recurso'];
                 }
-
+                
                 if ($statusRecurso) { 
-                ?>
-                    <hr>
-                    <h2 class="status-card--title">Você pode entrar com recurso</h2>
-                    <p class="status-card--content"><?= $statusRecurso; ?></p>
-                <?php 
+                    if ($data_recurso >= date ('Y-m-d')) {
+                        $date = (new DateTime($data_recurso))->format('d/m/Y');                        
+                        ?>
+                            <hr>
+                            <h2 class="status-card--title"><b>Você pode entrar com recurso até o dia <?= $date ?></b></h2>
+                            <?php if (is_array($statusRecurso)){
+                                foreach($statusRecurso as $s){
+                                    echo '<p class="status-card--content"> '. $s .'</p>';
+                                }                             
+                            } else {
+                                echo '<p class="status-card--content"> '. $statusRecurso .'</p>';
+                            }
+                        
+                    } else {
+                        
+                        $date = (new DateTime($data_recurso))->format('d/m/Y');                        
+                        ?>
+                            <hr>
+                            <h2 class="status-card--title">Verifique o período para solicitação de recurso</h2>
+                            <p class="status-card--content"><?= $statusRecurso; ?></p>
+                        <?php
+                    }
+                
+                
                 }
             } ?>
 
