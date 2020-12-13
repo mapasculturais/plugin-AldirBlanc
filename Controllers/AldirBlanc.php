@@ -806,8 +806,42 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
             
         }
-       
-        $mensagemPpg = ($registration->lab_ppg_email && $this->config['exibir_msg_ppg']) ? $this->config['msg_ppg_status_pre'] . $registration->owner->user->email . '. ' . $this->config['msg_ppg_status_pos'] : '';
+
+        $msgsPpg = [];
+        if ($registration->lab_ppg_email && $this->config['exibir_msg_ppg']) {
+            // primeira parcela do primeiro lote
+            if (!is_array($registration->lab_ppg_email) ||
+                (in_array(($this->config['ppg_first_ref'] ?? '______'),
+                          $registration->lab_ppg_email))) {
+                $msgsPpg[] = $this->config['msg_ppg_status_1st_pre'] .
+                             $registration->owner->user->email .
+                             $this->config['msg_ppg_status_1st_pos'];
+            }
+            if (is_array($registration->lab_ppg_email)) {
+                // segunda e terceira parcelas do primeiro lote
+                if (in_array($this->config['ppg_second_ref'],
+                             $registration->lab_ppg_email)) {
+                    $msgsPpg[] = $this->config['msg_ppg_status_2nd3rd_pre'] .
+                                 $registration->owner->user->email .
+                                 $this->config['msg_ppg_status_2nd3rd_pos'];
+                    // quarta, quinta e sexta parcelas do primeiro lote (TBD)
+                    if (sizeof($registration->lab_ppg_email) > 2) {
+                        $msgsPpg[] = $this->config['msg_ppg_status_pre'][1] .
+                                     $registration->owner->user->email .
+                                     $this->config['msg_ppg_status_pos'][1];
+                    }
+                // segundo lote em diante (TBD)
+                } else {
+                    $i = 0;
+                    while ($i < sizeof($registration->lab_ppg_email)) {
+                       $msgsPpg[] = $this->config['msg_ppg_status_pre'][$i] .
+                                    $registration->owner->user->email .
+                                    $this->config['msg_ppg_status_pos'][$i];
+                        ++$i;
+                    }
+                }
+            }
+        }
 
         $avaliacoesRecusadas = $this->processaDeParaAvaliacoesRecusadas($registration);
 
@@ -817,7 +851,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             'justificativaAvaliacao' => array_filter($justificativaAvaliacao),
             'recursos' => $recursos,
             'avaliacoesRecusadas' => $avaliacoesRecusadas,
-            'mensagem_ppg' =>$mensagemPpg
+            'mensagem_ppg' => $msgsPpg,
         ]);
     }
 
@@ -1495,145 +1529,188 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         
         $this->render('reporte', $data);
     }
-    function GET_email_ppg() {
-        
+
+    function GET_email_ppg()
+    {
         $this->requireAuthentication();
-
         $app = App::i();
-
-        if(!$app->user->is('admin')) {
-            $this->errorJson('Permissao negada', 403);
+        if (!$app->user->is("admin")) {
+            $this->errorJson("Permissao negada", 403);
         }
-        ini_set('max_execution_time', 0);
-        ini_set('memory_limit', '-1');
-        
-        $txt = $this->config['ppg_file_path_txt'];
-        $ret = $this->config['ppg_file_path_ret'];
-        $csv = $this->config['ppg_file_path_csv'];
-        $fileData = $this->readPpg($txt,$ret,$csv);
-        if($fileData){
-            foreach ($fileData as $line){
-                $aprovado = !intval($line['aprov']);
-                if ($line['inscricao']->lab_ppg_email){
-                    $app->log->debug("EMAIL JA ENVIADO PARA {$line['inscricao']->number}");
-                }elseif ($aprovado) {
-                    $this->enviaEmailPpg($line);
-                }elseif(!$aprovado){
-                    $app->log->debug("NÃO APROVADO {$line['inscricao']->number}");
+        ini_set("max_execution_time", 0);
+        ini_set("memory_limit", "-1");
+        $fileRepo = $app->repo("File");
+        $firstPPG = null;
+        if (isset($this->config["ppg_first_ref"])) {
+            $firstPPG = $fileRepo->find($this->config["ppg_first_ref"]);
+        }
+        $txt = $this->config["ppg_file_path_txt"];
+        $retRef = $this->config["ppg_file_ref_ret"];
+        $ret = $fileRepo->find($retRef)->path;
+        $fileData = $this->readPpg($txt, $ret);
+        if ($fileData) {
+            foreach ($fileData as $number => $line) {
+                $aprovado = true;
+                foreach ($line["protocols"] as $protocol) {
+                    if (intval($protocol["aprov"])) {
+                        $aprovado = false;
+                        break;
+                    }
+                }
+                if (!is_array($line["inscricao"]->lab_ppg_email) &&
+                    $line["inscricao"]->lab_ppg_email &&
+                    ($retRef == $firstPPG->id)) {
+                    $app->log->debug("EMAIL JA ENVIADO PARA $number");
+                } else if ($aprovado) {
+                    if (!is_array($line["inscricao"]->lab_ppg_email)) {
+                        $init = $firstPPG ? ["{$firstPPG->id}"] : [];
+                        $line["inscricao"]->lab_ppg_email = $init;
+                    }
+                    if (in_array($retRef, $line["inscricao"]->lab_ppg_email)) {
+                        $app->log->debug("EMAIL JA ENVIADO PARA $number");
+                    } else {
+                        $this->enviaEmailPpg($line, $retRef);
+                    }
+                } else {
+                    $app->log->debug("NÃO APROVADO $number");
                 }
             }
         }
+        return;
     }
-    
-    
 
-    private function readPpg($txt,$ret,$csv){
+    private function resolvePPGReference($ref)
+    {
         $app = App::i();
+        $payment = $app->repo("\\RegistrationPayments\Payment")->find($ref);
+        if (!isset($payment)) {
+            $app->log->debug("Pagamento não encontrado: $ref");
+            return null;
+        }
+        return $payment->registration;
+    }
 
-        // Verifica se os arquivos existem
-        if(!file_exists($ret) || !file_exists($txt) || !file_exists($csv)){
-            $this->errorJson('Algum arquivo não existe', 403);
+    private function readPpg($txt, $ret)
+    {
+        $app = App::i();
+        // verifica se os arquivos existem
+        if (!file_exists($ret) || !file_exists($txt)) {
+            $this->errorJson("Algum arquivo não existe", 403);
         }
         $data = [];
-         //Abre o arquivo em modo de leitura
-         
-        $fh = fopen($ret,'r');
-        $count = 0;
+        $byProtocol = [];
+         // abre o arquivo em modo de leitura
+        $fh = fopen($ret, "r");
         while ($line = fgets($fh)) {
-            if (substr($line, 0, 1 ) == 1) {
-                $prot = substr($line, 1, 15 );
-                $id = intval(substr($line, 10, 6 ));
+            if (substr($line, 0, 1) == "1") {
+                $prot = substr($line, 1, 15);
+                $reg = $this->resolvePPGReference(intval(substr($line, 10, 6)));
+                if (!$reg) {
+                    continue;
+                }
                 $aprov = substr($line, 16, 5);
                 $msg = substr($line, 21, 40);
-                $data[$id] = [
-                    'prot' => $prot,
-                    'aprov' => $aprov,
-                    'msg' => $msg,
+                $byProtocol[$prot] = [
+                    "aprov" => $aprov,
+                    "msg" => $msg,
+                    "inscricao" => $reg,
                 ];
             }
         }
         fclose($fh);
-        $fh = fopen($txt,'r');
-        $count = 0;
+        $fh = fopen($txt, "r");
         while ($line = fgets($fh)) {
-            if (substr($line, 0, 1 ) == 1) {
-
-                $senha = substr($line, 16, 6 );
-                $id = intval(substr($line, 10, 6 ));
-                $data[$id]['senha'] = $senha;
+            if (substr($line, 0, 1) == "1") {
+                $prot = substr($line, 1, 15);
+                if (isset($byProtocol[$prot])) {
+                    $byProtocol[$prot]["senha"] = substr($line, 16, 6);
+                    $reg = $byProtocol[$prot]["inscricao"];
+                    $regCPF = str_pad(preg_replace("/[^0-9]/", "",
+                                                   $reg->owner->documento), 11,
+                                      "0", STR_PAD_LEFT);
+                    $cpf = substr($line, 32, 11);
+                    if ($regCPF != $cpf) {
+                        $app->log->debug("CPF não confere: {$regCPF} vs. " .
+                                         "$cpf; protocolo $prot, inscrição " .
+                                         "{$reg->number}");
+                        unset($byProtocol[$prot]);
+                    }
+                }
             }
         }
         fclose($fh);
-        $stream = fopen($csv, "r");
-
-        //Faz a leitura do arquivo
-        $csvObj = Reader::createFromStream($stream);
-
-        //Define o limitador do arqivo (, ou ;)
-        $csvObj->setDelimiter(",");
-
-        //Seta em que linha deve se iniciar a leitura
-        $header_temp = $csvObj->setHeaderOffset(0);
-
-        //Faz o processamento dos dados
-        $stmt = (new Statement());
-        $results = $stmt->process($csvObj);
-        foreach($results as $key => $value){
-            $id = intval($value['idCliente']);
-            $inscricao = $value['registrationID'];
-            $data[$id]['inscricao'] = $app->repo('Registration')->find($inscricao);
+        foreach ($byProtocol as $protocol => $item) {
+            $regNumber = $item["inscricao"]->number;
+            if (!isset($data[$regNumber])) {
+                $data[$regNumber] = [
+                    "inscricao" => $item["inscricao"],
+                    "protocols" => [],
+                ];
+            }
+            $data[$regNumber]["protocols"][] = [
+                "prot" => $protocol,
+                "aprov" => $item["aprov"],
+                "msg" => $item["msg"],
+                "senha" => $item["senha"],
+            ];
         }
         return $data;
- 
     }
+
     // envia email com dados ppg
-    private function enviaEmailPpg($data){
+    private function enviaEmailPpg($data, $retRef)
+    {
         $app = App::i();
         $mustache = new \Mustache_Engine();
-        $site_name = $app->view->dict('site: name', false);
-        $baseUrl = $app->getBaseUrl();
-        $filename = $app->view->resolveFilename("views/aldirblanc", "email-ppg.html");
+        $site_name = $app->view->dict("site: name", false);
+        $filename = $app->view->resolveFilename("views/aldirblanc",
+                                                "email-ppg.html");
         $template = file_get_contents($filename);
-        $registration = $data['inscricao'];
-        $mensagem = $this->config['msg_ppg_email'];
+        $registration = $data["inscricao"];
         $params = [
             "siteName" => $site_name,
-            "urlImageToUseInEmails" => $this->config['logotipo_central'],
+            "signature" => $this->config["ppg_email_signature"],
+            "urlImageToUseInEmails" => $this->config["logotipo_central"],
             "user" => $registration->owner->name,
             "inscricao" => $registration->number, 
-            "protocolo" => $data['prot'], 
-            "senha" => $data['senha'], 
-            "baseUrl" => $baseUrl,
-            "mensagem" => $mensagem
+            "baseUrl" => $app->getBaseUrl(),
+            "mensagem" => $this->config["msg_ppg_email"],
         ];
-        $content = $mustache->render($template,$params);
+        foreach ($data["protocols"] as $protocol) {
+            $params["protocolAndPIN"][] = [
+                "protocolo" => $protocol["prot"],
+                "senha" => $protocol["senha"],
+            ];
+        }
+        $content = $mustache->render($template, $params);
         $email_params = [
-            'from' => $app->config['mailer.from'],
-            'to' => $registration->owner->user->email,
-            'subject' => $site_name . " - Dados Bancários",
-            'body' => $content
+            "from" => $app->config["mailer.from"],
+            "to" => $registration->owner->user->email,
+            "subject" => $this->config["ppg_email_subject"],
+            "body" => $content
         ];
-
         $app->log->debug("ENVIANDO EMAIL PPG da {$registration->number}");
         $emailSent = $app->createAndSendMailMessage($email_params);
-        if ($emailSent){
-            $sent_emails = $registration->lab_sent_emails ;
+        if ($emailSent) {
+            $sent_emails = $registration->lab_sent_emails;
             $sent_emails[] = [
-                'timestamp' => date('Y-m-d H:i:s'),
-                'loggedin_user' => [
-                    'id' => $app->user->id,
-                    'email' => $app->user->email,
-                    'name' => $app->user->profile->name 
+                "timestamp" => date("Y-m-d H:i:s"),
+                "loggedin_user" => [
+                    "id" => $app->user->id,
+                    "email" => $app->user->email,
+                    "name" => $app->user->profile->name
                 ],
-                'email' => 'email - ppg'
+                "email" => "email - ppg"
             ];
             $app->disableAccessControl();
             $registration->lab_sent_emails = $sent_emails;
-            $registration->lab_ppg_email = true;
+            $ppg_email = $registration->lab_ppg_email;
+            $ppg_email[] = $retRef;
+            $registration->lab_ppg_email = $ppg_email;
             $registration->save(true);
             $app->enableAccessControl();
         }
-
+        return;
     }
 
     function getInciso1ReportData() {

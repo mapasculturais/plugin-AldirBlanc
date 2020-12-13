@@ -36,10 +36,10 @@ $_params = [
             <?php else : ?>
                 <hr>
             <?php endif; ?>
-            <?php if ($mensagem_ppg != '') : ?>
-                <?= $mensagem_ppg ?>
+            <?php foreach ($mensagem_ppg as $msg): ?>
+                <?= $msg ?>
                 <hr>
-            <?php endif; ?>
+            <?php endforeach; ?>
 
 
             <?php

@@ -522,15 +522,17 @@
 
                                             <div class="status-card">
                                                 <h2 class="">Não compartilhe esses dados.</h2>
+                                                {{#protocolAndPIN}}
                                                 <p>
                                                     <b>Protocolo: </b> {{protocolo}}
                                                 </p>
                                                 <p>
                                                     <b>Senha: </b> {{senha}}
                                                 </p>
+                                                {{/protocolAndPIN}}
                                             </div><!-- /.status-card -->
                                             <br><br>
-                                            <p>Um abraço.</p>
+                                            <p>Um abraço,<br>{{signature}}</p>
                                         </td>
                                     </tr>
                                 </table>
@@ -560,4 +562,4 @@
     </table>
 </body>
 
-</html> 
+</html>
