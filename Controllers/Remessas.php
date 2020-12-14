@@ -2991,8 +2991,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return;
     }
 
-      private function importCnab240(Opportunity $opportunity, string $filename){
-      
+      private function importCnab240(Opportunity $opportunity, string $filename){      
         $app = App::i();
         $conn = $app->em->getConnection();
         $plugin = $app->plugins['AldirBlanc'];   
@@ -3003,17 +3002,18 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $countLine = 1;
         $countSeg = 1;
         $field_labelMap = [];
-        $config = $returnCode = $this->config['config-import-cnab240']['configs']; 
-
+        $config = $returnCode = $this->config['config-import-cnab240']['configs'];
         if($field = array_search($opportunity->id, $config['opportunitys'])){
             if(is_string($field)){
                 foreach ($opportunity->registrationFieldConfigurations as $fields) {
                     if($fields->title == $field){
                         $field_id = "field_" . $fields->id;
+
                     }
                 }
             }else{
                 $field_id = "field_" .$field;
+
             }
 
         }else{
@@ -3201,16 +3201,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         
         //Faz o processamento do retono na base do Mapas
         $csv_data = [];
+        $contProcess = 0;
         foreach($result as $key_result => $value){
-            
             if(in_array($key_result, $check)){
-
                 foreach($value as $key_value => $r){
-
                     if($key_value != "LOTE_STATUS"){
-                        
-                        if(!empty($r['inscricao'])){                            
+                         //Conta os registros processados
+                        $contProcess++;
 
+                        if(!empty($r['inscricao'])){
                             //pega o pagamento da inscrição
                             $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
                                 'registration' => preg_replace('/[^\d\-]/', '',$r['inscricao'])
@@ -3220,6 +3219,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             if(!$payment){
                                 $r['status'] = 'RETORNO NÃO PROCESSADO, PAGAMENTO NÃO ENCONTRADO';
                                 $csv_data[] = $r; 
+                                $app->log->info("#".$contProcess." - ". $r['cpf'] . " - RETORNO NÃO PROCESSADO - PAGAMENTO NÃO ENCONTRADO" );
                                 continue;
                             }
                             
@@ -3228,10 +3228,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             $status_txt = $r['status'] ? 'PAGAMENTO EFETUADO' : 'PAGAMENTO NÃO EFETUADO';
                             $reason = $r['reason'];
                             $status_code = $r['status'] ? Payment::STATUS_PAID : Payment::STATUS_FAILED;
-                            $paymenteMetadata = $payment->metadata;                                                      
+                           
+                            $paymenteMetadata = $payment->metadata;  
+                            
                             $meta_data = $paymenteMetadata;
-                            if(!(isset($paymenteMetadata['return_cnab_info']) ?? false)){
-                                
+                            if(!(isset($paymenteMetadata['return_cnab_info']) ?? false)){                                
                                 $meta_data['return_cnab_info'] = [
                                     'STATUS_CODE' => $status_code,
                                     'STATUS_TXT' => $status_txt,
@@ -3243,42 +3244,50 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                     'REPROCESSED_CNAB_FILE_NAME' => '',
                                     'REPROCESSED_REASON' => '',
                                 ];
+                               $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO PROCESSADO - {$status_txt}" );
+
+                            }else{
+                                $statusCodeAtual =  $meta_data['return_cnab_info']['STATUS_CODE'];
+                                $statusTxtAtual = $meta_data['return_cnab_info']['STATUS_TXT'];
                                
-                            }else{                                
-                                $meta_data['return_cnab_info']['STATUS_CODE'] = $status_code;
-                                $meta_data['return_cnab_info']['STATUS_TXT'] = $status_txt;
-                                $meta_data['return_cnab_info']['REPROCESSED'] = 'SIM';
-                                $meta_data['return_cnab_info']['REPROCESSED_DATE'] = $processingDate;
-                                $meta_data['return_cnab_info']['REPROCESSED_CNAB_FILE_NAME'] = $filename;
-                                $meta_data['return_cnab_info']['REPROCESSED_REASON'] = $reason;                                
-                            } 
-                            
+                                if($statusCodeAtual == Payment::STATUS_FAILED && $status_code == Payment::STATUS_PAID){                               
+                                    $meta_data['return_cnab_info']['STATUS_CODE'] = $status_code;
+                                    $meta_data['return_cnab_info']['STATUS_TXT'] = $status_txt;
+                                    $meta_data['return_cnab_info']['REPROCESSED'] = 'SIM';
+                                    $meta_data['return_cnab_info']['REPROCESSED_DATE'] = $processingDate;
+                                    $meta_data['return_cnab_info']['REPROCESSED_CNAB_FILE_NAME'] = $filename;
+                                    $meta_data['return_cnab_info']['REPROCESSED_REASON'] = $reason;    
+                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO RE-PROCESSADO - ".$status_txt );
+                                }else{
+                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - JÁ PROCESSADO E {$statusTxtAtual} - SEM MUDANÇA DE STATUS NESSE PROCESSAMENTO" );
+                                }
+
+                            }
                             //Salva o novo metadado
                             $payment->metadata = $meta_data;
+                           
                             $payment->save(true);
 
                             //Seta o status em texto para o CSV
                             $r['status'] = $status_txt;
+
                         }else{
                             //Seta o status em texto para o CSV caso nao encontre a inscrição
                             $r['status'] = "";
+                            $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO NÃO PROCESSADO - FALTA NÚMERO DE INSCRIÇÃO" );
 
-                        }
-                        
+                        }                        
                         //Monta o csv de resumo do processamento
                         $csv_data[] = $r; 
                     }
                 }
-            }
-        }
-
-        ;
+            }           
+        }      
         
         //Geração do CSV de resumo
         $file_name = 'resumo-importacao-cnab240-'.$this->data['file'].'.csv';    
         $dir =  PRIVATE_FILES_PATH . 'opportunity/'.$opportunity->id."/";
-        $patch = $dir . $file_name;
-        
+        $patch = $dir . $file_name;        
 
         if (!is_dir($dir)) {
             mkdir($dir, 0700, true);
@@ -3294,9 +3303,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $csv->insertOne($csv_line);
         } 
         
-        $csv->output($file_name);
-        
-
         $app->disableAccessControl();
         $opportunity = $app->repo("Opportunity")->find($opportunity->id);
         $opportunity->refresh();
@@ -3305,18 +3311,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunity->cnab240_processed_files = $files;
         $opportunity->save(true);
         $app->enableAccessControl();
+        //$csv->output($file_name);
         $this->finish("ok");
-        
     } 
     
-    
-    
     //###################################################################################################################################
-
     /**
      * Header do CSV de consolidação importador CNAB240
      */
-
      private function hearderCsvCnab(){
          return [
              'TIPO',
@@ -3352,7 +3354,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     'lote' => $lote,
                     'inscricao' => $inscri,
                     'cpf' => $cpf,
-                    'status' => true,
+                    'status' => false,
                     'reason' => $value
                 ];
             }
@@ -3418,7 +3420,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
             }
         }
-
         return trim($data);
     }    
 
@@ -3431,12 +3432,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     private function numberBank($bankName)
     {
         $bankName = strtolower(preg_replace('/\\s\\s+/', ' ',$this->normalizeString($bankName)));
-
         $bankList = $this->readingCsvFromTo('CSV/fromToNumberBank.csv');
         $list = [];
         foreach ($bankList as $key => $value) {
             $list[$key]['BANK'] = strtolower(preg_replace('/\\s\\s+/', ' ',$this->normalizeString($value['BANK'])));
-
             $list[$key]['NUMBER'] = strtolower(preg_replace('/\\s\\s+/', ' ',$this->normalizeString($value['NUMBER'])));
         }
         $result = 0;
@@ -3446,7 +3445,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 break;
             }
         }
-
         return $result;
     }
     
@@ -3456,10 +3454,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * @return string
      */
     private function getAddress($field, $attribute, $fieldsID, $registrations, $app, $length){
-        $field_id = $fieldsID[$field];
-       
-        $fromToAdress = $fieldsID['fromToAdress'];
-        
+        $field_id = $fieldsID[$field];       
+        $fromToAdress = $fieldsID['fromToAdress'];        
         $result = " ";
         if($fromToAdress){
             $adress = $this->readingCsvFromTo($fromToAdress);
@@ -3477,8 +3473,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 } elseif (is_array($registrations->$field_id)) {
                     $result = $registrations->$field_id[$attribute];
 
-                } else {
-                    
+                } else {                    
                     $address = $registrations->$field_id;
                     if(!$address){
                         $address = json_decode($registrations->getMetadata($field_id));
@@ -3500,8 +3495,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $app->log->info("\n".$registrations->id . $attribute . " Não encontrado");
             }
         }
-        return $this->normalizeString($result);
-                  
+        return $this->normalizeString($result);                  
     }
 
     /**
@@ -3522,8 +3516,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      *
      */
     private function mountTxt($array, $mapped, $txt_data, $register, $complement, $app)
-    {
-        
+    {        
         if ($complement) {
             foreach ($complement as $key => $value) {
                 $array[$key]['default'] = $value;
@@ -3555,8 +3548,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             } else {
                 $txt_data .= $this->createString($value);
             }
-        }
-        
+        }        
         return $txt_data;
     }
 
@@ -3649,7 +3641,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     private function createString($value)
     {
-
         $data = "";
         $qtd = strlen($value['default']);
         $length = $value['length'];
@@ -3670,7 +3661,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         } else {
             $data .= str_pad($value['default'], $length, " ");
         }
-
         return substr($data, 0, $length);
     }
 

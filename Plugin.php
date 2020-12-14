@@ -991,7 +991,7 @@ class Plugin extends \MapasCulturais\Plugin
         );
         $app->registerFileGroup("opportunity", $defBankless);
 
-        // metadados da oportunidade para suporte a arquivos de CNAB240
+        // metadados da oportunidade para suporte a arquivos importados do CNAB240
         $this->registerMetadata('MapasCulturais\Entities\Opportunity','cnab240_processed_files', [
             'label' => 'Arquivos de CNAB240 Processados',
             'type' => 'json',
@@ -1008,6 +1008,21 @@ class Plugin extends \MapasCulturais\Plugin
             true
         );
         $app->registerFileGroup("opportunity", $cnab240);
+
+
+        // metadados da oportunidade para suporte a arquivos resumos do CNAB240
+        $this->registerMetadata('MapasCulturais\Entities\Opportunity','resumo_cnab240_processed_files', [
+            'label' => 'Arquivos de CNAB240 Processados',
+            'type' => 'json',
+            'private' => true,
+            'default_value' => '{}',
+        ]);
+         // FileGroup para os arquivos de resumo do CNAB240
+         $cnab240Resumo = new \MapasCulturais\Definitions\FileGroup('mediacao-autorizacao', [
+            '^application/plain$',
+            '^application/vnd.ms-excel$'
+        ], ['O arquivo deve ser um documento ou uma imagem .jpg ou .png'], true, null, true);
+        $app->registerFileGroup("opportunity", $cnab240Resumo);
     }
 
     function json($data, $status = 200)
