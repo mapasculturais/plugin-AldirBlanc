@@ -2948,11 +2948,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         readfile($patch);
 
     }
-     /**
-      * Implementa o importador CNAB240
-      */
-
-
+    /**
+     * Importador retorno CNAB240
+    */
     public function GET_importFileCnab240()
     {   
         
@@ -2991,7 +2989,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return;
     }
 
-      private function importCnab240(Opportunity $opportunity, string $filename){      
+    /**
+     * Faz o processamento do arquivo importado
+     */
+    private function importCnab240(Opportunity $opportunity, string $filename){      
         $app = App::i();
         $conn = $app->em->getConnection();
         $plugin = $app->plugins['AldirBlanc'];   

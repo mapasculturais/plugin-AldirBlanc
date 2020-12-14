@@ -1,7 +1,7 @@
 <?php
 /**
  * Arquivo de configuração do retorno CNAB240
- * OBS. Sugerimos que copie o arquivo da pasta raiz, leve para pasda onde mantem suas configurações ex.: compose/common e faça o mapeamento em seu arquivo docker-compose.prod.yml
+ * OBS. Sugerimos que copie o arquivo da pasta raiz, leve para pasta onde mantem suas configurações ex.: compose/common e faça o mapeamento em seu arquivo docker-compose.prod.yml
  */
 return [
     'returnCode' => [ // Array com códigos de retorno BB
@@ -146,6 +146,6 @@ return [
         ],
     ],
     'configs' => [
-        'opportunitys' => [] //<= inserir aqui, as oprtunidades que devem executar o retorno do CNAB240 conforme exeplo a seguir('field_id do campo CPF ou CNPJ' => id_oportunidade)
+        'opportunitys' => [] //<= inserir aqui, as oportunidades que devem executar o retorno do CNAB240 conforme exemplo a seguir('field_id do campo CPF ou CNPJ' => id_oportunidade)
     ]
 ];
