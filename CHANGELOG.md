@@ -12,11 +12,12 @@
 - Corrige prefixo para casos de conta corrente de 510 para 51 no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
 - Inserire opção de fazer exportação de arquivos teste (TS) no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
 - Inserire configurações para habilitar e desabilitar botão do CNAB240 nos incisos no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
+- Inserire configurações para habilitar e desabilitar botão do CNAB240 nos incisos no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
 
 ## [v2.3.1] - 2020-12-01
 - Implementa os importadores para o MCI470 e PPG101 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Reordena as avaliações antes da reconsolidação do resultado das inscrições, para colocar as avaliações que foram importadas (as que têm id igual ao id da inscrição) para serem processadas primeiro;
-- Redireciona usuários com controle sobre alguma oportunidade ou avaliadores de alguma oportunidade para o painel ao acessar a tela de cadastro. [#161]https://github.com/mapasculturais/plugin-AldirBlanc/issues/161 
+- Implementa função para processar os retornos de pagamento do Banco do Brasil para o CNAB240 [#173]https://github.com/mapasculturais/plugin-AldirBlanc/issues/173 
 
 ## [v2.3.0] - 2020-10-27
 
