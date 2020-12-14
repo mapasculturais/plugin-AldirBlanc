@@ -6,6 +6,7 @@ use MapasCulturais\App;
 use MapasCulturais\Definitions\Role;
 use MapasCulturais\Entities\Registration;
 use MapasCulturais\i;
+use MapasCulturais\Definitions\FileGroup;
 
 // @todo refatorar autoloader de plugins para resolver classes em pastas
 require_once 'Controllers/AldirBlanc.php';
@@ -281,6 +282,15 @@ class Plugin extends \MapasCulturais\Plugin
                 }
             }
         });
+
+        // uploads de CSVs 
+        $app->hook('template(opportunity.<<single|edit>>.sidebar-right):end', function () {
+            $opportunity = $this->controller->requestedEntity; 
+            if($opportunity->canUser('@control')){
+                $this->part('aldirblanc/cnab240-uploads', ['entity' => $opportunity]);
+            }
+        });
+
 
         $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
             $em = $opportunity->getEvaluationMethod();
@@ -980,6 +990,24 @@ class Plugin extends \MapasCulturais\Plugin
             true
         );
         $app->registerFileGroup("opportunity", $defBankless);
+
+        // metadados da oportunidade para suporte a arquivos de CNAB240
+        $this->registerMetadata('MapasCulturais\Entities\Opportunity','cnab240_processed_files', [
+            'label' => 'Arquivos de CNAB240 Processados',
+            'type' => 'json',
+            'private' => true,
+            'default_value' => '{}',
+        ]);
+         // FileGroup para os arquivos do CNAB240
+         $cnab240 = new \MapasCulturais\Definitions\FileGroup(
+            "cnab240",
+            ["^text/plain$", "^application/octet-stream$"],
+            "O arquivo enviado não e um arquivo de retorno CNAB240.",
+            false,
+            null,
+            true
+        );
+        $app->registerFileGroup("opportunity", $cnab240);
     }
 
     function json($data, $status = 200)
