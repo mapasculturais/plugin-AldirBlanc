@@ -17,6 +17,8 @@
 - Inserire configurações para habilitar e desabilitar botão do CNAB240 nos incisos no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
 - Inserire posições 178 a 179 campo 24.3A No lote 2 Poupança BB inserir o valor default 11 no CNAB240(Ref. [#172](https://github.com/mapasculturais/plugin-AldirBlanc/issues/172))
 - Corrige complemento de conta poupança para 9 caracteres prefixo 51 + 7 números1 no CNAB240(Ref. [#172](https://github.com/mapasculturais/plugin-AldirBlanc/issues/172))
+- Inserire configurações para habilitar e desabilitar botão do CNAB240 nos incisos no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
+- Implementa função para processar os retornos de pagamento do Banco do Brasil para o CNAB240 [#173]https://github.com/mapasculturais/plugin-AldirBlanc/issues/173 
 
 ## [v2.3.1] - 2020-12-01
 - Implementa os importadores para o MCI470 e PPG101 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
