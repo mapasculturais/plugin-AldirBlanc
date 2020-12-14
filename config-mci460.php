@@ -29,7 +29,11 @@
  */
 return [
     "serial" => 0,
-    "branchMap" => "branchmap.csv",
+    "branchMap" => "CSV/branchMap.csv",
+    "defaults" => [
+        "bankNumber" => "001",
+        "accountType" => "Conta corrente",
+    ],
     "fieldMap" => [
         "hasAccount" => "field_1",
         "wantsAccount" => "field_18",
@@ -680,9 +684,9 @@ return [
         ],
     ],
     "condition" => [
-        "operator" => "and",
-        "operands" => [
-            [
+        // "operator" => "and",
+        // "operands" => [
+        //     [
                 "operator" => "not",
                 "operands" => [
                     [
@@ -716,10 +720,179 @@ return [
                         ],
                     ],
                 ],
+        //     ],
+        //     [
+        //         "operator" => "equals",
+        //         "operands" => ["singleParent", ["const" => "NÃO"]]
+        //     ],
+        // ],
+    ],
+    "return" => [
+        "topLevel" => [
+            [
+                "length" => 5,
+                "type" => "int",
+                "name" => "numeroRegistro",
+                "map" => "records",
             ],
             [
-                "operator" => "equals",
-                "operands" => ["singleParent", ["const" => "NÃO"]]
+                "length" => 145,
+                "type" => "text",
+                "name" => "data",
+            ],
+        ],
+        "records" => [
+            "00000" => [ // header
+                [
+                    "length" => 5,
+                    "type" => "int",
+                    "name" => "numeroRegistro",
+                    "match" => 0,
+                ],
+                [
+                    "length" => 8,
+                    "type" => "int",
+                    "name" => "dataRemessa",
+                ],
+                [
+                    "length" => 8,
+                    "type" => "text",
+                    "name" => "nomeArquivo",
+                    "match" => "MCIF470",
+                ],
+                [
+                    "length" => 5,
+                    "type" => "int",
+                    "name" => "numeroProcesso",
+                    "match" => 0, // preenchimento SECULT
+                ],
+                [
+                    "length" => 5,
+                    "type" => "int",
+                    "name" => "sequencialRemessa",
+                ],
+                [
+                    "length" => 2,
+                    "type" => "int",
+                    "name" => "versaoLayout",
+                    "match" => 1,
+                ],
+                [
+                    "length" => 117,
+                    "type" => "text",
+                    "name" => "padding",
+                ],
+            ],
+            "default" => [ // detail
+                [
+                    "length" => 5,
+                    "type" => "int",
+                    "name" => "numeroRegistro",
+                ],
+                [
+                    "length" => 14,
+                    "type" => "text",
+                    "name" => "cpfcnpj",
+                ],
+                [
+                    "length" => 8,
+                    "type" => "int",
+                    "name" => "dataNascimento",
+                ],
+                [
+                    "length" => 60,
+                    "type" => "text",
+                    "name" => "nomeCliente",
+                ],
+                [
+                    "length" => 17,
+                    "type" => "text",
+                    "name" => "usoEmpresa",
+                    "capture" => "registrationID",
+                ],
+                [
+                    "length" => 4,
+                    "type" => "text",
+                    "name" => "agencia",
+                    "capture" => "branch",
+                ],
+                [
+                    "length" => 1,
+                    "type" => "text",
+                    "name" => "dvAgencia",
+                    "capture" => "branchVC",
+                ],
+                [
+                    "length" => 2,
+                    "type" => "text",
+                    "name" => "grupoSetex",
+                    "capture" => "setex",
+                ],
+                [
+                    "length" => 1,
+                    "type" => "text",
+                    "name" => "dvGrupoSetex",
+                    "capture" => "setexVC",
+                ],
+                [
+                    "length" => 11,
+                    "type" => "int",
+                    "name" => "conta",
+                    "capture" => "account",
+                ],
+                [
+                    "length" => 1,
+                    "type" => "text",
+                    "name" => "dvConta",
+                    "capture" => "accountVC",
+                ],
+                [
+                    "length" => 3,
+                    "type" => "int",
+                    "name" => "ocorrenciaCliente",
+                    "capture" => "errorClient",
+                ],
+                [
+                    "length" => 3,
+                    "type" => "int",
+                    "name" => "ocorrenciaConta",
+                    "capture" => "errorAccount",
+                ],
+                [
+                    "length" => 3,
+                    "type" => "int",
+                    "name" => "ocorrenciaCredito",
+                    "capture" => "errorCredit",
+                ],
+                [
+                    "length" => 9,
+                    "type" => "int",
+                    "name" => "mciCliente",
+                ],
+                [
+                    "length" => 8,
+                    "type" => "text",
+                    "name" => "padding",
+                ],
+            ],
+            "99999" => [ // trailer
+                [
+                    "length" => 5,
+                    "type" => "int",
+                    "name" => "numeroRegistro",
+                    "match" => 99999,
+                ],
+                [
+                    "length" => 9,
+                    "type" => "int",
+                    "name" => "totalRegistros",
+                    "capture" => "countEntries",
+                ],
+                [
+                    "length" => 136,
+                    "type" => "text",
+                    "name" => "padding",
+                ],
             ],
         ],
     ],

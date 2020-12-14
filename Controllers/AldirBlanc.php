@@ -45,9 +45,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $opportunitiesArrayInciso2 = $this->config['inciso2_opportunity_ids'];
         $opportunityInciso1 = $this->config['inciso1_opportunity_id'];
-        if (array_unique($opportunitiesArrayInciso2) != $opportunitiesArrayInciso2 || in_array ($opportunityInciso1, array_values($opportunitiesArrayInciso2) )){
-            throw new \Exception('A mesma oportunidade não pode ser utiilizada para duas cidades ou dois incisos');
-        }
        
         $app->hook('view.render(<<aldirblanc/individual>>):before', function () use ($app) {
             $app->view->includeEditableEntityAssets();
@@ -175,6 +172,184 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     }
 
     /**
+     * Endpoint para enviar emails das oportunidades
+     */
+    function ALL_sendEmails(){
+        ini_set('max_execution_time', 0);
+        
+        $this->requireAuthentication();
+
+        if (empty($this->data['opportunity'])) {
+            $this->errorJson('O parâmetro opportunity é obrigatório');
+        }
+
+        $app = App::i();
+
+        $opportunity = $app->repo('Opportunity')->find($this->data['opportunity']);
+
+        if (!$opportunity) {
+            $this->errorJson('Oportunidade não encontrada');
+        }
+
+        $opportunity->checkPermission('@control');
+
+        $inciso1Ids = [$this->config['inciso1_opportunity_id']];
+        $inciso2Ids = array_values($this->config['inciso2_opportunity_ids']);
+        $inciso3Ids = is_array($this->config['inciso3_opportunity_ids']) ? $this->config['inciso3_opportunity_ids'] : [];
+
+        $lab_opportunities = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
+
+        if (!in_array($opportunity->id, $lab_opportunities)) {
+            $this->errorJson("Oportunidade não é da Lei Aldir Blanc");
+        }
+
+        if (empty($this->data['status'])) {
+            $status = '2,3,8,10';
+        } else {
+            $status = intval($this->data['status']);
+            if (!in_array($status, [2,3,8,10])) {
+                $this->errorJson('Os status válidos são 2, 3, 8 ou 10');
+                die;
+            }
+        }
+
+        $registrations = $app->em->getConnection()->fetchAll("
+            SELECT 
+                r.id,
+                r.status,
+                les.value AS last_email_status
+
+            FROM registration r
+                LEFT JOIN
+                    registration_meta les ON 
+                        les.object_id = r.id AND 
+                        les.key = 'lab_last_email_status'
+                    
+            WHERE 
+                r.opportunity_id = {$opportunity->id} AND 
+                r.status IN ({$status}) AND 
+                (les.value IS NULL OR les.value <> r.status::VARCHAR)
+
+            ORDER BY r.sent_timestamp ASC");
+
+        foreach ($registrations as &$reg) {
+            $reg = (object) $reg;
+            $registration = $app->repo('Registration')->find($reg->id);
+            $this->sendEmail($registration);
+        }
+    }
+
+    /**
+     * Envia email com status da inscrição
+     *
+     */
+    function sendEmail(Registration $registration){
+        $app = App::i();
+        $registrationStatusInfo = $this->getRegistrationStatusInfo($registration);
+
+        $mustache = new \Mustache_Engine();
+        $site_name = $app->view->dict('site: name', false);
+        $baseUrl = $app->getBaseUrl();
+        $justificativaAvaliacao = "";
+        foreach ($registrationStatusInfo['justificativaAvaliacao'] as $message) {
+            if (is_array($message) && !empty($this->config['exibir_resultado_padrao'] ) ) {
+               $justificativaAvaliacao .= $message['message'] . "<hr>";
+            }else{
+                $justificativaAvaliacao .= $message .'<hr>';
+            }
+        }
+        $filename = $app->view->resolveFilename("views/aldirblanc", "email-status.html");
+        $template = file_get_contents($filename);
+
+        $params = [
+            "siteName" => $site_name,
+            "urlImageToUseInEmails" => $this->config['logotipo_central'],
+            "user" => $registration->owner->name,
+            "inscricaoId" => $registration->id, 
+            "inscricao" => $registration->number, 
+            "statusNum" => $registration->status,
+            "statusTitle" => $registrationStatusInfo['registrationStatusMessage']['title'],
+            "justificativaAvaliacao" => $justificativaAvaliacao,
+            "msgRecurso" => $this->config['msg_recurso'],
+            "emailRecurso" => $this->config['email_recurso'],
+            "baseUrl" => $baseUrl
+        ];
+        $content = $mustache->render($template,$params);
+        $email_params = [
+            'from' => $app->config['mailer.from'],
+            'to' => $registration->owner->user->email,
+            'subject' => $site_name . " - Status de inscrição",
+            'body' => $content
+        ];
+
+        $app->log->debug("ENVIANDO EMAIL DE STATUS DA {$registration->number} ({$registrationStatusInfo['registrationStatusMessage']['title']})");
+        $app->createAndSendMailMessage($email_params);
+
+        
+        $sent_emails = $registration->lab_sent_emails ;
+        $sent_emails[] = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'loggedin_user' => [
+                'id' => $app->user->id,
+                'email' => $app->user->email,
+                'name' => $app->user->profile->name 
+            ],
+            'email' => $email_params
+        ];
+
+        $app->disableAccessControl();
+        $registration->lab_sent_emails = $sent_emails;
+
+        $registration->lab_last_email_status = $registration->status;
+
+        $registration->save(true);
+        $app->enableAccessControl();
+    }
+    /**
+     * Retorna Array com informações sobre o status de uma inscrição
+     *
+     * @return array
+     */
+    function getRegistrationStatusInfo(Registration $registration){
+        $app = App::i();
+        // retorna a mensagem de acordo com o status
+        $getStatusMessages = $this->getStatusMessages();
+        $registrationStatusInfo=[];
+        $registrationStatusInfo['registrationStatusMessage'] = $getStatusMessages[$registration->status];
+        // retorna as avaliações da inscrição
+        $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
+        
+        // monta array de mensagens
+        $justificativaAvaliacao = [];
+
+        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
+            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
+        }
+        
+        foreach ($evaluations as $evaluation) {
+
+            if ($evaluation->getResult() == $registration->status) {
+                
+                if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
+                    // resultados do dataprev
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
+                    // resultados dos avaliadores genericos
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                } 
+                
+                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
+                    // resultados dos demais avaliadores
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                }
+
+            }
+            
+        }
+        $registrationStatusInfo['justificativaAvaliacao'] = $justificativaAvaliacao;
+        return $registrationStatusInfo;
+    }
+    /**
      * Retorna array associativo com mensagens para cada status da inscrição
      *
      * @return array
@@ -260,6 +435,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         return $agent;
     }
+
+    
 
     /**
     * Redireciona o usuário para o formulário do inciso II
@@ -566,7 +743,11 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if(!$registration) {
             $app->pass();
         }
+        if($registration->status == 0) {
+            $app->redirect($this->createUrl('cadastro'));
+        }
         $registration->checkPermission('view');
+        $registrationStatusInfo = $this->getRegistrationStatusInfo($registration);
 
         // retorna a mensagem de acordo com o status
         $getStatusMessages = $this->getStatusMessages();
@@ -582,13 +763,32 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
         }
         
+        $recursos = [];
+
         foreach ($evaluations as $evaluation) {
+            $validacao = $evaluation->user->aldirblanc_validador ?? null;
+            if ($validacao == 'recurso') {
+                $recursos[] = $evaluation;
+            }
 
             if ($evaluation->getResult() == $registration->status) {
                 
                 if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
                     // resultados do dataprev
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                    $avaliacao = $evaluation->getEvaluationData()->obs ?? '';
+                    if (!empty($avaliacao)) {
+                        if (($registration->status == 3 || $registration->status == 2) && substr_count($evaluation->getEvaluationData()->obs, 'Reprocessado')) {
+
+                            if ($this->config['msg_reprocessamento_dataprev']) {
+                                $justificativaAvaliacao[] = $this->config['msg_reprocessamento_dataprev'];
+                            } else {
+                                $justificativaAvaliacao[] = $avaliacao;
+                            }
+                            
+                        } else {
+                            $justificativaAvaliacao[] = $avaliacao;
+                        }
+                    }
                 } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
                     // resultados dos avaliadores genericos
                     $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
@@ -603,7 +803,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             
         }
 
-        $this->render('status', ['registration' => $registration, 'registrationStatusMessage' => $registrationStatusMessage, 'justificativaAvaliacao' => array_filter($justificativaAvaliacao)]);
+        $this->render('status', [
+            'registration' => $registration, 
+            'registrationStatusMessage' => $registrationStatusMessage, 
+            'justificativaAvaliacao' => array_filter($justificativaAvaliacao),
+            'recursos' => $recursos
+        ]);
     }
 
     /**
@@ -625,7 +830,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $app->redirect($this->createUrl('status', [$registration->id]));
         }
         $registration->checkPermission('modify');
-        
+        $ignoreDates = $this->config['mediadores_prolongar_tempo'] && $app->user->is('mediador');
+        $now = new \DateTime('now');
+        $notInTime = ($registration->opportunity->registrationFrom > $now || $registration->opportunity->registrationTo < $now );
+        $showDraft = !($notInTime && !$ignoreDates);
+        if (!$showDraft){
+            $app->redirect($this->createUrl('cadastro'));
+        }
         if (!$registration->termos_aceitos) {
             if ($app->user->is('mediador')) {
                 $this->GET_aceitar_termos();
@@ -707,10 +918,21 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $owner_name = $app->user->profile->name;
 
         $repo = $app->repo('Registration');
+        $ignoreDates = $this->config['mediadores_prolongar_tempo'] && $app->user->is('mediador');
         
-        if ($this->config['inciso1_enabled']) {
-            $inciso1 = $this->getOpportunityInciso1();
-             
+        // pega inscrições do inciso 1
+        $inciso1 = $this->getOpportunityInciso1();
+        $registrations = $controller->apiQuery([
+            '@select' => 'id', 
+            'opportunity' => "EQ({$inciso1->id})", 
+            'status' => 'GTE(0)'
+        ]);
+        $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+        $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
+        // 
+
+        $inciso1_enabled = $this->config['inciso1_enabled'];
+        if ($this->config['inciso1_enabled'] || ( $ignoreDates )) {
             if ($app->user->is('mediador')){
                 $allowed = $this->config['lista_mediadores'][$app->user->email] ?? '';
                 
@@ -719,20 +941,27 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 }
             }
             if($inciso1){
-                $registrations = $controller->apiQuery([
-                    '@select' => 'id', 
-                    'opportunity' => "EQ({$inciso1->id})", 
-                    'status' => 'GTE(0)'
-                ]);
-                $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
-                $registrationsInciso1 = $repo->findBy(['id' => $registrations_ids ]);
+                $inciso1_enabled = true;
             }
         }
 
         $opportunitiesInciso2 = [];
         $registrationsInciso2 = [];
-        if ($this->config['inciso2_enabled']) {
-            $inciso2_ids = $this->config['inciso2_opportunity_ids'];
+        $inciso2_enabled = $this->config['inciso2_enabled'] ;
+        $inciso2_ids = $this->config['inciso2_opportunity_ids'];
+
+        // busca inscrições
+        $inciso2_ids_strings = implode(',', $inciso2_ids);
+        $registrations = $controller->apiQuery([
+            '@select' => 'id', 
+            'opportunity' => "IN({$inciso2_ids_strings})", 
+            'status' => 'GTE(0)'
+        ]);
+        $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
+        $registrationsInciso2 = $repo->findBy(['id' => $registrations_ids]);
+        // 
+
+        if ($inciso2_enabled || $ignoreDates) {
             if ($app->user->is('mediador')){
                 $allowed = $this->config['lista_mediadores'][$app->user->email] ?? "";
                 if (!$allowed){
@@ -746,37 +975,45 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 $inciso2_ids = array_values($inciso2_ids);
             }
 
-            $inciso2_ids = implode(',', $inciso2_ids);
             if($inciso2_ids){
-                $registrations = $controller->apiQuery([
-                    '@select' => 'id', 
-                    'opportunity' => "IN({$inciso2_ids})", 
-                    'status' => 'GTE(0)'
-                ]);
-                $registrations_ids = array_map(function($r) { return $r['id']; }, $registrations);
-                $registrationsInciso2 = $repo->findBy(['id' => $registrations_ids]);
-                $opportunitiesIdsInciso2 = explode(',',$inciso2_ids);
-                $opportunitiesInciso2 = $app->repo('Opportunity')->findRegistrationWithDateByIds($opportunitiesIdsInciso2); 
+                $inciso2_enabled = true;
+                $opportunitiesInciso2 = $app->repo('Opportunity')->findOpportunitiesWithDateByIds(array_values($inciso2_ids)); 
             }
         }
         $opportunitiesInciso3 = [];
         if ($this->config['inciso3_enabled']) {
-            #TODO inciso 3
             $opportunitiesInciso3 = $this->getOpportunitiesInciso3();
         }
+         // redireciona admins para painel
+         $opportunities_ids = array_values($this->config['inciso2_opportunity_ids']);
+         $opportunities_ids[] = $this->config['inciso1_opportunity_id'];
+
+         $opportunities = $app->repo('Opportunity')->findBy(['id' => $opportunities_ids]);
+
+         $evaluation_method_configurations = [];
+
+         foreach($opportunities as $opportunity) {
+             $evaluation_method_configurations[] = $opportunity->evaluationMethodConfiguration;
+
+             if($opportunity->canUser('@control') || $opportunity->canUser('viewEvaluations') || $opportunity->canUser('evaluateRegistrations')) {
+                 $app->redirect($app->createUrl('painel'));
+
+             }
+         }
         $this->render('cadastro', [
                 'inciso1Limite' => $this->config['inciso1_limite'],
                 'inciso2Limite' => $this->config['inciso2_limite'],
-                'inciso2_enabled' => isset($inciso2_ids) && $inciso2_ids ? $this->config['inciso2_enabled']:false,
-                'inciso1_enabled' => isset($inciso1) &&  $inciso1 ? $this->config['inciso1_enabled']: false,
+                'inciso2_enabled' => isset($inciso2_ids) && $inciso2_ids ? $inciso2_enabled:false,
+                'inciso1_enabled' => isset($inciso1) &&  $inciso1 ? $inciso1_enabled : false,
                 'inciso3_enabled' => $app->user->is('mediador') ? false : $this->config['inciso3_enabled'],
-                'cidades' => isset($inciso2_ids) && $inciso2_ids ? $this->getCidades($opportunitiesIdsInciso2) : [], 
+                'cidades' => isset($inciso2_ids) && $inciso2_ids ? $this->getCidades($inciso2_ids) : [], 
                 'registrationsInciso1' => isset($inciso1) &&  $inciso1 ? $registrationsInciso1 : [], 
                 'registrationsInciso2' => isset($inciso2_ids) && $inciso2_ids ? $registrationsInciso2 : [], 
                 'summaryStatusName'=>$summaryStatusName, 
                 'niceName' => $owner_name,
                 'opportunitiesInciso2' => isset($inciso2_ids) && $inciso2_ids ? $opportunitiesInciso2 : [],
-                'opportunitiesInciso3' => $app->user->is('mediador') ? [] : $opportunitiesInciso3
+                'opportunitiesInciso3' => $app->user->is('mediador') ? [] : $opportunitiesInciso3,
+                'ignoreDates' => $ignoreDates
             ]);
     }
 
@@ -922,6 +1159,26 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->plugin->createOpportunityInciso2();
 
         $this->json("Sucesso");
+    }
+
+    //Atualiza roles dos mediadores a partir da lista da configuração 
+    function GET_atualizarmediadores() {
+        $this->requireAuthentication();
+
+        $app = App::i();
+
+        if(!$app->user->is('admin')) {
+            $this->errorJson('Permissao negada', 403);
+        }
+        
+        set_time_limit(0);
+        $mediadores = $this->config['lista_mediadores'];
+        $emails = array_keys($mediadores);
+        $users = $app->repo('User')->findBy(['email' => $emails]);
+        foreach ($users as $u){
+            $u->addRole('mediador');
+        }
+        $this->json($users);
     }
 
 

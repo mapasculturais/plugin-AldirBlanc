@@ -67,7 +67,7 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
             $evaluations_obs = [];
             foreach($_evaluations as $eval) {
                 $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
-                $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs;
+                $evaluations_obs[$eval->registration->number] = $eval->evaluationData->obs ?? json_encode($eval->evaluationData) ;
             }
 
 
@@ -139,19 +139,32 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
             } else {
                 $nome = $plugin->getName();
                 $string = "";
-                if($result == '10'){
+                if($caller->result == '10'){
                     $string = "validado por {$nome}";
-                } else if($result == '2') {
+                } else if($caller->result == '2') {
                     $string = "invalidado por {$nome}";
-                } else if($result == '3') {
+                } else if($caller->result == '3') {
                     $string = "não selecionado por {$nome}";
-                } else if($result == '8') {
+                } else if($caller->result == '8') {
                     $string = "suplente por {$nome}";
                 }
-                if (!$this->consolidatedResult) {
+                // se não tem valor ainda ou se está atualizando:
+                if (!$this->consolidatedResult || count($evaluations) <= 1) {
                     $result = $string;
                 } else if (strpos($this->consolidatedResult, $nome) === false) {
-                    $result = "{$this->consolidatedResult}, {$string}";
+                    $current_result = $this->consolidatedResult;
+
+                    if($current_result == '10'){
+                        $current_result = "selecionada";
+                    } else if($current_result == '2') {
+                        $current_result = "inválida";
+                    } else if($current_result == '3') {
+                        $current_result = "não selecionada";
+                    } else if($current_result == '8') {
+                        $current_result = "suplente";
+                    }
+                    
+                    $result = "{$current_result}, {$string}";
                 } else {
                     $result = $this->consolidatedResult;
                 }            
@@ -163,15 +176,19 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
             $aldirblanc = $app->plugins['AldirBlanc'];
             $opportunity = $this->requestedEntity;
 
-            if ($aldirblanc->config['inciso2_enabled']) {
-                $ids = array_merge($ids, $aldirblanc->config['inciso2_opportunity_ids']);
+            $ids =  $aldirblanc->config['inciso2_opportunity_ids'];
+            
+            if ($aldirblanc->config['inciso3_enabled']) {
+                $inciso3_ids = $aldirblanc->getOpportunitiesInciso3Ids();
+                $ids = array_merge($ids, $inciso3_ids);
             }
 
-            if ($aldirblanc->config['inciso1_enabled']) {
+            if ($aldirblanc->config['inciso1_enabled'] || $aldirblanc->config['inciso1_opportunity_id']) {
                 $ids[] = $aldirblanc->config['inciso1_opportunity_id'];
             }
-
+            
             if (in_array($opportunity->id, $ids)) {
+                
                 $user = $plugin->getUser();
                 if (!in_array($opportunity->id, $user->aldirblanc_avaliador)) {
                     $plugin->makeUserEvaluatorIn($opportunity);
