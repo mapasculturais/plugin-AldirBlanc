@@ -444,6 +444,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
     function ALL_validaContasBancarias() {
         $this->requireAuthentication();
+        ini_set('max_execution_time', 0);
 
         $app = App::i();
         $conn = $app->em->getConnection();
@@ -501,18 +502,18 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
                 $app->log->info("$count / $total ## {$line['number']} -- VALID: {$validation->bank_number} {$validation->branch_full} {$validation->account_full}");
 
-                // $agent = $app->repo('Agent')->find($line['agent_id']);
+                $agent = $app->repo('Agent')->find($line['agent_id']);
                 
-                // $agent->payment_bank_account_number = $validation->account_full;
-                // $agent->payment_bank_branch = $validation->branch_full;
-                // $agent->payment_bank_number = $line['banco'];
-                // $agent->payment_bank_account_type = $line['conta_tipo'];
-                // $agent->save(true);
+                $agent->payment_bank_account_number = $validation->account_full;
+                $agent->payment_bank_branch = $validation->branch_full;
+                $agent->payment_bank_number = $banco;
+                $agent->payment_bank_account_type = $line['conta_tipo'];
+                $agent->save(true);
 
                 $app->em->clear();
             } else {
+                var_dump($validation);
                 $invalid++;
-                var_dump([$line, $validation]);
             }
         }
 
