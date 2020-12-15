@@ -1027,6 +1027,37 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     }
 
     /**
+     * Devolve os dados bancários dos metadados no agent_meta
+     * 
+     * payment_bank_account_type
+     * payment_bank_number
+     * payment_bank_branch
+     * payment_bank_account_number
+     */
+    private function bankData($registration, $return = 'account') {
+        
+        if ($return == 'account') {
+
+            return $registration->owner->metadata['payment_bank_account_number'] ?? null;
+
+        } elseif ($return == 'branch') {
+            
+            return $registration->owner->metadata['payment_bank_branch'] ?? null;
+
+        }  elseif ($return == 'account-type') {
+
+            return $registration->owner->metadata['payment_bank_account_type'] ?? null;
+
+        } elseif ($return == 'bank-number') {
+
+            return $registration->owner->metadata['payment_bank_number'] ?? null;
+
+        }
+        
+        return false;
+    }
+
+    /**
      * Implementa o exportador TXT no modelo CNAB 240, para envio de remessas ao banco do Brasil inciso1
      *
      *
@@ -1216,8 +1247,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'TIPO_MOVIMENTO' => '',
             'CODIGO_MOVIMENTO' => '',
             'CAMARA_CENTRALIZADORA' => function ($registrations) use ($detahe1) {
-                $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
-                $numberBank = $this->numberBank($registrations->$field_id);
+
+                //Verifica se existe o medadado se sim pega o registro
+                if(!($bank = $this->bankData($registrations, 'bank-number'))){
+                    $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                    $numberBank = $this->numberBank($registrations->$field_id);
+                    
+                }else{
+                    $numberBank = $bank;
+                }
+
+                //Se for BB devolve 000 se nao devolve 018
                 if($numberBank === "001"){
                     $result = "000";
 
@@ -1225,51 +1265,64 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $result = "018";
                     
                 }
+                
                 return $result;
 
             },
             'BEN_CODIGO_BANCO' => function ($registrations) use ($detahe2, $detahe1, $dePara, $cpfCsv) {
-                $field_cpf = $detahe2['BEN_CPF']['field_id'];
-                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-                
-                $pos = array_search($cpfBase,$cpfCsv);
 
-                if($pos){                    
-                    $result = $dePara[$pos]['BEN_NUM_BANCO'];
+                //Verifica se existe o medadado se sim pega o registro
+                if(!($bank = $this->bankData($registrations, 'bank-number'))){
+
+                    $field_cpf = $detahe2['BEN_CPF']['field_id'];
+                    $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
                     
+                    $pos = array_search($cpfBase,$cpfCsv);
+
+                    if($pos){                    
+                        $result = $dePara[$pos]['BEN_NUM_BANCO'];
+                        
+                    }else{
+                        $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                        $result = $this->numberBank($registrations->$field_id);
+                    }
                 }else{
-                    $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
-                    $result = $this->numberBank($registrations->$field_id);
+                    $result = $bank;
                 }
                
                 return $result;
 
             },
             'BEN_AGENCIA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
-                $result = "";
-                $field_cpf = $detahe2['BEN_CPF']['field_id'];
-                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-                
-                $pos = array_search($cpfBase,$cpfCsv);
-               
-                if($pos){                    
-                    $agencia = $dePara[$pos]['BEN_AGENCIA'];
+
+                //Verifica se existe o medadado se sim pega o registro
+                if(!($branch = $this->bankData($registrations, 'branch'))){
+                    $result = "";
+                    $field_cpf = $detahe2['BEN_CPF']['field_id'];
+                    $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
                     
-                }else{
-                    $temp = $default['formoReceipt'];
-                    $formoReceipt = $temp ? $registrations->$temp : false;
-    
-                    if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                        $field_id = $default['fieldsWalletDigital']['agency'];
-
-                    }else{
-                        $field_id = $detahe1['BEN_AGENCIA']['field_id'];
-
-                    }
-
-                    $agencia = $registrations->$field_id;
-                }
+                    $pos = array_search($cpfBase,$cpfCsv);
                 
+                    if($pos){                    
+                        $agencia = $dePara[$pos]['BEN_AGENCIA'];
+                        
+                    }else{
+                        $temp = $default['formoReceipt'];
+                        $formoReceipt = $temp ? $registrations->$temp : false;
+        
+                        if($formoReceipt == "CARTEIRA DIGITAL BB"){
+                            $field_id = $default['fieldsWalletDigital']['agency'];
+
+                        }else{
+                            $field_id = $detahe1['BEN_AGENCIA']['field_id'];
+
+                        }
+
+                        $agencia = $registrations->$field_id;
+                    }
+                }else{
+                    $agencia = $branch;
+                }
                 
 
                 $age = explode("-", $agencia);
@@ -1290,26 +1343,32 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 return is_string($result) ? strtoupper($result) : $result;
             },
             'BEN_AGENCIA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
-                $result = "";
-                $field_cpf = $detahe2['BEN_CPF']['field_id'];
-                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
                 
-                $pos = array_search($cpfBase,$cpfCsv);               
-                if($pos){                    
-                    $agencia = $dePara[$pos]['BEN_AGENCIA'];
-                    
-                }else{
-                    $temp = $default['formoReceipt'];
-                    $formoReceipt = $temp ? $registrations->$temp : false; 
-    
-                    if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                        $field_id = $default['fieldsWalletDigital']['agency'];                    
-                    }else{
-                        $field_id = $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
-                    }
+                //Verifica se existe o medadado se sim pega o registro
+                 if(!($branch = $this->bankData($registrations, 'branch'))){
+                        $result = "";
+                        $field_cpf = $detahe2['BEN_CPF']['field_id'];
+                        $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
+                        
+                        $pos = array_search($cpfBase,$cpfCsv);               
+                        if($pos){                    
+                            $agencia = $dePara[$pos]['BEN_AGENCIA'];
+                            
+                        }else{
+                            $temp = $default['formoReceipt'];
+                            $formoReceipt = $temp ? $registrations->$temp : false; 
+            
+                            if($formoReceipt == "CARTEIRA DIGITAL BB"){
+                                $field_id = $default['fieldsWalletDigital']['agency'];                    
+                            }else{
+                                $field_id = $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
+                            }
 
-                    $agencia = $registrations->$field_id;
-                }
+                            $agencia = $registrations->$field_id;
+                        }
+                    }else{
+                        $agencia = $branch;
+                    }
                 
                 
                 $age = explode("-", $agencia);
@@ -1327,39 +1386,47 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $result = $this->normalizeString($result);
                 return is_string($result) ? strtoupper($result) : $result;
             },
-            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {    
-                $result  = ""; 
-                $field_cpf = $detahe2['BEN_CPF']['field_id'];
-                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-
+            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {  
+                
                 $field_conta = $detahe1['TIPO_CONTA']['field_id'];
-                $typeAccount = $registrations->$field_conta;
-
                 $dig = $detahe1['BEN_CONTA_DIGITO']['field_id']; //pega o field_id do digito da conta
 
-                $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
-                if($temp){
-                    $numberBank = $this->numberBank($registrations->$temp);
-                }else{
-                    $numberBank = $default['defaultBank'];
-                }
-
-                $pos = array_search($cpfBase,$cpfCsv);               
-                if($pos){                    
-                    $temp_account = $dePara[$pos]['BEN_CONTA'];
-                    
-                }else{
-                    $temp = $default['formoReceipt'];
-                    $formoReceipt = $temp ? $registrations->$temp : false;
+                //Verifica se existe o medadado se sim pega o registro
+                if(!($account = $this->bankData($registrations, 'account'))){
+                    $result  = ""; 
+                    $field_cpf = $detahe2['BEN_CPF']['field_id'];
+                    $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
                    
-                    if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                        $field_id = $default['fieldsWalletDigital']['account'];                    
+                    $typeAccount = $registrations->$field_conta;                   
+
+                    $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                    if($temp){
+                        $numberBank = $this->numberBank($registrations->$temp);
                     }else{
-                        $field_id = $detahe1['BEN_CONTA']['field_id'];
+                        $numberBank = $default['defaultBank'];
                     }
 
-                    $temp_account = $registrations->$field_id;
-                }
+                    $pos = array_search($cpfBase,$cpfCsv);               
+                    if($pos){                    
+                        $temp_account = $dePara[$pos]['BEN_CONTA'];
+                        
+                    }else{
+                        $temp = $default['formoReceipt'];
+                        $formoReceipt = $temp ? $registrations->$temp : false;
+                    
+                        if($formoReceipt == "CARTEIRA DIGITAL BB"){
+                            $field_id = $default['fieldsWalletDigital']['account'];                    
+                        }else{
+                            $field_id = $detahe1['BEN_CONTA']['field_id'];
+                        }
+
+                        $temp_account = $registrations->$field_id;
+                    }
+                }else{
+                    $typeAccount = $this->bankData($registrations, 'account-type');
+                    $numberBank = $this->bankData($registrations, 'bank-number');
+                    $temp_account = $account;
+                }                
                 
                 $temp_account = explode("-", $temp_account);
                 if(count($temp_account)>1){
@@ -1398,55 +1465,62 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
                 $result = preg_replace('/[^0-9]/i', '',$result);
 
-                if($dig === $field_conta && $temp_account == 1){
+                if($dig === $field_conta && $temp_account == 1){                   
                     return substr($this->normalizeString($result), 0, -1); // Remove o ultimo caracter. Intende -se que o ultimo caracter é o DV da conta
 
-                }else{
+                }else{                    
                     return $this->normalizeString($result);
 
                 }
                 
             },
             'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
-                $result = "";
-                $field_id = $detahe1['BEN_CONTA']['field_id'];
-                
-                $field_cpf = $detahe2['BEN_CPF']['field_id'];
-                $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-                
-                /**
-                 * Caso use um banco padrão para recebimento, pega o número do banco das configs
-                 * Caso contrario busca o número do banco na base de dados
-                 */
-                $fieldBanco = $detahe1['BEN_CODIGO_BANCO']['field_id'];
-                if($fieldBanco){
-                    $numberBank = $this->numberBank($registrations->$fieldBanco);
-                }else{
-                    $numberBank = $default['defaultBank']; 
-                }
-                
-                /**
-                 * Verifica se o CPF do requerente consta na lista de de-para dos bancos
-                 * se existir, pega os dados bancários do arquivo
-                 */
-                $pos = array_search($cpfBase,$cpfCsv);               
-                if($pos){                    
-                    $temp_account = $dePara[$pos]['BEN_CONTA'];
+                //Verifica se existe o medadado se sim pega o registro
+                if(!($account = $this->bankData($registrations, 'account'))){
+                    $result = "";
+                    $field_id = $detahe1['BEN_CONTA']['field_id'];
                     
-                }else{
+                    $field_cpf = $detahe2['BEN_CPF']['field_id'];
+                    $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
+                    
                     /**
-                     * Verifica se existe a opção de forma de recebimento
-                     * Caso exista, e seja CARTEIRA DIGITAL BB pega o field id nas configs em (fieldsWalletDigital)
+                     * Caso use um banco padrão para recebimento, pega o número do banco das configs
+                     * Caso contrario busca o número do banco na base de dados
                      */
-                    $formaRecebimento = $default['formoReceipt'];
-                    $formoReceipt = $formaRecebimento ? $registrations->$formaRecebimento : false;
-                  
-                    if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                        $temp = $default['fieldsWalletDigital']['account'];                    
+                    $fieldBanco = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                    if($fieldBanco){
+                        $numberBank = $this->numberBank($registrations->$fieldBanco);
                     }else{
-                        $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
+                        $numberBank = $default['defaultBank']; 
                     }
-                    $temp_account = $registrations->$temp;
+                    
+                    /**
+                     * Verifica se o CPF do requerente consta na lista de de-para dos bancos
+                     * se existir, pega os dados bancários do arquivo
+                     */
+                    $pos = array_search($cpfBase,$cpfCsv);               
+                    if($pos){                    
+                        $temp_account = $dePara[$pos]['BEN_CONTA'];
+                        
+                    }else{
+                        /**
+                         * Verifica se existe a opção de forma de recebimento
+                         * Caso exista, e seja CARTEIRA DIGITAL BB pega o field id nas configs em (fieldsWalletDigital)
+                         */
+                        $formaRecebimento = $default['formoReceipt'];
+                        $formoReceipt = $formaRecebimento ? $registrations->$formaRecebimento : false;
+                    
+                        if($formoReceipt == "CARTEIRA DIGITAL BB"){
+                            $temp = $default['fieldsWalletDigital']['account'];                    
+                        }else{
+                            $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
+                        }
+                        $temp_account = $registrations->$temp;
+                    }
+                }else{
+                    $typeAccount = $this->bankData($registrations, 'account-type');
+                    $numberBank = $this->bankData($registrations, 'bank-number');
+                    $temp_account =  $account;
                 }
                 
                 $temp_account = explode("-", $temp_account);
@@ -1525,30 +1599,44 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'USO_BANCO_88' => '',
             'USO_BANCO_89' => '',
             'OUTRAS_INFO_233A' => function ($registrations) use ($detahe1, $default) {
-                $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                 //Verifica se existe o medadado se sim pega o registro
+                 if(!($bank = $this->bankData($registrations, 'bank-number'))){
 
-                $field_conta = $detahe1['TIPO_CONTA']['field_id'];
-                $typeAccount = $registrations->$field_conta;               
+                    $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
 
-                if($temp){
-                    $numberBank = $this->numberBank($registrations->$temp);
+                    $field_conta = $detahe1['TIPO_CONTA']['field_id'];
+                    $typeAccount = $registrations->$field_conta;               
+
+                    if($temp){
+                        $numberBank = $this->numberBank($registrations->$temp);
+                    }else{
+                        $numberBank = $default['defaultBank'];
+                    }
                 }else{
-                    $numberBank = $default['defaultBank'];
+                    $typeAccount = $this->bankData($registrations, 'account-type');                   
+                    $numberBank = $bank;
                 }
-                
+                    
                 if ($numberBank == "001" && $typeAccount == $default['typesAccount']['poupanca']) {
                     return '11';
+
                 }else{
                     return "";
+
                 }
             },
             'USO_BANCO_90' => '',
             'CODIGO_FINALIDADE_TED' => function ($registrations) use ($detahe1, $default) {
-                $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
-                if($temp){
-                    $numberBank = $this->numberBank($registrations->$temp);
+                //Verifica se existe o medadado se sim pega o registro
+                if(!($bank = $this->bankData($registrations, 'bank-number'))){
+                    $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                    if($temp){
+                        $numberBank = $this->numberBank($registrations->$temp);
+                    }else{
+                        $numberBank = $default['defaultBank'];
+                    }
                 }else{
-                    $numberBank = $default['defaultBank'];
+                    $numberBank =  $bank;
                 }
                 if ($numberBank != "001") {
                     return '10';
