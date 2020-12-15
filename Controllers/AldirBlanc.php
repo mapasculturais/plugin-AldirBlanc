@@ -1685,7 +1685,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $content = $mustache->render($template, $params);
         $email_params = [
             "from" => $app->config["mailer.from"],
-            "to" => $registration->owner->user->email,
+            "to" => ($registration->owner->emailPrivado ??
+                     $registration->owner->emailPublico ??
+                     $registration->owner->user->email),
+            "replyTo" => $this->config["ppg_email_replyto"],
             "subject" => $this->config["ppg_email_subject"],
             "body" => $content
         ];

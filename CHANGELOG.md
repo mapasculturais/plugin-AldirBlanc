@@ -1,4 +1,5 @@
 ## [Unreleased]
+- Adiciona reply-to aos e-mails dos PPG10x e altera a fonte do endereço de e-mail destino
 - Atualiza envio de e-mails e exibição da mensagem de status para adequar ao novo fluxo dos PPG10x
 - Altera referência padrão dos PPG10x para ID do pagamento [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Corrige bug de armazenamento dos metadados no importador do MCI470 [#171](https://github.com/mapasculturais/plugin-AldirBlanc/issues/171)
