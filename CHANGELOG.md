@@ -1,10 +1,8 @@
 ## [Unreleased]
-<<<<<<< HEAD
+- Corrige endereço de e-mail exibido na mensagem de status dos PPG10x
 - Adiciona reply-to aos e-mails dos PPG10x e altera a fonte do endereço de e-mail destino
 - Atualiza envio de e-mails e exibição da mensagem de status para adequar ao novo fluxo dos PPG10x
-=======
 - Endpoint para validação dos dados Bancários [#174](https://github.com/mapasculturais/plugin-AldirBlanc/issues/174)
->>>>>>> develop
 - Altera referência padrão dos PPG10x para ID do pagamento [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Corrige bug de armazenamento dos metadados no importador do MCI470 [#171](https://github.com/mapasculturais/plugin-AldirBlanc/issues/171)
 - Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)

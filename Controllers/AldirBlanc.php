@@ -894,12 +894,15 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $msgsPpg = [];
         if ($registration->lab_ppg_email && $this->config['exibir_msg_ppg']) {
+            $email = ($registration->owner->emailPrivado ??
+                      $registration->owner->emailPublico ??
+                      $registration->owner->user->email);
             // primeira parcela do primeiro lote
             if (!is_array($registration->lab_ppg_email) ||
                 (in_array(($this->config['ppg_first_ref'] ?? '______'),
                           $registration->lab_ppg_email))) {
                 $msgsPpg[] = $this->config['msg_ppg_status_1st_pre'] .
-                             $registration->owner->user->email .
+                             $registration->owner->user->email . // este foi o e-mail usado na primeira parcela do primeiro lote
                              $this->config['msg_ppg_status_1st_pos'];
             }
             if (is_array($registration->lab_ppg_email)) {
@@ -907,12 +910,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 if (in_array($this->config['ppg_second_ref'],
                              $registration->lab_ppg_email)) {
                     $msgsPpg[] = $this->config['msg_ppg_status_2nd3rd_pre'] .
-                                 $registration->owner->user->email .
+                                 $email .
                                  $this->config['msg_ppg_status_2nd3rd_pos'];
                     // quarta, quinta e sexta parcelas do primeiro lote (TBD)
                     if (sizeof($registration->lab_ppg_email) > 2) {
                         $msgsPpg[] = $this->config['msg_ppg_status_pre'][1] .
-                                     $registration->owner->user->email .
+                                     $email .
                                      $this->config['msg_ppg_status_pos'][1];
                     }
                 // segundo lote em diante (TBD)
@@ -920,7 +923,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     $i = 0;
                     while ($i < sizeof($registration->lab_ppg_email)) {
                        $msgsPpg[] = $this->config['msg_ppg_status_pre'][$i] .
-                                    $registration->owner->user->email .
+                                    $email .
                                     $this->config['msg_ppg_status_pos'][$i];
                         ++$i;
                     }
