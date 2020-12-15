@@ -1460,14 +1460,39 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         ini_set('memory_limit', '-1');
         
         $inciso1Id = $this->config['inciso1_opportunity_id'];
-        $registrations = $app->repo('Registration')->findBy(['opportunity' => $inciso1Id, 'status' => [2, 3]]);
+
+        $dql = "
+            SELECT 
+                e.id 
+            FROM 
+                MapasCulturais\\Entities\\Registration e
+            WHERE 
+                e.opportunity = $inciso1Id AND
+                e.status IN (2,3)";
+
+        $registrations = $app->em->createQuery($dql)->getArrayResult();
+
         $dias = $this->config['dias_para_recurso'];
         $dataLimite = new DateTime('now');
-        $dataLimite->modify('+' . $dias . ' day');     
-        foreach($registrations as $r) {
-            if(!$r->lab_data_limite_recurso){                                             
+        $dataLimite->modify('+' . $dias . ' day');
+
+        $total = count($registrations);
+        $count = 0;
+        foreach($registrations as $reg) {
+            $count++;
+            
+            $r = $app->repo('Registration')->find($reg['id']);
+            
+            if($r->lab_data_limite_recurso){
+                $app->log->debug("{$count}/{$total} -- EMAIL RECUSADAS, INSCRIÇÃO {$r->number} JÁ ENVIADA");
+
+            } else {
+                $app->log->debug("{$count}/{$total} -- EMAIL RECUSADAS, INSCRIÇÃO {$r->number} AINDA NÃO ENVIADA");
+
                 $emailenviado = $this->enviaEmailRecusadas($r, $dataLimite);
             }
+
+            $app->em->clear();
         }
     }
    
