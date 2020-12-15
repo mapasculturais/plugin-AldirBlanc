@@ -129,6 +129,24 @@ class Plugin extends \MapasCulturais\Plugin
             'ppg_file_path_txt' => env('AB_EMAIL_PPG_FILE_PATH_TXT', ''),
             'ppg_file_path_ret' => env('AB_EMAIL_PPG_FILE_PATH_RET', ''),
             'ppg_file_path_csv' => env('AB_EMAIL_PPG_FILE_PATH_CSV', ''),
+
+             'dados_bancarios_inciso1_fields' => [
+                'banco' => '',
+                'agencia' => '',
+                'conta' => '',
+                'agencia_dv' => '',
+                'conta_dv' => '',
+                'conta_tipo' => '',
+             ],
+
+             'mapeamento_bancos' => [
+                'Inexistente' => '1365'
+                // 'CAIXA ECONOMICA FEDERAL' =>  '104',
+                // 'BANCO DO BRASIL S.A' => '001',
+                // 'ITAÚ UNIBANCO S.A..' => '341',
+                // 'BCO BRADESCO S.A' => '237',
+                // 'BCO SANTANDER (BRASIL) S.A' => '033'
+            ]
         ];
 
         $skipConfig = false;

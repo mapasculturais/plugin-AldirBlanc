@@ -3278,7 +3278,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                     $meta_data['return_cnab_info']['REPROCESSED_REASON'] = $reason;    
                                     $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO RE-PROCESSADO - ".$status_txt );
                                 }else{
-                                    $app->log->info("#".$contProcess." - ". $r['cpf'] . " - JÁ PROCESSADO - {$statusTxtAtual} - SEM MUDANÇA DE STATUS NESSE PROCESSAMENTO" );
+                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - JÁ PROCESSADO - {$statusTxtAtual} - SEM MUDANÇA DE STATUS NESSE PROCESSAMENTO" );
                                 }
 
                             }
@@ -3293,7 +3293,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         }else{
                             //Seta o status em texto para o CSV caso nao encontre a inscrição
                             $r['status'] = "";
-                            $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO NÃO PROCESSADO - FALTA NÚMERO DE INSCRIÇÃO" );
+                            $app->log->info("#".$contProcess." - ". $r['cpf'] . " - RETORNO NÃO PROCESSADO - FALTA NÚMERO DE INSCRIÇÃO" );
 
                         }                        
                         //Monta o csv de resumo do processamento
