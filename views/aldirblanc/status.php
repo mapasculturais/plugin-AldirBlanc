@@ -79,7 +79,7 @@ $_params = [
                 ?>
                 <div class="status-card status-<?= $status ?>">
                     <h2 class="status-card--title">Recurso</h2>
-                    <p class="status-card--content"><?= $recurso->evaluationData->obs; ?></p>
+                    <p class="status-card--content"><?= ucfirst($recurso->evaluationData->status); ?></p>
                 </div>
                 <?php
             } 
