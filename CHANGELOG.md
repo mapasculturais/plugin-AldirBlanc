@@ -1,5 +1,6 @@
 ## [Unreleased]
 
+- Adiciona mensagens na página de status para inscrições desbancarizadas
 - Altera exibicao do recurso na pagina de status de ->obs para ->status [#15](https://git.hacklab.com.br/mapas/mapas-es/-/issues/15)
 - Altera referência padrão dos PPG10x para ID do pagamento [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Corrige bug de armazenamento dos metadados no importador do MCI470 [#171](https://github.com/mapasculturais/plugin-AldirBlanc/issues/171)
