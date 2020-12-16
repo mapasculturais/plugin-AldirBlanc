@@ -2138,6 +2138,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         ];
 
         $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement, $app);
+        $txt_data .= "\r\n";
 
         if (isset($_SESSION['problems'])) {
             foreach ($_SESSION['problems'] as $key => $value) {
