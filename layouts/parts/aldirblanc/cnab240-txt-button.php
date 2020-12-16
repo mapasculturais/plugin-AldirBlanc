@@ -18,7 +18,7 @@ if($inciso == 1){
 <a class="btn btn-default download btn-export-cancel"  ng-click="editbox.open('form-parameters-Cnab240', $event)" rel="noopener noreferrer">TXT CNAB240 BB</a>
 
 <!-- Formulário -->
-<edit-box id="form-parameters-Cnab240" position="top" title="<?php i::esc_attr_e($title) ?>" cancel-label="Cancelar" close-on-cancel="true">
+<edit-box id="form-parameters-Cnab240" position="left" title="<?php i::esc_attr_e($title) ?>" cancel-label="Cancelar" close-on-cancel="true">
     <form class="form-export-dataprev" action="<?=$route?>" method="POST">
   
         <label for="from">Data de pagamento</label>
