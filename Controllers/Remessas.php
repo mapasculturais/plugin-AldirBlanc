@@ -1246,13 +1246,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'SEGMENTO' => '',
             'TIPO_MOVIMENTO' => '',
             'CODIGO_MOVIMENTO' => '',
-            'CAMARA_CENTRALIZADORA' => function ($registrations) use ($detahe1) {
-
+            'CAMARA_CENTRALIZADORA' => function ($registrations) use ($detahe1, $default) {
                 //Verifica se existe o medadado se sim pega o registro
-                if(!($bank = $this->bankData($registrations, 'bank-number'))){
-                    $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
-                    $numberBank = $this->numberBank($registrations->$field_id);
-                    
+                if(!($bank = $this->bankData($registrations, 'bank-number'))){                    
+                    if(!$default['defaultBank']){
+                        $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
+                        $numberBank = $this->numberBank($registrations->$field_id);
+                    }else{
+                        $numberBank = $default['informDefaultBank'];
+                    }
                 }else{
                     $numberBank = $bank;
                 }
@@ -1832,33 +1834,49 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         if($informDefaultBank === "001" || $accountHolderBB === "SIM"){
                             
                             if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB") { 
-                                $recordsBBCorrente[] = $value;
+                                if($this->data['typeLote'] === "lotBBCorrente" || $this->data['typeLote'] === "all"){
+                                    $recordsBBCorrente[] = $value;
+                                }                                
                                 
                             }  else if (trim($value->$field_TipoConta) === "Conta poupança"){
-                                
-                                $recordsBBPoupanca[] = $value;                               
-        
+                                if($this->data['typeLote'] === "lotBBPoupanca" || $this->data['typeLote'] === "all"){
+                                    $recordsBBPoupanca[] = $value;                               
+                                }
+
                             }else{
-                                $recordsBBCorrente[] = $value;
+                                if($this->data['typeLote'] === "lotBBCorrente" || $this->data['typeLote'] === "all"){
+                                    $recordsBBCorrente[] = $value;
+                                }
                             }
                         }else{
-                            $recordsOthers[] = $value;
+                            if($this->data['typeLote'] === "lotOthers" || $this->data['typeLote'] === "all"){
+                                $recordsOthers[] = $value;
+                            }
+
                         }
                         
                     }else{    
                                            
                         if(($this->numberBank($value->$field_banco) == "001") || $accountHolderBB == "SIM"){
                             if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB") { 
-                                $recordsBBCorrente[] = $value;
+                                if($this->data['typeLote'] === "lotBBCorrente" || $this->data['typeLote'] === "all"){
+                                    $recordsBBCorrente[] = $value;
+                                }  
         
                             } else if (trim($value->$field_TipoConta) === "Conta poupança"){
-                                $recordsBBPoupanca[] = $value;
+                                if($this->data['typeLote'] === "lotBBPoupanca" || $this->data['typeLote'] === "all"){
+                                    $recordsBBPoupanca[] = $value;                              
+                                }
         
                             }else{
-                                $recordsBBCorrente[] = $value;
+                                if($this->data['typeLote'] === "lotBBCorrente" || $this->data['typeLote'] === "all"){
+                                    $recordsBBCorrente[] = $value;
+                                }
                             }
                         }else{                            
-                            $recordsOthers[] = $value;
+                            if($this->data['typeLote'] === "lotOthers" || $this->data['typeLote'] === "all"){
+                                $recordsOthers[] = $value;
+                            }
                         
                         }
                     }
@@ -1878,13 +1896,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 if ($this->numberBank($value->$field_banco) == "001") {               
                     if ($value->$field_TipoConta == "Conta corrente") {
-                        $recordsBBCorrente[] = $value;
+                        if($this->data['typeLote'] === "lotBBCorrente" || $this->data['typeLote'] === "all"){
+                            $recordsBBCorrente[] = $value;
+                        }  
                     } else {
-                        $recordsBBPoupanca[] = $value;
+                        if($this->data['typeLote'] === "lotBBPoupanca" || $this->data['typeLote'] === "all"){
+                            $recordsBBPoupanca[] = $value;                             
+                        }
                     }
     
                 } else {
-                    $recordsOthers[] = $value;
+                    if($this->data['typeLote'] === "lotOthers" || $this->data['typeLote'] === "all"){
+                        $recordsOthers[] = $value;
+                    }
                 }
             }
         }
@@ -3326,7 +3350,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             if(!$payment){
                                 $r['status'] = 'RETORNO NÃO PROCESSADO, PAGAMENTO NÃO ENCONTRADO';
                                 $csv_data[] = $r; 
-                                $app->log->info("#".$contProcess." - ". $r['cpf'] . " - RETORNO NÃO PROCESSADO - PAGAMENTO NÃO ENCONTRADO" );
+                                $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO NÃO PROCESSADO - PAGAMENTO NÃO ENCONTRADO" );
                                 continue;
                             }
                             
@@ -3381,7 +3405,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         }else{
                             //Seta o status em texto para o CSV caso nao encontre a inscrição
                             $r['status'] = "";
-                            $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO NÃO PROCESSADO - FALTA NÚMERO DE INSCRIÇÃO" );
+                            $app->log->info("#".$contProcess." - ". $r['cpf'] . " - RETORNO NÃO PROCESSADO - FALTA NÚMERO DE INSCRIÇÃO" );
 
                         }                        
                         //Monta o csv de resumo do processamento
