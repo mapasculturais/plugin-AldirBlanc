@@ -1268,6 +1268,60 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     }
 
 
+    function POST_redefinirSenhaMediado () {
+        $this->requireAuthentication();
+        
+        $app = App::i();
+
+        $registration = $this->requestedEntity;  
+
+        if (!$registration) {
+            $app->pass();
+        }
+
+        if(!$registration->mediacao_senha) {
+            eval(\psy\sh());
+            $this->errorJson('esta não é uma inscrição mediada');
+        }
+
+        if(!$this->postData['senha'] || strlen(trim($this->postData['senha'])) < 5) {
+            eval(\psy\sh());
+            $this->errorJson('a senha informada deve conter ao menos 5 caracteres', 400);
+        }
+
+        $registration->checkPermission('mudarSenhaMediado');
+
+        $app->disableAccessControl();
+        $registration->mediacao_senha = $this->postData['senha'];
+
+        $registration->save(true);
+        $app->enableAccessControl();
+
+        $this->json('sucesso');
+
+    }
+
+    function GET_redefinirSenhaMediado () {
+        $this->requireAuthentication();
+        
+        $app = App::i();
+
+        $registration = $this->requestedEntity;
+
+        if (!$registration) {
+            $app->pass();
+        }
+
+        if(!$registration->mediacao_senha) {
+            die('esta não é uma inscrição mediada');
+        }
+
+        $registration->checkPermission('mudarSenhaMediado');
+
+        $this->render('redefinicao-de-senha-mediado', ['registration' => $registration]);
+
+    }
+
     /**
      * Tela para login dos mediados
      * 
