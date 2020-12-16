@@ -32,6 +32,7 @@
 - Corrige nome do input no formulário do CNAB240 (Ref. [#160](https://github.com/mapasculturais/plugin-AldirBlanc/issues/160))
 - Adiciona possibilidade mensagem no lugar do botão de enviar inscrição quando desabilitado através da configuração 'mensagens_envio_desabilitado'  (Ref. [#159](https://github.com/mapasculturais/plugin-AldirBlanc/issues/159))
 - Adiciona possibilidade de impedir envios de inscrição de um array de oportunidades através da configuração 'oportunidades_desabilitar_envio' (Ref. [#159](https://github.com/mapasculturais/plugin-AldirBlanc/issues/159))
+- Refatora CNAB240 para ser possivel separar a exportação por lotes [#176]https://github.com/mapasculturais/plugin-AldirBlanc/issues/176 
 
 ## [v2.2.0] - 2020-10-25
 
