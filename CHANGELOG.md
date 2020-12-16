@@ -1,4 +1,5 @@
 ## [Unreleased]
+- Corrige envio de e-mails dos PPG10x e adiciona suporte a duas mensagens para o caso geral
 - Corrige endereço de e-mail exibido na mensagem de status dos PPG10x
 - Adiciona reply-to aos e-mails dos PPG10x e altera a fonte do endereço de e-mail destino
 - Atualiza envio de e-mails e exibição da mensagem de status para adequar ao novo fluxo dos PPG10x

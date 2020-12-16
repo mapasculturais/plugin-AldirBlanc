@@ -1659,8 +1659,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $firstPPG = $fileRepo->find($this->config["ppg_first_ref"]);
         }
         $txt = $this->config["ppg_file_path_txt"];
-        $retRef = $this->config["ppg_file_ref_ret"];
-        $ret = $fileRepo->find($retRef)->path;
+        $retRef = $this->data["file"];
+        $retFile = $fileRepo->find($retRef);
+        if ($retFile->group != "bankless") {
+            $this->errorJson("O arquivo não pertence ao grupo bankless.", 500);
+        }
+        $ret = $retFile->path;
         $fileData = $this->readPpg($txt, $ret);
         if ($fileData) {
             foreach ($fileData as $number => $line) {
@@ -1677,7 +1681,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     $app->log->debug("EMAIL JA ENVIADO PARA $number");
                 } else if ($aprovado) {
                     if (!is_array($line["inscricao"]->lab_ppg_email)) {
-                        $init = $firstPPG ? ["{$firstPPG->id}"] : [];
+                        $init = $line["inscricao"]->lab_ppg_email ?
+                                ["{$firstPPG->id}"] : [];
                         $line["inscricao"]->lab_ppg_email = $init;
                     }
                     if (in_array($retRef, $line["inscricao"]->lab_ppg_email)) {
@@ -1749,6 +1754,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                                          "{$reg->number}");
                         unset($byProtocol[$prot]);
                     }
+                } else {
+                    $this->errorJson(("O arquivo retorno possui protocolos " .
+                                      "não encontrados na remessa"), 500);
                 }
             }
         }
@@ -1781,14 +1789,15 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                                                 "email-ppg.html");
         $template = file_get_contents($filename);
         $registration = $data["inscricao"];
+        $ppg_email = $registration->lab_ppg_email;
         $params = [
             "siteName" => $site_name,
             "signature" => $this->config["ppg_email_signature"],
             "urlImageToUseInEmails" => $this->config["logotipo_central"],
             "user" => $registration->owner->name,
-            "inscricao" => $registration->number, 
+            "inscricao" => $registration->number,
             "baseUrl" => $app->getBaseUrl(),
-            "mensagem" => $this->config["msg_ppg_email"],
+            "mensagem" => $this->config["msg_ppg_email"][sizeof($ppg_email)],
         ];
         foreach ($data["protocols"] as $protocol) {
             $params["protocolAndPIN"][] = [
@@ -1803,7 +1812,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                      $registration->owner->emailPublico ??
                      $registration->owner->user->email),
             "replyTo" => $this->config["ppg_email_replyto"],
-            "subject" => $this->config["ppg_email_subject"],
+            "subject" => $this->config["ppg_email_subject"][sizeof($ppg_email)],
             "body" => $content
         ];
         $app->log->debug("ENVIANDO EMAIL PPG da {$registration->number}");
@@ -1821,7 +1830,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             ];
             $app->disableAccessControl();
             $registration->lab_sent_emails = $sent_emails;
-            $ppg_email = $registration->lab_ppg_email;
             $ppg_email[] = $retRef;
             $registration->lab_ppg_email = $ppg_email;
             $registration->save(true);
