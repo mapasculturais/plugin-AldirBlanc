@@ -1,4 +1,5 @@
 ## [Unreleased]
+- Recuperação de senha de mediados
 - Corrige envio de e-mails dos PPG10x e adiciona suporte a duas mensagens para o caso geral
 - Corrige endereço de e-mail exibido na mensagem de status dos PPG10x
 - Adiciona reply-to aos e-mails dos PPG10x e altera a fonte do endereço de e-mail destino
@@ -21,12 +22,16 @@
 - Inserire configurações para habilitar e desabilitar botão do CNAB240 nos incisos no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
 - Inserire posições 178 a 179 campo 24.3A No lote 2 Poupança BB inserir o valor default 11 no CNAB240(Ref. [#172](https://github.com/mapasculturais/plugin-AldirBlanc/issues/172))
 - Corrige complemento de conta poupança para 9 caracteres prefixo 51 + 7 números1 no CNAB240(Ref. [#172](https://github.com/mapasculturais/plugin-AldirBlanc/issues/172))
-- Implementa função para processar os retornos de pagamento do Banco do Brasil para o CNAB240 [#173]https://github.com/mapasculturais/plugin-AldirBlanc/issues/173 
-- Insere quebra de linha no treiller do lote no CNAB240 (Ref. [#177](https://github.com/mapasculturais/plugin-AldirBlanc/issues/177)
+
+- Refatorar importador dataprev para inscrições que foram em um primeiro momento inseridas na plataforma como Não processadas, sejam reprocessadas caso em um segundo momento a mesma venha com status de processado (Ref. [#19](https://github.com/mapasculturais/plugin-AldirBlanc/issues/19))
+- Refatorar código para que o busque cnab240 os dados bancários nos metadados inseridos na tabela agent_meta apos a validação de contas bancárias. (Ref. [#175](https://github.com/mapasculturais/plugin-AldirBlanc/issues/175))
 
 ## [v2.3.1] - 2020-12-01
 - Implementa os importadores para o MCI470 e PPG101 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Reordena as avaliações antes da reconsolidação do resultado das inscrições, para colocar as avaliações que foram importadas (as que têm id igual ao id da inscrição) para serem processadas primeiro;
+- Implementa função para processar os retornos de pagamento do Banco do Brasil para o CNAB240 [#173]https://github.com/mapasculturais/plugin-AldirBlanc/issues/173 
+- Refatora CNAB240 para ser possivel separar a exportação por lotes [#176]https://github.com/mapasculturais/plugin-AldirBlanc/issues/176 
+- Insere quebra de linha no treiller do lote no CNAB240 (Ref. [#177](https://github.com/mapasculturais/plugin-AldirBlanc/issues/177)
 - Redireciona usuários com controle sobre alguma oportunidade ou avaliadores de alguma oportunidade para o painel ao acessar a tela de cadastro. [#161]https://github.com/mapasculturais/plugin-AldirBlanc/issues/161
 
 ## [v2.3.0] - 2020-10-27
