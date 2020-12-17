@@ -549,12 +549,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
 
                 return $this->normalizeString($result);
-            }, 
-            'VALOR' => '',           
+            },                    
             'SITUACAO' => function ($registrations) use ($fieldsID) {
                 return 1;
 
             },
+            'VALOR' => '',  
             'INSCRICAO_ID' => function ($registrations) use ($fieldsID) {
                 return $this->normalizeString($registrations->number);
 
