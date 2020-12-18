@@ -2,6 +2,8 @@
 
 - Adiciona mensagens na página de status para inscrições desbancarizadas
 - Altera exibicao do recurso na pagina de status de ->obs para ->status [#15](https://git.hacklab.com.br/mapas/mapas-es/-/issues/15)
+- Recuperação de senha de mediados
+- Endpoint para validação dos dados Bancários [#174](https://github.com/mapasculturais/plugin-AldirBlanc/issues/174)
 - Altera referência padrão dos PPG10x para ID do pagamento [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Corrige bug de armazenamento dos metadados no importador do MCI470 [#171](https://github.com/mapasculturais/plugin-AldirBlanc/issues/171)
 - Padroniza exibição da área de upload de desbancarizados [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
@@ -27,6 +29,8 @@
 - Implementa os importadores para o MCI470 e PPG101 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Reordena as avaliações antes da reconsolidação do resultado das inscrições, para colocar as avaliações que foram importadas (as que têm id igual ao id da inscrição) para serem processadas primeiro;
 - Redireciona usuários com controle sobre alguma oportunidade ou avaliadores de alguma oportunidade para o painel ao acessar a tela de cadastro. [#161]https://github.com/mapasculturais/plugin-AldirBlanc/issues/161
+- Implementa função para processar os retornos de pagamento do Banco do Brasil para o CNAB240 [#173]https://github.com/mapasculturais/plugin-AldirBlanc/issues/173 
+- Refatora CNAB240 para ser possivel separar a exportação por lotes [#176]https://github.com/mapasculturais/plugin-AldirBlanc/issues/176 
 
 ## [v2.3.0] - 2020-10-27
 

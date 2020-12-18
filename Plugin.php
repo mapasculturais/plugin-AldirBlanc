@@ -113,7 +113,24 @@ class Plugin extends \MapasCulturais\Plugin
             //pre inscrições
              'oportunidades_desabilitar_envio' => (array) json_decode(env('AB_OPORTUNIDADES_DESABILITAR_ENVIO', '[]')),
              'mensagens_envio_desabilitado' => (array) json_decode(env('AB_MENSAGENS_ENVIO_DESABILITADO', '[]')),
-            
+
+             'dados_bancarios_inciso1_fields' => [
+                'banco' => '',
+                'agencia' => '',
+                'conta' => '',
+                'agencia_dv' => '',
+                'conta_dv' => '',
+                'conta_tipo' => '',
+             ],
+
+             'mapeamento_bancos' => [
+                'Inexistente' => '1365'
+                // 'CAIXA ECONOMICA FEDERAL' =>  '104',
+                // 'BANCO DO BRASIL S.A' => '001',
+                // 'ITAÚ UNIBANCO S.A..' => '341',
+                // 'BCO BRADESCO S.A' => '237',
+                // 'BCO SANTANDER (BRASIL) S.A' => '033'
+            ]
         ];
 
         $skipConfig = false;

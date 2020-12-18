@@ -108,6 +108,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         return $opportunity;
     }
+
+    
     
     /**
      * Retorna a oportunidade do inciso II
@@ -436,7 +438,91 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return $agent;
     }
 
-    
+    function ALL_validaContasBancarias() {
+        $this->requireAuthentication();
+        ini_set('max_execution_time', 0);
+
+        $app = App::i();
+        $conn = $app->em->getConnection();
+        $plugin_pagamentos = $app->plugins['RegistrationPayments'];
+        
+        $fields = $this->plugin->config['dados_bancarios_inciso1_fields'];
+
+        $bancos = $this->plugin->config['mapeamento_bancos'];
+
+        $banks = implode("','", array_keys($bancos));
+
+        $result = $conn->fetchAll("
+        SELECT 
+            r.id as registration_id, 
+            r.number, 
+            r.agent_id,
+            _banco.value AS banco,
+            _agencia.value AS agencia,
+            _agencia_dv.value AS agencia_dv,
+            _conta.value AS conta,
+            _conta_dv.value AS conta_dv,
+            _conta_tipo.value AS conta_tipo
+
+        FROM
+            registration r
+            JOIN registration_meta _banco ON _banco.key = '{$fields['banco']}' AND _banco.object_id = r.id
+            JOIN registration_meta _agencia ON _agencia.key = '{$fields['agencia']}' AND _agencia.object_id = r.id
+            LEFT JOIN registration_meta _agencia_dv ON _agencia_dv.key = '{$fields['agencia_dv']}' AND _agencia_dv.object_id = r.id
+            JOIN registration_meta _conta ON _conta.key = '{$fields['conta']}' AND _conta.object_id = r.id
+            LEFT JOIN registration_meta _conta_dv ON _conta_dv.key = '{$fields['conta_dv']}' AND _conta_dv.object_id = r.id
+            LEFT JOIN registration_meta _conta_tipo ON _conta_tipo.key = '{$fields['conta_tipo']}' AND _conta_tipo.object_id = r.id
+        WHERE 
+            _banco.value IN ('$banks')
+
+        ");
+
+        $total = count($result);
+
+        $invalid = 0;
+        $valid = 0;
+        $fixed = 0;
+
+        $count = 0;
+        foreach($result as  $line) {
+            $count++;
+
+            $banco = $bancos[$line['banco']];
+            $validation = $plugin_pagamentos->validateAccount($banco, $line['conta'], $line['agencia'], $line['conta_dv'], $line['agencia_dv']);
+            
+            if ($validation->account_full && $validation->branch_full) {
+                $valid++;
+                if($validation->account_changed || $validation->branch_changed) {
+                    $fixed++;
+                }
+
+                $app->log->info("$count / $total ## {$line['number']} -- VALID: {$validation->bank_number} {$validation->branch_full} {$validation->account_full}");
+
+                $agent = $app->repo('Agent')->find($line['agent_id']);
+                
+                $agent->payment_bank_account_number = $validation->account_full;
+                $agent->payment_bank_branch = $validation->branch_full;
+                $agent->payment_bank_number = $banco;
+                $agent->payment_bank_account_type = $line['conta_tipo'];
+                $agent->save(true);
+
+                $app->em->clear();
+            } else {
+                var_dump($validation);
+                $invalid++;
+            }
+        }
+
+
+        var_dump([
+            'total' => $total,
+            'invalid' => $invalid,
+            'valid' => $valid,
+            'fixed' => $fixed,
+        ]);
+
+        die;
+    }
 
     /**
     * Redireciona o usuário para o formulário do inciso II
@@ -1215,6 +1301,60 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->json($users);
     }
 
+
+    function POST_redefinirSenhaMediado () {
+        $this->requireAuthentication();
+        
+        $app = App::i();
+
+        $registration = $this->requestedEntity;  
+
+        if (!$registration) {
+            $app->pass();
+        }
+
+        if(!$registration->mediacao_senha) {
+            eval(\psy\sh());
+            $this->errorJson('esta não é uma inscrição mediada');
+        }
+
+        if(!$this->postData['senha'] || strlen(trim($this->postData['senha'])) < 5) {
+            eval(\psy\sh());
+            $this->errorJson('a senha informada deve conter ao menos 5 caracteres', 400);
+        }
+
+        $registration->checkPermission('mudarSenhaMediado');
+
+        $app->disableAccessControl();
+        $registration->mediacao_senha = $this->postData['senha'];
+
+        $registration->save(true);
+        $app->enableAccessControl();
+
+        $this->json('sucesso');
+
+    }
+
+    function GET_redefinirSenhaMediado () {
+        $this->requireAuthentication();
+        
+        $app = App::i();
+
+        $registration = $this->requestedEntity;
+
+        if (!$registration) {
+            $app->pass();
+        }
+
+        if(!$registration->mediacao_senha) {
+            die('esta não é uma inscrição mediada');
+        }
+
+        $registration->checkPermission('mudarSenhaMediado');
+
+        $this->render('redefinicao-de-senha-mediado', ['registration' => $registration]);
+
+    }
 
     /**
      * Tela para login dos mediados
