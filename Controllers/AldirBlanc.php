@@ -452,67 +452,72 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $banks = implode("','", array_keys($bancos));
 
-        $result = $conn->fetchAll("
-        SELECT 
-            r.id as registration_id, 
-            r.number, 
-            r.agent_id,
-            _banco.value AS banco,
-            _agencia.value AS agencia,
-            _agencia_dv.value AS agencia_dv,
-            _conta.value AS conta,
-            _conta_dv.value AS conta_dv,
-            _conta_tipo.value AS conta_tipo
-
-        FROM
-            registration r
-            JOIN registration_meta _banco ON _banco.key = '{$fields['banco']}' AND _banco.object_id = r.id
-            JOIN registration_meta _agencia ON _agencia.key = '{$fields['agencia']}' AND _agencia.object_id = r.id
-            LEFT JOIN registration_meta _agencia_dv ON _agencia_dv.key = '{$fields['agencia_dv']}' AND _agencia_dv.object_id = r.id
-            JOIN registration_meta _conta ON _conta.key = '{$fields['conta']}' AND _conta.object_id = r.id
-            LEFT JOIN registration_meta _conta_dv ON _conta_dv.key = '{$fields['conta_dv']}' AND _conta_dv.object_id = r.id
-            LEFT JOIN registration_meta _conta_tipo ON _conta_tipo.key = '{$fields['conta_tipo']}' AND _conta_tipo.object_id = r.id
-        WHERE 
-            _banco.value IN ('$banks')
-
-        ");
-
-        $total = count($result);
-
         $invalid = 0;
         $valid = 0;
         $fixed = 0;
-
+        $total = 0;
         $count = 0;
-        foreach($result as  $line) {
-            $count++;
 
-            $banco = $bancos[$line['banco']];
-            $validation = $plugin_pagamentos->validateAccount($banco, $line['conta'], $line['agencia'], $line['conta_dv'], $line['agencia_dv']);
+        $sqls = [
+            "select 
+            r.id as registration_id, 
+            r.number, 
+            r.agent_id,
+            _agencia.value as agencia,
+            _conta.value as conta,            
+            _conta_tipo.value as conta_tipo 
+        from registration r 
+            JOIN registration_meta _agencia ON _agencia.key = 'field_16' AND _agencia.object_id = r.id
+            JOIN registration_meta _conta ON _conta.key = 'field_15' AND _conta.object_id = r.id
+            LEFT JOIN registration_meta _conta_tipo ON _conta_tipo.key = 'field_17' AND _conta_tipo.object_id = r.id",
+
+            "select 
+            r.id as registration_id, 
+            r.number, 
+            r.agent_id,
+            _agencia.value as agencia,
+            _conta.value as conta,            
+            _conta_tipo.value as conta_tipo 
+        from registration r 
+            JOIN registration_meta _agencia ON _agencia.key = 'field_32' AND _agencia.object_id = r.id
+            JOIN registration_meta _conta ON _conta.key = 'field_33' AND _conta.object_id = r.id
+            LEFT JOIN registration_meta _conta_tipo ON _conta_tipo.key = 'field_17' AND _conta_tipo.object_id = r.id"
+        ];
+
+        foreach($sqls as $sql){
+            $result = $conn->fetchAll($sql);
             
-            if ($validation->account_full && $validation->branch_full) {
-                $valid++;
-                if($validation->account_changed || $validation->branch_changed) {
-                    $fixed++;
-                }
+            $total += count($result);
+            
+            foreach($result as  $line) {
+                $count++;
 
-                $app->log->info("$count / $total ## {$line['number']} -- VALID: {$validation->bank_number} {$validation->branch_full} {$validation->account_full}");
-
-                $agent = $app->repo('Agent')->find($line['agent_id']);
+                $banco = '001';
+                $validation = $plugin_pagamentos->validateAccount($banco, $line['conta'], $line['agencia'], $line['conta_dv'] = 1, $line['agencia_dv'] = 1);
                 
-                $agent->payment_bank_account_number = $validation->account_full;
-                $agent->payment_bank_branch = $validation->branch_full;
-                $agent->payment_bank_number = $banco;
-                $agent->payment_bank_account_type = $line['conta_tipo'];
-                $agent->save(true);
+                if ($validation->account_full && $validation->branch_full) {
+                    $valid++;
+                    if($validation->account_changed || $validation->branch_changed) {
+                        $fixed++;
+                    }
 
-                $app->em->clear();
-            } else {
-                var_dump($validation);
-                $invalid++;
+                    $app->log->info("$count / $total ## {$line['number']} -- VALID: {$validation->bank_number} {$validation->branch_full} {$validation->account_full}");
+
+                    $agent = $app->repo('Agent')->find($line['agent_id']);
+                    
+                    $agent->payment_bank_account_number = $validation->account_full;
+                    $agent->payment_bank_branch = $validation->branch_full;
+                    $agent->payment_bank_number = $banco;
+                    $agent->payment_bank_account_type = $line['conta_tipo'];
+                    $agent->save(true);
+
+                    $app->em->clear();
+                } else {
+                    var_dump($validation);
+                    $invalid++;
+                }
             }
         }
-
 
         var_dump([
             'total' => $total,
@@ -523,6 +528,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         die;
     }
+    
 
     /**
     * Redireciona o usuário para o formulário do inciso II
