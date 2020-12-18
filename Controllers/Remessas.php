@@ -168,6 +168,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return $registrations;
     }
 
+    public static function mciCondition($registration)
+    {
+        $config = App::i()->plugins["AldirBlanc"]->config["config-mci460"];
+        return self::genericCondition($config["fieldMap"], $registration,
+                                      $config["condition"]);
+    }
+
+    public static function ppgCondition($registration)
+    {
+        $config = App::i()->plugins["AldirBlanc"]->config["config-ppg10x"];
+        return self::genericCondition($config["fieldMap"], $registration,
+                                      $config["condition"]);
+    }
+
     /**
      * Implementa um exportador genérico, que de momento tem a intenção de antender os municipios que não vão enviar o arquivo de remessa
      * diretamente ao banco do Brasil.
@@ -3692,9 +3706,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $repo = $app->repo("\\RegistrationPayments\\Payment");
         $keys = $this->getParametersForms();
         $date = $keys["datePayment"];
+        $status = $keys["typeExport"];
         $select = ["registration" => $registration->id];
         if (isset($this->data[$date])) {
             $select["paymentDate"] = new DateTime($this->data[$date]);
+        }
+        if (isset($this->data[$status]) && ($this->data[$status] != "all")) {
+            $select["status"] = intval($this->data[$status]);
         }
         $payments = $repo->findBy($select);
         foreach ($payments as $payment) {
@@ -4226,7 +4244,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return $out;
     }
 
-    private function genericCondition($fieldMap, $registration, $condition)
+    private static function genericCondition($fieldMap, $registration,
+                                             $condition)
     {
         if (!is_array($condition)) {
             $field = $fieldMap[$condition];
@@ -4238,45 +4257,45 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         switch ($condition["operator"]) {
             case "and":
                 foreach ($condition["operands"] as $op) {
-                    if (!$this->genericCondition($fieldMap, $registration, $op)) {
+                    if (!self::genericCondition($fieldMap, $registration, $op)) {
                         return false;
                     }
                 }
                 return true;
             case "or":
                 foreach ($condition["operands"] as $op) {
-                    if (!!$this->genericCondition($fieldMap, $registration, $op)) {
+                    if (!!self::genericCondition($fieldMap, $registration, $op)) {
                         return true;
                     }
                 }
                 return false;
             case "xor":
-                return (!!$this->genericCondition($fieldMap, $registration,
-                                                  $condition["operands"][0]) !=
-                        !!$this->genericcondition($fieldMap, $registration,
-                                                  $condition["operands"][1]));
+                return (!!self::genericCondition($fieldMap, $registration,
+                                                 $condition["operands"][0]) !=
+                        !!self::genericcondition($fieldMap, $registration,
+                                                 $condition["operands"][1]));
             case "not":
-                return !$this->genericCondition($fieldMap, $registration,
-                                                $condition["operands"][0]);
+                return !self::genericCondition($fieldMap, $registration,
+                                               $condition["operands"][0]);
             case "exists":
-                $value = $this->genericCondition($fieldMap, $registration,
-                                                 $condition["operands"][0]);
+                $value = self::genericCondition($fieldMap, $registration,
+                                                $condition["operands"][0]);
                 return (($value != null) && !empty($value));
             case "equals":
-                return ($this->genericCondition($fieldMap, $registration,
-                                                $condition["operands"][0]) ==
-                        $this->genericCondition($fieldMap, $registration,
-                                                $condition["operands"][1]));
+                return (self::genericCondition($fieldMap, $registration,
+                                               $condition["operands"][0]) ==
+                        self::genericCondition($fieldMap, $registration,
+                                               $condition["operands"][1]));
             case "in":
-                return in_array($this->genericCondition($fieldMap, $registration,
-                                                        $condition["operands"][0]),
-                                $this->genericCondition($fieldMap, $registration,
-                                                        $condition["operands"][1]));
+                return in_array(self::genericCondition($fieldMap, $registration,
+                                                       $condition["operands"][0]),
+                                self::genericCondition($fieldMap, $registration,
+                                                       $condition["operands"][1]));
             case "prefix":
-                return str_starts_with($this->genericCondition($fieldMap, $registration,
-                                                               $condition["operands"][0]),
-                                       $this->genericCondition($fieldMap, $registration,
-                                                               $condition["operands"][1]));
+                return str_starts_with(self::genericCondition($fieldMap, $registration,
+                                                              $condition["operands"][0]),
+                                       self::genericCondition($fieldMap, $registration,
+                                                              $condition["operands"][1]));
         }
         return null;
     }
@@ -4511,8 +4530,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $linesBefore = $nLines;
             while ($registration = $registrations->next()[0]) {
                 // testa se é desbancarizado
-                if (!$this->genericCondition($config["fieldMap"], $registration,
-                                             $config["condition"])) {
+                if (!self::genericCondition($config["fieldMap"], $registration,
+                                            $config["condition"])) {
                     $app->log->info("Ignorando - condição não satisfeita: " .
                                     $registration->number);
                     continue;
@@ -4705,8 +4724,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     continue;
                 }
                 // testa se é desbancarizado
-                if (!$this->genericCondition($config["fieldMap"], $registration,
-                                             $config["condition"])) {
+                if (!self::genericCondition($config["fieldMap"], $registration,
+                                            $config["condition"])) {
                     $app->log->info("Ignorando - condição não satisfeita: " .
                                     $registration->number);
                     continue;
@@ -4787,8 +4806,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     continue;
                 }
                 // testa se é desbancarizado
-                if (!$this->genericCondition($config["fieldMap"], $registration,
-                                             $config["condition"])) {
+                if (!self::genericCondition($config["fieldMap"], $registration,
+                                            $config["condition"])) {
                     $app->log->info("Ignorando - condição não satisfeita: " .
                                     $registration->number);
                     continue;
