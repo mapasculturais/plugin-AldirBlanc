@@ -174,11 +174,15 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     }
 
     /**
+     * 
      * Endpoint para enviar emails das oportunidades
+     * 
+     * Exemplo: /aldirblanc/sendEmails/opportunity:1/status:10
+     * 
      */
     function ALL_sendEmails(){
         ini_set('max_execution_time', 0);
-        
+
         $this->requireAuthentication();
 
         if (empty($this->data['opportunity'])) {
@@ -209,7 +213,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $status = '2,3,8,10';
         } else {
             $status = intval($this->data['status']);
-            if (!in_array($status, [2,3,8,10])) {
+            if (!in_array($status, [2, 3, 8, 10])) {
                 $this->errorJson('Os status válidos são 2, 3, 8 ou 10');
                 die;
             }
@@ -237,75 +241,144 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         foreach ($registrations as &$reg) {
             $reg = (object) $reg;
             $registration = $app->repo('Registration')->find($reg->id);
-            $this->sendEmail($registration);
+
+            $payment = false;
+            $paymentMeta = $registration->metadata['secult_financeiro_raw'] ?? false;
+
+            if ($paymentMeta && strpos($paymentMeta, 'Caso tenha algum problema com seu pagamento, entre em contato com o suporte') && strpos($paymentMeta, '"AVALIACAO":"selecionada"')) {
+                $payment = true;
+            }
+            
+            $this->sendEmail($registration, $payment);
         }
+
     }
 
     /**
      * Envia email com status da inscrição
      *
      */
-    function sendEmail(Registration $registration){
+    function sendEmail(Registration $registration, $payment = false){
         $app = App::i();
-        $registrationStatusInfo = $this->getRegistrationStatusInfo($registration);
 
         $mustache = new \Mustache_Engine();
         $site_name = $app->view->dict('site: name', false);
         $baseUrl = $app->getBaseUrl();
-        $justificativaAvaliacao = "";
-        foreach ($registrationStatusInfo['justificativaAvaliacao'] as $message) {
-            if (is_array($message) && !empty($this->config['exibir_resultado_padrao'] ) ) {
-               $justificativaAvaliacao .= $message['message'] . "<hr>";
-            }else{
-                $justificativaAvaliacao .= $message .'<hr>';
+
+        $messageBody = '';
+
+        // Envia e-mail para inscrições com pagamento realizado
+        if ($payment) {
+
+            $filename = $app->view->resolveFilename("views/aldirblanc", "email-payments.html");
+            $template = file_get_contents($filename);
+
+            // Verifica se é uma inscrição desbancarizada
+            $accountCreationSecult = $registration->owner->metadata['account_creation'] ?? false;
+            $branch = $registration->owner->payment_bank_branch ?? false;
+
+            $secultRaw = json_decode($registration->metadata['secult_financeiro_raw'], true);
+
+            if ($accountCreationSecult && $branch) {
+
+                // Mensagem de Status para desbancarizados que possuem a conta criada pela SECULT.
+                $messageStatus = 'O pagamento foi realizado. Para ter acesso ao auxílio, dirija-se até a agência ';
+                $messageStatus .= $branch;
+                $messageStatus .= ' para validar a abertura de sua conta pela SECULT. Lembre-se de levar RG, CPF e comprovante de residência.';
+                $messageStatus .= '<br><br>';
+                $messageStatus .= $secultRaw['OBSERVACOES'];
+                $messageBody = $messageStatus;
+
+            } else {
+
+                $messageBody = 'O pagamento do seu benefício foi realizado e já está disponível para saque na conta indicada no momento de sua inscrição.';
+                $messageBody .= '<br><br>';
+                $messageBody .= $secultRaw['OBSERVACOES'];
+
             }
+
+            $statusTitle = 'Seu pagamento foi realizado com sucesso!!!';
+
+            $params = [
+                "siteName" => $site_name,
+                "urlImageToUseInEmails" => $this->config['logotipo_central'],
+                "user" => $registration->owner->name,
+                "inscricaoId" => $registration->id, 
+                "inscricao" => $registration->number, 
+                "statusNum" => $registration->status,
+                "statusTitle" => $statusTitle,
+                "messageBody" => $messageBody,
+                "baseUrl" => $baseUrl
+            ];
+            $content = $mustache->render($template,$params);
+
+        } else {
+
+            $registrationStatusInfo = $this->getRegistrationStatusInfo($registration);
+            $justificativaAvaliacao = "";
+            foreach ($registrationStatusInfo['justificativaAvaliacao'] as $message) {
+                if (is_array($message) && !empty($this->config['exibir_resultado_padrao'])) {
+                $justificativaAvaliacao .= $message['message'] . "<hr>";
+                } else {
+                    $justificativaAvaliacao .= $message .'<hr>';
+                }
+            }
+
+            $filename = $app->view->resolveFilename("views/aldirblanc", "email-status.html");
+            $template = file_get_contents($filename);
+
+            $statusTitle = $registrationStatusInfo['registrationStatusMessage']['title'];
+
+            $params = [
+                "siteName" => $site_name,
+                "urlImageToUseInEmails" => $this->config['logotipo_central'],
+                "user" => $registration->owner->name,
+                "inscricaoId" => $registration->id, 
+                "inscricao" => $registration->number, 
+                "statusNum" => $registration->status,
+                "statusTitle" => $statusTitle,
+                "justificativaAvaliacao" => $justificativaAvaliacao,
+                "msgRecurso" => $this->config['msg_recurso'],
+                "emailRecurso" => $this->config['email_recurso'],
+                "baseUrl" => $baseUrl
+            ];
+            $content = $mustache->render($template,$params);
+
         }
-        $filename = $app->view->resolveFilename("views/aldirblanc", "email-status.html");
-        $template = file_get_contents($filename);
 
-        $params = [
-            "siteName" => $site_name,
-            "urlImageToUseInEmails" => $this->config['logotipo_central'],
-            "user" => $registration->owner->name,
-            "inscricaoId" => $registration->id, 
-            "inscricao" => $registration->number, 
-            "statusNum" => $registration->status,
-            "statusTitle" => $registrationStatusInfo['registrationStatusMessage']['title'],
-            "justificativaAvaliacao" => $justificativaAvaliacao,
-            "msgRecurso" => $this->config['msg_recurso'],
-            "emailRecurso" => $this->config['email_recurso'],
-            "baseUrl" => $baseUrl
-        ];
-        $content = $mustache->render($template,$params);
-        $email_params = [
-            'from' => $app->config['mailer.from'],
-            'to' => $registration->owner->user->email,
-            'subject' => $site_name . " - Status de inscrição",
-            'body' => $content
-        ];
+        if (!empty($content)) {
 
-        $app->log->debug("ENVIANDO EMAIL DE STATUS DA {$registration->number} ({$registrationStatusInfo['registrationStatusMessage']['title']})");
-        $app->createAndSendMailMessage($email_params);
+            $email_params = [
+                'from' => $app->config['mailer.from'],
+                'to' => $registration->owner->user->email,
+                'subject' => $site_name . " - Status de inscrição",
+                'body' => $content
+            ];
 
-        
-        $sent_emails = $registration->lab_sent_emails ;
-        $sent_emails[] = [
-            'timestamp' => date('Y-m-d H:i:s'),
-            'loggedin_user' => [
-                'id' => $app->user->id,
-                'email' => $app->user->email,
-                'name' => $app->user->profile->name 
-            ],
-            'email' => $email_params
-        ];
+            $app->log->debug("ENVIANDO EMAIL DE STATUS DA {$registration->number} ({$statusTitle})");
+            $app->createAndSendMailMessage($email_params);
 
-        $app->disableAccessControl();
-        $registration->lab_sent_emails = $sent_emails;
+            $sent_emails = $registration->lab_sent_emails;
+            $sent_emails[] = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'loggedin_user' => [
+                    'id' => $app->user->id,
+                    'email' => $app->user->email,
+                    'name' => $app->user->profile->name
+                ],
+                'email' => $email_params
+            ];
 
-        $registration->lab_last_email_status = $registration->status;
+            $app->disableAccessControl();
+            $registration->lab_sent_emails = $sent_emails;
 
-        $registration->save(true);
-        $app->enableAccessControl();
+            $registration->lab_last_email_status = $registration->status;
+
+            $registration->save(true);
+            $app->enableAccessControl();
+
+        }
+
     }
     /**
      * Retorna Array com informações sobre o status de uma inscrição
