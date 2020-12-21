@@ -306,6 +306,43 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
+        // adiciona data limite de recurso e data da última e alteração de status à planilha de inscritos
+        $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
+            $_header = [];
+            $_body = [];
+
+            foreach ($header as $i => $value) {
+                $_header[] = $value;
+                if ($i == 4) {
+                    $_header[] = 'publicação da última modificação de status';
+                    $_header[] = 'limite para recurso';
+                }
+            }
+
+            $header = $_header;
+
+            $limites_recurso = [];
+            $status_log = [];
+            foreach ($registrations as $re) {
+                $limites_recurso[$re->number] = $re->lab_data_limite_recurso;
+                $status_log[$re->number] = $re->lab_status_log;
+            }
+
+            foreach ($body as $i => $line){
+                $_line = [];
+                foreach ($line as $j => $col) {
+                    $_line[] = $col;
+                    if($j == 4) {
+                        $logs = $status_log[$line[0]] ?? [];
+                        $status = array_pop($logs);
+                        $_line[] = $status ? $status->date : '';
+                        $_line[] = $limites_recurso[$line[0]];
+                    }
+                }
+                $body[$i] = $_line;
+            }
+        });
+
         $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
             $em = $opportunity->getEvaluationMethod();
 
@@ -323,9 +360,8 @@ class Plugin extends \MapasCulturais\Plugin
                 }
 
                 if (isset($evaluations_status[$eval->registration->number])) {
-                    if ($eval->result < $evaluations_status[$eval->registration->number]) {
-                        $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
-                    }
+                    $evaluations_status[$eval->registration->number] .= "\n-------------\n" . $em->valueToString($eval->result);
+                    
                 } else {
                     $evaluations_status[$eval->registration->number] = $em->valueToString($eval->result);
                 }
