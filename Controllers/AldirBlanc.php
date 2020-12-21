@@ -923,92 +923,94 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $recursos = [];
 
-        // retorna informações de pagamento
-        $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-            'registration' => $registration->id
-        ]);
+        // retorna informações de pagamento       
+        $paymentMeta = $registration->metadata['secult_financeiro_raw'] ?? false;
+            
+        $payment = false;
+        if ($paymentMeta && strpos($paymentMeta, 'Caso tenha algum problema com seu pagamento, entre em contato com o suporte') && strpos($paymentMeta, '"AVALIACAO":"selecionada"')) {
+            $payment = true;
+        }
 
-        $statusPayment = $payment->metadata['return_cnab_info']["STATUS_CODE"] ?? false;
-        $toPayment = $payment->metadata["csv_line"]["VALIDACAO"] ?? false;
-        $accountCreation = $registration->owner->metadata['account_creation'] ?? false;
-            
-        if($statusPayment != false){
-            if ($statusPayment == 10){
-                if($accountCreation){
-                    // Mensagem de Status para desbancarizados que possuem a conta criada pela SECULT.
-                    $registrationStatusMessage['title'] = 'Seu pagamento foi realizado com sucesso!!!';
-                    $messageStatus = 'O pagamento foi realizado. Para ter acesso ao auxílio, dirija-se até a agência ';
-                    $messageStatus .= $registration->owner->payment_bank_branch;
-                    $messageStatus .= ' para validar a abertura de sua conta pela SECULT. Lembre-se de levar RG, CPF e comprovante de residência.';
-                    $justificativaAvaliacao[] = $messageStatus;
-                }else{                    
-                    $messageStatus = 'O pagamento foi realizado.';                   
-                    $justificativaAvaliacao[] = $messageStatus;
-                }
-            }elseif ($statusPayment == 2){
-                $registrationStatusMessage['title'] = 'Pagamento pendente!';
-                $justificativaAvaliacao[] = 'Seu pagamento está em andamento. Consulte novamente em outro momento.';
+        if($payment){
+            // Verifica se é uma inscrição desbancarizada
+            $accountCreationSecult = $registration->owner->metadata['account_creation'] ?? false;
+            $branch = $registration->owner->payment_bank_branch ?? false;
+            $secultRaw = json_decode($registration->metadata['secult_financeiro_raw'], true);
+            if ($accountCreationSecult && $branch) {
+
+                // Mensagem de Status para desbancarizados que possuem a conta criada pela SECULT.
+                $messageStatus = 'O pagamento foi realizado. Para ter acesso ao auxílio, dirija-se até a agência ';
+                $messageStatus .= $branch;
+                $messageStatus .= ' para validar a abertura de sua conta pela SECULT. Lembre-se de levar RG, CPF e comprovante de residência.';
+                $messageStatus .= '<br><br>';
+                $messageStatus .= $secultRaw['OBSERVACOES'];
+                $justificativaAvaliacao[] = $messageStatus;
+
+            }else{
+
+                $messageStatus = 'O pagamento do seu benefício foi realizado e já está disponível para saque na conta indicada no momento de sua inscrição.';
+                $messageStatus .= '<br><br>';
+                $messageStatus .= $secultRaw['OBSERVACOES'];            
+                $justificativaAvaliacao[] = $messageStatus;
+                
             }
-        }elseif($toPayment){
-            $registrationStatusMessage['title'] = 'Pagamento pendente!';
-            $justificativaAvaliacao[] = 'Seu pagamento está em andamento. Consulte novamente em outro momento.';
-            
+            $registrationStatusMessage['title'] = 'Seu pagamento foi realizado com sucesso!!!';
         }else{
             // retorna as avaliações da inscrição
             $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
-            
+                        
             if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
                 $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
-            }
-            
-
-            foreach ($evaluations as $evaluation) {
-                $validacao = $evaluation->user->aldirblanc_validador ?? null;
-                if ($validacao == 'recurso') {
-                    $recursos[] = $evaluation;
-                }
-
-                if ($evaluation->getResult() == $registration->status) {
-                    
-                    if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
-                        // resultados do dataprev
-                        $avaliacao = $evaluation->getEvaluationData()->obs ?? '';
-                        if (!empty($avaliacao)) {
-                            if (($registration->status == 3 || $registration->status == 2) && substr_count($evaluation->getEvaluationData()->obs, 'Reprocessado')) {
-
-                                if ($this->config['msg_reprocessamento_dataprev']) {
-                                    $justificativaAvaliacao[] = $this->config['msg_reprocessamento_dataprev'];
+                foreach ($evaluations as $evaluation) {
+                    $validacao = $evaluation->user->aldirblanc_validador ?? null;
+                    if ($validacao == 'recurso') {
+                        $recursos[] = $evaluation;
+                    }
+    
+                    if ($evaluation->getResult() == $registration->status) {
+                        
+                        if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
+                            // resultados do dataprev
+                            $avaliacao = $evaluation->getEvaluationData()->obs ?? '';
+                            if (!empty($avaliacao)) {
+                                if (($registration->status == 3 || $registration->status == 2) && substr_count($evaluation->getEvaluationData()->obs, 'Reprocessado')) {
+    
+                                    if ($this->config['msg_reprocessamento_dataprev']) {
+                                        $justificativaAvaliacao[] = $this->config['msg_reprocessamento_dataprev'];
+                                    } else {
+                                        $justificativaAvaliacao[] = $avaliacao;
+                                    }
+                                    
                                 } else {
                                     $justificativaAvaliacao[] = $avaliacao;
                                 }
-                                
-                            } else {
-                                $justificativaAvaliacao[] = $avaliacao;
                             }
+                        } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
+                            // resultados dos avaliadores genericos
+                            $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
                         }
-                    } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
-                        // resultados dos avaliadores genericos
-                        $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                        
+                        if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
+                            // resultados dos demais avaliadores
+                            $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                        }
+    
                     }
                     
-                    if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
-                        // resultados dos demais avaliadores
-                        $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
-                    }
-
                 }
-                
-            }
+    
+            } 
 
-        }     
-
+        }        
+    
         $this->render('status', [
             'registration' => $registration, 
             'registrationStatusMessage' => $registrationStatusMessage, 
             'justificativaAvaliacao' => array_filter($justificativaAvaliacao),
             'recursos' => $recursos
         ]);
-    }
+    }          
+
 
     /**
      * Renderiza o formulário da solicitação
