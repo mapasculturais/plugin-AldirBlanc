@@ -146,7 +146,9 @@ class Plugin extends \MapasCulturais\Plugin
                 // 'ITAÚ UNIBANCO S.A..' => '341',
                 // 'BCO BRADESCO S.A' => '237',
                 // 'BCO SANTANDER (BRASIL) S.A' => '033'
-            ]
+             ],
+
+             'ppg_registros' => PRIVATE_FILES_PATH . 'aldirblanc/ppg/registros.csv'
         ];
 
         $skipConfig = false;
@@ -1519,5 +1521,34 @@ class Plugin extends \MapasCulturais\Plugin
         $app->disableAccessControl();
         $relation->save(true);
         $app->enableAccessControl();
+    }
+
+    function getSenhasPPG($registration_id) {
+        $app = App::i();
+        $filename = $this->config['ppg_registros'];
+
+        $handle = fopen($filename, "r");
+        $result = [];
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                $_line = explode(',', $line);
+                if (count($_line) == 4 && $_line[0] == $registration_id) {
+                    $payment = $app->repo('RegistrationPayments\Payment')->find($_line[1]);
+                    if($payment->status >= 8) {
+                        $result[] = (object) [
+                            'protocolo' => $_line[2],
+                            'senha' => $_line[3],
+                            'payment' => $payment
+                        ];
+                    }
+                }
+            }
+
+            fclose($handle);
+        } else {
+            throw new \Exception('arquivo de registros do PPG não encontrado');
+        } 
+
+        return $result;
     }
 }
