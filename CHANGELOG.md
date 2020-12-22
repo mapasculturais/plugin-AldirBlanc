@@ -1,4 +1,5 @@
 ## [Unreleased]
+- Corrige exibição de listagem de arquivos que apareciam em oportunidades que não são da AldirBlanc
 - Recuperação de senha de mediados
 - Endpoint para validação dos dados Bancários [#174](https://github.com/mapasculturais/plugin-AldirBlanc/issues/174)
 - Altera referência padrão dos PPG10x para ID do pagamento [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
