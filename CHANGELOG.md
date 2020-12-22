@@ -2,6 +2,7 @@
 
 - Adiciona mensagens na página de status para inscrições desbancarizadas
 - Altera exibicao do recurso na pagina de status de ->obs para ->status [#15](https://git.hacklab.com.br/mapas/mapas-es/-/issues/15)
+- Corrige exibição de listagem de arquivos que apareciam em oportunidades que não são da AldirBlanc
 - Recuperação de senha de mediados
 - Endpoint para validação dos dados Bancários [#174](https://github.com/mapasculturais/plugin-AldirBlanc/issues/174)
 - Altera referência padrão dos PPG10x para ID do pagamento [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
