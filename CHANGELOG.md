@@ -1,4 +1,10 @@
 ## [Unreleased]
+- Corrige exibição de listagem de arquivos que apareciam em oportunidades que não são da AldirBlanc
+- Recuperação de senha de mediados
+- Endpoint para validação dos dados Bancários [#174](https://github.com/mapasculturais/plugin-AldirBlanc/issues/174)
+- Altera referência padrão dos PPG10x para ID do pagamento [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
+- Corrige bug de armazenamento dos metadados no importador do MCI470 [#171](https://github.com/mapasculturais/plugin-AldirBlanc/issues/171)
+- Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Padroniza exibição da área de upload de desbancarizados [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Adiciona suporte a múltiplos pagamentos no mesmo arquivo PPG100 [#169](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
 - Adiciona ao formulário de avaliação dos incisos I e II a informação da consolidação atual das avaliações da inscrição [#163](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
@@ -11,11 +17,15 @@
 - Corrige prefixo para casos de conta corrente de 510 para 51 no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
 - Inserire opção de fazer exportação de arquivos teste (TS) no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
 - Inserire configurações para habilitar e desabilitar botão do CNAB240 nos incisos no CNAB240(Ref. [#170](https://github.com/mapasculturais/plugin-AldirBlanc/issues/170))
-
+- Inserire posições 178 a 179 campo 24.3A No lote 2 Poupança BB inserir o valor default 11 no CNAB240(Ref. [#172](https://github.com/mapasculturais/plugin-AldirBlanc/issues/172))
+- Corrige complemento de conta poupança para 9 caracteres prefixo 51 + 7 números1 no CNAB240(Ref. [#172](https://github.com/mapasculturais/plugin-AldirBlanc/issues/172))
+- Refatorar importador dataprev para inscrições que foram em um primeiro momento inseridas na plataforma como Não processadas, sejam reprocessadas caso em um segundo momento a mesma venha com status de processado (Ref. [#19](https://github.com/mapasculturais/plugin-AldirBlanc/issues/19))
+- Refatorar código para que o busque cnab240 os dados bancários nos metadados inseridos na tabela agent_meta apos a validação de contas bancárias. (Ref. [#175](https://github.com/mapasculturais/plugin-AldirBlanc/issues/175))
 ## [v2.3.1] - 2020-12-01
 - Implementa os importadores para o MCI470 e PPG101 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Reordena as avaliações antes da reconsolidação do resultado das inscrições, para colocar as avaliações que foram importadas (as que têm id igual ao id da inscrição) para serem processadas primeiro;
-- Redireciona usuários com controle sobre alguma oportunidade ou avaliadores de alguma oportunidade para o painel ao acessar a tela de cadastro. [#161]https://github.com/mapasculturais/plugin-AldirBlanc/issues/161 
+- Implementa função para processar os retornos de pagamento do Banco do Brasil para o CNAB240 [#173]https://github.com/mapasculturais/plugin-AldirBlanc/issues/173 
+- Refatora CNAB240 para ser possivel separar a exportação por lotes [#176]https://github.com/mapasculturais/plugin-AldirBlanc/issues/176 
 
 ## [v2.3.0] - 2020-10-27
 

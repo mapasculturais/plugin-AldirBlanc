@@ -571,8 +571,8 @@ return [
         ],
         'BEN_TIPO_DOC' => [ // Tipo de documento do requerente, CPF ou CNPJ, (1 = CPF, 2 = CNPJ). processo automatizado no exportador. Conta-se a quantidade de char do documento se for menor que 11 char, insere 1 no campo se for maisor insere 2
             'length' => 1,
-            'default' => 'mapped',
-            'field_id' => null,
+            'default' => null,
+            'field_id' => 'mapped',
             'type' => 'int',
         ],
         'BEN_CPF' => [ // Field_id do campo do CPF ou CNPJ do beneficiário, se atentar ao respondido no BEN_TIPO_DOC
