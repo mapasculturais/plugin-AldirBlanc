@@ -314,7 +314,7 @@ class Plugin extends \MapasCulturais\Plugin
 
 
         $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app, $opportunities_ids) {
-            if (!in_array($opportunity->id, $opportunity)) {
+            if (!in_array($opportunity->id, $opportunities_ids)) {
                 return;
             }
 
