@@ -1,4 +1,5 @@
 ## [Unreleased]
+- Corrige exibição de listagem de arquivos que apareciam em oportunidades que não são da AldirBlanc
 - Recuperação de senha de mediados
 - Corrige envio de e-mails dos PPG10x e adiciona suporte a duas mensagens para o caso geral
 - Corrige endereço de e-mail exibido na mensagem de status dos PPG10x

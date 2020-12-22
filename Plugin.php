@@ -252,6 +252,13 @@ class Plugin extends \MapasCulturais\Plugin
         $app = App::i();
 
         $plugin = $this;
+
+        $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
+        $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
+        $inciso3Ids = array_values($plugin->config['inciso3_opportunity_ids']);
+
+        $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
+
         if($plugin->config['zammad_enable']) {
             // $app->view->enqueueStyle('app','chat','chat.css');
         }
@@ -283,9 +290,7 @@ class Plugin extends \MapasCulturais\Plugin
             $app->enableAccessControl();
         });
         // adiciona informações do status das validações ao formulário de avaliação
-        $app->hook('template(registration.view.evaluationForm.simple):before', function(Registration $registration, $opportunity) use($plugin, $app) {
-            $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
-            $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
+        $app->hook('template(registration.view.evaluationForm.simple):before', function(Registration $registration, $opportunity) use($inciso1Ids, $inciso2Ids) {
             $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids);
             if (in_array($opportunity->id, $opportunities_ids) && $registration->consolidatedResult) {
                 $em = $registration->getEvaluationMethod();
@@ -313,48 +318,49 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
          //Botão exportador CNAB240 BB
-         $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
-            $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
-            $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
-            $inciso3Ids = [];//$plugin->config['inciso3_opportunity_ids'];
-            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
-            $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
-            $opportunity = $requestedOpportunity->id;
+         $app->hook('template(opportunity.single.header-inscritos):end', function () use($app, $inciso1Ids, $inciso2Ids){
+            
+            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids);
+            $opportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
 
             //Configura em que incisos deve ser exibido o botão do CNAB240. deixar o array vazio para nao exibir
             $exibirBtnIncisos = [1];            
             
             $selectList = false;            
-            if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
+            if (in_array($opportunity->id,$opportunities_ids) && $opportunity->canUser('@control')) {
                 $selectList = true;
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
-                if (in_array($requestedOpportunity->id, $inciso1Ids)){
+
+                if (in_array($opportunity->id, $inciso1Ids)){
                     $inciso = 1;
-
-                }
-                else if (in_array($requestedOpportunity->id, $inciso2Ids)){
+                
+                } else if (in_array($opportunity->id, $inciso2Ids)){
                     $inciso = 2;
-
-                }else if(in_array($requestedOpportunity->id, $inciso3Ids)){
-                    $inciso = 3;
-
                 }
+
                 if(in_array($inciso, $exibirBtnIncisos)){ //<= Configurar para exibir o botão do CNAB 240
-                    $this->part('aldirblanc/cnab240-txt-button', ['inciso' => $inciso, 'opportunity' => $opportunity, 'selectList' => $selectList, 'exibirBtnIncisos' =>$exibirBtnIncisos]);
+                    $this->part('aldirblanc/cnab240-txt-button', ['inciso' => $inciso, 'opportunity' => $opportunity->id, 'selectList' => $selectList, 'exibirBtnIncisos' =>$exibirBtnIncisos]);
                 }
             }
         });
 
         // uploads de CSVs 
-        $app->hook('template(opportunity.<<single|edit>>.sidebar-right):end', function () {
+        $app->hook('template(opportunity.<<single|edit>>.sidebar-right):end', function () use($app, $inciso1Ids, $inciso2Ids){
+            
+            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids);
             $opportunity = $this->controller->requestedEntity; 
-            if($opportunity->canUser('@control')){
+
+            if (in_array($opportunity->id,$opportunities_ids) && $opportunity->canUser('@control')) {
                 $this->part('aldirblanc/cnab240-uploads', ['entity' => $opportunity]);
             }
         });
 
 
-        $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app) {
+        $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app, $opportunities_ids) {
+            if (!in_array($opportunity->id, $opportunity)) {
+                return;
+            }
+
             $em = $opportunity->getEvaluationMethod();
 
             $_evaluations = $app->repo('RegistrationEvaluation')->findBy(['registration' => $registrations]);
@@ -417,7 +423,6 @@ class Plugin extends \MapasCulturais\Plugin
         // modulo de mediacao
         $app->hook('entity(Agent).canUser(<<viewPrivateData>>)', function($user,&$can) use($app){
             
-
             if (isset($_SESSION['mediado_data']) && $user->is('guest') ){
                 $data = $_SESSION['mediado_data'];
                 $data = $_SESSION['mediado_data'];
@@ -436,8 +441,8 @@ class Plugin extends \MapasCulturais\Plugin
                }
             }
         });
+
         $app->hook('entity(Registration).canUser(<<@control|view|viewPrivateData|viewConsolidatedResult>>)', function($user,&$can) use($app){
-            
             if (isset($_SESSION['mediado_data']) && $user->is('guest') ){
                 $data = $_SESSION['mediado_data'];
                 $cpf = $this->owner->getMetadata('documento');
@@ -455,8 +460,6 @@ class Plugin extends \MapasCulturais\Plugin
                     unset( $_SESSION['mediado_data'] );
                 }
             }
-            
-
         });
         // Permite mediadores cadastrar fora do prazo
         $app->hook('entity(Registration).canUser(<<send>>)', function($user,&$can) use($plugin, $app){
@@ -508,15 +511,12 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
         //Botão exportador genérico
-        $app->hook('template(opportunity.single.header-inscritos):end', function () use($plugin, $app){
-            $inciso1Ids = [$plugin->config['inciso1_opportunity_id']];
-            $inciso2Ids = array_values($plugin->config['inciso2_opportunity_ids']);
-            $inciso3Ids = array_values($plugin->config['inciso3_opportunity_ids']);
-            $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
+        $app->hook('template(opportunity.single.header-inscritos):end', function () use($app, $inciso1Ids, $inciso2Ids, $inciso3Ids, $opportunities_ids){
+            
             $requestedOpportunity = $this->controller->requestedEntity; //Tive que chamar o controller para poder requisitar a entity
             $opportunity = $requestedOpportunity->id;
             $selectList = false;
-            if(($requestedOpportunity->canUser('@control')) && in_array($requestedOpportunity->id,$opportunities_ids) ) {
+            if (in_array($requestedOpportunity->id,$opportunities_ids) && $requestedOpportunity->canUser('@control')) {
                 $selectList = true;
                 $app->view->enqueueScript('app', 'aldirblanc', 'aldirblanc/app.js');
                 if (in_array($requestedOpportunity->id, $inciso1Ids)){
