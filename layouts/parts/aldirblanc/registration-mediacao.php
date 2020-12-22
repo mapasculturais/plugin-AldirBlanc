@@ -43,7 +43,11 @@ if ($isPPG) :
                 <span class="label">Ordens de pagamento</span>
             </div>
 
-            <span><em>Essas são suas informações para recebimento do seu auxílio.</em></span>
+            <span><em>
+            O pagamento das três parcelas de R$ 1.000,00 do seu benefício está disponível para saque em qualquer caixa eletrônico do Banco do Brasil ou 24 horas. Para realizar o saque, você precisa dos números de protocolo e senhas abaixo.<br><br>
+            No caixa eletrônico, selecione no menu “opções sem cartão”, na sequência escolha “Saques” e depois “Benefícios Emergenciais”. Para encerrar, informe o número do protocolo e a senha da primeira parcela e faça o saque do valor. Finalize o processo e comece novamente para realizar o saque da segunda parcela, seguindo as mesmas orientações e alterando o número de protocolo e senha. Por fim, repita o procedimento para realizar o saque da terceira parcela.<br><br>
+            Se você foi aprovada como mulher chefe de família (monoparental). Serão seis parcelas e o procedimento será repetido por seis vezes.
+            </em></span>
 
             <hr>
 
