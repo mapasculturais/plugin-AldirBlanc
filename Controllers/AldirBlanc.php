@@ -566,7 +566,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 $count++;
 
                 $banco = '001';
-                $validation = $plugin_pagamentos->validateAccount($banco, $line['conta'], $line['agencia'], $line['conta_dv'] = 1, $line['agencia_dv'] = 1);
+                $validation = $plugin_pagamentos->validateAccount($banco, $line['conta'], $line['agencia'], $line['conta_dv'] = null, $line['agencia_dv'] = null);
                 
                 if ($validation->account_full && $validation->branch_full) {
                     $valid++;
