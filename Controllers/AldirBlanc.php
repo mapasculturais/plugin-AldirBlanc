@@ -108,6 +108,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         return $opportunity;
     }
+
+    
     
     /**
      * Retorna a oportunidade do inciso II
@@ -171,6 +173,257 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return $summaryStatusName;
     }
 
+    /**
+     * 
+     * Endpoint para enviar emails das oportunidades
+     * 
+     * Exemplo: /aldirblanc/sendEmails/opportunity:1/status:10
+     * 
+     */
+    function ALL_sendEmails(){
+        ini_set('max_execution_time', 0);
+
+        $this->requireAuthentication();
+
+        if (empty($this->data['opportunity'])) {
+            $this->errorJson('O parâmetro opportunity é obrigatório');
+        }
+
+        $app = App::i();
+
+        $opportunity = $app->repo('Opportunity')->find($this->data['opportunity']);
+
+        if (!$opportunity) {
+            $this->errorJson('Oportunidade não encontrada');
+        }
+
+        $opportunity->checkPermission('@control');
+
+        $inciso1Ids = [$this->config['inciso1_opportunity_id']];
+        $inciso2Ids = array_values($this->config['inciso2_opportunity_ids']);
+        $inciso3Ids = is_array($this->config['inciso3_opportunity_ids']) ? $this->config['inciso3_opportunity_ids'] : [];
+
+        $lab_opportunities = array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
+
+        if (!in_array($opportunity->id, $lab_opportunities)) {
+            $this->errorJson("Oportunidade não é da Lei Aldir Blanc");
+        }
+
+        if (empty($this->data['status'])) {
+            $status = '2,3,8,10';
+        } else {
+            $status = intval($this->data['status']);
+            if (!in_array($status, [2, 3, 8, 10])) {
+                $this->errorJson('Os status válidos são 2, 3, 8 ou 10');
+                die;
+            }
+        }
+
+        $registrations = $app->em->getConnection()->fetchAll("
+            SELECT 
+                r.id,
+                r.status,
+                les.value AS last_email_status
+
+            FROM registration r
+                LEFT JOIN
+                    registration_meta les ON 
+                        les.object_id = r.id AND 
+                        les.key = 'lab_last_email_status'
+                    
+            WHERE 
+                r.opportunity_id = {$opportunity->id} AND 
+                r.status IN ({$status}) AND 
+                (les.value IS NULL OR les.value <> r.status::VARCHAR)
+
+            ORDER BY r.sent_timestamp ASC");
+
+        foreach ($registrations as &$reg) {
+            $reg = (object) $reg;
+            $registration = $app->repo('Registration')->find($reg->id);
+
+            $payment = false;
+            $paymentMeta = $registration->metadata['secult_financeiro_raw'] ?? false;
+
+            if ($paymentMeta && strpos($paymentMeta, 'Caso tenha algum problema com seu pagamento, entre em contato com o suporte') && strpos($paymentMeta, '"AVALIACAO":"selecionada"')) {
+                $payment = true;
+            }
+            
+            $this->sendEmail($registration, $payment);
+        }
+
+    }
+
+    /**
+     * Envia email com status da inscrição
+     *
+     */
+    function sendEmail(Registration $registration, $payment = false){
+        $app = App::i();
+
+        $mustache = new \Mustache_Engine();
+        $site_name = $app->view->dict('site: name', false);
+        $baseUrl = $app->getBaseUrl();
+
+        $messageBody = '';
+
+        // Envia e-mail para inscrições com pagamento realizado
+        if ($payment) {
+
+            $filename = $app->view->resolveFilename("views/aldirblanc", "email-payments.html");
+            $template = file_get_contents($filename);
+
+            // Verifica se é uma inscrição desbancarizada
+            $accountCreationSecult = $registration->owner->metadata['account_creation'] ?? false;
+            $branch = $registration->owner->payment_bank_branch ?? false;
+
+            $secultRaw = json_decode($registration->metadata['secult_financeiro_raw'], true);
+
+            if ($accountCreationSecult && $branch) {
+
+                // Mensagem de Status para desbancarizados que possuem a conta criada pela SECULT.
+                $messageStatus = 'O pagamento foi realizado. Para ter acesso ao auxílio, dirija-se até a agência ';
+                $messageStatus .= $branch;
+                $messageStatus .= ' para validar a abertura de sua conta pela SECULT. Lembre-se de levar RG, CPF e comprovante de residência.';
+                $messageStatus .= '<br><br>';
+                $messageStatus .= $secultRaw['OBSERVACOES'];
+                $messageBody = $messageStatus;
+
+            } else {
+
+                $messageBody = 'O pagamento do seu benefício foi realizado e já está disponível para saque na conta indicada no momento de sua inscrição.';
+                $messageBody .= '<br><br>';
+                $messageBody .= $secultRaw['OBSERVACOES'];
+
+            }
+
+            $statusTitle = 'Seu pagamento foi realizado com sucesso!!!';
+
+            $params = [
+                "siteName" => $site_name,
+                "urlImageToUseInEmails" => $this->config['logotipo_central'],
+                "user" => $registration->owner->name,
+                "inscricaoId" => $registration->id, 
+                "inscricao" => $registration->number, 
+                "statusNum" => $registration->status,
+                "statusTitle" => $statusTitle,
+                "messageBody" => $messageBody,
+                "baseUrl" => $baseUrl
+            ];
+            $content = $mustache->render($template,$params);
+
+        } else {
+
+            $registrationStatusInfo = $this->getRegistrationStatusInfo($registration);
+            $justificativaAvaliacao = "";
+            foreach ($registrationStatusInfo['justificativaAvaliacao'] as $message) {
+                if (is_array($message) && !empty($this->config['exibir_resultado_padrao'])) {
+                $justificativaAvaliacao .= $message['message'] . "<hr>";
+                } else {
+                    $justificativaAvaliacao .= $message .'<hr>';
+                }
+            }
+
+            $filename = $app->view->resolveFilename("views/aldirblanc", "email-status.html");
+            $template = file_get_contents($filename);
+
+            $statusTitle = $registrationStatusInfo['registrationStatusMessage']['title'];
+
+            $params = [
+                "siteName" => $site_name,
+                "urlImageToUseInEmails" => $this->config['logotipo_central'],
+                "user" => $registration->owner->name,
+                "inscricaoId" => $registration->id, 
+                "inscricao" => $registration->number, 
+                "statusNum" => $registration->status,
+                "statusTitle" => $statusTitle,
+                "justificativaAvaliacao" => $justificativaAvaliacao,
+                "msgRecurso" => $this->config['msg_recurso'],
+                "emailRecurso" => $this->config['email_recurso'],
+                "baseUrl" => $baseUrl
+            ];
+            $content = $mustache->render($template,$params);
+
+        }
+
+        if (!empty($content)) {
+
+            $email_params = [
+                'from' => $app->config['mailer.from'],
+                'to' => $registration->owner->user->email,
+                'subject' => $site_name . " - Status de inscrição",
+                'body' => $content
+            ];
+
+            $app->log->debug("ENVIANDO EMAIL DE STATUS DA {$registration->number} ({$statusTitle})");
+            $app->createAndSendMailMessage($email_params);
+
+            $sent_emails = $registration->lab_sent_emails;
+            $sent_emails[] = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'loggedin_user' => [
+                    'id' => $app->user->id,
+                    'email' => $app->user->email,
+                    'name' => $app->user->profile->name
+                ],
+                'email' => $email_params
+            ];
+
+            $app->disableAccessControl();
+            $registration->lab_sent_emails = $sent_emails;
+
+            $registration->lab_last_email_status = $registration->status;
+
+            $registration->save(true);
+            $app->enableAccessControl();
+
+        }
+
+    }
+    /**
+     * Retorna Array com informações sobre o status de uma inscrição
+     *
+     * @return array
+     */
+    function getRegistrationStatusInfo(Registration $registration){
+        $app = App::i();
+        // retorna a mensagem de acordo com o status
+        $getStatusMessages = $this->getStatusMessages();
+        $registrationStatusInfo=[];
+        $registrationStatusInfo['registrationStatusMessage'] = $getStatusMessages[$registration->status];
+        // retorna as avaliações da inscrição
+        $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
+        
+        // monta array de mensagens
+        $justificativaAvaliacao = [];
+
+        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
+            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
+        }
+        
+        foreach ($evaluations as $evaluation) {
+
+            if ($evaluation->getResult() == $registration->status) {
+                
+                if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
+                    // resultados do dataprev
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
+                    // resultados dos avaliadores genericos
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                } 
+                
+                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
+                    // resultados dos demais avaliadores
+                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                }
+
+            }
+            
+        }
+        $registrationStatusInfo['justificativaAvaliacao'] = $justificativaAvaliacao;
+        return $registrationStatusInfo;
+    }
     /**
      * Retorna array associativo com mensagens para cada status da inscrição
      *
@@ -256,6 +509,92 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $app->disableAccessControl();
 
         return $agent;
+    }
+
+    function ALL_validaContasBancarias() {
+        $this->requireAuthentication();
+        ini_set('max_execution_time', 0);
+
+        $app = App::i();
+        $conn = $app->em->getConnection();
+        $plugin_pagamentos = $app->plugins['RegistrationPayments'];
+        
+        $fields = $this->plugin->config['dados_bancarios_inciso1_fields'];
+
+        $bancos = $this->plugin->config['mapeamento_bancos'];
+
+        $banks = implode("','", array_keys($bancos));
+
+        $result = $conn->fetchAll("
+        SELECT 
+            r.id as registration_id, 
+            r.number, 
+            r.agent_id,
+            _banco.value AS banco,
+            _agencia.value AS agencia,
+            _agencia_dv.value AS agencia_dv,
+            _conta.value AS conta,
+            _conta_dv.value AS conta_dv,
+            _conta_tipo.value AS conta_tipo
+
+        FROM
+            registration r
+            JOIN registration_meta _banco ON _banco.key = '{$fields['banco']}' AND _banco.object_id = r.id
+            JOIN registration_meta _agencia ON _agencia.key = '{$fields['agencia']}' AND _agencia.object_id = r.id
+            LEFT JOIN registration_meta _agencia_dv ON _agencia_dv.key = '{$fields['agencia_dv']}' AND _agencia_dv.object_id = r.id
+            JOIN registration_meta _conta ON _conta.key = '{$fields['conta']}' AND _conta.object_id = r.id
+            LEFT JOIN registration_meta _conta_dv ON _conta_dv.key = '{$fields['conta_dv']}' AND _conta_dv.object_id = r.id
+            LEFT JOIN registration_meta _conta_tipo ON _conta_tipo.key = '{$fields['conta_tipo']}' AND _conta_tipo.object_id = r.id
+        WHERE 
+            _banco.value IN ('$banks')
+
+        ");
+
+        $total = count($result);
+
+        $invalid = 0;
+        $valid = 0;
+        $fixed = 0;
+
+        $count = 0;
+        foreach($result as  $line) {
+            $count++;
+
+            $banco = $bancos[$line['banco']];
+            $validation = $plugin_pagamentos->validateAccount($banco, $line['conta'], $line['agencia'], $line['conta_dv'], $line['agencia_dv']);
+            
+            if ($validation->account_full && $validation->branch_full) {
+                $valid++;
+                if($validation->account_changed || $validation->branch_changed) {
+                    $fixed++;
+                }
+
+                $app->log->info("$count / $total ## {$line['number']} -- VALID: {$validation->bank_number} {$validation->branch_full} {$validation->account_full}");
+
+                $agent = $app->repo('Agent')->find($line['agent_id']);
+                
+                $agent->payment_bank_account_number = $validation->account_full;
+                $agent->payment_bank_branch = $validation->branch_full;
+                $agent->payment_bank_number = $banco;
+                $agent->payment_bank_account_type = $line['conta_tipo'];
+                $agent->save(true);
+
+                $app->em->clear();
+            } else {
+                var_dump($validation);
+                $invalid++;
+            }
+        }
+
+
+        var_dump([
+            'total' => $total,
+            'invalid' => $invalid,
+            'valid' => $valid,
+            'fixed' => $fixed,
+        ]);
+
+        die;
     }
 
     /**
@@ -567,68 +906,105 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $app->redirect($this->createUrl('cadastro'));
         }
         $registration->checkPermission('view');
+        $registrationStatusInfo = $this->getRegistrationStatusInfo($registration);
 
         // retorna a mensagem de acordo com o status
         $getStatusMessages = $this->getStatusMessages();
         $registrationStatusMessage = $getStatusMessages[$registration->status];
-
-        // retorna as avaliações da inscrição
-        $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
         
         // monta array de mensagens
         $justificativaAvaliacao = [];
 
-        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
-            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
-        }
-        
         $recursos = [];
 
-        foreach ($evaluations as $evaluation) {
-            $validacao = $evaluation->user->aldirblanc_validador ?? null;
-            if ($validacao == 'recurso') {
-                $recursos[] = $evaluation;
-            }
-
-            if ($evaluation->getResult() == $registration->status) {
-                
-                if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
-                    // resultados do dataprev
-                    $avaliacao = $evaluation->getEvaluationData()->obs ?? '';
-                    if (!empty($avaliacao)) {
-                        if (($registration->status == 3 || $registration->status == 2) && substr_count($evaluation->getEvaluationData()->obs, 'Reprocessado')) {
-
-                            if ($this->config['msg_reprocessamento_dataprev']) {
-                                $justificativaAvaliacao[] = $this->config['msg_reprocessamento_dataprev'];
-                            } else {
-                                $justificativaAvaliacao[] = $avaliacao;
-                            }
-                            
-                        } else {
-                            $justificativaAvaliacao[] = $avaliacao;
-                        }
-                    }
-                } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
-                    // resultados dos avaliadores genericos
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
-                } 
-                
-                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
-                    // resultados dos demais avaliadores
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
-                }
-
-            }
+        // retorna informações de pagamento       
+        $paymentMeta = $registration->metadata['secult_financeiro_raw'] ?? false;
             
+        $payment = false;
+        if ($paymentMeta && strpos($paymentMeta, 'Caso tenha algum problema com seu pagamento, entre em contato com o suporte') && strpos($paymentMeta, '"AVALIACAO":"selecionada"')) {
+            $payment = true;
         }
 
+        if($payment){
+            // Verifica se é uma inscrição desbancarizada
+            $accountCreationSecult = $registration->owner->metadata['account_creation'] ?? false;
+            $branch = $registration->owner->payment_bank_branch ?? false;
+            $secultRaw = json_decode($registration->metadata['secult_financeiro_raw'], true);
+            if ($accountCreationSecult && $branch) {
+
+                // Mensagem de Status para desbancarizados que possuem a conta criada pela SECULT.
+                $messageStatus = 'O pagamento foi realizado. Para ter acesso ao auxílio, dirija-se até a agência ';
+                $messageStatus .= $branch;
+                $messageStatus .= ' para validar a abertura de sua conta pela SECULT. Lembre-se de levar RG, CPF e comprovante de residência.';
+                $messageStatus .= '<br><br>';
+                $messageStatus .= $secultRaw['OBSERVACOES'];
+                $justificativaAvaliacao[] = $messageStatus;
+
+            }else{
+
+                $messageStatus = 'O pagamento do seu benefício foi realizado e já está disponível para saque na conta indicada no momento de sua inscrição.';
+                $messageStatus .= '<br><br>';
+                $messageStatus .= $secultRaw['OBSERVACOES'];            
+                $justificativaAvaliacao[] = $messageStatus;
+                
+            }
+            $registrationStatusMessage['title'] = 'Seu pagamento foi realizado com sucesso!!!';
+        }else{
+            // retorna as avaliações da inscrição
+            $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
+                        
+            if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
+                $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
+                foreach ($evaluations as $evaluation) {
+                    $validacao = $evaluation->user->aldirblanc_validador ?? null;
+                    if ($validacao == 'recurso') {
+                        $recursos[] = $evaluation;
+                    }
+    
+                    if ($evaluation->getResult() == $registration->status) {
+                        
+                        if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
+                            // resultados do dataprev
+                            $avaliacao = $evaluation->getEvaluationData()->obs ?? '';
+                            if (!empty($avaliacao)) {
+                                if (($registration->status == 3 || $registration->status == 2) && substr_count($evaluation->getEvaluationData()->obs, 'Reprocessado')) {
+    
+                                    if ($this->config['msg_reprocessamento_dataprev']) {
+                                        $justificativaAvaliacao[] = $this->config['msg_reprocessamento_dataprev'];
+                                    } else {
+                                        $justificativaAvaliacao[] = $avaliacao;
+                                    }
+                                    
+                                } else {
+                                    $justificativaAvaliacao[] = $avaliacao;
+                                }
+                            }
+                        } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
+                            // resultados dos avaliadores genericos
+                            $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                        }
+                        
+                        if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
+                            // resultados dos demais avaliadores
+                            $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                        }
+    
+                    }
+                    
+                }
+    
+            } 
+
+        }        
+    
         $this->render('status', [
             'registration' => $registration, 
             'registrationStatusMessage' => $registrationStatusMessage, 
             'justificativaAvaliacao' => array_filter($justificativaAvaliacao),
             'recursos' => $recursos
         ]);
-    }
+    }          
+
 
     /**
      * Renderiza o formulário da solicitação
@@ -1000,6 +1376,60 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->json($users);
     }
 
+
+    function POST_redefinirSenhaMediado () {
+        $this->requireAuthentication();
+        
+        $app = App::i();
+
+        $registration = $this->requestedEntity;  
+
+        if (!$registration) {
+            $app->pass();
+        }
+
+        if(!$registration->mediacao_senha) {
+            eval(\psy\sh());
+            $this->errorJson('esta não é uma inscrição mediada');
+        }
+
+        if(!$this->postData['senha'] || strlen(trim($this->postData['senha'])) < 5) {
+            eval(\psy\sh());
+            $this->errorJson('a senha informada deve conter ao menos 5 caracteres', 400);
+        }
+
+        $registration->checkPermission('mudarSenhaMediado');
+
+        $app->disableAccessControl();
+        $registration->mediacao_senha = $this->postData['senha'];
+
+        $registration->save(true);
+        $app->enableAccessControl();
+
+        $this->json('sucesso');
+
+    }
+
+    function GET_redefinirSenhaMediado () {
+        $this->requireAuthentication();
+        
+        $app = App::i();
+
+        $registration = $this->requestedEntity;
+
+        if (!$registration) {
+            $app->pass();
+        }
+
+        if(!$registration->mediacao_senha) {
+            die('esta não é uma inscrição mediada');
+        }
+
+        $registration->checkPermission('mudarSenhaMediado');
+
+        $this->render('redefinicao-de-senha-mediado', ['registration' => $registration]);
+
+    }
 
     /**
      * Tela para login dos mediados

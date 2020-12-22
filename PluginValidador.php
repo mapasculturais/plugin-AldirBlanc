@@ -224,6 +224,21 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
         ]);
     }
 
+    /** 
+     * Retorna os ids das oportunidades da aldir blanc
+     */
+    protected function getOpportunitiesIds($incisos = [1,2,3]) {
+        $app = App::i();
+
+        $plugin_aldirblanc = $app->plugins['AldirBlanc'];
+
+        $inciso1Ids = in_array(1,$incisos) ? [$plugin_aldirblanc->config['inciso1_opportunity_id']] : [];
+        $inciso2Ids = in_array(2,$incisos) ? array_values($plugin_aldirblanc->config['inciso2_opportunity_ids']) : [];
+        $inciso3Ids = in_array(3,$incisos) && is_array($plugin_aldirblanc->config['inciso3_opportunity_ids']) ? $plugin_aldirblanc->config['inciso3_opportunity_ids'] : [];
+        
+        return array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids);
+    }
+
     /**
      * Retorna o authUid do usuário do plugin validador
      *
