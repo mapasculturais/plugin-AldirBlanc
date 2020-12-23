@@ -2,13 +2,17 @@
 
 - Adiciona mensagens na página de status para inscrições desbancarizadas
 - Altera exibicao do recurso na pagina de status de ->obs para ->status [#15](https://git.hacklab.com.br/mapas/mapas-es/-/issues/15)
+- endpoint para corrigir espaços e agentes de inscrições mediadas
+
+## [v2.4.0]
+- Corrige bug no processamento de múltiplos pagamentos do exportador PPG100 [#169](https://github.com/mapasculturais/plugin-AldirBlanc/issues/169)
 - Corrige exibição de listagem de arquivos que apareciam em oportunidades que não são da AldirBlanc
 - Recuperação de senha de mediados
 - Endpoint para validação dos dados Bancários [#174](https://github.com/mapasculturais/plugin-AldirBlanc/issues/174)
 - Altera referência padrão dos PPG10x para ID do pagamento [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Corrige bug de armazenamento dos metadados no importador do MCI470 [#171](https://github.com/mapasculturais/plugin-AldirBlanc/issues/171)
 - Padroniza exibição da área de upload de desbancarizados [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
-- Adiciona suporte a múltiplos pagamentos no mesmo arquivo PPG100 [#169](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
+- Adiciona suporte a múltiplos pagamentos no mesmo arquivo PPG100 [#169](https://github.com/mapasculturais/plugin-AldirBlanc/issues/169)
 - Adiciona ao formulário de avaliação dos incisos I e II a informação da consolidação atual das avaliações da inscrição [#163](https://github.com/mapasculturais/plugin-AldirBlanc/issues/163)
 - Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Refatorando CNAB240 do Inciso 1 para receber desbancarizados com as contas criadas pela Secult
