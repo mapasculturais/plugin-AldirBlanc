@@ -83,6 +83,9 @@ class Plugin extends \MapasCulturais\Plugin
             'exibir_resultado_dataprev' => (array) json_decode(env('AB_EXIBIR_RESULTADO_DATAPREV', '[]')),
             'exibir_resultado_generico' => (array) json_decode(env('AB_EXIBIR_RESULTADO_GENERICO', '[]')),
             'exibir_resultado_avaliadores' => (array) json_decode(env('AB_EXIBIR_RESULTADO_AVALIADORES', '["10"]')),
+            
+            // array com id dos usuários para não exibir mensagens das avaliações
+            'nao_exibir_resultados' => (array) json_decode(env('AB_NAO_EXIBIR_RESULTADOS', '[]')),
 
             // mensagens de status padrao
             'msg_status_sent' => env('AB_STATUS_SENT_MESSAGE', 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail.'), // STATUS_SENT = 1
