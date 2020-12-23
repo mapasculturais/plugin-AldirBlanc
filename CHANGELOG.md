@@ -1,4 +1,8 @@
 ## [Unreleased]
+- endpoint para corrigir espaços e agentes de inscrições mediadas
+
+## [v2.4.0]
+- Corrige bug no processamento de múltiplos pagamentos do exportador PPG100 [#169](https://github.com/mapasculturais/plugin-AldirBlanc/issues/169)
 - Corrige exibição de listagem de arquivos que apareciam em oportunidades que não são da AldirBlanc
 - Recuperação de senha de mediados
 - Corrige envio de e-mails dos PPG10x e adiciona suporte a duas mensagens para o caso geral
@@ -6,7 +10,6 @@
 - Adiciona reply-to aos e-mails dos PPG10x e altera a fonte do endereço de e-mail destino
 - Atualiza envio de e-mails e exibição da mensagem de status para adequar ao novo fluxo dos PPG10x
 - Endpoint para validação dos dados Bancários [#174](https://github.com/mapasculturais/plugin-AldirBlanc/issues/174)
-- Corrige bug no processamento de múltiplos pagamentos do exportador PPG100 [#169](https://github.com/mapasculturais/plugin-AldirBlanc/issues/169)
 - Altera referência padrão dos PPG10x para ID do pagamento [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
 - Corrige bug de armazenamento dos metadados no importador do MCI470 [#171](https://github.com/mapasculturais/plugin-AldirBlanc/issues/171)
 - Realiza correções no importador do MCI470 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
