@@ -1,4 +1,5 @@
 ## [Unreleased]
+- endpoint para corrigir espaços e agentes de inscrições mediadas
 
 ## [v2.4.0]
 - Corrige bug no processamento de múltiplos pagamentos do exportador PPG100 [#169](https://github.com/mapasculturais/plugin-AldirBlanc/issues/169)

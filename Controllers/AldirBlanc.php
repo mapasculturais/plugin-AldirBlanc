@@ -5,11 +5,14 @@ namespace AldirBlanc\Controllers;
 use Exception;
 use MapasCulturais\App;
 use MapasCulturais\Entities\Agent;
+use MapasCulturais\Entities\MetaList;
 use MapasCulturais\i;
 use MapasCulturais\Entities\Registration;
 use MapasCulturais\Entities\RegistrationSpaceRelation as RegistrationSpaceRelationEntity;
+use MapasCulturais\Entities\Space;
 use MapasCulturais\Entities\User;
 use MapasCulturais\Exceptions\PermissionDenied;
+use Psy\Command\PsyVersionCommand;
 
 /**
  * Registration Controller
@@ -171,6 +174,268 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             Registration::STATUS_INVALID => i::__('Inválida', 'aldirblanc'),
         ];
         return $summaryStatusName;
+    }
+
+    protected function _setEntityData ($entity, $data) {
+        $app = App::i();
+        $meta_lists = [];
+
+        if($app->view->subsite){
+            $app->view->subsite->refresh();
+        }
+
+        foreach ($data as $key => $val) {
+            if (empty($val)) {
+                continue;
+            }
+            switch ($key) {
+                case '@type':
+                    $type = $app->getRegisteredEntityTypeByTypeName($entity, $val);
+                    $entity->type = $type;
+                break;
+                case '@terms:area':
+                    $entity->terms['area'] = $val;
+                break;
+                case '@location': 
+                    foreach ($val as $prop => $v) {
+                        if($prop == 'location') {
+                            $v = (array) $v;
+                        }
+                        $entity->$prop = $v;
+                    }
+                break;
+                case '@links':
+                    foreach ($val as $link) {
+                        if (empty($link->value)) {
+                            continue;
+                        }
+
+                        $ml = new MetaList;
+                        $url = $link->value ?? '';
+                        $group = preg_match("#youtu.be|vimeo#", $url) ? 'videos' : 'links';
+                        $ml->group = $group;
+                        $ml->title = $link->title ?? '' ;
+                        $ml->value = $link->value ?? '' ;
+                        
+                    }
+                break;
+
+                default:
+                    $entity->$key = $val;
+            }
+        }
+
+        $entity->save(true);
+        foreach($meta_lists as $ml) {
+
+            $ml->owner = $entity;
+            $ml->save(true);
+        }
+
+        $app->log->debug("\t -> CRIADO ENTIDADE $entity");
+    }
+
+    function GET_fixMediacoesInciso2() {
+        $this->requireAuthentication();
+        $app = App::i();
+
+        if (!$app->user->is('admin')) {
+            die('Permissão Negada');
+        }
+
+        set_time_limit(0);
+
+        if ($app->repo('DbUpdate')->findBy(['name' => __METHOD__])) {
+            die('ação já executada');
+        }
+
+        $conn = $app->em->getConnection();
+        $conn->beginTransaction();
+
+        $opportunities_ids = implode(',', array_values($this->config['inciso2_opportunity_ids']));
+
+        $spaces_to_delete = [];
+        $agents_to_delete = [];
+        
+        $registrations_ids = $conn->fetchAll("
+            SELECT 
+                id, agent_id, opportunity_id, create_timestamp
+            FROM 
+                registration
+            WHERE
+                opportunity_id IN ({$opportunities_ids}) AND
+                id in (
+                    SELECT object_id 
+                    FROM registration_meta 
+                    WHERE key = 'mediacao_senha'
+                )
+        ");
+
+        $total = count($registrations_ids);
+        foreach ($registrations_ids as $i => $r) {
+            $r = (object) $r;
+            $opportunity = $app->repo('Opportunity')->find($r->opportunity_id);
+            $agent_data = [];
+            $space_data = [];
+
+            foreach ($opportunity->registrationFieldConfigurations as $field) {
+                $entity_field = $field->config['entityField'] ?? null;
+                $sql = "
+                    SELECT value 
+                    FROM registration_meta 
+                    WHERE key = 'field_{$field->id}' AND object_id = {$r->id}";
+                    
+                if($field->fieldType == 'agent-collective-field') {
+                    if($val = $conn->fetchColumn($sql)) {
+                        $agent_data[$entity_field] = json_decode($val);
+                    }
+
+                } else if($field->fieldType == 'space-field') {
+                    if ($val = $conn->fetchColumn($sql)) {
+                        $space_data[$entity_field] = json_decode($val);
+                    }
+                }
+            }
+            if($agent_data || $space_data) {
+                $app->log->debug("$i / $total === corrigindo inscrição {$r->id}");
+                $owner = $app->repo('Agent')->find($r->agent_id);
+                
+                if($agent_data) {
+                    $agent = new Agent;
+                    $agent->user = $owner->user;
+                    $agent->type = 2;
+                    $agent->parent = $owner;
+                    $agent->createTimestamp = new \DateTime($r->create_timestamp);
+
+                    /**
+                     * quando o campo não vem é pq já estava definido na entidade e o digitador não modificou o campo,
+                     * e por isso o valor não foi salvo como metadado da inscrição
+                     */
+                    if (empty($agent_data['name'])) {
+                        $current_agent_name = $conn->fetchColumn("
+                            SELECT name 
+                            FROM agent 
+                            WHERE id = (
+                                SELECT agent_id 
+                                FROM agent_relation 
+                                WHERE 
+                                    object_id = '{$r->id}' AND
+                                    object_type = 'MapasCulturais\\Entities\\Registration' AND
+                                    type = 'coletivo'
+                            )");
+
+                        $agent->name = $current_agent_name ?: '';
+                    }
+                    $this->_setEntityData($agent, $agent_data);
+
+                    /**
+                     * como todos os agentes serão reinseridos, os atuais serão excluídos
+                     */
+                    $agents_to_delete[] = $conn->fetchColumn("
+                        SELECT agent_id 
+                        FROM agent_relation 
+                        WHERE 
+                            object_id = '{$r->id}' AND
+                            object_type = 'MapasCulturais\\Entities\\Registration' AND
+                            type = 'coletivo'");
+
+                    $conn->executeQuery("
+                        UPDATE agent_relation 
+                        SET agent_id = {$agent->id} 
+                        WHERE 
+                            object_type = 'MapasCulturais\\Entities\\Registration' AND
+                            object_id = {$r->id} AND
+                            type = 'coletivo'
+                    ");
+                }
+
+                if($space_data) {
+                    $space = new Space;
+                    $space->owner = $owner;
+                    $space->createTimestamp = new \DateTime($r->create_timestamp);
+
+                    /**
+                     * quando o campo não vem é pq já estava definido na entidade e o digitador não modificou o campo,
+                     * e por isso o valor não foi salvo como metadado da inscrição
+                     */
+                    if (empty($space_data['@type'])) {
+                        $current_space_type = $conn->fetchColumn("
+                            SELECT type 
+                            FROM space 
+                            WHERE id = (
+                                SELECT space_id 
+                                FROM space_relation 
+                                WHERE object_id = {$r->id}
+                            )");
+
+                        $space->type = $current_space_type ?: 199;
+                    }
+
+                    /**
+                     * quando o campo não vem é pq já estava definido na entidade e o digitador não modificou o campo,
+                     * e por isso o valor não foi salvo como metadado da inscrição
+                     */
+                    if (empty($space_data['name'])) {
+                        $current_space_name = $conn->fetchColumn("
+                            SELECT name 
+                            FROM space 
+                            WHERE id = (
+                                SELECT space_id 
+                                FROM space_relation 
+                                WHERE object_id = '{$r->id}'
+                            )");
+
+                        $space->name = $current_space_name ?: '';
+                    }
+
+                    $this->_setEntityData($space, $space_data);
+
+                    /**
+                     * como todos os espaços serão reinseridos, os atuais serão excluídos
+                     */
+                    $spaces_to_delete[] = $conn->fetchColumn("
+                        SELECT space_id 
+                        FROM space_relation 
+                        WHERE 
+                            object_id = '{$r->id}' AND
+                            object_type = 'MapasCulturais\\Entities\\Registration'");
+
+                    $conn->executeQuery("
+                        UPDATE space_relation 
+                        SET space_id = {$space->id} 
+                        WHERE 
+                            object_type = 'MapasCulturais\\Entities\\Registration' AND
+                            object_id = {$r->id}
+                    ");
+                }
+            }
+
+            $app->em->flush();
+            $app->em->clear();
+        }
+
+        if ($agents_to_delete) {
+            $agents_to_delete = implode(',', array_unique($agents_to_delete));
+            $conn->executeQuery("DELETE FROM agent WHERE id in ($agents_to_delete)");
+            $app->log->debug("AGENTES $agents_to_delete EXCLUIDOS");
+        }
+
+        if ($spaces_to_delete) {
+            $spaces_to_delete = implode(',', array_unique($spaces_to_delete));
+            $conn->executeQuery("DELETE FROM space WHERE id in ($spaces_to_delete)");
+            $app->log->debug("ESPAÇOS $spaces_to_delete EXCLUIDOS");
+
+        }
+
+        $app->disableAccessControl();
+        $db_update = new \MapasCulturais\Entities\DbUpdate;
+        $db_update->name = __METHOD__;
+        $db_update->save(true);
+        $app->enableAccessControl();
+
+        $conn->commit();
+
+        
     }
 
     /**
