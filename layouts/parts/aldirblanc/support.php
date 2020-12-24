@@ -2,6 +2,7 @@
     <style>
     #main-footer .support {
         text-align: center;
+        color:black;
     }
     </style>
     <div class="support">
