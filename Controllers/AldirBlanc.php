@@ -1221,43 +1221,53 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
             $registrationStatusMessage['title'] = 'Seu pagamento foi realizado com sucesso!!!';
         }else{
+
             // retorna as avaliações da inscrição
             $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
                         
             if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
+
                 $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
+
                 foreach ($evaluations as $evaluation) {
-                    $validacao = $evaluation->user->aldirblanc_validador ?? null;
+                    $validacao = $evaluation->user->metadata['aldirblanc_validador'] ?? null;
                     if ($validacao == 'recurso') {
                         $recursos[] = $evaluation;
                     }
     
                     if ($evaluation->getResult() == $registration->status) {
+
+                        // Verifica a configuração `nao_exibir_resultados`
+                        if (!in_array($evaluation->user->id, $this->config['nao_exibir_resultados'])) {
                         
-                        if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
-                            // resultados do dataprev
-                            $avaliacao = $evaluation->getEvaluationData()->obs ?? '';
-                            if (!empty($avaliacao)) {
-                                if (($registration->status == 3 || $registration->status == 2) && substr_count($evaluation->getEvaluationData()->obs, 'Reprocessado')) {
-    
-                                    if ($this->config['msg_reprocessamento_dataprev']) {
-                                        $justificativaAvaliacao[] = $this->config['msg_reprocessamento_dataprev'];
+                            if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
+                                // resultados do dataprev
+                                $avaliacao = $evaluation->getEvaluationData()->obs ?? '';
+                                if (!empty($avaliacao)) {
+                                    if (($registration->status == 3 || $registration->status == 2) && substr_count($evaluation->getEvaluationData()->obs, 'Reprocessado')) {
+        
+                                        if ($this->config['msg_reprocessamento_dataprev']) {
+                                            $justificativaAvaliacao[] = $this->config['msg_reprocessamento_dataprev'];
+                                        } else {
+                                            $justificativaAvaliacao[] = $avaliacao;
+                                        }
+                                        
                                     } else {
                                         $justificativaAvaliacao[] = $avaliacao;
                                     }
-                                    
-                                } else {
-                                    $justificativaAvaliacao[] = $avaliacao;
+                                }
+                            } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
+                                // resultados dos avaliadores genericos
+                                $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                            }
+
+                            if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
+                                if (!in_array($evaluation, $recursos)) {
+                                    // resultados dos demais avaliadores
+                                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
                                 }
                             }
-                        } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
-                            // resultados dos avaliadores genericos
-                            $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
-                        }
-                        
-                        if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
-                            // resultados dos demais avaliadores
-                            $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                            
                         }
     
                     }
