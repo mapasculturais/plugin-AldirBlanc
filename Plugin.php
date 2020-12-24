@@ -50,7 +50,7 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_inciso1_disabled' => env('AB_INCISO1_DISABLE_MESSAGE','Em breve!'),
             'msg_inciso2_disabled' => env('AB_INCISO2_DISABLE_MESSAGE','A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!'),
             'link_suporte' => env('AB_LINK_SUPORTE',null),
-            'link_suporte_no_footer' => env('AB_LINK_SUPORTE',false),
+            'link_suporte_no_footer' => env('AB_LINK_SUPORTE',true),
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS',null),
             'mediados_owner' => env('AB_MEDIADOS_OWNER',''),
             'texto_categoria_espaco-formalizado' => env('AB_TXT_CAT_ESPACO_FORMALIZADO', '<strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.' ),
