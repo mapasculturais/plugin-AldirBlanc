@@ -127,7 +127,19 @@ $_params = [
 
         <?php $this->part('aldirblanc/registration-single--header', $_params) ?>
         
-        <?php if ($app->user->is('mediador') || $app->user->is('admin')) {
+        <?php
+
+        // verifica se o usuário é o próprio mediado a partir dos dados da $_SESSION['mediado_data']
+        $isMediadoUser = false;
+        if (isset($_SESSION['mediado_data']) && $app->user->is('guest')) {
+            $agentCpf = str_replace(["-", "."], "", $registration->owner->getMetadata('documento'));
+            $sessionCpf = str_replace(["-", "."], "", $_SESSION['mediado_data']['cpf']);
+            if ($agentCpf == $sessionCpf) {
+                $isMediadoUser = true;
+            }
+        }
+        
+        if ($isMediadoUser || $app->user->is('admin')) {
             $this->part('aldirblanc/registration-mediacao', $_params);
         } ?>
 
