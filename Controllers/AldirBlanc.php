@@ -1260,7 +1260,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         }
 
         $msgsPpg = [];
-        if ($registration->lab_ppg_email && $this->config['exibir_msg_ppg']) {
+        if ($registration->lab_ppg_email && $this->config['exibir_msg_ppg'] &&
+            !($registration->mediacao_senha &&
+              $registration->mediacao_contato)) {
             $email = ($registration->owner->emailPrivado ??
                       $registration->owner->emailPublico ??
                       $registration->owner->user->email);
@@ -2065,12 +2067,47 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->render('reporte', $data);
     }
 
-    function GET_email_ppg()
+    function ALL_cleanPPGEmailFiles()
     {
         $this->requireAuthentication();
         $app = App::i();
         if (!$app->user->is("admin")) {
-            $this->errorJson("Permissao negada", 403);
+            $this->errorJson("Permissão negada", 403);
+        }
+        $this->ppgEmailDeleteFiles($app);
+        $this->finish("ok");
+        return;
+    }
+
+    function ALL_genKeys()
+    {
+        $this->requireAuthentication();
+        $app = App::i();
+        if (!$app->user->is("admin")) {
+            $this->errorJson("Permissão negada", 403);
+        }
+        $ssl = openssl_pkey_new([
+            "digest_alg" => "sha512",
+            "private_key_bits" => 4096,
+            "private_key_type" => OPENSSL_KEYTYPE_RSA]);
+        if (!openssl_pkey_export_to_file($ssl, $this->ppgEmailKeyPath($app)) ||
+            !($pubk = openssl_pkey_get_details($ssl)["key"])) {
+            $this->errorJson("Erro ao criar chave.", 500);
+        }
+        header("Content-Type: text/utf-8");
+        header("Content-Disposition: attachment; filename=pub-" .
+               "{$app->user->id}.pem");
+        header("Pragma: no-cache");
+        echo $pubk;
+        return;
+    }
+
+    function POST_processPPGEmails()
+    {
+        $this->requireAuthentication();
+        $app = App::i();
+        if (!$app->user->is("admin")) {
+            $this->errorJson("Permissão negada", 403);
         }
         ini_set("max_execution_time", 0);
         ini_set("memory_limit", "-1");
@@ -2079,16 +2116,41 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         if (isset($this->config["ppg_first_ref"])) {
             $firstPPG = $fileRepo->find($this->config["ppg_first_ref"]);
         }
-        $txt = $this->config["ppg_file_path_txt"];
-        $retRef = $this->data["file"];
+        $keyFile = $fileRepo->find($this->data["key"]);
+        $txtFile = $fileRepo->find($this->data["source"]);
+        $retRef = $this->data["response"];
+        $iv = hex2bin($this->data["ivhex"]);
         $retFile = $fileRepo->find($retRef);
         if ($retFile->group != "bankless") {
             $this->errorJson("O arquivo não pertence ao grupo bankless.", 500);
         }
-        $ret = $retFile->path;
-        $fileData = $this->readPpg($txt, $ret);
-        if ($fileData) {
-            foreach ($fileData as $number => $line) {
+        $pkPath = $this->ppgEmailKeyPath($app);
+        if (file_exists($pkPath) && ((time() - filemtime($pkPath)) > 600)) {
+            $this->jsonError("A chave expirou.", 500);
+        }
+        $privk = openssl_pkey_get_private("file://$pkPath");
+        if (!$privk) {
+            $this->errorJson("Erro ao carregar a chave privada.", 500);
+        }
+        $keyHex = "";
+        if (!openssl_private_decrypt(file_get_contents($keyFile->path), $keyHex,
+                                     $privk)) {
+            $this->errorJson("Erro ao obter a chave simétrica.", 500);
+        }
+        $key = hex2bin(trim($keyHex));
+        $txtClear = openssl_decrypt(file_get_contents($txtFile->path),
+                                    "aes-256-cbc", $key, 1, $iv);
+        if (!$txtClear) {
+            $this->errorJson("Erro ao decodificar remessa.", 500);
+        }
+        header("Content-type: text/plain");
+        header("Pragma: no-cache");
+        $ppgData = $this->readPpg(explode("\r\n", $txtClear), $retFile->path,
+                                  true);
+        if ($ppgData) {
+            foreach ($ppgData as $number => $line) {
+                ob_flush();
+                flush();
                 $aprovado = true;
                 foreach ($line["protocols"] as $protocol) {
                     if (intval($protocol["aprov"])) {
@@ -2096,25 +2158,50 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                         break;
                     }
                 }
-                if (!is_array($line["inscricao"]->lab_ppg_email) &&
-                    $line["inscricao"]->lab_ppg_email &&
+                $reg = $line["inscricao"];
+                if (!is_array($reg->lab_ppg_email) && $reg->lab_ppg_email &&
                     ($retRef == $firstPPG->id)) {
-                    $app->log->debug("EMAIL JA ENVIADO PARA $number");
+                    echo("E-mail já enviado para $number.\n");
                 } else if ($aprovado) {
-                    if (!is_array($line["inscricao"]->lab_ppg_email)) {
-                        $init = $line["inscricao"]->lab_ppg_email ?
+                    if (!is_array($reg->lab_ppg_email)) {
+                        $reg->lab_ppg_email = $reg->lab_ppg_email ?
                                 ["{$firstPPG->id}"] : [];
-                        $line["inscricao"]->lab_ppg_email = $init;
                     }
-                    if (in_array($retRef, $line["inscricao"]->lab_ppg_email)) {
-                        $app->log->debug("EMAIL JA ENVIADO PARA $number");
+                    if (in_array($retRef, $reg->lab_ppg_email)) {
+                        echo("E-mail já enviado para $number.\n");
+                    } else if ($reg->mediacao_senha && $reg->mediacao_contato) {
+                        echo("Não enviando para $number porque é mediada.\n");
                     } else {
-                        $this->enviaEmailPpg($line, $retRef);
+                        $n = 1 + sizeof($reg->lab_ppg_email);
+                        echo("Enviando e-mail ($n) para $number.\n");
+                        $this->enviaEmailPpg($line, $retRef, true);
                     }
                 } else {
-                    $app->log->debug("NÃO APROVADO $number");
+                    echo("Não aprovado $number.\n");
                 }
             }
+            if (!$this->data["dryrun"]) {
+                $this->ppgEmailDeleteFiles($app);
+                    }
+                } else {
+            echo("Nada a processar.\n");
+                }
+        return;
+            }
+
+    private function ppgEmailKeyPath($app)
+    {
+        return (PRIVATE_FILES_PATH . "/aldirblanc/{$app->user->id}.pem");
+    }
+
+    private function ppgEmailDeleteFiles($app)
+    {
+        foreach ($app->user->profile->getFiles("email-files") as $file) {
+            $file->delete(true);
+        }
+        $privkPath = $this->ppgEmailKeyPath($app);
+        if (file_exists($privkPath)) {
+            unlink($privkPath);
         }
         return;
     }
@@ -2130,12 +2217,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return $payment->registration;
     }
 
-    private function readPpg($txt, $ret)
+    private function readPpg($txtLines, $ret, $echoOut=false)
     {
         $app = App::i();
-        // verifica se os arquivos existem
-        if (!file_exists($ret) || !file_exists($txt)) {
-            $this->errorJson("Algum arquivo não existe", 403);
+        // verifica se o arquivo existe
+        if (!file_exists($ret)) {
+            $this->errorJson("O arquivo retorno não existe.", 403);
         }
         $data = [];
         $byProtocol = [];
@@ -2158,8 +2245,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
         }
         fclose($fh);
-        $fh = fopen($txt, "r");
-        while ($line = fgets($fh)) {
+        $out = "";
+        foreach ($txtLines as $line) {
             if (substr($line, 0, 1) == "1") {
                 $prot = substr($line, 1, 15);
                 if (isset($byProtocol[$prot])) {
@@ -2170,9 +2257,13 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                                       "0", STR_PAD_LEFT);
                     $cpf = substr($line, 32, 11);
                     if ($regCPF != $cpf) {
-                        $app->log->debug("CPF não confere: {$regCPF} vs. " .
-                                         "$cpf; protocolo $prot, inscrição " .
-                                         "{$reg->number}");
+                        $msg = "CPF não confere: $regCPF vs. $cpf; protocolo " .
+                               "$prot, inscrição {$reg->number}";
+                        if ($echoOut) {
+                            $out .= "$msg.\n";
+                        } else {
+                            $app->log->debug($msg);
+                        }
                         unset($byProtocol[$prot]);
                     }
                 } else {
@@ -2181,7 +2272,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 }
             }
         }
-        fclose($fh);
+        if ($echoOut) {
+            echo($out);
+        }
         foreach ($byProtocol as $protocol => $item) {
             $regNumber = $item["inscricao"]->number;
             if (!isset($data[$regNumber])) {
@@ -2211,6 +2304,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $template = file_get_contents($filename);
         $registration = $data["inscricao"];
         $ppg_email = $registration->lab_ppg_email;
+        $msgIndex = min(sizeof($ppg_email), 1);
         $params = [
             "siteName" => $site_name,
             "signature" => $this->config["ppg_email_signature"],
@@ -2218,7 +2312,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             "user" => $registration->owner->name,
             "inscricao" => $registration->number,
             "baseUrl" => $app->getBaseUrl(),
-            "mensagem" => $this->config["msg_ppg_email"][sizeof($ppg_email)],
+            "mensagem" => $this->config["msg_ppg_email"][$msgIndex],
         ];
         foreach ($data["protocols"] as $protocol) {
             $params["protocolAndPIN"][] = [
@@ -2233,11 +2327,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                      $registration->owner->emailPublico ??
                      $registration->owner->user->email),
             "replyTo" => $this->config["ppg_email_replyto"],
-            "subject" => $this->config["ppg_email_subject"][sizeof($ppg_email)],
+            "subject" => $this->config["ppg_email_subject"][$msgIndex],
             "body" => $content
         ];
-        $app->log->debug("ENVIANDO EMAIL PPG da {$registration->number}");
-        $emailSent = $app->createAndSendMailMessage($email_params);
+        $app->log->debug("Enviando e-mail PPG da {$registration->number}");
+        $emailSent = !$this->data["dryrun"] &&
+                     $app->createAndSendMailMessage($email_params);
         if ($emailSent) {
             $sent_emails = $registration->lab_sent_emails;
             $sent_emails[] = [
