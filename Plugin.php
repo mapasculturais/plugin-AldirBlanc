@@ -51,6 +51,7 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_inciso1_disabled' => env('AB_INCISO1_DISABLE_MESSAGE','Em breve!'),
             'msg_inciso2_disabled' => env('AB_INCISO2_DISABLE_MESSAGE','A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!'),
             'link_suporte' => env('AB_LINK_SUPORTE',null),
+            'link_suporte_no_footer' => env('AB_LINK_SUPORTE',false),
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS',null),
             'mediados_owner' => env('AB_MEDIADOS_OWNER',''),
             'texto_categoria_espaco-formalizado' => env('AB_TXT_CAT_ESPACO_FORMALIZADO', '<strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.' ),
@@ -84,6 +85,9 @@ class Plugin extends \MapasCulturais\Plugin
             'exibir_resultado_generico' => (array) json_decode(env('AB_EXIBIR_RESULTADO_GENERICO', '[]')),
             'exibir_resultado_avaliadores' => (array) json_decode(env('AB_EXIBIR_RESULTADO_AVALIADORES', '["10"]')),
             
+            // array com id dos usuários para não exibir mensagens das avaliações
+            'nao_exibir_resultados' => (array) json_decode(env('AB_NAO_EXIBIR_RESULTADOS', '[]')),
+
             // array com id dos usuários para não exibir mensagens das avaliações
             'nao_exibir_resultados' => (array) json_decode(env('AB_NAO_EXIBIR_RESULTADOS', '[]')),
 
@@ -251,6 +255,12 @@ class Plugin extends \MapasCulturais\Plugin
             // $app->view->enqueueStyle('app','chat','chat.css');
         }
 
+        $app->hook('template(<<*>>.main-footer):begin', function() use($plugin) {
+            if ($plugin->config['link_suporte_no_footer'] && $plugin->config['link_suporte']) {
+                $this->part('aldirblanc/support', ['linkSuporte' => $plugin->config['link_suporte']]);
+            }
+        });
+
         // adiciona informações do status das validações ao formulário de avaliação
         $app->hook('template(registration.view.evaluationForm.simple):before', function(Registration $registration, $opportunity) use($inciso1Ids, $inciso2Ids) {
             $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids);
@@ -319,7 +329,7 @@ class Plugin extends \MapasCulturais\Plugin
 
 
         $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app, $opportunities_ids) {
-            if (!in_array($opportunity->id, $opportunity)) {
+            if (!in_array($opportunity->id, $opportunities_ids)) {
                 return;
             }
 

@@ -7,13 +7,9 @@ $logotipo = isset($aldirBlancController->config['logotipo_instituicao']) ? $aldi
 
 </section>
 
-<?php if ($linkSuporte){
-    ?>
-    <div class="support">
-        Precisa de ajuda? Envie um e-mail para: <a target="_blank" class="link" href="mailto:<?= $linkSuporte; ?> "><?=$linkSuporte?></a>
-    </div>
-    <?php
-}?>
+<?php if ($linkSuporte): ?>
+    <?php $this->part('aldirblanc/support', ['linkSuporte' => $linkSuporte]) ?>
+<?php endif; ?>
 
 <footer id="main-footer">
 
