@@ -355,6 +355,37 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
+        // painel de controle de e-mails dos PPG10x
+        $app->hook('template(agent.single.tabs):end',
+                   function () use ($app, $plugin) {
+            $ag = $app->user->profile->id;
+            if (!$app->user->is("admin") ||
+                ($this->controller->requestedEntity->id != $ag) ||
+                !in_array($ag, ($plugin->config["ppg_email_admins"] ?? []))) {
+                    return;
+            }
+            $this->part("aldirblanc/ppg-emails-tab");
+            return;
+        });
+        $app->hook('template(agent.single.tabs-content):end',
+                   function () use ($app, $plugin) {
+            $ag = $app->user->profile->id;
+            if (!$app->user->is("admin") ||
+                ($this->controller->requestedEntity->id != $ag) ||
+                !in_array($ag, ($plugin->config["ppg_email_admins"] ?? []))) {
+                    return;
+            }
+            $files = $app->repo("File")->findBy([
+                "group" => "bankless"
+            ]);
+            $uploadedFiles = $app->user->profile->getFiles("email-files");
+            $this->part("aldirblanc/ppg-emails-tab-content", [
+                "entity" => $this->controller->requestedEntity,
+                "files" => $files,
+                "uploadedFiles" => $uploadedFiles,
+            ]);
+            return;
+        });
 
         $app->hook('opportunity.registrations.reportCSV', function(\MapasCulturais\Entities\Opportunity $opportunity, $registrations, &$header, &$body) use($app, $opportunities_ids) {
             if (!in_array($opportunity->id, $opportunities_ids)) {
@@ -1110,6 +1141,12 @@ class Plugin extends \MapasCulturais\Plugin
             '^application/vnd.ms-excel$'
         ], ['O arquivo deve ser um documento ou uma imagem .jpg ou .png'], true, null, true);
         $app->registerFileGroup("opportunity", $cnab240Resumo);
+        // FileGroup para os arquivos do painel de e-mails PPG
+        $defEmail = new \MapasCulturais\Definitions\FileGroup('email-files', [
+            '^application/octet-stream$',
+            '^[a-z]+/[a-z\.\-]+$',
+        ], "O arquivo enviado não é do tipo correto.", false, null, true);
+        $app->registerFileGroup("agent", $defEmail);
     }
 
     function json($data, $status = 200)
