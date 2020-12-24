@@ -50,6 +50,7 @@ class Plugin extends \MapasCulturais\Plugin
             'msg_inciso1_disabled' => env('AB_INCISO1_DISABLE_MESSAGE','Em breve!'),
             'msg_inciso2_disabled' => env('AB_INCISO2_DISABLE_MESSAGE','A solicitação deste benefício será lançada em breve. Acompanhe a divulgação pelas instituições responsáveis pela gestão da cultura em seu município!'),
             'link_suporte' => env('AB_LINK_SUPORTE','https://bit.ly/3hOQfBz'),
+            'link_suporte_no_footer' => env('AB_LINK_SUPORTE',true),
             'privacidade_termos_condicoes' => env('AB_PRIVACIDADE_TERMOS','https://mapacultural.pa.gov.br/files/subsite/2/termos-e-politica.pdf'),
 
             'texto_categoria_espaco-formalizado' => env('AB_TXT_CAT_ESPACO_FORMALIZADO', '<strong>Entidade, empresa ou cooperativa do setor cultural com inscrição em CNPJ</strong> para espaço do tipo <strong>Espaço físico próprio, alugado, itinerante, público cedido em comodato, emprestado ou de uso compartilhado</strong>.' ),
@@ -85,6 +86,9 @@ class Plugin extends \MapasCulturais\Plugin
             'exibir_resultado_dataprev' => (array) json_decode(env('AB_EXIBIR_RESULTADO_DATAPREV', '[]')),
             'exibir_resultado_generico' => (array) json_decode(env('AB_EXIBIR_RESULTADO_GENERICO', '[]')),
             'exibir_resultado_avaliadores' => (array) json_decode(env('AB_EXIBIR_RESULTADO_AVALIADORES', '["10"]')),
+
+            // array com id dos usuários para não exibir mensagens das avaliações
+            'nao_exibir_resultados' => (array) json_decode(env('AB_NAO_EXIBIR_RESULTADOS', '[]')),
 
             // mensagens de status padrao
             'msg_status_sent' => env('AB_STATUS_SENT_MESSAGE', 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail.'), // STATUS_SENT = 1
@@ -289,6 +293,13 @@ class Plugin extends \MapasCulturais\Plugin
             $this->save();
             $app->enableAccessControl();
         });
+        
+        $app->hook('template(<<*>>.main-footer):begin', function() use($plugin) {
+            if ($plugin->config['link_suporte_no_footer'] && $plugin->config['link_suporte']) {
+                $this->part('aldirblanc/support', ['linkSuporte' => $plugin->config['link_suporte']]);
+            }
+        });
+
         // adiciona informações do status das validações ao formulário de avaliação
         $app->hook('template(registration.view.evaluationForm.simple):before', function(Registration $registration, $opportunity) use($inciso1Ids, $inciso2Ids) {
             $opportunities_ids = array_merge($inciso1Ids, $inciso2Ids);
