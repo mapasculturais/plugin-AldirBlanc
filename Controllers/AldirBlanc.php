@@ -5,11 +5,14 @@ namespace AldirBlanc\Controllers;
 use Exception;
 use MapasCulturais\App;
 use MapasCulturais\Entities\Agent;
+use MapasCulturais\Entities\MetaList;
 use MapasCulturais\i;
 use MapasCulturais\Entities\Registration;
 use MapasCulturais\Entities\RegistrationSpaceRelation as RegistrationSpaceRelationEntity;
+use MapasCulturais\Entities\Space;
 use MapasCulturais\Entities\User;
 use MapasCulturais\Exceptions\PermissionDenied;
+use Psy\Command\PsyVersionCommand;
 
 /**
  * Registration Controller
@@ -108,6 +111,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         return $opportunity;
     }
+
+    
     
     /**
      * Retorna a oportunidade do inciso II
@@ -171,12 +176,278 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return $summaryStatusName;
     }
 
+    protected function _setEntityData ($entity, $data) {
+        $app = App::i();
+        $meta_lists = [];
+
+        if($app->view->subsite){
+            $app->view->subsite->refresh();
+        }
+
+        foreach ($data as $key => $val) {
+            if (empty($val)) {
+                continue;
+            }
+            switch ($key) {
+                case '@type':
+                    $type = $app->getRegisteredEntityTypeByTypeName($entity, $val);
+                    $entity->type = $type;
+                break;
+                case '@terms:area':
+                    $entity->terms['area'] = $val;
+                break;
+                case '@location': 
+                    foreach ($val as $prop => $v) {
+                        if($prop == 'location') {
+                            $v = (array) $v;
+                        }
+                        $entity->$prop = $v;
+                    }
+                break;
+                case '@links':
+                    foreach ($val as $link) {
+                        if (empty($link->value)) {
+                            continue;
+                        }
+
+                        $ml = new MetaList;
+                        $url = $link->value ?? '';
+                        $group = preg_match("#youtu.be|vimeo#", $url) ? 'videos' : 'links';
+                        $ml->group = $group;
+                        $ml->title = $link->title ?? '' ;
+                        $ml->value = $link->value ?? '' ;
+                        
+                    }
+                break;
+
+                default:
+                    $entity->$key = $val;
+            }
+        }
+
+        $entity->save(true);
+        foreach($meta_lists as $ml) {
+
+            $ml->owner = $entity;
+            $ml->save(true);
+        }
+
+        $app->log->debug("\t -> CRIADO ENTIDADE $entity");
+    }
+
+    function GET_fixMediacoesInciso2() {
+        $this->requireAuthentication();
+        $app = App::i();
+
+        if (!$app->user->is('admin')) {
+            die('Permissão Negada');
+        }
+
+        set_time_limit(0);
+
+        if ($app->repo('DbUpdate')->findBy(['name' => __METHOD__])) {
+            die('ação já executada');
+        }
+
+        $conn = $app->em->getConnection();
+        $conn->beginTransaction();
+
+        $opportunities_ids = implode(',', array_values($this->config['inciso2_opportunity_ids']));
+
+        $spaces_to_delete = [];
+        $agents_to_delete = [];
+        
+        $registrations_ids = $conn->fetchAll("
+            SELECT 
+                id, agent_id, opportunity_id, create_timestamp
+            FROM 
+                registration
+            WHERE
+                opportunity_id IN ({$opportunities_ids}) AND
+                id in (
+                    SELECT object_id 
+                    FROM registration_meta 
+                    WHERE key = 'mediacao_senha'
+                )
+        ");
+
+        $total = count($registrations_ids);
+        foreach ($registrations_ids as $i => $r) {
+            $r = (object) $r;
+            $opportunity = $app->repo('Opportunity')->find($r->opportunity_id);
+            $agent_data = [];
+            $space_data = [];
+
+            foreach ($opportunity->registrationFieldConfigurations as $field) {
+                $entity_field = $field->config['entityField'] ?? null;
+                $sql = "
+                    SELECT value 
+                    FROM registration_meta 
+                    WHERE key = 'field_{$field->id}' AND object_id = {$r->id}";
+                    
+                if($field->fieldType == 'agent-collective-field') {
+                    if($val = $conn->fetchColumn($sql)) {
+                        $agent_data[$entity_field] = json_decode($val);
+                    }
+
+                } else if($field->fieldType == 'space-field') {
+                    if ($val = $conn->fetchColumn($sql)) {
+                        $space_data[$entity_field] = json_decode($val);
+                    }
+                }
+            }
+            if($agent_data || $space_data) {
+                $app->log->debug("$i / $total === corrigindo inscrição {$r->id}");
+                $owner = $app->repo('Agent')->find($r->agent_id);
+                
+                if($agent_data) {
+                    $agent = new Agent;
+                    $agent->user = $owner->user;
+                    $agent->type = 2;
+                    $agent->parent = $owner;
+                    $agent->createTimestamp = new \DateTime($r->create_timestamp);
+
+                    /**
+                     * quando o campo não vem é pq já estava definido na entidade e o digitador não modificou o campo,
+                     * e por isso o valor não foi salvo como metadado da inscrição
+                     */
+                    if (empty($agent_data['name'])) {
+                        $current_agent_name = $conn->fetchColumn("
+                            SELECT name 
+                            FROM agent 
+                            WHERE id = (
+                                SELECT agent_id 
+                                FROM agent_relation 
+                                WHERE 
+                                    object_id = '{$r->id}' AND
+                                    object_type = 'MapasCulturais\\Entities\\Registration' AND
+                                    type = 'coletivo'
+                            )");
+
+                        $agent->name = $current_agent_name ?: '';
+                    }
+                    $this->_setEntityData($agent, $agent_data);
+
+                    /**
+                     * como todos os agentes serão reinseridos, os atuais serão excluídos
+                     */
+                    $agents_to_delete[] = $conn->fetchColumn("
+                        SELECT agent_id 
+                        FROM agent_relation 
+                        WHERE 
+                            object_id = '{$r->id}' AND
+                            object_type = 'MapasCulturais\\Entities\\Registration' AND
+                            type = 'coletivo'");
+
+                    $conn->executeQuery("
+                        UPDATE agent_relation 
+                        SET agent_id = {$agent->id} 
+                        WHERE 
+                            object_type = 'MapasCulturais\\Entities\\Registration' AND
+                            object_id = {$r->id} AND
+                            type = 'coletivo'
+                    ");
+                }
+
+                if($space_data) {
+                    $space = new Space;
+                    $space->owner = $owner;
+                    $space->createTimestamp = new \DateTime($r->create_timestamp);
+
+                    /**
+                     * quando o campo não vem é pq já estava definido na entidade e o digitador não modificou o campo,
+                     * e por isso o valor não foi salvo como metadado da inscrição
+                     */
+                    if (empty($space_data['@type'])) {
+                        $current_space_type = $conn->fetchColumn("
+                            SELECT type 
+                            FROM space 
+                            WHERE id = (
+                                SELECT space_id 
+                                FROM space_relation 
+                                WHERE object_id = {$r->id}
+                            )");
+
+                        $space->type = $current_space_type ?: 199;
+                    }
+
+                    /**
+                     * quando o campo não vem é pq já estava definido na entidade e o digitador não modificou o campo,
+                     * e por isso o valor não foi salvo como metadado da inscrição
+                     */
+                    if (empty($space_data['name'])) {
+                        $current_space_name = $conn->fetchColumn("
+                            SELECT name 
+                            FROM space 
+                            WHERE id = (
+                                SELECT space_id 
+                                FROM space_relation 
+                                WHERE object_id = '{$r->id}'
+                            )");
+
+                        $space->name = $current_space_name ?: '';
+                    }
+
+                    $this->_setEntityData($space, $space_data);
+
+                    /**
+                     * como todos os espaços serão reinseridos, os atuais serão excluídos
+                     */
+                    $spaces_to_delete[] = $conn->fetchColumn("
+                        SELECT space_id 
+                        FROM space_relation 
+                        WHERE 
+                            object_id = '{$r->id}' AND
+                            object_type = 'MapasCulturais\\Entities\\Registration'");
+
+                    $conn->executeQuery("
+                        UPDATE space_relation 
+                        SET space_id = {$space->id} 
+                        WHERE 
+                            object_type = 'MapasCulturais\\Entities\\Registration' AND
+                            object_id = {$r->id}
+                    ");
+                }
+            }
+
+            $app->em->flush();
+            $app->em->clear();
+        }
+
+        if ($agents_to_delete) {
+            $agents_to_delete = implode(',', array_unique($agents_to_delete));
+            $conn->executeQuery("DELETE FROM agent WHERE id in ($agents_to_delete)");
+            $app->log->debug("AGENTES $agents_to_delete EXCLUIDOS");
+        }
+
+        if ($spaces_to_delete) {
+            $spaces_to_delete = implode(',', array_unique($spaces_to_delete));
+            $conn->executeQuery("DELETE FROM space WHERE id in ($spaces_to_delete)");
+            $app->log->debug("ESPAÇOS $spaces_to_delete EXCLUIDOS");
+
+        }
+
+        $app->disableAccessControl();
+        $db_update = new \MapasCulturais\Entities\DbUpdate;
+        $db_update->name = __METHOD__;
+        $db_update->save(true);
+        $app->enableAccessControl();
+
+        $conn->commit();
+
+        
+    }
+
     /**
+     * 
      * Endpoint para enviar emails das oportunidades
+     * 
+     * Exemplo: /aldirblanc/sendEmails/opportunity:1/status:10
+     * 
      */
     function ALL_sendEmails(){
         ini_set('max_execution_time', 0);
-        
+
         $this->requireAuthentication();
 
         if (empty($this->data['opportunity'])) {
@@ -207,7 +478,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             $status = '2,3,8,10';
         } else {
             $status = intval($this->data['status']);
-            if (!in_array($status, [2,3,8,10])) {
+            if (!in_array($status, [2, 3, 8, 10])) {
                 $this->errorJson('Os status válidos são 2, 3, 8 ou 10');
                 die;
             }
@@ -235,75 +506,144 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         foreach ($registrations as &$reg) {
             $reg = (object) $reg;
             $registration = $app->repo('Registration')->find($reg->id);
-            $this->sendEmail($registration);
+
+            $payment = false;
+            $paymentMeta = $registration->metadata['secult_financeiro_raw'] ?? false;
+
+            if ($paymentMeta && strpos($paymentMeta, 'Caso tenha algum problema com seu pagamento, entre em contato com o suporte') && strpos($paymentMeta, '"AVALIACAO":"selecionada"')) {
+                $payment = true;
+            }
+            
+            $this->sendEmail($registration, $payment);
         }
+
     }
 
     /**
      * Envia email com status da inscrição
      *
      */
-    function sendEmail(Registration $registration){
+    function sendEmail(Registration $registration, $payment = false){
         $app = App::i();
-        $registrationStatusInfo = $this->getRegistrationStatusInfo($registration);
 
         $mustache = new \Mustache_Engine();
         $site_name = $app->view->dict('site: name', false);
         $baseUrl = $app->getBaseUrl();
-        $justificativaAvaliacao = "";
-        foreach ($registrationStatusInfo['justificativaAvaliacao'] as $message) {
-            if (is_array($message) && !empty($this->config['exibir_resultado_padrao'] ) ) {
-               $justificativaAvaliacao .= $message['message'] . "<hr>";
-            }else{
-                $justificativaAvaliacao .= $message .'<hr>';
+
+        $messageBody = '';
+
+        // Envia e-mail para inscrições com pagamento realizado
+        if ($payment) {
+
+            $filename = $app->view->resolveFilename("views/aldirblanc", "email-payments.html");
+            $template = file_get_contents($filename);
+
+            // Verifica se é uma inscrição desbancarizada
+            $accountCreationSecult = $registration->owner->metadata['account_creation'] ?? false;
+            $branch = $registration->owner->payment_bank_branch ?? false;
+
+            $secultRaw = json_decode($registration->metadata['secult_financeiro_raw'], true);
+
+            if ($accountCreationSecult && $branch) {
+
+                // Mensagem de Status para desbancarizados que possuem a conta criada pela SECULT.
+                $messageStatus = 'O pagamento foi realizado. Para ter acesso ao auxílio, dirija-se até a agência ';
+                $messageStatus .= $branch;
+                $messageStatus .= ' para validar a abertura de sua conta pela SECULT. Lembre-se de levar RG, CPF e comprovante de residência.';
+                $messageStatus .= '<br><br>';
+                $messageStatus .= $secultRaw['OBSERVACOES'];
+                $messageBody = $messageStatus;
+
+            } else {
+
+                $messageBody = 'O pagamento do seu benefício foi realizado e já está disponível para saque na conta indicada no momento de sua inscrição.';
+                $messageBody .= '<br><br>';
+                $messageBody .= $secultRaw['OBSERVACOES'];
+
             }
+
+            $statusTitle = 'Seu pagamento foi realizado com sucesso!!!';
+
+            $params = [
+                "siteName" => $site_name,
+                "urlImageToUseInEmails" => $this->config['logotipo_central'],
+                "user" => $registration->owner->name,
+                "inscricaoId" => $registration->id, 
+                "inscricao" => $registration->number, 
+                "statusNum" => $registration->status,
+                "statusTitle" => $statusTitle,
+                "messageBody" => $messageBody,
+                "baseUrl" => $baseUrl
+            ];
+            $content = $mustache->render($template,$params);
+
+        } else {
+
+            $registrationStatusInfo = $this->getRegistrationStatusInfo($registration);
+            $justificativaAvaliacao = "";
+            foreach ($registrationStatusInfo['justificativaAvaliacao'] as $message) {
+                if (is_array($message) && !empty($this->config['exibir_resultado_padrao'])) {
+                $justificativaAvaliacao .= $message['message'] . "<hr>";
+                } else {
+                    $justificativaAvaliacao .= $message .'<hr>';
+                }
+            }
+
+            $filename = $app->view->resolveFilename("views/aldirblanc", "email-status.html");
+            $template = file_get_contents($filename);
+
+            $statusTitle = $registrationStatusInfo['registrationStatusMessage']['title'];
+
+            $params = [
+                "siteName" => $site_name,
+                "urlImageToUseInEmails" => $this->config['logotipo_central'],
+                "user" => $registration->owner->name,
+                "inscricaoId" => $registration->id, 
+                "inscricao" => $registration->number, 
+                "statusNum" => $registration->status,
+                "statusTitle" => $statusTitle,
+                "justificativaAvaliacao" => $justificativaAvaliacao,
+                "msgRecurso" => $this->config['msg_recurso'],
+                "emailRecurso" => $this->config['email_recurso'],
+                "baseUrl" => $baseUrl
+            ];
+            $content = $mustache->render($template,$params);
+
         }
-        $filename = $app->view->resolveFilename("views/aldirblanc", "email-status.html");
-        $template = file_get_contents($filename);
 
-        $params = [
-            "siteName" => $site_name,
-            "urlImageToUseInEmails" => $this->config['logotipo_central'],
-            "user" => $registration->owner->name,
-            "inscricaoId" => $registration->id, 
-            "inscricao" => $registration->number, 
-            "statusNum" => $registration->status,
-            "statusTitle" => $registrationStatusInfo['registrationStatusMessage']['title'],
-            "justificativaAvaliacao" => $justificativaAvaliacao,
-            "msgRecurso" => $this->config['msg_recurso'],
-            "emailRecurso" => $this->config['email_recurso'],
-            "baseUrl" => $baseUrl
-        ];
-        $content = $mustache->render($template,$params);
-        $email_params = [
-            'from' => $app->config['mailer.from'],
-            'to' => $registration->owner->user->email,
-            'subject' => $site_name . " - Status de inscrição",
-            'body' => $content
-        ];
+        if (!empty($content)) {
 
-        $app->log->debug("ENVIANDO EMAIL DE STATUS DA {$registration->number} ({$registrationStatusInfo['registrationStatusMessage']['title']})");
-        $app->createAndSendMailMessage($email_params);
+            $email_params = [
+                'from' => $app->config['mailer.from'],
+                'to' => $registration->owner->user->email,
+                'subject' => $site_name . " - Status de inscrição",
+                'body' => $content
+            ];
 
-        
-        $sent_emails = $registration->lab_sent_emails ;
-        $sent_emails[] = [
-            'timestamp' => date('Y-m-d H:i:s'),
-            'loggedin_user' => [
-                'id' => $app->user->id,
-                'email' => $app->user->email,
-                'name' => $app->user->profile->name 
-            ],
-            'email' => $email_params
-        ];
+            $app->log->debug("ENVIANDO EMAIL DE STATUS DA {$registration->number} ({$statusTitle})");
+            $app->createAndSendMailMessage($email_params);
 
-        $app->disableAccessControl();
-        $registration->lab_sent_emails = $sent_emails;
+            $sent_emails = $registration->lab_sent_emails;
+            $sent_emails[] = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'loggedin_user' => [
+                    'id' => $app->user->id,
+                    'email' => $app->user->email,
+                    'name' => $app->user->profile->name
+                ],
+                'email' => $email_params
+            ];
 
-        $registration->lab_last_email_status = $registration->status;
+            $app->disableAccessControl();
+            $registration->lab_sent_emails = $sent_emails;
 
-        $registration->save(true);
-        $app->enableAccessControl();
+            $registration->lab_last_email_status = $registration->status;
+
+            $registration->save(true);
+            $app->enableAccessControl();
+
+        }
+
     }
     /**
      * Retorna Array com informações sobre o status de uma inscrição
@@ -436,7 +776,91 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return $agent;
     }
 
-    
+    function ALL_validaContasBancarias() {
+        $this->requireAuthentication();
+        ini_set('max_execution_time', 0);
+
+        $app = App::i();
+        $conn = $app->em->getConnection();
+        $plugin_pagamentos = $app->plugins['RegistrationPayments'];
+        
+        $fields = $this->plugin->config['dados_bancarios_inciso1_fields'];
+
+        $bancos = $this->plugin->config['mapeamento_bancos'];
+
+        $banks = implode("','", array_keys($bancos));
+
+        $result = $conn->fetchAll("
+        SELECT 
+            r.id as registration_id, 
+            r.number, 
+            r.agent_id,
+            _banco.value AS banco,
+            _agencia.value AS agencia,
+            _agencia_dv.value AS agencia_dv,
+            _conta.value AS conta,
+            _conta_dv.value AS conta_dv,
+            _conta_tipo.value AS conta_tipo
+
+        FROM
+            registration r
+            JOIN registration_meta _banco ON _banco.key = '{$fields['banco']}' AND _banco.object_id = r.id
+            JOIN registration_meta _agencia ON _agencia.key = '{$fields['agencia']}' AND _agencia.object_id = r.id
+            LEFT JOIN registration_meta _agencia_dv ON _agencia_dv.key = '{$fields['agencia_dv']}' AND _agencia_dv.object_id = r.id
+            JOIN registration_meta _conta ON _conta.key = '{$fields['conta']}' AND _conta.object_id = r.id
+            LEFT JOIN registration_meta _conta_dv ON _conta_dv.key = '{$fields['conta_dv']}' AND _conta_dv.object_id = r.id
+            LEFT JOIN registration_meta _conta_tipo ON _conta_tipo.key = '{$fields['conta_tipo']}' AND _conta_tipo.object_id = r.id
+        WHERE 
+            _banco.value IN ('$banks')
+
+        ");
+
+        $total = count($result);
+
+        $invalid = 0;
+        $valid = 0;
+        $fixed = 0;
+
+        $count = 0;
+        foreach($result as  $line) {
+            $count++;
+
+            $banco = $bancos[$line['banco']];
+            $validation = $plugin_pagamentos->validateAccount($banco, $line['conta'], $line['agencia'], $line['conta_dv'], $line['agencia_dv']);
+            
+            if ($validation->account_full && $validation->branch_full) {
+                $valid++;
+                if($validation->account_changed || $validation->branch_changed) {
+                    $fixed++;
+                }
+
+                $app->log->info("$count / $total ## {$line['number']} -- VALID: {$validation->bank_number} {$validation->branch_full} {$validation->account_full}");
+
+                $agent = $app->repo('Agent')->find($line['agent_id']);
+                
+                $agent->payment_bank_account_number = $validation->account_full;
+                $agent->payment_bank_branch = $validation->branch_full;
+                $agent->payment_bank_number = $banco;
+                $agent->payment_bank_account_type = $line['conta_tipo'];
+                $agent->save(true);
+
+                $app->em->clear();
+            } else {
+                var_dump($validation);
+                $invalid++;
+            }
+        }
+
+
+        var_dump([
+            'total' => $total,
+            'invalid' => $invalid,
+            'valid' => $valid,
+            'fixed' => $fixed,
+        ]);
+
+        die;
+    }
 
     /**
     * Redireciona o usuário para o formulário do inciso II
@@ -752,64 +1176,100 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         // retorna a mensagem de acordo com o status
         $getStatusMessages = $this->getStatusMessages();
         $registrationStatusMessage = $getStatusMessages[$registration->status];
-
-        // retorna as avaliações da inscrição
-        $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
         
         // monta array de mensagens
         $justificativaAvaliacao = [];
 
-        if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
-            $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
-        }
-        
         $recursos = [];
 
-        foreach ($evaluations as $evaluation) {
-            $validacao = $evaluation->user->aldirblanc_validador ?? null;
-            if ($validacao == 'recurso') {
-                $recursos[] = $evaluation;
-            }
-
-            if ($evaluation->getResult() == $registration->status) {
-                
-                if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
-                    // resultados do dataprev
-                    $avaliacao = $evaluation->getEvaluationData()->obs ?? '';
-                    if (!empty($avaliacao)) {
-                        if (($registration->status == 3 || $registration->status == 2) && substr_count($evaluation->getEvaluationData()->obs, 'Reprocessado')) {
-
-                            if ($this->config['msg_reprocessamento_dataprev']) {
-                                $justificativaAvaliacao[] = $this->config['msg_reprocessamento_dataprev'];
-                            } else {
-                                $justificativaAvaliacao[] = $avaliacao;
-                            }
-                            
-                        } else {
-                            $justificativaAvaliacao[] = $avaliacao;
-                        }
-                    }
-                } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
-                    // resultados dos avaliadores genericos
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
-                } 
-                
-                if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
-                    // resultados dos demais avaliadores
-                    $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
-                }
-
-            }
+        // retorna informações de pagamento       
+        $paymentMeta = $registration->metadata['secult_financeiro_raw'] ?? false;
             
+        $payment = false;
+        if ($paymentMeta && strpos($paymentMeta, 'Caso tenha algum problema com seu pagamento, entre em contato com o suporte') && strpos($paymentMeta, '"AVALIACAO":"selecionada"')) {
+            $payment = true;
         }
 
+        if($payment){
+            // Verifica se é uma inscrição desbancarizada
+            $accountCreationSecult = $registration->owner->metadata['account_creation'] ?? false;
+            $branch = $registration->owner->payment_bank_branch ?? false;
+            $secultRaw = json_decode($registration->metadata['secult_financeiro_raw'], true);
+            if ($accountCreationSecult && $branch) {
+
+                // Mensagem de Status para desbancarizados que possuem a conta criada pela SECULT.
+                $messageStatus = 'O pagamento foi realizado. Para ter acesso ao auxílio, dirija-se até a agência ';
+                $messageStatus .= $branch;
+                $messageStatus .= ' para validar a abertura de sua conta pela SECULT. Lembre-se de levar RG, CPF e comprovante de residência.';
+                $messageStatus .= '<br><br>';
+                $messageStatus .= $secultRaw['OBSERVACOES'];
+                $justificativaAvaliacao[] = $messageStatus;
+
+            }else{
+
+                $messageStatus = 'O pagamento do seu benefício foi realizado e já está disponível para saque na conta indicada no momento de sua inscrição.';
+                $messageStatus .= '<br><br>';
+                $messageStatus .= $secultRaw['OBSERVACOES'];            
+                $justificativaAvaliacao[] = $messageStatus;
+                
+            }
+            $registrationStatusMessage['title'] = 'Seu pagamento foi realizado com sucesso!!!';
+        }else{
+            // retorna as avaliações da inscrição
+            $evaluations = $app->repo('RegistrationEvaluation')->findByRegistrationAndUsersAndStatus($registration);
+                        
+            if (in_array($registration->status, $this->config['exibir_resultado_padrao'])) {
+                $justificativaAvaliacao[] = $getStatusMessages[$registration->status];
+                foreach ($evaluations as $evaluation) {
+                    $validacao = $evaluation->user->aldirblanc_validador ?? null;
+                    if ($validacao == 'recurso') {
+                        $recursos[] = $evaluation;
+                    }
+    
+                    if ($evaluation->getResult() == $registration->status) {
+                        
+                        if (in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && in_array($registration->status, $this->config['exibir_resultado_dataprev'])) {
+                            // resultados do dataprev
+                            $avaliacao = $evaluation->getEvaluationData()->obs ?? '';
+                            if (!empty($avaliacao)) {
+                                if (($registration->status == 3 || $registration->status == 2) && substr_count($evaluation->getEvaluationData()->obs, 'Reprocessado')) {
+    
+                                    if ($this->config['msg_reprocessamento_dataprev']) {
+                                        $justificativaAvaliacao[] = $this->config['msg_reprocessamento_dataprev'];
+                                    } else {
+                                        $justificativaAvaliacao[] = $avaliacao;
+                                    }
+                                    
+                                } else {
+                                    $justificativaAvaliacao[] = $avaliacao;
+                                }
+                            }
+                        } elseif (in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id']) && in_array($registration->status, $this->config['exibir_resultado_generico'])) {
+                            // resultados dos avaliadores genericos
+                            $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                        }
+                        
+                        if (in_array($registration->status, $this->config['exibir_resultado_avaliadores']) && !in_array($evaluation->user->id, $this->config['avaliadores_dataprev_user_id']) && !in_array($evaluation->user->id, $this->config['avaliadores_genericos_user_id'])) {
+                            // resultados dos demais avaliadores
+                            $justificativaAvaliacao[] = $evaluation->getEvaluationData()->obs ?? '';
+                        }
+    
+                    }
+                    
+                }
+    
+            } 
+
+        }        
+    
         $this->render('status', [
             'registration' => $registration, 
             'registrationStatusMessage' => $registrationStatusMessage, 
             'justificativaAvaliacao' => array_filter($justificativaAvaliacao),
             'recursos' => $recursos
         ]);
-    }
+    }          
+
 
     /**
      * Renderiza o formulário da solicitação
@@ -1181,6 +1641,60 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->json($users);
     }
 
+
+    function POST_redefinirSenhaMediado () {
+        $this->requireAuthentication();
+        
+        $app = App::i();
+
+        $registration = $this->requestedEntity;  
+
+        if (!$registration) {
+            $app->pass();
+        }
+
+        if(!$registration->mediacao_senha) {
+            eval(\psy\sh());
+            $this->errorJson('esta não é uma inscrição mediada');
+        }
+
+        if(!$this->postData['senha'] || strlen(trim($this->postData['senha'])) < 5) {
+            eval(\psy\sh());
+            $this->errorJson('a senha informada deve conter ao menos 5 caracteres', 400);
+        }
+
+        $registration->checkPermission('mudarSenhaMediado');
+
+        $app->disableAccessControl();
+        $registration->mediacao_senha = $this->postData['senha'];
+
+        $registration->save(true);
+        $app->enableAccessControl();
+
+        $this->json('sucesso');
+
+    }
+
+    function GET_redefinirSenhaMediado () {
+        $this->requireAuthentication();
+        
+        $app = App::i();
+
+        $registration = $this->requestedEntity;
+
+        if (!$registration) {
+            $app->pass();
+        }
+
+        if(!$registration->mediacao_senha) {
+            die('esta não é uma inscrição mediada');
+        }
+
+        $registration->checkPermission('mudarSenhaMediado');
+
+        $this->render('redefinicao-de-senha-mediado', ['registration' => $registration]);
+
+    }
 
     /**
      * Tela para login dos mediados
