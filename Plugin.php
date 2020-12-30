@@ -1037,6 +1037,17 @@ class Plugin extends \MapasCulturais\Plugin
         );
         $app->registerFileGroup("opportunity", $cnab240);
 
+         // FileGroup para os arquivos do CNAB240
+         $resumo_cnab = new \MapasCulturais\Definitions\FileGroup(
+            "resumo_cnab",
+            ["^text/plain$", "^application/octet-stream$"],
+            "O arquivo enviado não e um arquivo de resumo CNAB240.",
+            false,
+            null,
+            true
+        );
+        $app->registerFileGroup("opportunity", $resumo_cnab);
+
 
         // metadados da oportunidade para suporte a arquivos resumos do CNAB240
         $this->registerMetadata('MapasCulturais\Entities\Opportunity','resumo_cnab240_processed_files', [

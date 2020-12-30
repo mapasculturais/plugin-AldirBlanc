@@ -3176,6 +3176,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     //Valida o arquivo
                     $n = $this->getLineData($r, 230, 231);
                     $result['AQURIVO']['ARQUIVO_STATUS']  = $this->validatedCanb($n, $seg, $cpf, $inscri, $lote);
+
+                    //Pega a data do arquivo
+                    $dataArq = $this->getLineData($r, 143, 150);
+                    $_SESSION['dataArquivo']  = $dataArq;
                    
                 }
             }else if($key_data === "LOTE_1_DATA"){
@@ -3205,7 +3209,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
                             
                             //Firmata o CPF ou CNPJ
-                            $cpf_cnpj = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($cpf_cnpj, -11));
+                            $cpf_cnpj = substr($cpf_cnpj, -11);
 
                             //Busca o número da inscrição
                             if($this->getLineData($r, 210, 224) != ""){
@@ -3215,13 +3219,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                 $inscri = $this->getLineData($r, 33, 62);
 
                             }else{
-                                $inscri = $conn->fetchAll("select object_id from registration_meta rm where key = 'cpf_fix' and value = :cpf_cnpj", ['cpf_cnpj' => $cpf_cnpj]);
+                                
+                                $inscri = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
+                                
                                 if(!$inscri){
                                     $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
                                     continue;
                                 }
                             }
-                            $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri[0]['object_id'], $lote);
+                            $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri[0]['id'], $lote);
                         }
                         
                         if($seg === "B"){
@@ -3256,7 +3262,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
                             
                             //Firmata o CPF ou CNPJ
-                            $cpf_cnpj = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($cpf_cnpj, -11));
+                            $cpf_cnpj = substr($cpf_cnpj, -11);
 
                             //Busca o número da inscrição
                             if($this->getLineData($r, 210, 224) != ""){
@@ -3266,14 +3272,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                 $inscri = $this->getLineData($r, 33, 62);
 
                             }else{
-                                $inscri = $conn->fetchAll("select object_id from registration_meta rm where key = 'cpf_fix' and value = :cpf_cnpj", ['cpf_cnpj' => $cpf_cnpj]);
+                                $inscri = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
+                                
                                 if(!$inscri){
                                     $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
                                     continue;
                                 }
 
                             }
-                            $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri[0]['object_id'], $lote);
+                            $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri[0]['id'], $lote);
                         }
 
                         if($seg === "B"){
@@ -3308,7 +3315,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                              $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
                              
                              //Firmata o CPF ou CNPJ
-                             $cpf_cnpj = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($cpf_cnpj, -11));
+                             $cpf_cnpj = substr($cpf_cnpj, -11);
  
                              //Busca o número da inscrição
                              if($this->getLineData($r, 210, 224) != ""){
@@ -3318,14 +3325,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                  $inscri = $this->getLineData($r, 33, 62);
  
                              }else{
-                                 $inscri = $conn->fetchAll("select object_id from registration_meta rm where key = 'cpf_fix' and value = :cpf_cnpj", ['cpf_cnpj' => $cpf_cnpj]);
-                                 if(!$inscri){
+                                $inscri = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
+                                
+                                if(!$inscri){
                                     $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
                                     continue;
-                                    }
+                                }
                             }
                             
-                             $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri[0]['object_id'], $lote);
+                             $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri[0]['id'], $lote);
                         }
 
                         if($seg === "B"){
@@ -3337,15 +3345,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }else if($key_data === "TREILLER_DATA_ARQ"){}
         }
       
-        
         //Arrays que serão realmente avaliados no processmento do retorno
         $check = ['LOTE_1', 'LOTE_2', 'LOTE_3'];
-        
+       
         //Faz o processamento do retono na base do Mapas
         $csv_data = [];
         $contProcess = 0;
-        foreach($result as $key_result => $value){
-         
+        $dataArq = "";
+        foreach($result as $key_result => $value){         
+            
             if(in_array($key_result, $check)){
                 foreach($value as $key_value => $r){
                     
@@ -3403,7 +3411,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                     $meta_data['return_cnab_info']['REPROCESSED_REASON'] = $reason;    
                                     $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO RE-PROCESSADO - ".$status_txt );
                                 }else{
-                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - JÁ PROCESSADO E {$statusTxtAtual} - SEM MUDANÇA DE STATUS NESSE PROCESSAMENTO" );
+                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - JÁ PROCESSADO E {$statusTxtAtual} - SEM MUDANÇA DE STATUS NESSE PROCESSAMENTO");
                                 }
 
                             }
@@ -3424,13 +3432,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         //Monta o csv de resumo do processamento
                         $csv_data[] = $r; 
                     }
+
+                    
                 }
             }           
-        }      
-        
+        }
+            
+       
         //Geração do CSV de resumo
         $file_name = 'resumo-importacao-cnab240-'.$this->data['file'].'.csv';    
-        $dir =  PRIVATE_FILES_PATH . 'opportunity/'.$opportunity->id."/";
+        $dir =  PRIVATE_FILES_PATH . 'opportunity/'.$opportunity->id."/temp/";
         $patch = $dir . $file_name;        
 
         if (!is_dir($dir)) {
@@ -3446,7 +3457,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         foreach ($csv_data as $key_csv => $csv_line) {            
             $csv->insertOne($csv_line);
         } 
-        fclose($stream);
+        
+        $file = new \MapasCulturais\Entities\OpportunityFile([
+            'name' => $file_name,
+            'type' => 'text/csv$',
+            'tmp_name' => $patch,
+            'error' => 0,
+            'size' => filesize ($patch)
+        ]);
+
+        $file->group = 'resumo_cnab';
+        $file->description = 'resumo-retorno';   
+        $file->owner = $opportunity;              
+        $file->save(true);
+        $arquivos = $opportunity->getFiles('resumo_cnab');
         
         $app->disableAccessControl();
         $opportunity = $app->repo("Opportunity")->find($opportunity->id);
@@ -3470,7 +3494,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              'INSCRICAO',
              'CPF',
              'STATUS',
-             'LEITURA'
+             'LEITURA',
+             'DATA_ARQUIVO_RETORNO'
          ];
      }
     /**
@@ -3480,6 +3505,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $returnCode = $returnCode = $this->config['config-import-cnab240']['returnCode'];
         $positive = $returnCode['positive'];
         $negative = $returnCode['negative'];
+        $dia = substr($_SESSION['dataArquivo'],0,2);
+        $mes = substr($_SESSION['dataArquivo'],2,2);
+        $ano = substr($_SESSION['dataArquivo'],4,4);
+
         foreach($positive as $key => $value){
             if($key === $code){
                 return [
@@ -3488,7 +3517,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     'inscricao' => $inscri,
                     'cpf' => $cpf,
                     'status' => true,
-                    'reason' => $value
+                    'reason' => $value,
+                    'data' => "{$dia}/{$mes}/{$ano}"
                 ];
             }
         }
@@ -3500,7 +3530,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     'inscricao' => $inscri,
                     'cpf' => $cpf,
                     'status' => false,
-                    'reason' => $value
+                    'reason' => $value,
+                    'data' => "{$dia}/{$mes}/{$ano}"
                 ];
             }
         }
@@ -5082,10 +5113,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }else{
                 $registration->cpf_fix = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($fix, -11));
                 $registration->save(true);
-                unset($registration->cpf_fix);
+                
                 $app->log->info("#".$i. "-".$registration->id. " - Fix aplicado");
             }
             $i ++;
+
         }
         $app->enableAccessControl();
     }
