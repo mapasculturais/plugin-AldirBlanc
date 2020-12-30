@@ -999,6 +999,15 @@ class Plugin extends \MapasCulturais\Plugin
             'private' => true,
             'default_value' => '{}',
         ]);
+
+        //Registra o metadado de revisão de CPF
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'cpf_fix', [
+            'label' => i::__('Revisa formato CPF'),
+            'type' => 'text',
+            'private' => true,
+        ]);
+
+
         // FileGroup para os arquivos de desbancarizados
         $defBankless = new \MapasCulturais\Definitions\FileGroup(
             "bankless",
@@ -1036,12 +1045,6 @@ class Plugin extends \MapasCulturais\Plugin
             'private' => true,
             'default_value' => '{}',
         ]);
-         // FileGroup para os arquivos de resumo do CNAB240
-         $cnab240Resumo = new \MapasCulturais\Definitions\FileGroup('mediacao-autorizacao', [
-            '^application/plain$',
-            '^application/vnd.ms-excel$'
-        ], ['O arquivo deve ser um documento ou uma imagem .jpg ou .png'], true, null, true);
-        $app->registerFileGroup("opportunity", $cnab240Resumo);
     }
 
     function json($data, $status = 200)
