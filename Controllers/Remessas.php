@@ -3212,20 +3212,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             //Firmata o CPF ou CNPJ
                             $cpf_cnpj = substr($cpf_cnpj, -11);
 
-                            //Busca o número da inscrição
-                            $inscri_arq = null;
+                            //Busca o número da inscrição                           
                             if($this->getLineData($r, 210, 224) != ""){
-                                $inscri_arq = $this->getLineData($r, 210, 224);
+                                $inscri = $this->getLineData($r, 210, 224);
 
                             }elseif($this->getLineData($r, 33, 62) != ""){
-                                $inscri_arq = $this->getLineData($r, 33, 62);
+                                $inscri = $this->getLineData($r, 33, 62);
 
                             }else{
-                                
-                                
                                 $inscri_db = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
-                                
-                                $inscri = $inscri_arq ? $inscri_arq : $inscri_db[0]['id'];
+                                $inscri = $inscri_db[0]['id'];
                                 
                                 if(!$inscri){
                                     $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
@@ -3270,17 +3266,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             $cpf_cnpj = substr($cpf_cnpj, -11);
 
                             //Busca o número da inscrição
-                            $inscri_arq = null;
                             if($this->getLineData($r, 210, 224) != ""){
-                                $inscri_arq = $this->getLineData($r, 210, 224);
+                                $inscri = $this->getLineData($r, 210, 224);
 
                             }elseif($this->getLineData($r, 33, 62)!=""){
-                                $inscri_arq = $this->getLineData($r, 33, 62);
+                                $inscri = $this->getLineData($r, 33, 62);
 
                             }else{
                                 $inscri_db = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
-                                
-                                $inscri = $inscri_arq ? $inscri_arq : $inscri_db[0]['id'];
+                                $inscri = $inscri_db[0]['id'];
 
                                 if(!$inscri){
                                     $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
@@ -3326,17 +3320,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                              $cpf_cnpj = substr($cpf_cnpj, -11);
  
                              //Busca o número da inscrição
-                             $inscri_arq = null;
                              if($this->getLineData($r, 210, 224) != ""){
-                                 $inscri_arq = $this->getLineData($r, 210, 224);
+                                 $inscri = $this->getLineData($r, 210, 224);
  
                              }elseif($this->getLineData($r, 33, 62)!=""){
-                                 $inscri_arq = $this->getLineData($r, 33, 62);
+                                 $inscri = $this->getLineData($r, 33, 62);
  
                              }else{
                                 $inscri_db = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
-                                
-                                $inscri = $inscri_arq ? $inscri_arq : $inscri_db[0]['id'];
+                                $inscri = $inscri_db[0]['id'];
 
                                 if(!$inscri){
                                     $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
