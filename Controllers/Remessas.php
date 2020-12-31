@@ -3123,7 +3123,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     /**
      * Faz o processamento do arquivo importado
      */
-    private function importCnab240(Opportunity $opportunity, string $filename){      
+    private function importCnab240(Opportunity $opportunity, string $filename){    
+        $this->requireAuthentication();  
         $app = App::i();
         $conn = $app->em->getConnection();
         $plugin = $app->plugins['AldirBlanc'];   
@@ -3173,14 +3174,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $lote = null;
             if($key_data === "HEADER_DATA_ARQ"){
                 foreach($value as $key_r => $r){
+
+                     //Pega a data do arquivo
+                     $dataArq = $this->getLineData($r, 143, 150);
+                     $_SESSION['dataArquivo']  = $dataArq;
+
                     //Valida o arquivo
                     $n = $this->getLineData($r, 230, 231);
                     $result['AQURIVO']['ARQUIVO_STATUS']  = $this->validatedCanb($n, $seg, $cpf, $inscri, $lote);
-
-                    //Pega a data do arquivo
-                    $dataArq = $this->getLineData($r, 143, 150);
-                    $_SESSION['dataArquivo']  = $dataArq;
-                   
                 }
             }else if($key_data === "LOTE_1_DATA"){
                 $cont = 1;
@@ -3332,10 +3333,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                     continue;
                                 }
                             }
-                            
-                             $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri[0]['id'], $lote);
+                            $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri[0]['id'], $lote);
                         }
-
+                        
                         if($seg === "B"){
                             $cont ++;
                         }
@@ -3370,7 +3370,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             //Caso nao exita pagamento ele ignora e insere o log no CSV
                             if(!$payment){
                                 $r['status'] = 'RETORNO NÃO PROCESSADO, PAGAMENTO NÃO ENCONTRADO';
-                                $csv_data[] = $r; 
+                                $csv_data[] = $r;
                                 $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO NÃO PROCESSADO - PAGAMENTO NÃO ENCONTRADO" );
                                 continue;
                             }
@@ -3383,45 +3383,64 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                            
                             $paymenteMetadata = $payment->metadata;  
                             
+                            $registration = $app->repo('Registration')->find(['id' => $r['inscricao']]);
+                            $dataprev_raw = json_decode($registration->getMetadata('dataprev_raw'));
+                            $monoParentDataprev = !empty((array)$dataprev_raw) ?  mb_strtolower($dataprev_raw->IN_MULH_PROV_MONOPARENT) : 'não';
+                            $monoParentInscricao = mb_strtolower($registration->metadata["field_".$config['monoParentField']]);                            
+                            $monoParental = ($monoParentDataprev ==  'sim' && $monoParentInscricao == 'sim') ? true : false;
+                            
                             $meta_data = $paymenteMetadata;
-                            if(!(isset($paymenteMetadata['return_cnab_info']) ?? false)){                                
+                            $first = false;
+                            if(!(isset($meta_data['return_cnab_info']) ?? false)){                                
                                 $meta_data['return_cnab_info'] = [
                                     'STATUS_CODE' => $status_code,
                                     'STATUS_TXT' => $status_txt,
-                                    'PROCESSING_DATE' => $processingDate,
-                                    'REASON' => $reason,
-                                    'CNAB_FILE_NAME' => $filename,
-                                    'REPROCESSED' => 'NÃO',
-                                    'REPROCESSED_DATE' => '',                             
-                                    'REPROCESSED_CNAB_FILE_NAME' => '',
-                                    'REPROCESSED_REASON' => '',
+                                    'PAYMENT_NUMBER' => '1',
+                                    'PAYMENT_DATA' => []
                                 ];
-                               $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO PROCESSADO - {$status_txt}" );
 
-                            }else{
-                                $statusCodeAtual =  $meta_data['return_cnab_info']['STATUS_CODE'];
-                                $statusTxtAtual = $meta_data['return_cnab_info']['STATUS_TXT'];
-                               
-                                if($statusCodeAtual == Payment::STATUS_FAILED && $status_code == Payment::STATUS_PAID){                               
-                                    $meta_data['return_cnab_info']['STATUS_CODE'] = $status_code;
-                                    $meta_data['return_cnab_info']['STATUS_TXT'] = $status_txt;
-                                    $meta_data['return_cnab_info']['REPROCESSED'] = 'SIM';
-                                    $meta_data['return_cnab_info']['REPROCESSED_DATE'] = $processingDate;
-                                    $meta_data['return_cnab_info']['REPROCESSED_CNAB_FILE_NAME'] = $filename;
-                                    $meta_data['return_cnab_info']['REPROCESSED_REASON'] = $reason;    
-                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO RE-PROCESSADO - ".$status_txt );
-                                }else{
-                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - JÁ PROCESSADO E {$statusTxtAtual} - SEM MUDANÇA DE STATUS NESSE PROCESSAMENTO");
-                                }
-
+                                $first = true;
                             }
-                            //Salva o novo metadado
-                            $payment->metadata = $meta_data;
-                           
-                            $payment->save(true);
+                            
+                            $i = $first ? 1 : ((int) $meta_data['return_cnab_info']['PAYMENT_NUMBER'] +1);
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['STATUS_CODE_PAYMENT'] = $status_code;
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['STATUS_TXT_PAYMENT'] = $status_txt;
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['PROCESSING_DATE'] = $processingDate;
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['REASON'] = $reason;
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['CNAB_FILE_NAME'] = $filename;
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['MONO_PARENTAL'] = $monoParental ? 'SIM' : 'NÃO';
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['FILE_ID'] = $this->data['file'];
+                            $meta_data['return_cnab_info']['PAYMENT_NUMBER'] = $i;
 
+                            $consolidado = false;
+                            if(!$first){
+                                $consolidado = true;
+                                $paymentsData = $meta_data['return_cnab_info']['PAYMENT_DATA'];
+                                foreach($paymentsData as $key => $value){
+                                    if($value['STATUS_CODE_PAYMENT'] == '10'){
+                                        $meta_data['return_cnab_info']['STATUS_CODE'] = 10;
+                                        $meta_data['return_cnab_info']['STATUS_TXT'] = 'PAGAMENTO EFETUADO';
+                                        $meta_data['return_cnab_info']['ID_PAYMENT'] = $key; 
+                                        $meta_data['return_cnab_info']['FILE_ID'] = $value['FILE_ID'];                                     
+                                        $mess = "PAGAMENTO EFETUADO - ARQUIVO - ". $value['FILE_ID'];
+                                        break;
+                                    }else{
+                                        $mess = "PAGAMENTO NÃO EFETUADO - ARQUIVO - ". $value['FILE_ID'];
+                                    }
+                                }
+                                $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO CONSOLIDADO - STATUS FINAL É {$mess}");
+                            }else{
+                                $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO PROCESSADO - ".$status_txt);
+                            }
+               
+                            //Salva o novo metadado
+                            $payment->metadata = $meta_data;                          
+                            
+                            $payment->save(true);
+                            
+                            
                             //Seta o status em texto para o CSV
-                            $r['status'] = $status_txt;
+                            $r['status'] = $consolidado ? "PAGAMENTO CONSOLIDADO NESSE PROCESSAMENTO O RESULTADO FINAL É ".$mess : $status_txt;
 
                         }else{
                             //Seta o status em texto para o CSV caso nao encontre a inscrição
@@ -3432,13 +3451,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         //Monta o csv de resumo do processamento
                         $csv_data[] = $r; 
                     }
-
-                    
                 }
             }           
         }
-            
-       
+        
         //Geração do CSV de resumo
         $file_name = 'resumo-importacao-cnab240-'.$this->data['file'].'.csv';    
         $dir =  PRIVATE_FILES_PATH . 'opportunity/'.$opportunity->id."/temp/";
@@ -3494,7 +3510,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              'INSCRICAO',
              'CPF',
              'STATUS',
-             'LEITURA',
+             'LEITURA_ATUAL',
              'DATA_ARQUIVO_RETORNO'
          ];
      }
