@@ -168,20 +168,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return $registrations;
     }
 
-    public static function mciCondition($registration)
-    {
-        $config = App::i()->plugins["AldirBlanc"]->config["config-mci460"];
-        return self::genericCondition($config["fieldMap"], $registration,
-                                      $config["condition"]);
-    }
-
-    public static function ppgCondition($registration)
-    {
-        $config = App::i()->plugins["AldirBlanc"]->config["config-ppg10x"];
-        return self::genericCondition($config["fieldMap"], $registration,
-                                      $config["condition"]);
-    }
-
     /**
      * Implementa um exportador genérico, que de momento tem a intenção de antender os municipios que não vão enviar o arquivo de remessa
      * diretamente ao banco do Brasil.
@@ -2152,6 +2138,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         ];
 
         $txt_data = $this->mountTxt($trailer2, $mappedTrailer2, $txt_data, null, $complement, $app);
+        $txt_data .= "\r\n";
 
         if (isset($_SESSION['problems'])) {
             foreach ($_SESSION['problems'] as $key => $value) {
@@ -3136,7 +3123,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     /**
      * Faz o processamento do arquivo importado
      */
-    private function importCnab240(Opportunity $opportunity, string $filename){      
+    private function importCnab240(Opportunity $opportunity, string $filename){    
+        $this->requireAuthentication();  
         $app = App::i();
         $conn = $app->em->getConnection();
         $plugin = $app->plugins['AldirBlanc'];   
@@ -3186,10 +3174,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $lote = null;
             if($key_data === "HEADER_DATA_ARQ"){
                 foreach($value as $key_r => $r){
+
+                     //Pega a data do arquivo
+                     $dataArq = $this->getLineData($r, 143, 150);
+                     $_SESSION['dataArquivo']  = $dataArq;
+
                     //Valida o arquivo
                     $n = $this->getLineData($r, 230, 231);
                     $result['AQURIVO']['ARQUIVO_STATUS']  = $this->validatedCanb($n, $seg, $cpf, $inscri, $lote);
-                   
                 }
             }else if($key_data === "LOTE_1_DATA"){
                 $cont = 1;
@@ -3218,7 +3210,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
                             
                             //Firmata o CPF ou CNPJ
-                            $cpf_cnpj = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($cpf_cnpj, -11));
+                            $cpf_cnpj = substr($cpf_cnpj, -11);
 
                             //Busca o número da inscrição
                             if($this->getLineData($r, 210, 224) != ""){
@@ -3228,19 +3220,22 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                 $inscri = $this->getLineData($r, 33, 62);
 
                             }else{
-                                $inscri = $conn->fetchColumn("select id from registration where agents_data like :cpf",['cpf' => '%"documento":"' . $cpf_cnpj . '"%']);
-
+                                
+                                $inscri = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
+                                
+                                if(!$inscri){
+                                    $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
+                                    continue;
+                                }
                             }
-                            $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri, $lote);
+                            $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri[0]['id'], $lote);
                         }
-
+                        
                         if($seg === "B"){
                             $cont ++;
                         }
-                        
                     }
                 }
-                
             }else if($key_data === "LOTE_2_DATA"){
                 
                 $cont = 1;
@@ -3268,7 +3263,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
                             
                             //Firmata o CPF ou CNPJ
-                            $cpf_cnpj = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($cpf_cnpj, -11));
+                            $cpf_cnpj = substr($cpf_cnpj, -11);
 
                             //Busca o número da inscrição
                             if($this->getLineData($r, 210, 224) != ""){
@@ -3278,10 +3273,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                 $inscri = $this->getLineData($r, 33, 62);
 
                             }else{
-                                $inscri = $conn->fetchColumn("select id from registration where agents_data like :cpf",['cpf' => '%"documento":"' . $cpf_cnpj . '"%']);
+                                $inscri = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
+                                
+                                if(!$inscri){
+                                    $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
+                                    continue;
+                                }
 
                             }
-                            $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri, $lote);
+                            $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri[0]['id'], $lote);
                         }
 
                         if($seg === "B"){
@@ -3316,7 +3316,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                              $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
                              
                              //Firmata o CPF ou CNPJ
-                             $cpf_cnpj = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($cpf_cnpj, -11));
+                             $cpf_cnpj = substr($cpf_cnpj, -11);
  
                              //Busca o número da inscrição
                              if($this->getLineData($r, 210, 224) != ""){
@@ -3326,12 +3326,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                  $inscri = $this->getLineData($r, 33, 62);
  
                              }else{
-                                 $inscri = $conn->fetchColumn("select id from registration where agents_data like :cpf",['cpf' => '%"documento":"' . $cpf_cnpj . '"%']);
- 
-                             }
-                             $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri, $lote);
+                                $inscri = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
+                                
+                                if(!$inscri){
+                                    $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
+                                    continue;
+                                }
+                            }
+                            $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri[0]['id'], $lote);
                         }
-
+                        
                         if($seg === "B"){
                             $cont ++;
                         }
@@ -3343,13 +3347,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
       
         //Arrays que serão realmente avaliados no processmento do retorno
         $check = ['LOTE_1', 'LOTE_2', 'LOTE_3'];
-        
+       
         //Faz o processamento do retono na base do Mapas
         $csv_data = [];
         $contProcess = 0;
-        foreach($result as $key_result => $value){
+        $dataArq = "";
+        foreach($result as $key_result => $value){         
+            
             if(in_array($key_result, $check)){
                 foreach($value as $key_value => $r){
+                    
                     if($key_value != "LOTE_STATUS"){
                          //Conta os registros processados
                         $contProcess++;
@@ -3363,7 +3370,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             //Caso nao exita pagamento ele ignora e insere o log no CSV
                             if(!$payment){
                                 $r['status'] = 'RETORNO NÃO PROCESSADO, PAGAMENTO NÃO ENCONTRADO';
-                                $csv_data[] = $r; 
+                                $csv_data[] = $r;
                                 $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO NÃO PROCESSADO - PAGAMENTO NÃO ENCONTRADO" );
                                 continue;
                             }
@@ -3376,45 +3383,64 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                            
                             $paymenteMetadata = $payment->metadata;  
                             
+                            $registration = $app->repo('Registration')->find(['id' => $r['inscricao']]);
+                            $dataprev_raw = json_decode($registration->getMetadata('dataprev_raw'));
+                            $monoParentDataprev = !empty((array)$dataprev_raw) ?  mb_strtolower($dataprev_raw->IN_MULH_PROV_MONOPARENT) : 'não';
+                            $monoParentInscricao = mb_strtolower($registration->metadata["field_".$config['monoParentField']]);                            
+                            $monoParental = ($monoParentDataprev ==  'sim' && $monoParentInscricao == 'sim') ? true : false;
+                            
                             $meta_data = $paymenteMetadata;
-                            if(!(isset($paymenteMetadata['return_cnab_info']) ?? false)){                                
+                            $first = false;
+                            if(!(isset($meta_data['return_cnab_info']) ?? false)){                                
                                 $meta_data['return_cnab_info'] = [
                                     'STATUS_CODE' => $status_code,
                                     'STATUS_TXT' => $status_txt,
-                                    'PROCESSING_DATE' => $processingDate,
-                                    'REASON' => $reason,
-                                    'CNAB_FILE_NAME' => $filename,
-                                    'REPROCESSED' => 'NÃO',
-                                    'REPROCESSED_DATE' => '',                             
-                                    'REPROCESSED_CNAB_FILE_NAME' => '',
-                                    'REPROCESSED_REASON' => '',
+                                    'PAYMENT_NUMBER' => '1',
+                                    'PAYMENT_DATA' => []
                                 ];
-                               $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO PROCESSADO - {$status_txt}" );
 
-                            }else{
-                                $statusCodeAtual =  $meta_data['return_cnab_info']['STATUS_CODE'];
-                                $statusTxtAtual = $meta_data['return_cnab_info']['STATUS_TXT'];
-                               
-                                if($statusCodeAtual == Payment::STATUS_FAILED && $status_code == Payment::STATUS_PAID){                               
-                                    $meta_data['return_cnab_info']['STATUS_CODE'] = $status_code;
-                                    $meta_data['return_cnab_info']['STATUS_TXT'] = $status_txt;
-                                    $meta_data['return_cnab_info']['REPROCESSED'] = 'SIM';
-                                    $meta_data['return_cnab_info']['REPROCESSED_DATE'] = $processingDate;
-                                    $meta_data['return_cnab_info']['REPROCESSED_CNAB_FILE_NAME'] = $filename;
-                                    $meta_data['return_cnab_info']['REPROCESSED_REASON'] = $reason;    
-                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO RE-PROCESSADO - ".$status_txt );
-                                }else{
-                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - JÁ PROCESSADO - {$statusTxtAtual} - SEM MUDANÇA DE STATUS NESSE PROCESSAMENTO" );
-                                }
-
+                                $first = true;
                             }
-                            //Salva o novo metadado
-                            $payment->metadata = $meta_data;
-                           
-                            $payment->save(true);
+                            
+                            $i = $first ? 1 : ((int) $meta_data['return_cnab_info']['PAYMENT_NUMBER'] +1);
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['STATUS_CODE_PAYMENT'] = $status_code;
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['STATUS_TXT_PAYMENT'] = $status_txt;
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['PROCESSING_DATE'] = $processingDate;
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['REASON'] = $reason;
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['CNAB_FILE_NAME'] = $filename;
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['MONO_PARENTAL'] = $monoParental ? 'SIM' : 'NÃO';
+                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['FILE_ID'] = $this->data['file'];
+                            $meta_data['return_cnab_info']['PAYMENT_NUMBER'] = $i;
 
+                            $consolidado = false;
+                            if(!$first){
+                                $consolidado = true;
+                                $paymentsData = $meta_data['return_cnab_info']['PAYMENT_DATA'];
+                                foreach($paymentsData as $key => $value){
+                                    if($value['STATUS_CODE_PAYMENT'] == '10'){
+                                        $meta_data['return_cnab_info']['STATUS_CODE'] = 10;
+                                        $meta_data['return_cnab_info']['STATUS_TXT'] = 'PAGAMENTO EFETUADO';
+                                        $meta_data['return_cnab_info']['ID_PAYMENT'] = $key; 
+                                        $meta_data['return_cnab_info']['FILE_ID'] = $value['FILE_ID'];                                     
+                                        $mess = "PAGAMENTO EFETUADO - ARQUIVO - ". $value['FILE_ID'];
+                                        break;
+                                    }else{
+                                        $mess = "PAGAMENTO NÃO EFETUADO - ARQUIVO - ". $value['FILE_ID'];
+                                    }
+                                }
+                                $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO CONSOLIDADO - STATUS FINAL É {$mess}");
+                            }else{
+                                $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO PROCESSADO - ".$status_txt);
+                            }
+               
+                            //Salva o novo metadado
+                            $payment->metadata = $meta_data;                          
+                            
+                            $payment->save(true);
+                            
+                            
                             //Seta o status em texto para o CSV
-                            $r['status'] = $status_txt;
+                            $r['status'] = $consolidado ? "PAGAMENTO CONSOLIDADO NESSE PROCESSAMENTO O RESULTADO FINAL É ".$mess : $status_txt;
 
                         }else{
                             //Seta o status em texto para o CSV caso nao encontre a inscrição
@@ -3427,17 +3453,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }
                 }
             }           
-        }      
+        }
         
         //Geração do CSV de resumo
         $file_name = 'resumo-importacao-cnab240-'.$this->data['file'].'.csv';    
-        $dir =  PRIVATE_FILES_PATH . 'opportunity/'.$opportunity->id."/";
+        $dir =  PRIVATE_FILES_PATH . 'opportunity/'.$opportunity->id."/temp/";
         $patch = $dir . $file_name;        
 
         if (!is_dir($dir)) {
             mkdir($dir, 0700, true);
         }
-
+       
         $stream = fopen($patch, 'w');        
         $csv = Writer::createFromStream($stream);
         $csv->setDelimiter(';');
@@ -3447,6 +3473,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         foreach ($csv_data as $key_csv => $csv_line) {            
             $csv->insertOne($csv_line);
         } 
+        
+        $file = new \MapasCulturais\Entities\OpportunityFile([
+            'name' => $file_name,
+            'type' => 'text/csv$',
+            'tmp_name' => $patch,
+            'error' => 0,
+            'size' => filesize ($patch)
+        ]);
+
+        $file->group = 'resumo_cnab';
+        $file->description = 'resumo-retorno';   
+        $file->owner = $opportunity;              
+        $file->save(true);
+        $arquivos = $opportunity->getFiles('resumo_cnab');
         
         $app->disableAccessControl();
         $opportunity = $app->repo("Opportunity")->find($opportunity->id);
@@ -3470,7 +3510,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              'INSCRICAO',
              'CPF',
              'STATUS',
-             'LEITURA'
+             'LEITURA_ATUAL',
+             'DATA_ARQUIVO_RETORNO'
          ];
      }
     /**
@@ -3480,6 +3521,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $returnCode = $returnCode = $this->config['config-import-cnab240']['returnCode'];
         $positive = $returnCode['positive'];
         $negative = $returnCode['negative'];
+        $dia = substr($_SESSION['dataArquivo'],0,2);
+        $mes = substr($_SESSION['dataArquivo'],2,2);
+        $ano = substr($_SESSION['dataArquivo'],4,4);
+
         foreach($positive as $key => $value){
             if($key === $code){
                 return [
@@ -3488,7 +3533,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     'inscricao' => $inscri,
                     'cpf' => $cpf,
                     'status' => true,
-                    'reason' => $value
+                    'reason' => $value,
+                    'data' => "{$dia}/{$mes}/{$ano}"
                 ];
             }
         }
@@ -3500,7 +3546,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     'inscricao' => $inscri,
                     'cpf' => $cpf,
                     'status' => false,
-                    'reason' => $value
+                    'reason' => $value,
+                    'data' => "{$dia}/{$mes}/{$ano}"
                 ];
             }
         }
@@ -3706,13 +3753,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $repo = $app->repo("\\RegistrationPayments\\Payment");
         $keys = $this->getParametersForms();
         $date = $keys["datePayment"];
-        $status = $keys["typeExport"];
         $select = ["registration" => $registration->id];
         if (isset($this->data[$date])) {
             $select["paymentDate"] = new DateTime($this->data[$date]);
-        }
-        if (isset($this->data[$status]) && ($this->data[$status] != "all")) {
-            $select["status"] = intval($this->data[$status]);
         }
         $payments = $repo->findBy($select);
         foreach ($payments as $payment) {
@@ -4244,8 +4287,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         return $out;
     }
 
-    private static function genericCondition($fieldMap, $registration,
-                                             $condition)
+    private function genericCondition($fieldMap, $registration, $condition)
     {
         if (!is_array($condition)) {
             $field = $fieldMap[$condition];
@@ -4257,45 +4299,45 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         switch ($condition["operator"]) {
             case "and":
                 foreach ($condition["operands"] as $op) {
-                    if (!self::genericCondition($fieldMap, $registration, $op)) {
+                    if (!$this->genericCondition($fieldMap, $registration, $op)) {
                         return false;
                     }
                 }
                 return true;
             case "or":
                 foreach ($condition["operands"] as $op) {
-                    if (!!self::genericCondition($fieldMap, $registration, $op)) {
+                    if (!!$this->genericCondition($fieldMap, $registration, $op)) {
                         return true;
                     }
                 }
                 return false;
             case "xor":
-                return (!!self::genericCondition($fieldMap, $registration,
-                                                 $condition["operands"][0]) !=
-                        !!self::genericcondition($fieldMap, $registration,
-                                                 $condition["operands"][1]));
+                return (!!$this->genericCondition($fieldMap, $registration,
+                                                  $condition["operands"][0]) !=
+                        !!$this->genericcondition($fieldMap, $registration,
+                                                  $condition["operands"][1]));
             case "not":
-                return !self::genericCondition($fieldMap, $registration,
-                                               $condition["operands"][0]);
-            case "exists":
-                $value = self::genericCondition($fieldMap, $registration,
+                return !$this->genericCondition($fieldMap, $registration,
                                                 $condition["operands"][0]);
+            case "exists":
+                $value = $this->genericCondition($fieldMap, $registration,
+                                                 $condition["operands"][0]);
                 return (($value != null) && !empty($value));
             case "equals":
-                return (self::genericCondition($fieldMap, $registration,
-                                               $condition["operands"][0]) ==
-                        self::genericCondition($fieldMap, $registration,
-                                               $condition["operands"][1]));
+                return ($this->genericCondition($fieldMap, $registration,
+                                                $condition["operands"][0]) ==
+                        $this->genericCondition($fieldMap, $registration,
+                                                $condition["operands"][1]));
             case "in":
-                return in_array(self::genericCondition($fieldMap, $registration,
-                                                       $condition["operands"][0]),
-                                self::genericCondition($fieldMap, $registration,
-                                                       $condition["operands"][1]));
+                return in_array($this->genericCondition($fieldMap, $registration,
+                                                        $condition["operands"][0]),
+                                $this->genericCondition($fieldMap, $registration,
+                                                        $condition["operands"][1]));
             case "prefix":
-                return str_starts_with(self::genericCondition($fieldMap, $registration,
-                                                              $condition["operands"][0]),
-                                       self::genericCondition($fieldMap, $registration,
-                                                              $condition["operands"][1]));
+                return str_starts_with($this->genericCondition($fieldMap, $registration,
+                                                               $condition["operands"][0]),
+                                       $this->genericCondition($fieldMap, $registration,
+                                                               $condition["operands"][1]));
         }
         return null;
     }
@@ -4457,7 +4499,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $config = $this->config["config-ppg10x"];
         $idMap = null;
         if (isset($config["idMap"]) &&
-            isset($this->data["use_ppg_idmap"])) {
+            !isset($this->data["ignore_ppg_idmap"])) {
             $idMap = $this->getCSVData($config["idMap"], ",", $key);
             if (!$idMap) {
                 App::i()->log->info("Mapeamento de identificadores ausente.");
@@ -4479,9 +4521,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             ]);
         } else {
             $payment = $paymentRepo->find($reference);
-            if (isset($payment)) {
-                $registrationID = $payment->registration->id;
-            }
+            $registrationID = $payment->registration->id;
         }
         if (!isset($payment)) {
             if ($idMap != null) {
@@ -4530,8 +4570,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $linesBefore = $nLines;
             while ($registration = $registrations->next()[0]) {
                 // testa se é desbancarizado
-                if (!self::genericCondition($config["fieldMap"], $registration,
-                                            $config["condition"])) {
+                if (!$this->genericCondition($config["fieldMap"], $registration,
+                                             $config["condition"])) {
                     $app->log->info("Ignorando - condição não satisfeita: " .
                                     $registration->number);
                     continue;
@@ -4620,11 +4660,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             if (!isset($payment)) {
                 continue;
             }
-            $status = ($entry["paymentCode"] == 0) ? Payment::STATUS_AVAILABLE :
-                      Payment::STATUS_FAILED;
-            if ($payment->status != $status) { // o setter não lida bem com sobrescrever o mesmo valor
-                $payment->status = $status;
-            }
+            $payment->status = ($entry["paymentCode"] == 0) ?
+                               Payment::STATUS_AVAILABLE :
+                               Payment::STATUS_FAILED;
             $metadata = is_array($payment->metadata) ? $payment->metadata :
                         json_decode($payment->metadata);
             $metadata["ppg101"] = [
@@ -4724,8 +4762,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     continue;
                 }
                 // testa se é desbancarizado
-                if (!self::genericCondition($config["fieldMap"], $registration,
-                                            $config["condition"])) {
+                if (!$this->genericCondition($config["fieldMap"], $registration,
+                                             $config["condition"])) {
                     $app->log->info("Ignorando - condição não satisfeita: " .
                                     $registration->number);
                     continue;
@@ -4806,8 +4844,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     continue;
                 }
                 // testa se é desbancarizado
-                if (!self::genericCondition($config["fieldMap"], $registration,
-                                            $config["condition"])) {
+                if (!$this->genericCondition($config["fieldMap"], $registration,
+                                             $config["condition"])) {
                     $app->log->info("Ignorando - condição não satisfeita: " .
                                     $registration->number);
                     continue;
@@ -5039,5 +5077,64 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $app->enableAccessControl();
         $app->log->info("Total registros: " . $footer["countEntries"]);
         return;
+    }
+
+    /**
+     * Endpoint para revisar formato do CPF
+     */
+    public function ALL_cpfReview()
+    {
+        //Seta o timeout
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '768M');
+        
+        //Exige que o usuário esteja autenticado
+        $this->requireAuthentication();
+        $app = App::i();
+        
+        //Pega a oportunidade
+        if(!isset($this->data['opportunity']) && empty($this->data['opportunity'])){
+            echo "Informe a oportunidade";
+            die();
+        }
+        $opportunity_id = $this->data['opportunity'];
+        $opportunity = $app->repo('Opportunity')->find($opportunity_id);
+        $this->registerRegistrationMetadata($opportunity);
+
+        //Verifica se o usuário tem co0ntrole da oportunidade
+        if (!$opportunity->canUser('@control')) {
+            echo "Não autorizado";
+            die();
+        }
+        
+        //Pega as registrations
+        $registrations = $app->repo('Registration')->findBy(['opportunity' => $opportunity, 'status' => [1,10]]);
+        
+        //Cria o metadado e salva o CPF com formato válido
+        $app->disableAccessControl();
+        $i = 0;    
+        foreach($registrations as $registration){
+            $documento = $registration->owner->documento ?? false;
+            
+            if(!$documento){
+                $app->log->info("#".$i. "-".$registration->id. " - Documento nao encontrado no agente");
+                continue;
+            }
+            
+            $fix = preg_replace('/[^0-9]/i', '', $documento);      
+            
+            if(strlen($fix) != 11){
+                $app->log->info("#".$i. "-".$registration->id. " - CPF inválido - ". $registration->owner->documento);
+
+            }else{
+                $registration->cpf_fix = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($fix, -11));
+                $registration->save(true);
+                
+                $app->log->info("#".$i. "-".$registration->id. " - Fix aplicado");
+            }
+            $i ++;
+
+        }
+        $app->enableAccessControl();
     }
 }
