@@ -1109,6 +1109,15 @@ class Plugin extends \MapasCulturais\Plugin
             'private' => true,
             'default_value' => '{}',
         ]);
+
+        //Registra o metadado de revisão de CPF
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'cpf_fix', [
+            'label' => i::__('Revisa formato CPF'),
+            'type' => 'text',
+            'private' => true,
+        ]);
+
+
         // FileGroup para os arquivos de desbancarizados
         $defBankless = new \MapasCulturais\Definitions\FileGroup(
             "bankless",
@@ -1138,6 +1147,17 @@ class Plugin extends \MapasCulturais\Plugin
         );
         $app->registerFileGroup("opportunity", $cnab240);
 
+         // FileGroup para os arquivos do CNAB240
+         $resumo_cnab = new \MapasCulturais\Definitions\FileGroup(
+            "resumo_cnab",
+            ["^text/plain$", "^application/octet-stream$"],
+            "O arquivo enviado não e um arquivo de resumo CNAB240.",
+            false,
+            null,
+            true
+        );
+        $app->registerFileGroup("opportunity", $resumo_cnab);
+
 
         // metadados da oportunidade para suporte a arquivos resumos do CNAB240
         $this->registerMetadata('MapasCulturais\Entities\Opportunity','resumo_cnab240_processed_files', [
@@ -1146,12 +1166,7 @@ class Plugin extends \MapasCulturais\Plugin
             'private' => true,
             'default_value' => '{}',
         ]);
-         // FileGroup para os arquivos de resumo do CNAB240
-         $cnab240Resumo = new \MapasCulturais\Definitions\FileGroup('mediacao-autorizacao', [
-            '^application/plain$',
-            '^application/vnd.ms-excel$'
-        ], ['O arquivo deve ser um documento ou uma imagem .jpg ou .png'], true, null, true);
-        $app->registerFileGroup("opportunity", $cnab240Resumo);
+        
         // FileGroup para os arquivos do painel de e-mails PPG
         $defEmail = new \MapasCulturais\Definitions\FileGroup('email-files', [
             '^application/octet-stream$',
