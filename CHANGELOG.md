@@ -33,6 +33,7 @@
 - Refatora Importador CNAB240 para que busque as inscrições pelo CPF. (Ref. [#185](https://github.com/mapasculturais/plugin-AldirBlanc/issues/185))
 - Refatora Importador CNAB240 para permitir baixar arquivos de consolidação. (Ref. [#185](https://github.com/mapasculturais/plugin-AldirBlanc/issues/185))
 - Refatora Importador CNAB240 para qpermitir processar mais de um retorno para mesma inscrição, fazendo a consolidação do resultado. (Ref. [#185](https://github.com/mapasculturais/plugin-AldirBlanc/issues/185))
+- Refatora CNAB240 para buscar DV de Agencia e Contas em fields separados. (Ref. [#182](https://github.com/mapasculturais/plugin-AldirBlanc/issues/182))
 
 ## [v2.3.1] - 2020-12-01
 - Implementa os importadores para o MCI470 e PPG101 [#162](https://github.com/mapasculturais/plugin-AldirBlanc/issues/162)
