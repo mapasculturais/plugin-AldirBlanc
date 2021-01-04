@@ -525,7 +525,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }
                     
               
-                return $result = $this->normalizeString(substr($result, 0, 4));
+                return $result = $this->normalizeString($result);
             },
             'CONTA_BANCO' => function ($registrations) use ($fieldsID , $proponentTypes, $dePara, $cpfCsv) {
                  $temp = $fieldsID['TIPO_PROPONENTE'];
