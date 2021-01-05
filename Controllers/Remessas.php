@@ -219,7 +219,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunity_id = $opportunity->id;
         $registrations = $this->getRegistrations($opportunity);
         $parametersForms = $this->getParametersForms();
-
+        
         /**
          * Mapeamento de fields_id pelo label do campo
          */
@@ -368,6 +368,18 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         break;
                     }
                 }
+
+                if($result == "" || empty($result)){
+                    $metadata = $registrations->owner->metadata;
+                    foreach(['telefonePublico', 'telefonePrivado'] as $value){
+                        if(isset($metadata[$value])){
+                            $result = $metadata[$value];
+                            break;
+                        }
+                    }
+                   
+                }
+
                 return $this->normalizeString(preg_replace('/[^0-9]/i', '', $result));
             },
             'NUM_BANCO' => function ($registrations) use ($fieldsID , $dePara, $cpfCsv, $categories) {
@@ -467,8 +479,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'INCISO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['INCISO'];
                 return $this->normalizeString($field_id);
-            },
-
+            }
         ];
 
         //Itera sobre os dados mapeados
@@ -579,6 +590,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $fromToAccounts = $csv_conf[$opportunity_id]['fromToAccounts'];
         $dePara = $this->readingCsvFromTo($fromToAccounts);
         $cpfCsv = $this->cpfCsv($fromToAccounts);
+        
         
         /**
          * Mapeamento de fields_id
@@ -770,6 +782,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 } else {
                     $result = $registrations->$field_id;
                 }
+                
+                if($result == "" || empty($result)){
+                    $metadata = $registrations->owner->metadata;
+                    foreach(['telefonePublico', 'telefonePrivado', 'telefone1', 'telefone2'] as $value){
+                        if(isset($metadata[$value]) && $metadata[$value] != ""){
+                            $result = $metadata[$value];
+                            break;
+                        }
+                    }
+                   
+                }
 
                 return $this->normalizeString(preg_replace('/[^0-9]/i', '', $result));
             },
@@ -896,8 +919,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'INCISO' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['INCISO'];
                 return $this->normalizeString($field_id);
-            },
-
+            }
         ];
 
         //Itera sobre os dados mapeados
@@ -3602,6 +3624,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $field_id = $fieldsID[$field];       
         $fromToAdress = $fieldsID['fromToAdress'];        
         $result = " ";
+       
         if($fromToAdress){
             $adress = $this->readingCsvFromTo($fromToAdress);
             foreach($adress as $key => $value){
@@ -3631,7 +3654,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     } 
                 }
             }
-            
             if($length){
                 if (strlen($result) > $length) {
                     $app->log->info("\n".$registrations->number ." ". $field . " > que ". $length . " Char. Truncado!");
@@ -3640,6 +3662,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $app->log->info("\n".$registrations->id . $attribute . " Não encontrado");
             }
         }
+
+        if($result == "" || empty($result) || $result == " "){
+            $metadata = $registrations->owner->metadata;
+            if(isset($metadata[$attribute])){
+                $result = $metadata[$attribute];
+            }
+        }
+
         return $this->normalizeString($result);                  
     }
 
