@@ -1795,6 +1795,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $countUnbanked = 0;
         $noFormoReceipt = 0;
 
+        $countBanked = 0;
+        $countUnbanked = 0; 
+        
         if($default['ducumentsType']['unbanked']){ // Caso exista separação entre bancarizados e desbancarizados
             foreach($registrations as $value){
                 
@@ -3083,10 +3086,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * Importador retorno CNAB240
     */
     public function GET_importFileCnab240()
-    {   
-        
-        $this->requireAuthentication();
-
+    { 
         $app = App::i();
 
         $opportunity_id = $this->data['opportunity'] ?? 0;
@@ -3174,10 +3174,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $lote = null;
             if($key_data === "HEADER_DATA_ARQ"){
                 foreach($value as $key_r => $r){
+                    $_SESSION['dataArquivo'] = "";
 
-                     //Pega a data do arquivo
-                     $dataArq = $this->getLineData($r, 143, 150);
-                     $_SESSION['dataArquivo']  = $dataArq;
+                    //Pega o tipo do arquivo
+                    $_SESSION['fileType'] = preg_replace('/[^a-zA-Z-]/', '',$this->getLineData($r, 171, 192));
 
                     //Valida o arquivo
                     $n = $this->getLineData($r, 230, 231);
@@ -3196,12 +3196,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $seg = ($key_r % 2) == true ? "A" : "B";
 
                         if($seg === "A"){
+                            //Pega a data do arquivo
+                            $dataPag = $this->getLineData($r, 93, 100);                                                        
+                            $_SESSION['dataArquivo']  = $dataPag;
+
                             //Valida as inscrições
                             $code = $this->getLineData($r, 230, 231);
                             $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri, $lote);
 
                         }
                         else{
+                            
                             //Pega o tipo de documento CPF ou CNPJ
                             $tipo = $this->getLineData($r, 17, 17);
                             
@@ -3250,6 +3255,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $seg = ($key_r % 2) == true ? "A" : "B";
 
                         if($seg === "A"){
+                            //Pega a data do arquivo
+                            $dataPag = $this->getLineData($r, 93, 100);                              
+                            $_SESSION['dataArquivo']  = $dataPag;
+
                             //Valida as inscrições
                             $code = $this->getLineData($r, 230, 231);
                             $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri, $lote);
@@ -3303,6 +3312,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $seg = ($key_r % 2) == true ? "A" : "B";
 
                         if($seg === "A"){
+                            //Pega a data do arquivo
+                            $dataPag = $this->getLineData($r, 93, 100);                              
+                            $_SESSION['dataArquivo']  = $dataPag;
+                            
                             //Valida as inscrições
                             $code = $this->getLineData($r, 230, 231);
                             $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf, $inscri, $lote);
@@ -3352,109 +3365,146 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $csv_data = [];
         $contProcess = 0;
         $dataArq = "";
+        
         foreach($result as $key_result => $value){         
             
             if(in_array($key_result, $check)){
                 foreach($value as $key_value => $r){
-                    
                     if($key_value != "LOTE_STATUS"){
                          //Conta os registros processados
                         $contProcess++;
 
                         if(!empty($r['inscricao'])){
+                            
                             //pega o pagamento da inscrição
-                            $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
-                                'registration' => preg_replace('/[^\d\-]/', '',$r['inscricao'])
+                            $payments = $app->em->getRepository('\\RegistrationPayments\\Payment')->findBy([
+                                'registration' => preg_replace('/[^\d\-]/', '',$r['inscricao']),
+
                             ]); 
                             
+                           
                             //Caso nao exita pagamento ele ignora e insere o log no CSV
-                            if(!$payment){
-                                $r['status'] = 'RETORNO NÃO PROCESSADO, PAGAMENTO NÃO ENCONTRADO';
-                                $csv_data[] = $r;
+                            if(!$payments){
                                 $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO NÃO PROCESSADO - PAGAMENTO NÃO ENCONTRADO" );
                                 continue;
                             }
-                            
-                            //Remonta o metadado de pagamento com informações do CNAB
-                            $meta_data = []; 
-                            $status_txt = $r['status'] ? 'PAGAMENTO EFETUADO' : 'PAGAMENTO NÃO EFETUADO';
-                            $reason = $r['reason'];
-                            $status_code = $r['status'] ? Payment::STATUS_PAID : Payment::STATUS_FAILED;
-                           
-                            $paymenteMetadata = $payment->metadata;  
-                            
-                            $registration = $app->repo('Registration')->find(['id' => $r['inscricao']]);
-                            $dataprev_raw = json_decode($registration->getMetadata('dataprev_raw'));
-                            $monoParentDataprev = !empty((array)$dataprev_raw) ?  mb_strtolower($dataprev_raw->IN_MULH_PROV_MONOPARENT) : 'não';
-                            $monoParentInscricao = mb_strtolower($registration->metadata["field_".$config['monoParentField']]);                            
-                            $monoParental = ($monoParentDataprev ==  'sim' && $monoParentInscricao == 'sim') ? true : false;
-                            
-                            $meta_data = $paymenteMetadata;
-                            $first = false;
-                            if(!(isset($meta_data['return_cnab_info']) ?? false)){                                
-                                $meta_data['return_cnab_info'] = [
-                                    'STATUS_CODE' => $status_code,
-                                    'STATUS_TXT' => $status_txt,
-                                    'PAYMENT_NUMBER' => '1',
-                                    'PAYMENT_DATA' => []
-                                ];
 
-                                $first = true;
-                            }
-                            
-                            $i = $first ? 1 : ((int) $meta_data['return_cnab_info']['PAYMENT_NUMBER'] +1);
-                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['STATUS_CODE_PAYMENT'] = $status_code;
-                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['STATUS_TXT_PAYMENT'] = $status_txt;
-                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['PROCESSING_DATE'] = $processingDate;
-                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['REASON'] = $reason;
-                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['CNAB_FILE_NAME'] = $filename;
-                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['MONO_PARENTAL'] = $monoParental ? 'SIM' : 'NÃO';
-                            $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['FILE_ID'] = $this->data['file'];
-                            $meta_data['return_cnab_info']['PAYMENT_NUMBER'] = $i;
+                            foreach($payments as $key_payment => $payment){
+                                
+                                $meta_data = [];                             
+                                $meta_data = $payment->metadata;  
+    
+                                $registration = $app->repo('Registration')->find(['id' => $r['inscricao']]);
+                                $dataprev_raw = json_decode($registration->getMetadata('dataprev_raw'));
+                                $monoParentDataprev = !empty((array)$dataprev_raw) ?  mb_strtolower($dataprev_raw->IN_MULH_PROV_MONOPARENT) : 'não';
+                                $monoParentInscricao = mb_strtolower($registration->metadata["field_".$config['monoParentField']]);                            
+                                $monoParental = ($monoParentDataprev ==  'sim' && $monoParentInscricao == 'sim') ? 'SIM' : 'NÃO';
+                                $r['payment_id'] = $payment->id;  
 
-                            $consolidado = false;
-                            if(!$first){
-                                $consolidado = true;
-                                $paymentsData = $meta_data['return_cnab_info']['PAYMENT_DATA'];
-                                foreach($paymentsData as $key => $value){
-                                    if($value['STATUS_CODE_PAYMENT'] == '10'){
-                                        $meta_data['return_cnab_info']['STATUS_CODE'] = 10;
-                                        $meta_data['return_cnab_info']['STATUS_TXT'] = 'PAGAMENTO EFETUADO';
-                                        $meta_data['return_cnab_info']['ID_PAYMENT'] = $key; 
-                                        $meta_data['return_cnab_info']['FILE_ID'] = $value['FILE_ID'];                                     
-                                        $mess = "PAGAMENTO EFETUADO - ARQUIVO - ". $value['FILE_ID'];
-                                        break;
-                                    }else{
-                                        $mess = "PAGAMENTO NÃO EFETUADO - ARQUIVO - ". $value['FILE_ID'];
-                                    }
+                                if($payment->status == 10){
+                                    $txt = $meta_data['return_cnab_info']['STATUS_TXT'];
+                                    $data = new DateTime($meta_data['return_cnab_info']['PAYMENT_DATA'][1]['PROCESSING_DATE']);
+                                    $r['status'] = "PAGAMENTO JÁ PROCESSADO DIA " . $data->format('d/m/Y');
+                                    $r['monoparental'] = $monoParental;
+                                    $r['arquivo_retorno'] = strtoupper(basename($filename,'.ret'));
+                                    $r['reason'] = "";                                                                      
+                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - PAGAMENTO JÁ PROCESSADO" );
+                                    continue;
                                 }
-                                $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO CONSOLIDADO - STATUS FINAL É {$mess}");
-                            }else{
-                                $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO PROCESSADO - ".$status_txt);
+                                
+                                //Remonta o metadado de pagamento com informações do CNAB                                                            
+                                $reason = $r['reason'];
+                                if($r['status'] && $r['return_code'] == "00"){
+                                    $status_code = Payment::STATUS_PAID;
+                                    $status_txt =  "PAGAMENTO EFETUADO";
+                                    $payment->status = Payment::STATUS_PAID;
+    
+                                }else if($r['status'] && $r['return_code'] == "BD"){
+                                    $status_code = Payment::STATUS_PROCESSING;
+                                    $status_txt =  "PAGAMENTO EM PROCESSO";
+                                    $payment->status = Payment::STATUS_PROCESSING;
+    
+                                }else if($r['status'] && !in_array($r['return_code'], ['00','BD'])){
+                                    $status_code = Payment::STATUS_FAILED;
+                                    $status_txt =  "ANALISAR RETORNO DESSE PAGAMENTO, CÓDIGO ".$r['return_code']. "NÃO ESPERADO";
+                                    $payment->status = Payment::STATUS_FAILED;
+                                }else{
+                                    $status_code = Payment::STATUS_FAILED;
+                                    $status_txt =  "PAGAMENTO NÃO EFETUADO";
+                                    $payment->status = Payment::STATUS_FAILED;
+                                }
+                                
+                                $first = false;
+                                if(!(isset($meta_data['return_cnab_info']) ?? false)){                                
+                                    $meta_data['return_cnab_info'] = [
+                                        'STATUS_CODE' => $status_code,
+                                        'STATUS_TXT' => $status_txt,
+                                        'PAYMENT_NUMBER' => '1',
+                                        'PAYMENT_DATA' => []
+                                    ];
+    
+                                    $first = true;
+                                }
+                                
+                                $i = $first ? 1 : ((int) $meta_data['return_cnab_info']['PAYMENT_NUMBER'] +1);
+                                $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['STATUS_CODE_PAYMENT'] = $status_code;
+                                $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['STATUS_TXT_PAYMENT'] = $status_txt;
+                                $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['PROCESSING_DATE'] = $processingDate;
+                                $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['REASON'] = $reason;
+                                $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['CNAB_FILE_NAME'] = $filename;
+                                $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['MONO_PARENTAL'] = $monoParental;
+                                $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['FILE_ID'] = $this->data['file'];
+                                $meta_data['return_cnab_info']['PAYMENT_NUMBER'] = $i;
+    
+                                $consolidado = false;
+                                if(!$first){
+                                    $consolidado = true;
+                                    $paymentsData = $meta_data['return_cnab_info']['PAYMENT_DATA'];
+                                    foreach($paymentsData as $key => $value){
+                                        if($value['STATUS_CODE_PAYMENT'] == '10'){
+                                            $meta_data['return_cnab_info']['STATUS_CODE'] = 10;
+                                            $meta_data['return_cnab_info']['STATUS_TXT'] = 'PAGAMENTO EFETUADO';
+                                            $meta_data['return_cnab_info']['ID_PAYMENT'] = $key; 
+                                            $meta_data['return_cnab_info']['FILE_ID'] = $value['FILE_ID'];                                     
+                                            $mess = "PAGAMENTO EFETUADO - ARQUIVO - ". $value['FILE_ID'];
+                                            break;
+                                        }else{
+                                            $mess = "PAGAMENTO NÃO EFETUADO - ARQUIVO - ". $value['FILE_ID'];
+                                        }
+                                    }
+                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO CONSOLIDADO - STATUS FINAL É {$mess}");
+                                }else{
+                                    $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO PROCESSADO - ".$status_txt);
+                                }
+                   
+                                //Salva o novo metadado
+                                $payment->metadata = $meta_data;                          
+                                
+                                $payment->save(true);
+                                
+                                
+                                //Seta o status em texto para o CSV
+                                $r['status'] = $status_txt;
+                                $r['monoparental'] = $monoParental;
+                                $r['arquivo_retorno'] = strtoupper(basename($filename,'.ret'));
                             }
-               
-                            //Salva o novo metadado
-                            $payment->metadata = $meta_data;                          
-                            
-                            $payment->save(true);
-                            
-                            
-                            //Seta o status em texto para o CSV
-                            $r['status'] = $consolidado ? "PAGAMENTO CONSOLIDADO NESSE PROCESSAMENTO O RESULTADO FINAL É ".$mess : $status_txt;
 
                         }else{
                             //Seta o status em texto para o CSV caso nao encontre a inscrição
-                            $r['status'] = "";
+                            $r['info'] = "";
                             $app->log->info("#".$contProcess." - ". $r['cpf'] . " - RETORNO NÃO PROCESSADO - FALTA NÚMERO DE INSCRIÇÃO" );
 
                         }                        
                         //Monta o csv de resumo do processamento
                         $csv_data[] = $r; 
+                        
                     }
+                   
                 }
             }           
-        }
-        
+        }       
+       
+       
         //Geração do CSV de resumo
         $file_name = 'resumo-importacao-cnab240-'.$this->data['file'].'.csv';    
         $dir =  PRIVATE_FILES_PATH . 'opportunity/'.$opportunity->id."/temp/";
@@ -3510,8 +3560,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              'INSCRICAO',
              'CPF',
              'STATUS',
-             'LEITURA_ATUAL',
-             'DATA_ARQUIVO_RETORNO'
+             'LEITURA_CODIGO_BB',
+             'DATA_ARQUIVO_RETORNO',
+             'CODIGO_BB',
+             'TIPO_ARQUIVO',
+             'ID_PAGAMENTO',
+             'MONO_PARENTAL',
+             'ARQUIVO'
          ];
      }
     /**
@@ -3524,7 +3579,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $dia = substr($_SESSION['dataArquivo'],0,2);
         $mes = substr($_SESSION['dataArquivo'],2,2);
         $ano = substr($_SESSION['dataArquivo'],4,4);
-
+        
         foreach($positive as $key => $value){
             if($key === $code){
                 return [
@@ -3534,7 +3589,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     'cpf' => $cpf,
                     'status' => true,
                     'reason' => $value,
-                    'data' => "{$dia}/{$mes}/{$ano}"
+                    'data' => "{$dia}/{$mes}/{$ano}",
+                    'return_code' => $code,
+                    'file_type' => $_SESSION['fileType']
                 ];
             }
         }
@@ -3547,7 +3604,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     'cpf' => $cpf,
                     'status' => false,
                     'reason' => $value,
-                    'data' => "{$dia}/{$mes}/{$ano}"
+                    'data' => "{$dia}/{$mes}/{$ano}",
+                    'return_code' => $code,
+                    'file_type' => $_SESSION['fileType']
                 ];
             }
         }
