@@ -1868,7 +1868,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $inciso2_ids = is_array($plugin_aldirblanc->config['inciso2_opportunity_ids']) ? array_values($plugin_aldirblanc->config['inciso2_opportunity_ids']) : [];
         
-        $this->relatorio($inciso2_ids, 'Inciso I');
+        $this->relatorio($inciso2_ids, 'Inciso II');
     }
     
     function GET_relatorios_inciso3() {
@@ -1877,7 +1877,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $inciso3_ids = is_array($plugin_aldirblanc->config['inciso3_opportunity_ids']) ? $plugin_aldirblanc->config['inciso3_opportunity_ids'] : []; 
 
-        $this->relatorio($inciso3_ids, 'Inciso I');
+        $this->relatorio($inciso3_ids, 'Inciso III');
     }
 
     function relatorio($opportunity_ids, $title) {
