@@ -146,6 +146,7 @@ return [
         ],
     ],
     'configs' => [
-        'opportunitys' => [] //<= inserir aqui, as oportunidades que devem executar o retorno do CNAB240 conforme exemplo a seguir('field_id do campo CPF ou CNPJ' => id_oportunidade)
+        'opportunitys' => [],//<= inserir aqui, as oportunidades que devem executar o retorno do CNAB240 conforme exemplo a seguir('field_id do campo CPF ou CNPJ' => id_oportunidade)
+        'monoParentField' => ''//<= inserir aqui o id do campo que indica se a inscriçãoe monoparental ou não ATENÇÂO INSERIR APENAS O ID SEM O "field_"
     ]
 ];
