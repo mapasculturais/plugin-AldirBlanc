@@ -1271,8 +1271,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $msgsPpg = [];
         if ($registration->lab_ppg_email && $this->config['exibir_msg_ppg'] &&
-            !($registration->mediacao_senha &&
-              $registration->mediacao_contato)) {
+            !$this->isMediated($registration)) {
             $email = ($registration->owner->emailPrivado ??
                       $registration->owner->emailPublico ??
                       $registration->owner->user->email);
@@ -2179,8 +2178,11 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                     }
                     if (in_array($retRef, $reg->lab_ppg_email)) {
                         echo("E-mail já enviado para $number.\n");
-                    } else if ($reg->mediacao_senha && $reg->mediacao_contato) {
+                    } else if ($this->isMediated($reg)) {
                         echo("Não enviando para $number porque é mediada.\n");
+                    } else if (strlen($reg->owner->emailPrivado ??
+                                      $reg->owner->emailPublico ?? "") == 0) {
+                        echo("Não enviando para $number por falta de e-mail.\n");
                     } else {
                         $n = 1 + sizeof($reg->lab_ppg_email);
                         echo("Enviando e-mail ($n) para $number.\n");
@@ -2192,12 +2194,20 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
             if (!$this->data["dryrun"]) {
                 $this->ppgEmailDeleteFiles($app);
-                    }
-                } else {
-            echo("Nada a processar.\n");
-                }
-        return;
             }
+        } else {
+            echo("Nada a processar.\n");
+        }
+        return;
+    }
+
+    private function isMediated($registration)
+    {
+        return ($registration->mediacao_senha ||
+                $registration->mediacao_contato ||
+                $registration->mediacao_contato_tipo ||
+                $registration->owner->user->is("mediador"));
+    }
 
     private function ppgEmailKeyPath($app)
     {
@@ -2334,8 +2344,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $email_params = [
             "from" => $app->config["mailer.from"],
             "to" => ($registration->owner->emailPrivado ??
-                     $registration->owner->emailPublico ??
-                     $registration->owner->user->email),
+                     $registration->owner->emailPublico),
             "replyTo" => $this->config["ppg_email_replyto"],
             "subject" => $this->config["ppg_email_subject"][$msgIndex],
             "body" => $content

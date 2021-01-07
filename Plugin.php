@@ -1172,6 +1172,7 @@ class Plugin extends \MapasCulturais\Plugin
             '^application/vnd.ms-excel$'
         ], ['O arquivo deve ser um documento ou uma imagem .jpg ou .png'], true, null, true);
         $app->registerFileGroup("opportunity", $cnab240Resumo);
+        
         // FileGroup para os arquivos do painel de e-mails PPG
         $defEmail = new \MapasCulturais\Definitions\FileGroup('email-files', [
             '^application/octet-stream$',

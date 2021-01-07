@@ -1296,6 +1296,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             },
             'BEN_AGENCIA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
+                
+                $field_age = $detahe1['BEN_AGENCIA']['field_id'];
+                $field_dv =  $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
 
                 //Verifica se existe o medadado se sim pega o registro
                 if(!($branch = $this->bankData($registrations, 'branch'))){
@@ -1314,13 +1317,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         
                         if($formoReceipt == "CARTEIRA DIGITAL BB"){
                             $field_id = $default['fieldsWalletDigital']['agency'];
+                            $agencia = $registrations->$field_id;
 
                         }else{
-                            $field_id = $detahe1['BEN_AGENCIA']['field_id'];
-
+                            if($field_age != $field_dv){
+                                $agencia = $registrations->$field_dv ? ($registrations->$field_age."-".$registrations->$field_dv) : $registrations->$field_age;                                    
+                            }else{
+                                $agencia = $registrations->$field_age;                                    
+                            }
                         }
-
-                        $agencia = $registrations->$field_id;
                     }
                 }else{
                     $agencia = $branch;
@@ -1345,9 +1350,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 return is_string($result) ? strtoupper($result) : $result;
             },
             'BEN_AGENCIA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
+               
+                $field_age = $detahe1['BEN_AGENCIA']['field_id'];
+                $field_dv =  $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
                 
                 //Verifica se existe o medadado se sim pega o registro
-                 if(!($branch = $this->bankData($registrations, 'branch'))){
+                if(!($branch = $this->bankData($registrations, 'branch'))){ 
                         $result = "";
                         $field_cpf = $detahe2['BEN_CPF']['field_id'];
                         $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
@@ -1361,18 +1369,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             $formoReceipt = $temp ? $registrations->$temp : false; 
             
                             if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                                $field_id = $default['fieldsWalletDigital']['agency'];                    
-                            }else{
-                                $field_id = $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
+                                $field_id = $default['fieldsWalletDigital']['agency'];
+                                $agencia = $registrations->$field_id;                    
+                            }else{                              
+                                if($field_age != $field_dv){
+                                    $agencia = $registrations->$field_dv ?? $registrations->$field_age;                                    
+                                }else{
+                                    $agencia = $registrations->$field_age;                                    
+                                }
                             }
-
-                            $agencia = $registrations->$field_id;
                         }
-                    }else{
-                        $agencia = $branch;
-                    }
+                }else{
+                    $agencia = $branch;
+                }
                 
-                
+                   
                 $age = explode("-", $agencia);
 
                 if(count($age)>1){
@@ -1391,7 +1402,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {  
                 
                 $field_conta = $detahe1['TIPO_CONTA']['field_id'];
-                $dig = $detahe1['BEN_CONTA_DIGITO']['field_id']; //pega o field_id do digito da conta
+                $field_dv = $detahe1['BEN_CONTA_DIGITO']['field_id']; //pega o field_id do digito da conta
+                $field_cc = $detahe1['BEN_CONTA']['field_id'];
+                
 
                 //Verifica se existe o medadado se sim pega o registro
                 if(!($account = $this->bankData($registrations, 'account'))){
@@ -1417,12 +1430,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $formoReceipt = $temp ? $registrations->$temp : false;
                     
                         if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                            $field_id = $default['fieldsWalletDigital']['account'];                    
+                            $field_id = $default['fieldsWalletDigital']['account'];
+                            $temp_account = $registrations->$field_id;                    
                         }else{
                             $field_id = $detahe1['BEN_CONTA']['field_id'];
+                            if($field_cc != $field_dv){
+                                $temp_account = $registrations->$field_dv ? $registrations->$field_cc."-".$registrations->$field_dv : $registrations->$field_cc;
+                            }else{
+                                $temp_account = $registrations->$field_cc;
+                            }
                         }
-
-                        $temp_account = $registrations->$field_id;
                     }
                 }else{
                     $typeAccount = $this->bankData($registrations, 'account-type');
@@ -1467,7 +1484,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
                 $result = preg_replace('/[^0-9]/i', '',$result);
 
-                if($dig === $field_conta && $temp_account == 1){                   
+                if($field_dv === $field_cc && $temp_account == 1){                   
                     return substr($this->normalizeString($result), 0, -1); // Remove o ultimo caracter. Intende -se que o ultimo caracter é o DV da conta
 
                 }else{                    
@@ -1477,6 +1494,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 
             },
             'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
+
+                $field_cc = $detahe1['BEN_CONTA']['field_id'];
+                $field_dv =  $detahe1['BEN_CONTA_DIGITO']['field_id'];
+
                 //Verifica se existe o medadado se sim pega o registro
                 if(!($account = $this->bankData($registrations, 'account'))){
                     $result = "";
@@ -1513,11 +1534,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $formoReceipt = $formaRecebimento ? $registrations->$formaRecebimento : false;
                     
                         if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                            $temp = $default['fieldsWalletDigital']['account'];                    
-                        }else{
-                            $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
+                            $temp = $default['fieldsWalletDigital']['account'];
+                            $temp_account = $registrations->$temp;                    
+                        }else{                            
+                            if($field_cc != $field_dv){
+                                $temp_account = $registrations->$field_dv ? $registrations->$field_cc."-".$registrations->$field_dv : $registrations->$field_cc;
+                            }else{
+                                $temp_account = $registrations->$field_cc;
+                            }
                         }
-                        $temp_account = $registrations->$temp;
+                        
                     }
                 }else{
                     $typeAccount = $this->bankData($registrations, 'account-type');
@@ -3212,18 +3238,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             //Firmata o CPF ou CNPJ
                             $cpf_cnpj = substr($cpf_cnpj, -11);
 
-                            //Busca o número da inscrição
+                            //Busca o número da inscrição                           
                             if($this->getLineData($r, 210, 224) != ""){
                                 $inscri = $this->getLineData($r, 210, 224);
 
-                            }elseif($this->getLineData($r, 33, 62)!=""){
+                            }elseif($this->getLineData($r, 33, 62) != ""){
                                 $inscri = $this->getLineData($r, 33, 62);
 
                             }else{
-                                
                                 $inscri_db = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
-                                $inscri = $inscri[0]['id'];
-
+                                $inscri = $inscri_db[0]['id'];
+                                
                                 if(!$inscri){
                                     $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
                                     continue;
@@ -3275,7 +3300,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                             }else{
                                 $inscri_db = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
-                                $inscri = $inscri[0]['id'];
+                                $inscri = $inscri_db[0]['id'];
 
                                 if(!$inscri){
                                     $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
@@ -3329,7 +3354,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
  
                              }else{
                                 $inscri_db = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
-                                $inscri = $inscri[0]['id'];
+                                $inscri = $inscri_db[0]['id'];
 
                                 if(!$inscri){
                                     $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
@@ -3482,11 +3507,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'type' => 'text/csv$',
             'tmp_name' => $patch,
             'error' => 0,
-            'size' => filesize ($patch)
+            'size' => filesize($patch)
         ]);
 
         $file->group = 'resumo_cnab';
-        $file->description = 'resumo-retorno';   
+        $file->description = 'resumo-retorno'.$this->data['file'];   
         $file->owner = $opportunity;              
         $file->save(true);
         $arquivos = $opportunity->getFiles('resumo_cnab');
@@ -3498,8 +3523,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $files->{basename($filename)} = date("d/m/Y \à\s H:i");
         $opportunity->cnab240_processed_files = $files;
         $opportunity->save(true);
-        $app->enableAccessControl();
-        //$csv->output($file_name);
+        $app->enableAccessControl();        
         $this->finish("ok");
     } 
     
