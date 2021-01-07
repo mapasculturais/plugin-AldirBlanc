@@ -1,8 +1,8 @@
 <?php 
 $app = MapasCulturais\App::i();
 
-$files = $entity->getFiles('cnab240'); 
-
+$files = $entity->getFiles('cnab240');
+$filesResumo = $entity->getFiles('resumo_cnab');
 $url = $app->createUrl('remessas', 'importFileCnab240', ['opportunity' => $entity->id]);
 $template = '
 <li id="file-{{id}}" class="widget-list-item">
@@ -26,7 +26,15 @@ $template = '
     <ul class="widget-list js-dataprev js-slimScroll">
         <?php if(is_array($files)): foreach($files as $file): ?>
             <li id="file-<?php echo $file->id ?>" class="widget-list-item<?php if($this->isEditable()) echo \MapasCulturais\i::_e(' is-editable'); ?>" >
+                
                 <a href="<?php echo $file->url;?>"><span><?php echo $file->description ? $file->description : $file->name;?></span></a>
+                
+                <?php foreach($filesResumo as $resumo){?>
+                    <?php if($resumo->name == "resumo-importacao-cnab240-{$file->id}.csv") {?>
+                        <a href="<?php echo $resumo->url;?>"><span>resumo-import-<?=$file->id?></span></a>
+                    <?php } ?>
+                <?php } ?>
+                
                 <?php if($processed_at = $entity->cnab240_processed_files->{$file->name} ?? null): ?>
                     - processado em <?= $processed_at ?>
                 <?php else: ?>

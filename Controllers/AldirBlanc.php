@@ -2364,6 +2364,161 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         return;
     }
 
+    function checkPermissionToRelatorios() {
+        $this->requireAuthentication();
+
+        $current_user = App::i()->user;
+        
+        if (!$current_user->is('admin')) {
+            throw new PermissionDenied($current_user, $this, 'view report');
+        }
+    }
+
+    function GET_relatorios_inciso1() {
+        $this->checkPermissionToRelatorios();
+
+        $plugin_aldirblanc = $this->plugin;
+
+        $inciso1_ids = $plugin_aldirblanc->config['inciso1_opportunity_id'] ? [$plugin_aldirblanc->config['inciso1_opportunity_id']] : [];
+        
+        $this->relatorio($inciso1_ids, 'Inciso I');
+    }
+
+
+    function GET_relatorios_inciso2() {
+        $this->checkPermissionToRelatorios();
+        
+        $plugin_aldirblanc = $this->plugin;
+
+        $inciso2_ids = is_array($plugin_aldirblanc->config['inciso2_opportunity_ids']) ? array_values($plugin_aldirblanc->config['inciso2_opportunity_ids']) : [];
+        
+        $this->relatorio($inciso2_ids, 'Inciso II');
+    }
+    
+    function GET_relatorios_inciso3() {
+        $this->checkPermissionToRelatorios();
+        
+        $plugin_aldirblanc = $this->plugin;
+
+        $inciso3_ids = is_array($plugin_aldirblanc->config['inciso3_opportunity_ids']) ? $plugin_aldirblanc->config['inciso3_opportunity_ids'] : []; 
+
+        $this->relatorio($inciso3_ids, 'Inciso III');
+    }
+
+    function relatorio($opportunity_ids, $title) {
+        if(empty($opportunity_ids)) {
+            return;
+        }
+        $conn = App::i()->em->getConnection();
+
+        $rel_data = [];
+
+        $ids = implode(',', $opportunity_ids);
+
+        $metadata = [
+            'raca' => 'Responsável - Raça', 
+            'genero' => 'Responsável - Gênero',
+            'En_Municipio' => 'Responsável - Cidade',
+            'geoZona' => 'Responsável - Zona',
+            'geoDistrito' => 'Responsável - Distrito',
+            'En_Bairro' => 'Responsável - Bairro'
+        ];
+
+        $statuses = [
+            'Todos os status' => '',
+            'Todas as enviadas' => 'AND r.status > 0',
+            'Selecionadas' => 'AND r.status = 10',
+            'Não Selecionadas' => 'AND r.status = 3',
+            'Inválidas' => 'AND r.status = 2',
+            'Rascunho' => 'AND r.status = 0',
+        ];
+
+        /* METADADOS DO AGENTE */
+        foreach($metadata as $key => $name) {
+            $data = [];
+
+            foreach($statuses as $status => $where) {
+                $data[$status] = [];
+
+                $sql = "
+                    SELECT 
+                        trim(unaccent(lower(am.value))) as value, 
+                        count(DISTINCT(r.id)) AS num 
+                    FROM registration r 
+                        LEFT JOIN agent_meta am ON am.object_id = r.agent_id
+                    WHERE 
+                        am.key = '{$key}' AND 
+                        r.opportunity_id in ($ids)
+                        $where
+                        
+                    GROUP BY trim(unaccent(lower(am.value)))
+                    ORDER BY num DESC";
+                
+                foreach ($conn->fetchAll($sql) as $row) {
+                    $data[$status][$row['value']] = $row['num'];
+                }
+
+            }
+
+            $rel_data[] = ['name'=> $name, 'data' => $data];
+        }
+
+
+        /* ÁREA DE ATUAÇÃO */
+        $data = [];
+        
+        foreach($statuses as $status => $where) {
+            $sql = "
+                SELECT 
+                    t.term as value, 
+                    count(DISTINCT(r.id)) AS num 
+                FROM registration r 
+                    LEFT JOIN term_relation tr ON tr.object_id = r.agent_id AND tr.object_type = 'MapasCulturais\Entities\Agent'
+                    JOIN term t ON t.id = tr.term_id AND t.taxonomy = 'area'
+                WHERE 
+                    r.opportunity_id in ($ids)
+                    $where
+                    
+                GROUP BY t.term
+                ORDER BY num DESC";
+
+            foreach ($conn->fetchAll($sql) as $row) {
+                $data[$status][$row['value']] = $row['num'];
+            }
+        }
+
+        $rel_data[] = ['name'=> 'Responsável - Área de atuação', 'data' => $data];
+
+        /* IDADE */
+        $data = [];
+        
+        foreach($statuses as $status => $where) {
+            $sql = "
+                    SELECT 
+                        age(concat(date_part('year',now()),'-01-01')::DATE, concat(date_part('year',am.value::DATE),'-01-01')::DATE) as value, 
+                        count(DISTINCT(r.id)) AS num 
+                    FROM registration r 
+                        LEFT JOIN agent_meta am ON am.object_id = r.agent_id
+                    WHERE 
+                        am.key = 'dataDeNascimento' AND 
+                        am.value <> '' AND
+                        r.opportunity_id in ($ids)
+                        $where
+                        
+                    GROUP BY age(concat(date_part('year',now()),'-01-01')::DATE, concat(date_part('year',am.value::DATE),'-01-01')::DATE)
+                    ORDER BY value ASC";
+
+            foreach ($conn->fetchAll($sql) as $row) {
+                $data[$status][$row['value']] = $row['num'];
+            }
+        }
+
+        $rel_data[] = ['name'=> 'Responsável - Idade', 'data' => $data, 'max_chart' => 99];
+        
+        $this->render('relatorios', ['rel_data' => $rel_data, 'title' => $title]);
+    }
+
+
     function getInciso1ReportData() {
         if (!$this->config['inciso1_enabled']) return null;
 
