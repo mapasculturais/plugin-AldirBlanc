@@ -1849,11 +1849,19 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $this->render('reporte', $data);
     }
 
+    function checkPermissionToRelatorios() {
+        $this->requireAuthentication();
 
-
+        $current_user = App::i()->user;
+        
+        if (!$current_user->is('admin')) {
+            throw new PermissionDenied($current_user, $this, 'view report');
+        }
+    }
 
     function GET_relatorios_inciso1() {
-        
+        $this->checkPermissionToRelatorios();
+
         $plugin_aldirblanc = $this->plugin;
 
         $inciso1_ids = $plugin_aldirblanc->config['inciso1_opportunity_id'] ? [$plugin_aldirblanc->config['inciso1_opportunity_id']] : [];
@@ -1863,6 +1871,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
 
     function GET_relatorios_inciso2() {
+        $this->checkPermissionToRelatorios();
         
         $plugin_aldirblanc = $this->plugin;
 
@@ -1872,6 +1881,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     }
     
     function GET_relatorios_inciso3() {
+        $this->checkPermissionToRelatorios();
         
         $plugin_aldirblanc = $this->plugin;
 
@@ -1891,12 +1901,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $ids = implode(',', $opportunity_ids);
 
         $metadata = [
-            'raca' => 'Raça', 
-            'genero' => 'Gênero',
-            'En_Municipio' => 'Cidade',
-            'geoZona' => 'Zona',
-            'geoDistrito' => 'Distrito',
-            'En_Bairro' => 'Bairro'
+            'raca' => 'Responsável - Raça', 
+            'genero' => 'Responsável - Gênero',
+            'En_Municipio' => 'Responsável - Cidade',
+            'geoZona' => 'Responsável - Zona',
+            'geoDistrito' => 'Responsável - Distrito',
+            'En_Bairro' => 'Responsável - Bairro'
         ];
 
         $statuses = [
@@ -1962,7 +1972,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
         }
 
-        $rel_data[] = ['name'=> 'Área de atuação', 'data' => $data];
+        $rel_data[] = ['name'=> 'Responsável - Área de atuação', 'data' => $data];
 
         /* IDADE */
         $data = [];
@@ -1988,7 +1998,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
         }
 
-        $rel_data[] = ['name'=> 'Idades dos incritos', 'data' => $data, 'max_chart' => 99];
+        $rel_data[] = ['name'=> 'Responsável - Idade', 'data' => $data, 'max_chart' => 99];
         
         $this->render('relatorios', ['rel_data' => $rel_data, 'title' => $title]);
     }
