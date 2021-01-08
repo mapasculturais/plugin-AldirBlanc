@@ -1898,8 +1898,18 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $rel_data = [];
 
-        $ids = implode(',', $opportunity_ids);
+        $ids = implode(',', $opportunity_ids); 
+       
 
+       
+        if(isset($_GET['opportunityid']) && in_array($_GET['opportunityid'], $opportunity_ids)){
+            
+            $ids = $_GET['opportunityid']; 
+            
+        } else {
+            $ids = implode(',', $opportunity_ids);
+        }
+        
         $metadata = [
             'raca' => 'Responsável - Raça', 
             'genero' => 'Responsável - Gênero',
@@ -2000,7 +2010,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $rel_data[] = ['name'=> 'Responsável - Idade', 'data' => $data, 'max_chart' => 99];
         
-        $this->render('relatorios', ['rel_data' => $rel_data, 'title' => $title]);
+        $this->render('relatorios', ['rel_data' => $rel_data, 'title' => $title, 'opportunity_ids' => $opportunity_ids]);
     }
 
 

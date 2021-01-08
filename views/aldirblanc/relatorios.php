@@ -126,10 +126,18 @@ function print_table($title, $data, $max_values_to_chart, $print_total = false) 
     .datatable tr:hover {
         background: #f1f7ff;
     }
-</style>
+</style>     
+       
+    
+<h1><?=$title?> <br></h1>
 
-<h1><?=$title?></h1>
-
+<?php 
+// o foreach configura os links das informações dos módulos do inciso III
+foreach($opportunity_ids as $opportunity_id): 
+    $opportunity = $app->repo('Opportunity')->find($opportunity_id);
+    ?>    
+    <a href="?opportunityid=<?= $opportunity_id ?>"><?= $opportunity->name ?> <br></a>
+<?php endforeach ?>
 <figure class="highcharts-figure">
     <?php foreach($rel_data as $data): ?>
         <?php print_table($data['name'], $data['data'], $data['max_chart'] ?? 15) ?>
