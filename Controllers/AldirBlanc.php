@@ -1898,17 +1898,15 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $rel_data = [];
 
-        $ids = implode(',', $opportunity_ids); 
-       
-
+        $ids = implode(',', $opportunity_ids);  
        
         if(isset($_GET['opportunityid']) && in_array($_GET['opportunityid'], $opportunity_ids)){
             
-            $ids = $_GET['opportunityid']; 
-            
+            $ids = $_GET['opportunityid'];            
+           
         } else {
             $ids = implode(',', $opportunity_ids);
-        }
+        }        
         
         $metadata = [
             'raca' => 'Responsável - Raça', 

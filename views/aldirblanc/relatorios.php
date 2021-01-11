@@ -125,19 +125,43 @@ function print_table($title, $data, $max_values_to_chart, $print_total = false) 
     }
     .datatable tr:hover {
         background: #f1f7ff;
+    }    
+    .botao{        
+        border-radius: 10px;              
+        font-family: Verdana, sans-serif;
+        margin: auto;
     }
-</style>     
-       
+    a.active{        
+        border-radius: 1px;         
+        color:black;     
+        background-color:#66ffff ;   
+        margin: auto;           
+    }
+    .editaBotao{        
+        display: inline;        
+    }
+</style>            
     
-<h1><?=$title?> <br></h1>
+<h1><?=$title?> <br></h1> 
 
-<?php 
-// o foreach configura os links das informações dos módulos do inciso III
+<?php
 foreach($opportunity_ids as $opportunity_id): 
-    $opportunity = $app->repo('Opportunity')->find($opportunity_id);
-    ?>    
-    <a href="?opportunityid=<?= $opportunity_id ?>"><?= $opportunity->name ?> <br></a>
-<?php endforeach ?>
+    $opportunity = $app->repo('Opportunity')->find($opportunity_id);?>  
+    <div class="editaBotao">
+        <button class ="botao">
+            <a href="?opportunityid=<?=$opportunity_id?>" <?php if (isset($_GET['opportunityid']) && $_GET['opportunityid'] == $opportunity_id) echo 'class="active"';?>> <?= $opportunity->name?> </a>
+        </button>
+<?php  endforeach; ?>
+<?php if (!isset($_GET['opportunityid'])){ ?>
+        <button class="botao">        
+            <a href="relatorios_inciso3" class="active"> <?= $title ?></a>
+        </button>   
+    </div>
+<?php }else{ ?>
+        <button class="botao">        
+        <a href="relatorios_inciso3"> <?php $title ?></a>
+        </button>
+<?php } ?>      
 <figure class="highcharts-figure">
     <?php foreach($rel_data as $data): ?>
         <?php print_table($data['name'], $data['data'], $data['max_chart'] ?? 15) ?>
