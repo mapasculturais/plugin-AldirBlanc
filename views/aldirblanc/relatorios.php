@@ -159,7 +159,7 @@ foreach($opportunity_ids as $opportunity_id):
     </div>
 <?php }else{ ?>
         <button class="botao">        
-        <a href="relatorios_inciso3"> <?php $title ?></a>
+            <a href="relatorios_inciso3"> <?= $title ?></a>
         </button>
 <?php } ?>      
 <figure class="highcharts-figure">
