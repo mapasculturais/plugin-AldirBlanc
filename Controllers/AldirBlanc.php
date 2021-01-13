@@ -1866,7 +1866,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $inciso1_ids = $plugin_aldirblanc->config['inciso1_opportunity_id'] ? [$plugin_aldirblanc->config['inciso1_opportunity_id']] : [];
         
-        $this->relatorio($inciso1_ids, 'Inciso I');
+        $this->relatorio($inciso1_ids, 1);
     }
 
 
@@ -1877,7 +1877,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $inciso2_ids = is_array($plugin_aldirblanc->config['inciso2_opportunity_ids']) ? array_values($plugin_aldirblanc->config['inciso2_opportunity_ids']) : [];
         
-        $this->relatorio($inciso2_ids, 'Inciso II');
+        $this->relatorio($inciso2_ids, 2);
     }
     
     function GET_relatorios_inciso3() {
@@ -1887,10 +1887,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $inciso3_ids = is_array($plugin_aldirblanc->config['inciso3_opportunity_ids']) ? $plugin_aldirblanc->config['inciso3_opportunity_ids'] : []; 
 
-        $this->relatorio($inciso3_ids, 'Inciso III');
+        $this->relatorio($inciso3_ids, 3);
     }
 
-    function relatorio($opportunity_ids, $title) {
+    function relatorio($opportunity_ids, $inciso) {
         if(empty($opportunity_ids)) {
             return;
         }
@@ -1900,8 +1900,14 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
 
         $ids = implode(',', $opportunity_ids); 
        
-
-       
+        $titles = [
+            1 => 'Inciso I',
+            2 => 'Inciso II',
+            3 => 'Inciso III',
+        ];
+        
+        $title = $titles[$inciso];
+               
         if(isset($_GET['opportunityid']) && in_array($_GET['opportunityid'], $opportunity_ids)){
             
             $ids = $_GET['opportunityid']; 
@@ -1909,80 +1915,193 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         } else {
             $ids = implode(',', $opportunity_ids);
         }
-        
+
         $metadata = [
-            'raca' => 'Responsável - Raça', 
-            'genero' => 'Responsável - Gênero',
-            'En_Municipio' => 'Responsável - Cidade',
-            'geoZona' => 'Responsável - Zona',
-            'geoDistrito' => 'Responsável - Distrito',
-            'En_Bairro' => 'Responsável - Bairro'
+            'owner' => [],
+            'coletivo' => [],
+            'space' => []
         ];
 
+        $config_prefix = "relatorios.inciso{$inciso}";
+
+        $owner_meta = explode(',',$this->plugin->config["{$config_prefix}.ownerMetadata"]);
+        foreach ($owner_meta as $key) {
+            $metadata['owner'][$key] = Agent::getPropertyLabel($key);
+        }
+
+        $coletivo_meta = explode(',',$this->plugin->config["{$config_prefix}.coletivoMetadata"]);
+        foreach ($coletivo_meta as $key) {
+            $metadata['coletivo'][$key] = Agent::getPropertyLabel($key);
+        }
+
+        $space_meta = explode(',',$this->plugin->config["{$config_prefix}.spaceMetadata"]);
+        foreach ($space_meta as $key) {
+            $metadata['space'][$key] = Space::getPropertyLabel($key);
+        }
+
         $statuses = [
-            'Todos os status' => '',
-            'Todas as enviadas' => 'AND r.status > 0',
+            // 'Todos os status' => '',
+            // 'Todas as enviadas' => 'AND r.status > 0',
             'Selecionadas' => 'AND r.status = 10',
+            'Suplente' => 'AND r.status = 8',
             'Não Selecionadas' => 'AND r.status = 3',
             'Inválidas' => 'AND r.status = 2',
+            'Pendentes' => 'AND r.status = 1',
             'Rascunho' => 'AND r.status = 0',
         ];
 
-        /* METADADOS DO AGENTE */
-        foreach($metadata as $key => $name) {
-            $data = [];
+        $entities = ['owner' => 'Responsável', 'coletivo' => 'Coletivo', 'space' => 'Espaço'];
 
-            foreach($statuses as $status => $where) {
-                $data[$status] = [];
+        /* METADADOS */
+        foreach($entities as $type => $label) {
 
-                $sql = "
-                    SELECT 
-                        trim(unaccent(lower(am.value))) as value, 
-                        count(DISTINCT(r.id)) AS num 
-                    FROM registration r 
-                        LEFT JOIN agent_meta am ON am.object_id = r.agent_id
-                    WHERE 
-                        am.key = '{$key}' AND 
-                        r.opportunity_id in ($ids)
-                        $where
-                        
-                    GROUP BY trim(unaccent(lower(am.value)))
-                    ORDER BY num DESC";
-                
-                foreach ($conn->fetchAll($sql) as $row) {
-                    $data[$status][$row['value']] = $row['num'];
+            foreach($metadata[$type] as $key => $name) {
+                $data = [];
+                $empty = true;
+
+                foreach($statuses as $status => $where) {
+                    $data[$status] = [];
+
+                    if ($type == 'owner') {
+                        $sql = "
+                            SELECT 
+                                trim(unaccent(lower(am.value))) as value, 
+                                count(DISTINCT(r.id)) AS num 
+                            FROM registration r 
+                                LEFT JOIN agent_meta am ON am.object_id = r.agent_id
+                            WHERE 
+                                am.key = '{$key}' AND 
+                                r.opportunity_id in ($ids)
+                                $where
+                                
+                            GROUP BY trim(unaccent(lower(am.value)))
+                            ORDER BY num DESC";
+
+                    } else if ($type == 'coletivo') {
+                        $sql = "
+                            SELECT 
+                                trim(unaccent(lower(am.value))) as value, 
+                                count(DISTINCT(r.id)) AS num 
+                            FROM registration r 
+                                JOIN agent_relation ar ON 
+                                    ar.object_type = 'MapasCulturais\\Entities\\Registration' AND 
+                                    ar.type = '{$type}' AND
+                                    ar.object_id = r.id
+                                
+                                JOIN agent_meta am ON am.object_id = ar.agent_id
+                            WHERE 
+                                am.key = '{$key}' AND 
+                                r.opportunity_id in ($ids)
+                                $where
+                                
+                            GROUP BY trim(unaccent(lower(am.value)))
+                            ORDER BY num DESC";
+
+                        // die($sql);
+                    } else if ($type == 'space') {
+                        $sql = "
+                            SELECT 
+                                sm.value,
+                                count(*) as num 
+                            FROM registration r 
+                                JOIN 
+                                    space_relation sr ON 
+                                    sr.object_id = r.id AND 
+                                    sr.object_type = 'MapasCulturais\Entities\Registration' 
+                                JOIN 
+                                    space_meta sm ON 
+                                    sm.object_id = sr.space_id AND 
+                                    sm.key = '{$key}' 
+                            WHERE
+                                r.opportunity_id in ($ids)
+                                $where
+                            GROUP BY sm.value 
+                            ORDER BY num desc;";
+                            
+                    }
+                    
+                    foreach ($conn->fetchAll($sql) as $row) {
+                        $empty = false;
+                        $data[$status][$row['value']] = $row['num'];
+                    }
+
                 }
 
+                if (!$empty) {
+                    $rel_data[] = ['name'=> "$label - $name", 'data' => $data, 'max_chart' => 25];
+                }
             }
-
-            $rel_data[] = ['name'=> $name, 'data' => $data];
         }
 
 
         /* ÁREA DE ATUAÇÃO */
-        $data = [];
-        
-        foreach($statuses as $status => $where) {
-            $sql = "
-                SELECT 
-                    t.term as value, 
-                    count(DISTINCT(r.id)) AS num 
-                FROM registration r 
-                    LEFT JOIN term_relation tr ON tr.object_id = r.agent_id AND tr.object_type = 'MapasCulturais\Entities\Agent'
-                    JOIN term t ON t.id = tr.term_id AND t.taxonomy = 'area'
-                WHERE 
-                    r.opportunity_id in ($ids)
-                    $where
-                    
-                GROUP BY t.term
-                ORDER BY num DESC";
+        foreach($entities as $type => $label) {
 
-            foreach ($conn->fetchAll($sql) as $row) {
-                $data[$status][$row['value']] = $row['num'];
+            $data = [];
+            
+            foreach($statuses as $status => $where) {
+                if ($type == 'owner') {
+                    $sql = "
+                        SELECT 
+                            t.term as value, 
+                            count(DISTINCT(r.id)) AS num 
+                        FROM registration r 
+                            LEFT JOIN term_relation tr ON tr.object_id = r.agent_id AND tr.object_type = 'MapasCulturais\Entities\Agent'
+                            JOIN term t ON t.id = tr.term_id AND t.taxonomy = 'area'
+                        WHERE 
+                            r.opportunity_id in ($ids)
+                            $where
+                            
+                        GROUP BY t.term
+                        ORDER BY num DESC";
+
+                } else if ($type == 'coletivo') {
+                    $sql = "
+                        SELECT 
+                            t.term as value, 
+                            count(DISTINCT(r.id)) AS num 
+                        FROM registration r 
+                            JOIN agent_relation ar ON 
+                                ar.object_type = 'MapasCulturais\\Entities\\Registration' AND 
+                                ar.type = '{$type}' AND
+                                ar.object_id = r.id
+                            LEFT JOIN term_relation tr ON tr.object_id = ar.agent_id AND tr.object_type = 'MapasCulturais\Entities\Agent'
+                            JOIN term t ON t.id = tr.term_id AND t.taxonomy = 'area'
+                        WHERE 
+                            r.opportunity_id in ($ids)
+                            $where
+                            
+                        GROUP BY t.term
+                        ORDER BY num DESC";
+
+                } else if ($type == 'space') {
+                    $sql = "
+                        SELECT 
+                            t.term as value, 
+                            count(DISTINCT(r.id)) AS num 
+                        FROM registration r 
+                            JOIN space_relation sr ON 
+                                sr.object_type = 'MapasCulturais\\Entities\\Registration' AND 
+                                sr.object_id = r.id
+                            LEFT JOIN term_relation tr ON tr.object_id = sr.space_id AND tr.object_type = 'MapasCulturais\Entities\Space'
+                            JOIN term t ON t.id = tr.term_id AND t.taxonomy = 'area'
+                        WHERE 
+                            r.opportunity_id in ($ids)
+                            $where
+                            
+                        GROUP BY t.term
+                        ORDER BY num DESC";
+                }
+                
+                foreach ($conn->fetchAll($sql) as $row) {
+                    $data[$status][$row['value']] = $row['num'];
+                }
+            }
+
+            if ($data) {
+                $rel_data[] = ['name'=> "{$label} - Área de atuação", 'data' => $data, 'max_chart' => 99];
             }
         }
-
-        $rel_data[] = ['name'=> 'Responsável - Área de atuação', 'data' => $data];
 
         /* IDADE */
         $data = [];
@@ -2008,8 +2127,60 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             }
         }
 
-        $rel_data[] = ['name'=> 'Responsável - Idade', 'data' => $data, 'max_chart' => 99];
+        if ($data) {
+            $rel_data[] = ['name'=> 'Responsável - Idade', 'data' => $data, 'max_chart' => 99];
+        }
+
+        /* Campos da inscrição */
+        $registration_fields_config = $this->plugin->config["{$config_prefix}.registrationFields"];
+
+        if (is_object($registration_fields_config) || is_array($registration_fields_config)) {
+            $data = [];
+            foreach ($registration_fields_config as $label => $config) {
+                foreach($statuses as $status => $where) {
+                    $data[$status] = [];
+                    if (is_array($config) && is_int($config[0])) {
+                        $field_ids = implode(',', $config);
+                        $f_on = "f.id IN ({$field_ids})";
+                    } else if (is_array($config) && is_string($config[0])) {
+                        $titles = implode("','", $config);
+                        $f_on = "f.title IN ('{$titles}')";
+
+                    } else if (is_string($config)) {
+                        $f_on = "f.title = '$config'";
+                    } else {
+                        continue;
+                    }
+
+                    $sql = "
+                        SELECT 
+                            rm.value,
+                            count(DISTINCT(r.id)) AS num 
+                        FROM registration r 
+                            JOIN registration_field_configuration f ON f.opportunity_id = r.opportunity_id AND $f_on
+                            JOIN registration_meta rm ON rm.object_id = r.id AND rm.key = CONCAT('field_', f.id)
+                        WHERE 
+                            r.opportunity_id in ($ids)
+                            $where
+                        GROUP BY rm.value
+                        ORDER BY num DESC";
+
+                    foreach ($conn->fetchAll($sql) as $row) {
+                        $data[$status][$row['value']] = $row['num'];
+                    }
+    
+                }
+                if ($data) {
+                    $rel_data[] = ['name'=> $label, 'data' => $data, 'max_chart' => 99];
+                }
+            }
+        }
+
         
+        usort($rel_data, function($a, $b) {
+            return $a['name'] <=> $b['name'];
+        });
+
         $this->render('relatorios', ['rel_data' => $rel_data, 'title' => $title, 'opportunity_ids' => $opportunity_ids]);
     }
 
