@@ -1897,8 +1897,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $conn = App::i()->em->getConnection();
 
         $rel_data = [];
-
-        $ids = implode(',', $opportunity_ids); 
        
         $titles = [
             1 => 'Inciso I',
@@ -1910,12 +1908,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                
         if(isset($_GET['opportunityid']) && in_array($_GET['opportunityid'], $opportunity_ids)){
             
-            $ids = $_GET['opportunityid']; 
-            
+            $ids = $_GET['opportunityid'];            
+           
         } else {
             $ids = implode(',', $opportunity_ids);
-        }
-
+        }        
+        
         $metadata = [
             'owner' => [],
             'coletivo' => [],

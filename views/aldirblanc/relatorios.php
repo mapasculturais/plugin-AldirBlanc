@@ -153,22 +153,40 @@ function get_archor_name($name) {
     }
     .datatable tr:hover {
         background: #f1f7ff;
+    }    
+    .botao{        
+        border-radius: 10px;              
+        font-family: Verdana, sans-serif;
+        margin: auto;
     }
-</style>     
+    a.active{        
+        border-radius: 1px;         
+        color:black;     
+        background-color:#66ffff ;   
+        margin: auto;           
+    }
+    .editaBotao{        
+        display: inline;        
+    }
+</style>            
+    
+<h1><?=$title?></h1> 
 
-<h1><?=$title?> <br></h1>
-
-<?php 
-// o foreach configura os links das informações dos módulos do inciso III
+<div class="editaBotao">
+<?php
 foreach($opportunity_ids as $opportunity_id): 
-    $opportunity = $app->repo('Opportunity')->find($opportunity_id);
-    ?>    
-    <a href="?opportunityid=<?= $opportunity_id ?>"><?= $opportunity->name ?> <br></a>
-<?php endforeach ?>
+    $opportunity = $app->repo('Opportunity')->find($opportunity_id);  ?>  
+        <button class ="botao">
+            <a href="?opportunityid=<?=$opportunity_id?>" <?php if (isset($_GET['opportunityid']) && $_GET['opportunityid'] == $opportunity_id) echo 'class="active"';?>> <?= $opportunity->name?> </a>
+        </button>
+<?php  endforeach; ?>
+</div>
 
 <h3>Relatórios</h3>
 <?php foreach($rel_data as $data): ?>
-    <a href="#<?=get_archor_name($data['name'])?>"><?= $data['name'] ?></a><span>,</span>
+    <button class ="botao">
+        <a href="#<?=get_archor_name($data['name'])?>"><?= $data['name'] ?></a>
+    </button>
 <?php endforeach; ?>
 
 <figure class="highcharts-figure">
