@@ -27,7 +27,7 @@ function print_table($title, $data, $max_values_to_chart, $print_total = true) {
             <tbody>
             <?php foreach($values as $val): ?>
                 <tr>
-                    <td><?= $val ? $val : '<em>Não Informado</em>' ?></td>
+                    <td><?= $val ? ucwords($val) : '<em>Não Informado</em>' ?></td>
                     <?php foreach($statuses as $status): $total[$status] = @$total[$status] += $data[$status][$val] ?? 0?>
                         <td> <?= $data[$status][$val] ?? 0 ?> </td>
                     <?php endforeach ?>
@@ -165,22 +165,27 @@ function get_archor_name($name) {
         background-color:#66ffff ;   
         margin: auto;           
     }
-    .editaBotao{        
-        display: inline;        
+
+    h3 {
+        font-size: 1em;
+        text-align: center;
     }
 </style>            
     
-<h1><?=$title?></h1> 
-
-<div class="editaBotao">
-<?php
-foreach($opportunity_ids as $opportunity_id): 
-    $opportunity = $app->repo('Opportunity')->find($opportunity_id);  ?>  
-        <button class ="botao">
-            <a href="?opportunityid=<?=$opportunity_id?>" <?php if (isset($_GET['opportunityid']) && $_GET['opportunityid'] == $opportunity_id) echo 'class="active"';?>> <?= $opportunity->name?> </a>
-        </button>
-<?php  endforeach; ?>
-</div>
+<h1><?=$title?></h1>
+ <?php if(count($opportunity_ids) > 1): ?>
+    <h3>Oportunidades</h3>
+    <button class ="botao">
+        <a href="?" <?php if (!($_GET['opportunityid'] ?? null)) echo 'class="active"';?>> Todo o <?=$title?> </a>
+    </button>
+    <?php
+    foreach($opportunity_ids as $opportunity_id): 
+        $opportunity = $app->repo('Opportunity')->find($opportunity_id);  ?>  
+            <button class ="botao">
+                <a href="?opportunityid=<?=$opportunity_id?>" <?php if (isset($_GET['opportunityid']) && $_GET['opportunityid'] == $opportunity_id) echo 'class="active"';?>> <?= $opportunity->name?> </a>
+            </button>
+    <?php  endforeach; ?>
+<?php endif ?>
 
 <h3>Relatórios</h3>
 <?php foreach($rel_data as $data): ?>
