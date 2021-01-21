@@ -267,6 +267,15 @@ class Plugin extends \MapasCulturais\Plugin
             // $app->view->enqueueStyle('app','chat','chat.css');
         }
 
+        //Insere campo de observações nos modais de pagamento
+        $app->hook('template(opportunity.single.payment-edit-single-modal-metadata):begin', function(){
+            $this->part('aldirblanc/observacoes-pagamento');
+        });
+        
+        $app->hook('template(opportunity.single.payment-edit-multiple-modal-metadata):begin', function(){
+            $this->part('aldirblanc/observacoes-pagamento');
+        });
+
         $app->hook('template(<<*>>.main-footer):begin', function() use($plugin) {
             if ($plugin->config['link_suporte_no_footer'] && $plugin->config['link_suporte']) {
                 $this->part('aldirblanc/support', ['linkSuporte' => $plugin->config['link_suporte']]);
