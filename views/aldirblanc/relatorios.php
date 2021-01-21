@@ -1,41 +1,49 @@
 <?php 
 namespace Relatorios;
 
-function print_table($title, $data, $max_values_to_chart, $print_total = false) {
+
+function print_table($title, $data, $max_values_to_chart, $print_total = true) {
     $statuses = array_keys($data);
     $values = [];
     $total = [];
+    foreach($statuses as $col){
+        $values = array_unique(array_merge($values, array_keys($data[$col])));
+    }
 
     $id = uniqid();
     ?>
     <section class="data">
-        <h2><?=$title?></h2>
-        <div id="container-<?=$id?>"></div>
+        <h2 id="<?=get_archor_name($title)?>"><?=$title?></h2>
+        <div id="container-<?=$id?>" style="coment-height:<?= (count($values) * 15 ) + 200?>px"></div>
         <table id="table-<?=$id?>" class="datatable">
+            <thead>
             <tr>
                 <td>&nbsp;</td>
-                <?php foreach($statuses as $col): $values = array_unique(array_merge($values, array_keys($data[$col])))?>
+                <?php foreach($statuses as $col): ?>
                     <td><?= $col ?></td>
                 <?php endforeach ?>
             </tr>
-
+            </thead>
+            <tbody>
             <?php foreach($values as $val): ?>
                 <tr>
-                    <td><?= $val ? $val : '<em>Não Informado</em>' ?></td>
+                    <td><?= $val ? ucwords($val) : '<em>Não Informado</em>' ?></td>
                     <?php foreach($statuses as $status): $total[$status] = @$total[$status] += $data[$status][$val] ?? 0?>
                         <td> <?= $data[$status][$val] ?? 0 ?> </td>
                     <?php endforeach ?>
                 </tr>
             <?php endforeach; ?>
-
+            </tbody>
             <?php if($print_total): ?>
+            <tfoot>
             <tr>
                 <td><strong>TOTAL</strong></td>
                 <?php foreach($statuses as $status): ?>
-                    <td><?= $total[$status] ?? 0 ?></td>
+                    <td><strong><?= $total[$status] ?? 0 ?></strong></td>
                 <?php endforeach ?>
             </tr>
             <?php endif; ?>
+            </tfoot>
         </table>
         
         
@@ -45,9 +53,17 @@ function print_table($title, $data, $max_values_to_chart, $print_total = false) 
             data: {
                 table: 'table-<?=$id?>',
                 switchRowsAndColumns: true,
+                endRow: $("#table-<?=$id?> tr").length -2
             },
             chart: {
-                type: 'column'
+                // type: 'bar',
+                // type: 'pie',
+                type: 'column',
+            },
+            plotOptions: {
+                series: {
+                    // stacking: 'normal'
+                }
             },
             title: {
                 text: ''
@@ -70,6 +86,12 @@ function print_table($title, $data, $max_values_to_chart, $print_total = false) 
     </section>
     <?php
 }
+
+function get_archor_name($name) {
+    return preg_replace('#[ ]*#', '', $name);
+}
+
+
 ?>
 
 <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -91,10 +113,10 @@ function print_table($title, $data, $max_values_to_chart, $print_total = false) 
     }
 
     #container {
-        height: 400px;
+        width: 100%;
     }
 
-    .highcharts-figure, .highcharts-data-table table {
+    .highcharts-data-table table {
         min-width: 310px;
         max-width: 800px;
         margin: 1em auto;
@@ -106,8 +128,14 @@ function print_table($title, $data, $max_values_to_chart, $print_total = false) 
         border: 1px solid #EBEBEB;
         margin: 10px auto;
         text-align: center;
-        width: 100%;
+        width: 800px;
     }
+
+    .datatable tbody {
+        max-height: 400px;
+        overflow-y: scroll;
+    }
+
     .datatable caption {
         padding: 1em 0;
         font-size: 1.2em;
@@ -125,13 +153,49 @@ function print_table($title, $data, $max_values_to_chart, $print_total = false) 
     }
     .datatable tr:hover {
         background: #f1f7ff;
+    }    
+    .botao{        
+        border-radius: 10px;              
+        font-family: Verdana, sans-serif;
+        margin: auto;
     }
-</style>
+    a.active{        
+        border-radius: 1px;         
+        color:black;     
+        background-color:#66ffff ;   
+        margin: auto;           
+    }
 
+    h3 {
+        font-size: 1em;
+        text-align: center;
+    }
+</style>            
+    
 <h1><?=$title?></h1>
+ <?php if(count($opportunity_ids) > 1): ?>
+    <h3>Oportunidades</h3>
+    <button class ="botao">
+        <a href="?" <?php if (!($_GET['opportunityid'] ?? null)) echo 'class="active"';?>> Todo o <?=$title?> </a>
+    </button>
+    <?php
+    foreach($opportunity_ids as $opportunity_id): 
+        $opportunity = $app->repo('Opportunity')->find($opportunity_id);  ?>  
+            <button class ="botao">
+                <a href="?opportunityid=<?=$opportunity_id?>" <?php if (isset($_GET['opportunityid']) && $_GET['opportunityid'] == $opportunity_id) echo 'class="active"';?>> <?= $opportunity->name?> </a>
+            </button>
+    <?php  endforeach; ?>
+<?php endif ?>
+
+<h3>Relatórios</h3>
+<?php foreach($rel_data as $data): ?>
+    <button class ="botao">
+        <a href="#<?=get_archor_name($data['name'])?>"><?= $data['name'] ?></a>
+    </button>
+<?php endforeach; ?>
 
 <figure class="highcharts-figure">
     <?php foreach($rel_data as $data): ?>
-        <?php print_table($data['name'], $data['data'], $data['max_chart'] ?? 15) ?>
+        <?php print_table($data['name'], $data['data'], $data['max_chart'] ?? 11000) ?>
     <?php endforeach; ?>
 </figure>

@@ -136,7 +136,24 @@ class Plugin extends \MapasCulturais\Plugin
                 // 'BCO SANTANDER (BRASIL) S.A' => '033'
              ],
 
-             'ppg_registros' => PRIVATE_FILES_PATH . 'aldirblanc/ppg/registros.csv'
+             'ppg_registros' => PRIVATE_FILES_PATH . 'aldirblanc/ppg/registros.csv',
+
+            'relatorios.inciso1.ownerMetadata' => env('AB_RELATORIOS_INCISO1_OWNER_METADATA', 'raca,genero,En_Municipio,En_Bairro'),
+            'relatorios.inciso1.coletivoMetadata' => env('AB_RELATORIOS_INCISO1_COLETIVO_METADATA', ''),
+            'relatorios.inciso1.spaceMetadata' => env('AB_RELATORIOS_INCISO1_SPACE_METADATA', ''),
+
+            'relatorios.inciso2.ownerMetadata' => env('AB_RELATORIOS_INCISO2_OWNER_METADATA', 'raca,genero,En_Municipio,En_Bairro'),
+            'relatorios.inciso2.coletivoMetadata' => env('AB_RELATORIOS_INCISO2_COLETIVO_METADATA', 'En_Municipio,En_Bairro'),
+            'relatorios.inciso2.spaceMetadata' => env('AB_RELATORIOS_INCISO2_SPACE_METADATA', 'En_Municipio,En_Bairro'),
+
+            'relatorios.inciso3.ownerMetadata' => env('AB_RELATORIOS_INCISO3_OWNER_METADATA', 'raca,genero,En_Municipio,En_Bairro'),
+            'relatorios.inciso3.coletivoMetadata' => env('AB_RELATORIOS_INCISO3_COLETIVO_METADATA', 'En_Municipio,En_Bairro'),
+            'relatorios.inciso3.spaceMetadata' => env('AB_RELATORIOS_INCISO3_SPACE_METADATA', 'En_Municipio,En_Bairro'),
+
+            'relatorios.inciso1.registrationFields' => env('AB_RELATORIOS_INCISO1_REGISTRATION_FIELDS', '{}'),
+            'relatorios.inciso2.registrationFields' => env('AB_RELATORIOS_INCISO2_REGISTRATION_FIELDS', '{}'),
+            'relatorios.inciso3.registrationFields' => env('AB_RELATORIOS_INCISO3_REGISTRATION_FIELDS', '{}'),
+            
         ];
 
         $skipConfig = false;
@@ -251,6 +268,7 @@ class Plugin extends \MapasCulturais\Plugin
             // $app->view->enqueueStyle('app','chat','chat.css');
         }
 
+        //Insere campo de observações nos modais de pagamento
         $app->hook('template(opportunity.single.payment-edit-single-modal-metadata):begin', function(){
             $this->part('aldirblanc/observacoes-pagamento');
         });
