@@ -1291,7 +1291,6 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }else{
                     $result = $bank;
                 }
-               
                 return $result;
 
             },
@@ -1321,7 +1320,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                         }else{
                             if($field_age != $field_dv){
-                                $agencia = $registrations->$field_dv ? ($registrations->$field_age."-".$registrations->$field_dv) : $registrations->$field_age;                                    
+                                if(is_numeric($registrations->$field_dv) && $registrations->$field_dv == 0){
+                                    $agencia = $registrations->$field_age."-".$registrations->$field_dv;
+
+                                }else{
+                                    $agencia = $registrations->$field_dv ? ($registrations->$field_age."-".$registrations->$field_dv) : $registrations->$field_age;
+                                    
+                                }                                                                  
                             }else{
                                 $agencia = $registrations->$field_age;                                    
                             }
@@ -1351,11 +1356,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'BEN_AGENCIA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
                
+                
                 $field_age = $detahe1['BEN_AGENCIA']['field_id'];
                 $field_dv =  $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
-                
+               
                 //Verifica se existe o medadado se sim pega o registro
                 if(!($branch = $this->bankData($registrations, 'branch'))){ 
+                    
                         $result = "";
                         $field_cpf = $detahe2['BEN_CPF']['field_id'];
                         $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
@@ -1372,8 +1379,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                 $field_id = $default['fieldsWalletDigital']['agency'];
                                 $agencia = $registrations->$field_id;                    
                             }else{                              
-                                if($field_age != $field_dv){
-                                    $agencia = $registrations->$field_dv ?? $registrations->$field_age;                                    
+                                if($field_age != $field_dv){       
+                                    if(is_numeric($registrations->$field_dv) && $registrations->$field_dv == 0){
+                                        $agencia = $field_age."-".$registrations->$field_dv;
+
+                                    }else{
+                                        $agencia = $registrations->$field_dv ? $field_age."-".$registrations->$field_dv : $registrations->$field_age;
+
+                                    }                            
+                                                                       
                                 }else{
                                     $agencia = $registrations->$field_age;                                    
                                 }
@@ -1383,9 +1397,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $agencia = $branch;
                 }
                 
-                   
                 $age = explode("-", $agencia);
-
+                
                 if(count($age)>1){
                     $result = $age[1];
                 }else{
@@ -1395,7 +1408,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $result = "";
                     }
                 }
-                
+               
                 $result = $this->normalizeString($result);
                 return is_string($result) ? strtoupper($result) : $result;
             },
@@ -1435,7 +1448,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         }else{
                             $field_id = $detahe1['BEN_CONTA']['field_id'];
                             if($field_cc != $field_dv){
-                                $temp_account = $registrations->$field_dv ? $registrations->$field_cc."-".$registrations->$field_dv : $registrations->$field_cc;
+
+                                if(is_numeric($registrations->$field_dv) && $registrations->$field_dv == 0){
+                                    $temp_account =  $registrations->$field_cc."-".$registrations->$field_dv;
+
+                                }else{
+                                    $temp_account = $registrations->$field_dv ? $registrations->$field_cc."-".$registrations->$field_dv : $registrations->$field_cc;
+
+                                }
                             }else{
                                 $temp_account = $registrations->$field_cc;
                             }
@@ -1497,9 +1517,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 $field_cc = $detahe1['BEN_CONTA']['field_id'];
                 $field_dv =  $detahe1['BEN_CONTA_DIGITO']['field_id'];
-
+               
                 //Verifica se existe o medadado se sim pega o registro
                 if(!($account = $this->bankData($registrations, 'account'))){
+                    
                     $result = "";
                     $field_id = $detahe1['BEN_CONTA']['field_id'];
                     
@@ -1538,7 +1559,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             $temp_account = $registrations->$temp;                    
                         }else{                            
                             if($field_cc != $field_dv){
-                                $temp_account = $registrations->$field_dv ? $registrations->$field_cc."-".$registrations->$field_dv : $registrations->$field_cc;
+                                if(is_numeric($registrations->$field_dv) && $registrations->$field_dv == 0){
+                                    $temp_account = $registrations->$field_cc."-".$registrations->$field_dv;
+                                }else{
+                                    $temp_account = $registrations->$field_dv ? $registrations->$field_cc."-".$registrations->$field_dv : $registrations->$field_cc;
+                                }
+                               
                             }else{
                                 $temp_account = $registrations->$field_cc;
                             }
@@ -1577,12 +1603,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     } else {
                         $dig = trim(strtoupper($dig));                       
                         $result = $default['savingsDigit'][$dig];
-                    }
-                } else {
-
+                    }                    
+                } else {                    
                     $result = $dig;
-                }                
-                
+                }
                 return is_string($result) ? strtoupper(trim($result)) : $this->normalizeString(trim($result));
                
             },
