@@ -1,6 +1,7 @@
 ## [Unreleased]
-- endpoint para corrigir espaços e agentes de inscrições mediadas
-- interface para envio dos e-mails dos PPG10x
+- Endpoint para corrigir espaços e agentes de inscrições mediadas
+- Interface para envio dos e-mails dos PPG10x
+- Implementa exportador do Banpará [#185]
 
 ## [v2.4.0]
 - Corrige bug no processamento de múltiplos pagamentos do exportador PPG100 [#169](https://github.com/mapasculturais/plugin-AldirBlanc/issues/169)

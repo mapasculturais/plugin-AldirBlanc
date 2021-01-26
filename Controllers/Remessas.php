@@ -47,13 +47,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     /**
      * Retorna a oportunidade
-     * 
-     * @return \MapasCulturais\Entities\Opportunity 
-     * @throws Exception 
+     *
+     * @return \MapasCulturais\Entities\Opportunity
+     * @throws Exception
      */
     function getOpportunity() {
         $app = App::i();
-        
+
         $opportunity_id = $this->data['opportunity'];
 
         /**
@@ -69,17 +69,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         return $opportunity;
     }
-    
+
     /**
      * Retorna as inscrições
-     * 
-     * @param mixed $opportunity 
+     *
+     * @param mixed $opportunity
      * @return \MapasCulturais\Entities\Registration[]
-     * @throws Exception 
+     * @throws Exception
      */
     function getRegistrations(Opportunity $opportunity, $asIterator=false) {
         $app = App::i();
-        
+
         /**
          * Pega os parâmetros do endpoint
          */
@@ -87,9 +87,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $finishDate = null;
         $startDate = null;
         $paymentDate = null;
-        $extra = ""; 
-        $params = [];        
-        
+        $extra = "";
+        $params = [];
+
         //Pega as referências de qual form esta vindo os dados, CNAB ou GENÉRICO
         $parametersForms = $this->getParametersForms();
         $typeExport = $parametersForms['typeExport'];
@@ -123,26 +123,26 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         }else{
             $statusPayment = [$this->data[$typeExport]];
-            
+
         }
-        
+
         //Pega uma lista seleta de inscrições para exportar
-        if(isset($this->data[$typeSelect]) && !empty($this->data[$listSelect])){          
+        if(isset($this->data[$typeSelect]) && !empty($this->data[$listSelect])){
             $reg = array_filter(explode(",", $this->data[$listSelect]));
             if($this->data[$typeSelect] ==="ignore"){
                 $extra .= " AND r.id NOT IN (:registrations)";
             }else{
                 $extra .= " AND r.id IN (:registrations)";
             }
-           
+
             $params['registrations']  = $reg;
         }
-        
+
         /**
          * Busca as inscrições com refêrencia ao status passado no formulário
-         * 
-         */ 
-        
+         *
+         */
+
         $dql = "SELECT r FROM MapasCulturais\\Entities\\Registration r
             JOIN RegistrationPayments\\Payment p WITH r.id = p.registration WHERE
             r.status > 0 AND
@@ -152,19 +152,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $query = $app->em->createQuery($dql);
 
         $params += [
-            'opportunity' => $opportunity,                
+            'opportunity' => $opportunity,
             'statusPayment' => $statusPayment
         ];
-            
-        $query->setParameters($params);        
-        
-        $registrations = $asIterator ? $query->iterate() : $query->getResult();          
+
+        $query->setParameters($params);
+
+        $registrations = $asIterator ? $query->iterate() : $query->getResult();
 
         if (!$asIterator && empty($registrations)) {
             echo "Não foram encontrados registros.";
             die();
         }
-          
+
         return $registrations;
     }
 
@@ -179,7 +179,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     public function ALL_genericExportInciso2()
     {
-      
+
         //Seta o timeout
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '768M');
@@ -194,13 +194,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          * Pega os dados da configuração
          */
 
-        $csv_conf = $this->config['csv_generic_inciso2'];        
+        $csv_conf = $this->config['csv_generic_inciso2'];
         $categories = $csv_conf['categories'];
         $header = $csv_conf['header'];
         $fromToAccounts = $csv_conf['fields']['fromToAccounts'];
         $dePara = $this->readingCsvFromTo($fromToAccounts);
-        $cpfCsv = $this->cpfCsv($fromToAccounts);    
-        
+        $cpfCsv = $this->cpfCsv($fromToAccounts);
+
         $opportunity = $this->getOpportunity();
         $opportunity_id = $opportunity->id;
         $registrations = $this->getRegistrations($opportunity);
@@ -274,8 +274,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CNPJ' => function ($registrations) use ($fieldsID, $categories, $app) {
                 $result = " ";
                 if (in_array($registrations->category, $categories['CNPJ'])) {
-                    $field_id = $fieldsID['CNPJ'];                    
-                    if (is_array($field_id)) {                        
+                    $field_id = $fieldsID['CNPJ'];
+                    if (is_array($field_id)) {
                         foreach ($field_id as $key => $value) {
                             if ($registrations->$value) {
                                 $result = str_replace(['.', '-', '/'], '', $registrations->$value);
@@ -290,7 +290,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     if (strlen($result) != 14 && $result != " ") {
                         $app->log->info($registrations->number . " CNPJ inválido");
                     }
-                } 
+                }
 
                 return str_replace(['.', '-', '/', ' '], '', $result);
 
@@ -298,13 +298,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'RAZAO_SOCIAL' => function ($registrations) use ($fieldsID, $categories) {
                 $result = " ";
                 if (in_array($registrations->category, $categories['CNPJ'])) {
-                    $field_id = $fieldsID['RAZAO_SOCIAL'];                    
-                    if (is_array($field_id)) {                        
+                    $field_id = $fieldsID['RAZAO_SOCIAL'];
+                    if (is_array($field_id)) {
                         foreach ($field_id as $key => $value) {
                             if ($registrations->$value) {
                                 $result = $this->normalizeString($registrations->$value);
                             }
-                        }                       
+                        }
                     } else {
                         $result = $this->normalizeString($registrations->$field_id);
                     }
@@ -313,9 +313,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 return $result;
             },
             'LOGRADOURO' => function ($registrations) use ($fieldsID, $app) {
-                $result = $this->getAddress('LOGRADOURO', 'En_Nome_Logradouro', $fieldsID, $registrations, $app, null);                
+                $result = $this->getAddress('LOGRADOURO', 'En_Nome_Logradouro', $fieldsID, $registrations, $app, null);
                 return $result;
-                
+
             },
             'NUMERO' => function ($registrations) use ($fieldsID, $app) {
                 $result = $this->getAddress('NUMERO', 'En_Num', $fieldsID, $registrations, $app, 5);
@@ -324,27 +324,27 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'COMPLEMENTO' => function ($registrations) use ($fieldsID, $app) {
                 $result = $this->getAddress('COMPLEMENTO', 'En_Complemento', $fieldsID, $registrations, $app, 20);
                 return substr($result, 0, 20);
-            
+
             },
             'BAIRRO' => function ($registrations) use ($fieldsID, $app) {
                 $result = $this->getAddress('BAIRRO', 'En_Bairro', $fieldsID, $registrations, $app, null);
                 return $result;
-                
+
             },
             'MUNICIPIO' => function ($registrations) use ($fieldsID, $app) {
                 $result = $this->getAddress('MUNICIPIO', 'En_Municipio', $fieldsID, $registrations, $app, null);
                 return $result;
-                
+
             },
             'CEP' => function ($registrations) use ($fieldsID, $app) {
                 $result = $this->getAddress('CEP', 'En_CEP', $fieldsID, $registrations, $app, null);
                 return $result;
-                
+
             },
             'ESTADO' => function ($registrations) use ($fieldsID, $app) {
                 $result = $this->getAddress('ESTADO', 'En_Estado', $fieldsID, $registrations, $app, null);
                 return $result;
-               
+
             },
             'TELEFONE' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['TELEFONE'];
@@ -372,21 +372,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }
                 }else{
                     $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_id);
-                }                
+                }
                 $pos = array_search($cpfBase,$cpfCsv);
-                
-                if($pos){                    
+
+                if($pos){
                     $result = $dePara[$pos]['BEN_NUM_BANCO'];
-                    
+
                 }else{
                     $field_id = $fieldsID['NUM_BANCO'];
                     $result = $this->numberBank($registrations->$field_id);
                 }
 
                 return $this->normalizeString($result);
-                
-            },            
-            'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $app, $dePara, $cpfCsv, $categories) {                
+
+            },
+            'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $app, $dePara, $cpfCsv, $categories) {
                 if (in_array($registrations->category, $categories['CPF'])) {
                     $field_id = $fieldsID['CPF'];
                 }else if (in_array($registrations->category, $categories['CNPJ'])){
@@ -402,17 +402,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }
                 }else{
                     $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_id);
-                }                
+                }
                 $pos = array_search($cpfBase,$cpfCsv);
-                
-                if($pos){                    
+
+                if($pos){
                     $result = $dePara[$pos]['BEN_AGENCIA'];
-                    
+
                 }else{
                     $field_id = $fieldsID['AGENCIA_BANCO'];
                     $result =  $registrations->$field_id;
                 }
-                
+
                 return $this->normalizeString(substr($result, 0, 4));
             },
             'CONTA_BANCO' => function ($registrations) use ($fieldsID, $app , $dePara, $cpfCsv, $categories) {
@@ -431,12 +431,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }
                 }else{
                     $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_id);
-                }                
+                }
                 $pos = array_search($cpfBase,$cpfCsv);
-                
-                if($pos){                    
+
+                if($pos){
                     $result = $dePara[$pos]['BEN_CONTA'];
-                    
+
                 }else{
                     $field_id = $fieldsID['CONTA_BANCO'];
 
@@ -444,7 +444,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
 
                 return $this->normalizeString($result);
-            },            
+            },
             'VALOR' => '',
             'INSCRICAO_ID' => function ($registrations) use ($fieldsID) {
                 return $this->normalizeString($registrations->number);
@@ -460,7 +460,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         //Itera sobre os dados mapeados
         $csv_data = [];
         foreach ($registrations as $key_registration => $registration) {
-          
+
             //Pega as informações de pagamento
             $amount = $this->processesPayment($registration, $app);
             if(!$amount){
@@ -496,7 +496,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          * Salva o arquivo no servidor e faz o dispatch dele em um formato CSV
          * O arquivo e salvo no deretório docker-data/private-files/aldirblanc/inciso2/remessas
          */
-        
+
         $file_name = 'inciso2-genCsv-' . $this->getStatus($this->data[$parametersForms['typeExport']]) . $opportunity_id . '-' . md5(json_encode($csv_data)) . '.csv';
 
         $dir = PRIVATE_FILES_PATH . 'aldirblanc/inciso2/remessas/generics/';
@@ -556,7 +556,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $proponentTypes = $csv_conf['parameters_default']['proponentTypes'];
         $header = $csv_conf['header'];
 
-       
+
         $opportunity = $this->getOpportunity();
         $opportunity_id = $opportunity->id;
         $registrations = $this->getRegistrations($opportunity);
@@ -565,7 +565,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $fromToAccounts = $csv_conf[$opportunity_id]['fromToAccounts'];
         $dePara = $this->readingCsvFromTo($fromToAccounts);
         $cpfCsv = $this->cpfCsv($fromToAccounts);
-        
+
         /**
          * Mapeamento de fields_id
          */
@@ -623,11 +623,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $propType = trim($registrations->$temp);
                     if ($propType === $proponentTypes['fisica'] || empty($propType) || $propType === $proponentTypes['coletivo']) {
                         $result = $this->normalizeString($registrations->$field_id);
-                        
+
                         if (strlen($result) != 11) {
                             $app->log->info("\n".$registrations->number . " CPF inválido");
                         }
-                    } 
+                    }
                 } else {
                     $result = $this->normalizeString($registrations->$field_id);
                 }
@@ -636,23 +636,23 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'NOME_SOCIAL' => function ($registrations) use ($fieldsID, $proponentTypes) {
                 $temp = $fieldsID['TIPO_PROPONENTE'];
-                $field_id = $fieldsID['NOME_SOCIAL'];                
+                $field_id = $fieldsID['NOME_SOCIAL'];
                 $propType = $temp ? trim($registrations->$temp) : null;
-                
+
                 $result = " ";
                 if ($propType == trim($proponentTypes['fisica']) || empty($propType) || $propType == trim($proponentTypes['coletivo'])) {
                     if(is_array($field_id)){
                         foreach($field_id as $value){
                             if($registrations->$value){
-                                $result = $registrations->$value; 
+                                $result = $registrations->$value;
                             }
                         }
                     }else{
-                        $result = $registrations->$field_id;  
+                        $result = $registrations->$field_id;
 
                     }
                 }
-                
+
                 return $this->normalizeString($result);
             },
             'CNPJ' => function ($registrations) use ($fieldsID, $app, $proponentTypes) {
@@ -660,17 +660,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $fieldsID['CNPJ'];
                 $result = " ";
 
-                $propType = $temp ? trim($registrations->$temp) : null; 
-                
+                $propType = $temp ? trim($registrations->$temp) : null;
+
                 if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
-                    if (is_array($field_id)) {                            
+                    if (is_array($field_id)) {
                         foreach ($field_id as $key => $value) {
                             if ($registrations->$value) {
                                 $result = str_replace(['.', '-', '/', ' '], '', $registrations->$value);
                                 break;
                             }
                         }
-                        
+
                         $result = $this->normalizeString($result);
                     } else {
 
@@ -681,7 +681,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $app->log->info("\n".$registrations->number . " CNPJ inválido");
                     }
                 }
-                
+
                 return str_replace(['.', '-', '/', ' '], '', $result);
 
             },
@@ -690,28 +690,28 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $fieldsID['RAZAO_SOCIAL'];
 
                 $result = " ";
-                $propType = $temp ? trim($registrations->$temp) : null;               
+                $propType = $temp ? trim($registrations->$temp) : null;
 
                 if ($propType === trim($proponentTypes['juridica']) || $propType === trim($proponentTypes['juridica-mei'])) {
-                    if (is_array($field_id)) {                           
+                    if (is_array($field_id)) {
                         foreach ($field_id as $key => $value) {
                             if ($registrations->$value) {
                                 $result = $registrations->$value;
                             }
 
-                        }                           
+                        }
                     } else {
                         $result = $registrations->$field_id;
 
                     }
 
-                } 
-                
+                }
+
                 return $this->normalizeString($result);
 
             },
             'LOGRADOURO' => function ($registrations) use ($fieldsID, $app) {
-                $result = $this->getAddress('LOGRADOURO', 'En_Nome_Logradouro', $fieldsID, $registrations, $app, null);                
+                $result = $this->getAddress('LOGRADOURO', 'En_Nome_Logradouro', $fieldsID, $registrations, $app, null);
                 return $result;
 
             },
@@ -731,18 +731,18 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             },
             'MUNICIPIO' => function ($registrations) use ($fieldsID, $app) {
                 $result = $this->getAddress('MUNICIPIO', 'En_Municipio', $fieldsID, $registrations, $app, null);
-                return $result;               
+                return $result;
 
             },
             'CEP' => function ($registrations) use ($fieldsID, $app) {
                 $result = $this->getAddress('CEP', 'En_CEP', $fieldsID, $registrations, $app, null);
                 return $result;
-            
+
             },
             'ESTADO' => function ($registrations) use ($fieldsID, $app) {
                 $result = $this->getAddress('ESTADO', 'En_Estado', $fieldsID, $registrations, $app, null);
                 return $result;
-            
+
             },
             'TELEFONE' => function ($registrations) use ($fieldsID) {
                 $field_id = $fieldsID['TELEFONE'];
@@ -782,17 +782,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         }
                     }else{
                         $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_temp);
-                    }     
+                    }
 
                     $pos = array_search($cpfBase,$cpfCsv);
-                    
+
                     if($pos){
                         $result = $dePara[$pos]['BEN_NUM_BANCO'];
                     }else{
                         $field_id = $fieldsID['NUM_BANCO'];
                         $result = $this->numberBank($registrations->$field_id);
                     }
-                
+
                 $result = $result;
 
                 if (empty($result)) {
@@ -800,7 +800,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
 
                 return $result;
-            },            
+            },
             'AGENCIA_BANCO' => function ($registrations) use ($fieldsID, $proponentTypes, $dePara, $cpfCsv) {
                 $temp = $fieldsID['TIPO_PROPONENTE'];
                 if($temp){
@@ -824,7 +824,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         }
                     }else{
                         $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_temp);
-                    }     
+                    }
 
                     $pos = array_search($cpfBase,$cpfCsv);
                     if($pos){
@@ -833,8 +833,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $field_id = $fieldsID['AGENCIA_BANCO'];
                         $result = $registrations->$field_id;
                     }
-                    
-              
+
+
                 return $result = $this->normalizeString(substr($result, 0, 4));
             },
             'CONTA_BANCO' => function ($registrations) use ($fieldsID , $proponentTypes, $dePara, $cpfCsv) {
@@ -860,7 +860,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         }
                     }else{
                         $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_temp);
-                    }     
+                    }
 
                     $pos = array_search($cpfBase,$cpfCsv);
                     if($pos){
@@ -868,12 +868,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     }else{
                         $field_id = $fieldsID['CONTA_BANCO'];
                         $result = $registrations->$field_id;
-                    }                
-               
-                
+                    }
+
+
 
                 return $this->normalizeString($result);
-            },            
+            },
             'VALOR' => '',
             'INSCRICAO_ID' => function ($registrations) use ($fieldsID) {
                 return $this->normalizeString($registrations->number);
@@ -916,10 +916,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             //Insere o valor a ser pago no CSV
             $csv_data[$key_registration]['VALOR'] = $amount;
-            
-            
+
+
         }
-        
+
         /**
          * Salva o arquivo no servidor e faz o dispatch dele em um formato CSV
          * O arquivo e salvo no deretório docker-data/private-files/aldirblanc/inciso2/remessas
@@ -979,6 +979,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             throw new Exception("O parâmetro \"type\" é obrigatório.");
         }
         switch ($parameters["type"]) {
+            case "banpara":
+                $this->exportBanpara($opportunities);
+                break;
             case "mci460":
                 $this->exportMCI460($opportunities);
                 break;
@@ -1028,20 +1031,20 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
     /**
      * Devolve os dados bancários dos metadados no agent_meta
-     * 
+     *
      * payment_bank_account_type
      * payment_bank_number
      * payment_bank_branch
      * payment_bank_account_number
      */
     private function bankData($registration, $return = 'account') {
-        
+
         if ($return == 'account') {
 
             return $registration->owner->metadata['payment_bank_account_number'] ?? null;
 
         } elseif ($return == 'branch') {
-            
+
             return $registration->owner->metadata['payment_bank_branch'] ?? null;
 
         }  elseif ($return == 'account-type') {
@@ -1053,7 +1056,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             return $registration->owner->metadata['payment_bank_number'] ?? null;
 
         }
-        
+
         return false;
     }
 
@@ -1083,12 +1086,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $opportunity_id = $opportunity->id;
         $registrations = $this->getRegistrations($opportunity);
         $parametersForms = $this->getParametersForms();
-        
+
         /**
          * Pega os dados das configurações
          */
         $txt_config = $this->config['config-cnab240-inciso1'];
-        $default = $txt_config['parameters_default'];           
+        $default = $txt_config['parameters_default'];
         $header1 = $txt_config['HEADER1'];
         $header2 = $txt_config['HEADER2'];
         $detahe1 = $txt_config['DETALHE1'];
@@ -1097,8 +1100,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $trailer2 = $txt_config['TRAILER2'];
         $fromToAccounts = $default['fromToAccounts'];
         $dePara = $this->readingCsvFromTo($fromToAccounts);
-        $cpfCsv = $this->cpfCsv($fromToAccounts);       
-       
+        $cpfCsv = $this->cpfCsv($fromToAccounts);
+
         $mappedHeader1 = [
             'BANCO' => '',
             'LOTE' => '',
@@ -1115,7 +1118,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }else{
                     return "";
                 }
-            }, 
+            },
             'AGENCIA' => function ($registrations) use ($header1) {
                 $result = "";
                 $field_id = $header1['AGENCIA'];
@@ -1136,7 +1139,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $header1['CONTA'];
                 $value = $this->normalizeString($field_id['default']);
                 return substr($value, 0, 12);
-                
+
 
             },
             'CONTA_DIGITO' => function ($registrations) use ($header1) {
@@ -1211,7 +1214,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $header2['CONTA'];
                 $value = $this->normalizeString($field_id['default']);
                 return substr($value, 0, 12);
-              
+
 
             },
             'CONTA_DIGITO' => function ($registrations) use ($header2) {
@@ -1248,7 +1251,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             'CODIGO_MOVIMENTO' => '',
             'CAMARA_CENTRALIZADORA' => function ($registrations) use ($detahe1, $default) {
                 //Verifica se existe o medadado se sim pega o registro
-                if(!($bank = $this->bankData($registrations, 'bank-number'))){                    
+                if(!($bank = $this->bankData($registrations, 'bank-number'))){
                     if(!$default['defaultBank']){
                         $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
                         $numberBank = $this->numberBank($registrations->$field_id);
@@ -1265,9 +1268,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 }else{
                     $result = "018";
-                    
+
                 }
-                
+
                 return $result;
 
             },
@@ -1278,12 +1281,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                     $field_cpf = $detahe2['BEN_CPF']['field_id'];
                     $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-                    
+
                     $pos = array_search($cpfBase,$cpfCsv);
 
-                    if($pos){                    
+                    if($pos){
                         $result = $dePara[$pos]['BEN_NUM_BANCO'];
-                        
+
                     }else{
                         $field_id = $detahe1['BEN_CODIGO_BANCO']['field_id'];
                         $result = $this->numberBank($registrations->$field_id);
@@ -1295,7 +1298,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             },
             'BEN_AGENCIA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
-                
+
                 $field_age = $detahe1['BEN_AGENCIA']['field_id'];
                 $field_dv =  $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
 
@@ -1304,16 +1307,16 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $result = "";
                     $field_cpf = $detahe2['BEN_CPF']['field_id'];
                     $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-                    
+
                     $pos = array_search($cpfBase,$cpfCsv);
-                
-                    if($pos){                    
+
+                    if($pos){
                         $agencia = $dePara[$pos]['BEN_AGENCIA'];
-                        
+
                     }else{
                         $temp = $default['formoReceipt'];
                         $formoReceipt = $temp ? $registrations->$temp : false;
-        
+
                         if($formoReceipt == "CARTEIRA DIGITAL BB"){
                             $field_id = $default['fieldsWalletDigital']['agency'];
                             $agencia = $registrations->$field_id;
@@ -1325,80 +1328,80 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                                 }else{
                                     $agencia = $registrations->$field_dv ? ($registrations->$field_age."-".$registrations->$field_dv) : $registrations->$field_age;
-                                    
-                                }                                                                  
+
+                                }
                             }else{
-                                $agencia = $registrations->$field_age;                                    
+                                $agencia = $registrations->$field_age;
                             }
                         }
                     }
                 }else{
                     $agencia = $branch;
                 }
-                
+
 
                 $age = explode("-", $agencia);
-                
+
                 if(count($age)>1){
                     $result = $age[0];
 
                 }else{
                     if (strlen($age[0]) > 4) {
-                    
+
                         $result = substr($age[0], 0, 4);
                     } else {
                         $result = $age[0];
                     }
                 }
-               
+
                 $result = $this->normalizeString($result);
                 return is_string($result) ? strtoupper($result) : $result;
             },
             'BEN_AGENCIA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
-               
-                
+
+
                 $field_age = $detahe1['BEN_AGENCIA']['field_id'];
                 $field_dv =  $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
-               
+
                 //Verifica se existe o medadado se sim pega o registro
-                if(!($branch = $this->bankData($registrations, 'branch'))){ 
-                    
+                if(!($branch = $this->bankData($registrations, 'branch'))){
+
                         $result = "";
                         $field_cpf = $detahe2['BEN_CPF']['field_id'];
                         $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-                        
-                        $pos = array_search($cpfBase,$cpfCsv);               
-                        if($pos){                    
+
+                        $pos = array_search($cpfBase,$cpfCsv);
+                        if($pos){
                             $agencia = $dePara[$pos]['BEN_AGENCIA'];
-                            
+
                         }else{
                             $temp = $default['formoReceipt'];
-                            $formoReceipt = $temp ? $registrations->$temp : false; 
-            
+                            $formoReceipt = $temp ? $registrations->$temp : false;
+
                             if($formoReceipt == "CARTEIRA DIGITAL BB"){
                                 $field_id = $default['fieldsWalletDigital']['agency'];
-                                $agencia = $registrations->$field_id;                    
-                            }else{                              
-                                if($field_age != $field_dv){       
+                                $agencia = $registrations->$field_id;
+                            }else{
+                                if($field_age != $field_dv){
                                     if(is_numeric($registrations->$field_dv) && $registrations->$field_dv == 0){
                                         $agencia = $field_age."-".$registrations->$field_dv;
 
                                     }else{
                                         $agencia = $registrations->$field_dv ? $field_age."-".$registrations->$field_dv : $registrations->$field_age;
 
-                                    }                            
-                                                                       
+                                    }
+
                                 }else{
-                                    $agencia = $registrations->$field_age;                                    
+                                    $agencia = $registrations->$field_age;
                                 }
                             }
                         }
                 }else{
                     $agencia = $branch;
                 }
-                
+
                 $age = explode("-", $agencia);
-                
+
                 if(count($age)>1){
                     $result = $age[1];
                 }else{
@@ -1408,24 +1411,24 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $result = "";
                     }
                 }
-               
+
                 $result = $this->normalizeString($result);
                 return is_string($result) ? strtoupper($result) : $result;
             },
-            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {  
-                
+            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
+
                 $field_conta = $detahe1['TIPO_CONTA']['field_id'];
                 $field_dv = $detahe1['BEN_CONTA_DIGITO']['field_id']; //pega o field_id do digito da conta
                 $field_cc = $detahe1['BEN_CONTA']['field_id'];
-                
+
 
                 //Verifica se existe o medadado se sim pega o registro
                 if(!($account = $this->bankData($registrations, 'account'))){
-                    $result  = ""; 
+                    $result  = "";
                     $field_cpf = $detahe2['BEN_CPF']['field_id'];
                     $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-                   
-                    $typeAccount = $registrations->$field_conta;                   
+
+                    $typeAccount = $registrations->$field_conta;
 
                     $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
                     if($temp){
@@ -1434,17 +1437,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $numberBank = $default['defaultBank'];
                     }
 
-                    $pos = array_search($cpfBase,$cpfCsv);               
-                    if($pos){                    
+                    $pos = array_search($cpfBase,$cpfCsv);
+                    if($pos){
                         $temp_account = $dePara[$pos]['BEN_CONTA'];
-                        
+
                     }else{
                         $temp = $default['formoReceipt'];
                         $formoReceipt = $temp ? $registrations->$temp : false;
-                    
+
                         if($formoReceipt == "CARTEIRA DIGITAL BB"){
                             $field_id = $default['fieldsWalletDigital']['account'];
-                            $temp_account = $registrations->$field_id;                    
+                            $temp_account = $registrations->$field_id;
                         }else{
                             $field_id = $detahe1['BEN_CONTA']['field_id'];
                             if($field_cc != $field_dv){
@@ -1465,21 +1468,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $typeAccount = $this->bankData($registrations, 'account-type');
                     $numberBank = $this->bankData($registrations, 'bank-number');
                     $temp_account = $account;
-                }                
-                
+                }
+
                 $temp_account = explode("-", $temp_account);
                 if(count($temp_account)>1){
                     $account = $temp_account[0];
                 }else{
                     $account = substr($temp_account[0], 0, -1);
                 }
-               
+
                 if(!$account){
                     $app->log->info($registrations->number . " Conta bancária não informada");
                     return " ";
                 }
 
-                
+
                 if($typeAccount == $default['typesAccount']['poupanca']){
 
                     if (($numberBank == '001') && (substr($account, 0, 2) != "51")) {
@@ -1488,7 +1491,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                         if(strlen($account_temp) < 9){
                             $result = "51".str_pad($account, 7, 0, STR_PAD_LEFT);
-                        
+
                         }else{
                             $result = "51" . $account;
 
@@ -1501,32 +1504,32 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $result = $account;
 
                 }
-                
+
                 $result = preg_replace('/[^0-9]/i', '',$result);
 
-                if($field_dv === $field_cc && $temp_account == 1){                   
+                if($field_dv === $field_cc && $temp_account == 1){
                     return substr($this->normalizeString($result), 0, -1); // Remove o ultimo caracter. Intende -se que o ultimo caracter é o DV da conta
 
-                }else{                    
+                }else{
                     return $this->normalizeString($result);
 
                 }
-                
+
             },
             'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
 
                 $field_cc = $detahe1['BEN_CONTA']['field_id'];
                 $field_dv =  $detahe1['BEN_CONTA_DIGITO']['field_id'];
-               
+
                 //Verifica se existe o medadado se sim pega o registro
                 if(!($account = $this->bankData($registrations, 'account'))){
-                    
+
                     $result = "";
                     $field_id = $detahe1['BEN_CONTA']['field_id'];
-                    
+
                     $field_cpf = $detahe2['BEN_CPF']['field_id'];
                     $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-                    
+
                     /**
                      * Caso use um banco padrão para recebimento, pega o número do banco das configs
                      * Caso contrario busca o número do banco na base de dados
@@ -1535,17 +1538,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     if($fieldBanco){
                         $numberBank = $this->numberBank($registrations->$fieldBanco);
                     }else{
-                        $numberBank = $default['defaultBank']; 
+                        $numberBank = $default['defaultBank'];
                     }
-                    
+
                     /**
                      * Verifica se o CPF do requerente consta na lista de de-para dos bancos
                      * se existir, pega os dados bancários do arquivo
                      */
-                    $pos = array_search($cpfBase,$cpfCsv);               
-                    if($pos){                    
+                    $pos = array_search($cpfBase,$cpfCsv);
+                    if($pos){
                         $temp_account = $dePara[$pos]['BEN_CONTA'];
-                        
+
                     }else{
                         /**
                          * Verifica se existe a opção de forma de recebimento
@@ -1553,39 +1556,39 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                          */
                         $formaRecebimento = $default['formoReceipt'];
                         $formoReceipt = $formaRecebimento ? $registrations->$formaRecebimento : false;
-                    
+
                         if($formoReceipt == "CARTEIRA DIGITAL BB"){
                             $temp = $default['fieldsWalletDigital']['account'];
-                            $temp_account = $registrations->$temp;                    
-                        }else{                            
+                            $temp_account = $registrations->$temp;
+                        }else{
                             if($field_cc != $field_dv){
                                 if(is_numeric($registrations->$field_dv) && $registrations->$field_dv == 0){
                                     $temp_account = $registrations->$field_cc."-".$registrations->$field_dv;
                                 }else{
                                     $temp_account = $registrations->$field_dv ? $registrations->$field_cc."-".$registrations->$field_dv : $registrations->$field_cc;
                                 }
-                               
+
                             }else{
                                 $temp_account = $registrations->$field_cc;
                             }
                         }
-                        
+
                     }
                 }else{
                     $typeAccount = $this->bankData($registrations, 'account-type');
                     $numberBank = $this->bankData($registrations, 'bank-number');
                     $temp_account =  $account;
                 }
-                
+
                 $temp_account = explode("-", $temp_account);
-                
+
                 if(count($temp_account)>1){
                     $dig = substr($temp_account[1], -1);
 
                 }else{
                     $dig = substr($temp_account[0], -1);
                 }
-                
+
                 /**
                  * Pega o tipo de conta que o beneficiário tem Poupança ou corrente
                  */
@@ -1597,28 +1600,28 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                  * Se a conta for poupança e iniciar com o 510, ele mantem conta e DV como estão
                  * Caso contrario, ele pega o DV do De-Para das configs (savingsDigit)
                  */
-                if ($numberBank == '001' && $typeAccount == $default['typesAccount']['poupanca']) {                   
+                if ($numberBank == '001' && $typeAccount == $default['typesAccount']['poupanca']) {
                     if (substr($temp_account[0], 0, 3) == "510") {
                         $result = $dig;
                     } else {
-                        $dig = trim(strtoupper($dig));                       
+                        $dig = trim(strtoupper($dig));
                         $result = $default['savingsDigit'][$dig];
-                    }                    
-                } else {                    
+                    }
+                } else {
                     $result = $dig;
                 }
                 return is_string($result) ? strtoupper(trim($result)) : $this->normalizeString(trim($result));
-               
+
             },
             'BEN_DIGITO_CONTA_AGENCIA_80' => '',
             'BEN_NOME' => function ($registrations) use ($detahe1) {
                 $field_id = $detahe1['BEN_NOME']['field_id'];
-                $result = substr($this->normalizeString($registrations->$field_id), 0, $detahe1['BEN_NOME']['length']);                            
+                $result = substr($this->normalizeString($registrations->$field_id), 0, $detahe1['BEN_NOME']['length']);
                 return $result;
             },
             'BEN_DOC_ATRIB_EMPRESA_82' => '',
             'DATA_PAGAMENTO' => function ($registrations) use ($detahe1) {
-                $date = new DateTime();                
+                $date = new DateTime();
                 $date->add(new DateInterval('P5D'));
                 $weekday = $date->format('D');
 
@@ -1636,7 +1639,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $date->add(new DateInterval('P1D'));
                     $weekday = $date->format('D');
                 }
-                
+
                 return $date->format('dmY');
             },
             'TIPO_MOEDA' => '',
@@ -1657,7 +1660,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $temp = $detahe1['BEN_CODIGO_BANCO']['field_id'];
 
                     $field_conta = $detahe1['TIPO_CONTA']['field_id'];
-                    $typeAccount = $registrations->$field_conta;               
+                    $typeAccount = $registrations->$field_conta;
 
                     if($temp){
                         $numberBank = $this->numberBank($registrations->$temp);
@@ -1665,10 +1668,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $numberBank = $default['defaultBank'];
                     }
                 }else{
-                    $typeAccount = $this->bankData($registrations, 'account-type');                   
+                    $typeAccount = $this->bankData($registrations, 'account-type');
                     $numberBank = $bank;
                 }
-                    
+
                 if ($numberBank == "001" && $typeAccount == $default['typesAccount']['poupanca']) {
                     return '11';
 
@@ -1716,7 +1719,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }else{
                     return 2;
                 }
-               
+
             },
             'BEN_CPF' => function ($registrations) use ($detahe2) {
                 $field_id = $detahe2['BEN_CPF']['field_id'];
@@ -1734,7 +1737,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_NUMERO']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_Num'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -1744,7 +1747,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_COMPLEMENTO']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_Complemento'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -1754,7 +1757,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_BAIRRO']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_Bairro'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -1764,7 +1767,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_CIDADE']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_Municipio'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -1774,7 +1777,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_CEP']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_CEP'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -1784,7 +1787,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_CIDADE']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_Estado'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -1834,7 +1837,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $field_banco = $default['field_banco'];
         $field_agency = $default['field_agency'];
         $defaultBank = $default['defaultBank'];
-        $informDefaultBank = $default['informDefaultBank'];       
+        $informDefaultBank = $default['informDefaultBank'];
         $selfDeclaredBB = $default['selfDeclaredBB'];
         $typesReceipt = $default['typesReceipt'];
         $formoReceipt = $default['formoReceipt'];
@@ -1847,50 +1850,50 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
         if($default['ducumentsType']['unbanked']){ // Caso exista separação entre bancarizados e desbancarizados
             foreach($registrations as $value){
-                
-                //Caso nao exista pagamento para a inscrição, ele a ignora e notifica na tela                
+
+                //Caso nao exista pagamento para a inscrição, ele a ignora e notifica na tela
                 if(!$this->validatedPayment($value)){
                     $app->log->info("\n".$value->number . " - Pagamento nao encontrado.");
                     continue;
-                } 
-                
-                // Veirifica se existe a pergunta se o requerente é correntista BB ou não no formulário. Se sim, pega a resposta  
-                $accountHolderBB = "NÃO";              
+                }
+
+                // Veirifica se existe a pergunta se o requerente é correntista BB ou não no formulário. Se sim, pega a resposta
+                $accountHolderBB = "NÃO";
                 if($selfDeclaredBB){
                     $accountHolderBB = trim($value->$selfDeclaredBB);
-                   
+
                 }
-                
+
                 //Caso nao exista informações bancárias
-                if(!$value->$formoReceipt && $selfDeclaredBB === "NÃO"){                                   
+                if(!$value->$formoReceipt && $selfDeclaredBB === "NÃO"){
                     $app->log->info("\n".$value->number . " - Forma de recebimento não encontrada.");
-                    $noFormoReceipt ++;                   
+                    $noFormoReceipt ++;
                     continue;
                 }
-                
-                //Verifica se a inscrição é bancarizada ou desbancarizada               
+
+                //Verifica se a inscrição é bancarizada ou desbancarizada
                 if(in_array(trim($value->$formoReceipt), $typesReceipt['banked']) || $accountHolderBB === "SIM"){
-                    $Banked = true;     
+                    $Banked = true;
                     $countBanked ++;
 
                 }else if(in_array(trim($value->$formoReceipt) , $typesReceipt['unbanked']) || $accountHolderBB === "NÃO"){
                     $Banked = false;
-                    $countUnbanked ++; 
-                               
+                    $countUnbanked ++;
+
                 }
-               
+
                 if($Banked){
-                    if($defaultBank){                          
+                    if($defaultBank){
                         if($informDefaultBank === "001" || $accountHolderBB === "SIM"){
-                            
-                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB") { 
+
+                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB") {
                                 if($this->data['typeLote'] === "lotBBCorrente" || $this->data['typeLote'] === "all"){
                                     $recordsBBCorrente[] = $value;
-                                }                                
-                                
+                                }
+
                             }  else if (trim($value->$field_TipoConta) === "Conta poupança"){
                                 if($this->data['typeLote'] === "lotBBPoupanca" || $this->data['typeLote'] === "all"){
-                                    $recordsBBPoupanca[] = $value;                               
+                                    $recordsBBPoupanca[] = $value;
                                 }
 
                             }else{
@@ -1904,39 +1907,39 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             }
 
                         }
-                        
-                    }else{    
-                                           
+
+                    }else{
+
                         if(($this->numberBank($value->$field_banco) == "001") || $accountHolderBB == "SIM"){
-                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB") { 
+                            if (trim($value->$field_TipoConta) === "Conta corrente" || $value->$formoReceipt === "CARTEIRA DIGITAL BB") {
                                 if($this->data['typeLote'] === "lotBBCorrente" || $this->data['typeLote'] === "all"){
                                     $recordsBBCorrente[] = $value;
-                                }  
-        
+                                }
+
                             } else if (trim($value->$field_TipoConta) === "Conta poupança"){
                                 if($this->data['typeLote'] === "lotBBPoupanca" || $this->data['typeLote'] === "all"){
-                                    $recordsBBPoupanca[] = $value;                              
+                                    $recordsBBPoupanca[] = $value;
                                 }
-        
+
                             }else{
                                 if($this->data['typeLote'] === "lotBBCorrente" || $this->data['typeLote'] === "all"){
                                     $recordsBBCorrente[] = $value;
                                 }
                             }
-                        }else{                            
+                        }else{
                             if($this->data['typeLote'] === "lotOthers" || $this->data['typeLote'] === "all"){
                                 $recordsOthers[] = $value;
                             }
-                        
+
                         }
                     }
                 }else{
                     continue;
-                
+
                 }
             }
         }else{
-          
+
             foreach ($registrations as $value) {
                 //Caso nao exista pagamento para a inscrição, ele a ignora e notifica na tela
                 if(!$this->validatedPayment($value)){
@@ -1944,17 +1947,17 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     continue;
                 }
 
-                if ($this->numberBank($value->$field_banco) == "001") {               
+                if ($this->numberBank($value->$field_banco) == "001") {
                     if ($value->$field_TipoConta == "Conta corrente") {
                         if($this->data['typeLote'] === "lotBBCorrente" || $this->data['typeLote'] === "all"){
                             $recordsBBCorrente[] = $value;
-                        }  
+                        }
                     } else {
                         if($this->data['typeLote'] === "lotBBPoupanca" || $this->data['typeLote'] === "all"){
-                            $recordsBBPoupanca[] = $value;                             
+                            $recordsBBPoupanca[] = $value;
                         }
                     }
-    
+
                 } else {
                     if($this->data['typeLote'] === "lotOthers" || $this->data['typeLote'] === "all"){
                         $recordsOthers[] = $value;
@@ -1963,7 +1966,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
         }
         //Caso exista separação de bancarizados ou desbancarizados, mostra no terminal o resumo
-        if($default['ducumentsType']['unbanked']){           
+        if($default['ducumentsType']['unbanked']){
             $app->log->info("\nResumo da separação entre bancarizados e desbancarizados.");
             $app->log->info($countBanked . " BANCARIZADOS");
             $app->log->info($countUnbanked . " DESBANCARIZADOS");
@@ -1976,7 +1979,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $app->log->info(count($recordsOthers) . " OUTROS BANCOS");
         $app->log->info($noFormoReceipt . " SEM INFORMAÇÃO BANCÁRIA");
         sleep(1);
-        
+
         //Verifica se existe registros em algum dos arrays. Caso não exista exibe a mensagem
         $validaExist = array_merge($recordsBBCorrente, $recordsOthers, $recordsBBPoupanca);
         if(empty($validaExist)){
@@ -2048,7 +2051,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             //treiller 1
             $lotBBCorrente += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
-            $valor = $_SESSION['valor'];             
+            $valor = $_SESSION['valor'];
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotBBCorrente,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
@@ -2085,7 +2088,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             //Detalhes 1 e 2
 
-            foreach ($recordsBBPoupanca as $key_records => $records) {               
+            foreach ($recordsBBPoupanca as $key_records => $records) {
                 $numSeqRegistro++;
                 $complement = [
                     'LOTE' => $numLote,
@@ -2147,7 +2150,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
             //Detalhes 1 e 2
 
-            foreach ($recordsOthers as $key_records => $records) {                
+            foreach ($recordsOthers as $key_records => $records) {
                 $numSeqRegistro++;
                 $complement = [
                     'LOTE' => $numLote,
@@ -2163,13 +2166,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $txt_data .= "\r\n";
                 $lotOthers += 2;
                 $this->processesPayment($records, $app);
-                
+
 
             }
 
             //treiller 1
             $lotOthers += 1; // Adiciona 1 para obedecer a regra de somar o treiller 1
-            $valor = $_SESSION['valor'];         
+            $valor = $_SESSION['valor'];
             $complement = [
                 'QUANTIDADE_REGISTROS_127' => $lotOthers,
                 'VALOR_TOTAL_DOC_INTEIRO' => $valor,
@@ -2196,7 +2199,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
             unset($_SESSION['problems']);
         }
-        
+
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
          */
@@ -2256,7 +2259,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
          * Pega os dados das configurações
          */
         $txt_config = $this->config['config-cnab240-inciso2'];
-        $default = $txt_config['parameters_default'];        
+        $default = $txt_config['parameters_default'];
         $header1 = $txt_config['HEADER1'];
         $header2 = $txt_config['HEADER2'];
         $detahe1 = $txt_config['DETALHE1'];
@@ -2264,9 +2267,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $trailer1 = $txt_config['TRAILER1'];
         $trailer2 = $txt_config['TRAILER2'];
         $fromToAccounts = $default['fromToAccounts'];
-        
+
         $dePara = $this->readingCsvFromTo($fromToAccounts);
-        $cpfCsv = $this->cpfCsv($fromToAccounts);  
+        $cpfCsv = $this->cpfCsv($fromToAccounts);
 
         $header1 = $this->getFieldId($header1, $field_labelMap);
         $header2 = $this->getFieldId($header2, $field_labelMap);
@@ -2274,7 +2277,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $detahe2 = $this->getFieldId($detahe2, $field_labelMap);
         $trailer1 = $this->getFieldId($trailer1, $field_labelMap);
         $trailer2 = $this->getFieldId($trailer2, $field_labelMap);
-                
+
 
         $mappedHeader1 = [
             'BANCO' => '',
@@ -2307,7 +2310,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $header1['CONTA'];
                 $value = $this->normalizeString($field_id['default']);
                 return substr($value, 0, 12);
-                
+
 
             },
             'CONTA_DIGITO' => function ($registrations) use ($header1) {
@@ -2376,7 +2379,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $header2['CONTA'];
                 $value = $this->normalizeString($field_id['default']);
                 return substr($value, 0, 12);
-              
+
 
             },
             'CONTA_DIGITO' => function ($registrations) use ($header2) {
@@ -2419,7 +2422,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 }else{
                     $result = "018";
-                    
+
                 }
                 return $result;
 
@@ -2433,41 +2436,41 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $result = "";
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-                
+
                 $pos = array_search($cpfBase,$cpfCsv);
-               
-                if($pos){                    
+
+                if($pos){
                     $agencia = $dePara[$pos]['BEN_AGENCIA'];
-                    
+
                 }else{
                     $temp = $default['formoReceipt'];
-                    $formoReceipt = $registrations->$temp; 
-    
+                    $formoReceipt = $registrations->$temp;
+
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                        $field_id = $default['fieldsWalletDigital']['agency'];                    
+                        $field_id = $default['fieldsWalletDigital']['agency'];
                     }else{
                         $field_id = $detahe1['BEN_AGENCIA']['field_id'];
                     }
 
                     $agencia = $registrations->$field_id;
                 }
-                
-                
+
+
 
                 $age = explode("-", $agencia);
-                
+
                 if(count($age)>1){
                     $result = $age[0];
 
                 }else{
                     if (strlen($age[0]) > 4) {
-                    
+
                         $result = substr($age[0], 0, 4);
                     } else {
                         $result = $age[0];
                     }
                 }
-               
+
                 $result = $this->normalizeString($result);
                 return is_string($result) ? strtoupper($result) : $result;
             },
@@ -2475,25 +2478,25 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $result = "";
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-                
-                $pos = array_search($cpfBase,$cpfCsv);               
-                if($pos){                    
+
+                $pos = array_search($cpfBase,$cpfCsv);
+                if($pos){
                     $agencia = $dePara[$pos]['BEN_AGENCIA'];
-                    
+
                 }else{
                     $temp = $default['formoReceipt'];
-                    $formoReceipt = $registrations->$temp; 
-    
+                    $formoReceipt = $registrations->$temp;
+
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                        $field_id = $default['fieldsWalletDigital']['agency'];                    
+                        $field_id = $default['fieldsWalletDigital']['agency'];
                     }else{
                         $field_id = $detahe1['BEN_AGENCIA_DIGITO']['field_id'];
                     }
 
                     $agencia = $registrations->$field_id;
                 }
-                
-                
+
+
                 $age = explode("-", $agencia);
 
                 if(count($age)>1){
@@ -2505,12 +2508,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         $result = "";
                     }
                 }
-                
+
                 $result = $this->normalizeString($result);
                 return is_string($result) ? strtoupper($result) : $result;
             },
-            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {    
-                $result  = ""; 
+            'BEN_CONTA' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
+                $result  = "";
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
 
@@ -2526,49 +2529,49 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $numberBank = $default['defaultBank'];
                 }
 
-                $pos = array_search($cpfBase,$cpfCsv);               
-                if($pos){                    
+                $pos = array_search($cpfBase,$cpfCsv);
+                if($pos){
                     $temp_account = $dePara[$pos]['BEN_CONTA'];
-                    
+
                 }else{
                     $temp = $default['formoReceipt'];
                     $formoReceipt = $registrations->$temp;
 
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                        $field_id = $default['fieldsWalletDigital']['account'];                    
+                        $field_id = $default['fieldsWalletDigital']['account'];
                     }else{
                         $field_id = $detahe1['BEN_CONTA']['field_id'];
                     }
 
                     $temp_account = $registrations->$field_id;
                 }
-                
+
                 $temp_account = explode("-", $temp_account);
                 if(count($temp_account)>1){
                     $account = $temp_account[0];
                 }else{
                     $account = substr($temp_account[0], 0, -1);
                 }
-                
+
                 if(!$account){
                     $app->log->info($registrations->number . " Conta bancária não informada");
                     return " ";
                 }
 
-                
+
                 if($typeAccount == $default['typesAccount']['poupanca']){
 
                     if (($numberBank == '001') && (substr($account, 0, 3) != "510")) {
 
                         $result = "510" . $account;
-                         
+
                     }else{
                         $result = $account;
                     }
                 }else{
                     $result = $account;
                 }
-                
+
                 $result = preg_replace('/[^0-9]/i', '',$result);
 
                 if($dig === $field_conta && $temp_account == 1){
@@ -2578,7 +2581,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     return $this->normalizeString($result);
 
                 }
-                
+
             },
             'BEN_CONTA_DIGITO' => function ($registrations) use ($detahe2, $detahe1, $default, $app, $dePara, $cpfCsv) {
                 $result = "";
@@ -2586,7 +2589,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $field_id = $detahe1['BEN_CONTA']['field_id'];
                 $field_cpf = $detahe2['BEN_CPF']['field_id'];
                 $cpfBase = preg_replace('/[^0-9]/i', '',$registrations->$field_cpf);
-                
+
 
                 if($temp){
                     $numberBank = $this->numberBank($registrations->$temp);
@@ -2598,22 +2601,22 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $temp = $detahe1['TIPO_CONTA']['field_id'];
                 $typeAccount = $registrations->$temp;
 
-                $pos = array_search($cpfBase,$cpfCsv);               
-                if($pos){                    
+                $pos = array_search($cpfBase,$cpfCsv);
+                if($pos){
                     $temp_account = $dePara[$pos]['BEN_CONTA'];
-                    
+
                 }else{
                     $temp = $default['formoReceipt'];
                     $formoReceipt = $registrations->$temp;
-                    
+
                     if($formoReceipt == "CARTEIRA DIGITAL BB"){
-                        $temp = $default['fieldsWalletDigital']['account'];                    
+                        $temp = $default['fieldsWalletDigital']['account'];
                     }else{
                         $temp = $detahe1['BEN_CONTA_DIGITO']['field_id'];
                     }
                     $temp_account = $registrations->$field_id;
                 }
-                
+
                 $temp_account = explode("-", $temp_account);
                 if(count($temp_account)>1){
                     $dig = $temp_account[1];
@@ -2621,32 +2624,32 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }else{
                     $dig = substr($temp_account[0], -1);
                 }
-                
-                if ($numberBank == '001' && $typeAccount == $default['typesAccount']['poupanca']) {                   
+
+                if ($numberBank == '001' && $typeAccount == $default['typesAccount']['poupanca']) {
                     if (substr($temp_account[0], 0, 3) == "510") {
                         $result = $dig;
                     } else {
-                        $dig = trim(strtoupper($dig));                       
+                        $dig = trim(strtoupper($dig));
                         $result = $default['savingsDigit'][$dig];
                     }
                 } else {
 
                     $result = $dig;
                 }
-                
+
                 $result = $this->normalizeString(preg_replace('/[^0-9]/i', '',$result));
                 return is_string($result) ? strtoupper($result) : $result;
-               
+
             },
             'BEN_DIGITO_CONTA_AGENCIA_80' => '',
             'BEN_NOME' => function ($registrations) use ($detahe1) {
                 $field_id = $detahe1['BEN_NOME']['field_id'];
-                $result = substr($this->normalizeString($registrations->$field_id), 0, $detahe1['BEN_NOME']['length']);                            
+                $result = substr($this->normalizeString($registrations->$field_id), 0, $detahe1['BEN_NOME']['length']);
                 return $result;
             },
             'BEN_DOC_ATRIB_EMPRESA_82' => '',
             'DATA_PAGAMENTO' => function ($registrations) use ($detahe1) {
-                $date = new DateTime();                
+                $date = new DateTime();
                 $date->add(new DateInterval('P1D'));
                 $weekday = $date->format('D');
 
@@ -2664,7 +2667,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     $date->add(new DateInterval('P1D'));
                     $weekday = $date->format('D');
                 }
-                
+
                 return $date->format('dmY');
             },
             'TIPO_MOEDA' => '',
@@ -2681,7 +2684,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                 $amount =  preg_replace('/[^0-9]/i', '', $payment->amount);
                 return number_format($amount, 2, '.', '');
-                
+
             },
             'USO_BANCO_88' => '',
             'USO_BANCO_89' => '',
@@ -2725,7 +2728,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_LOGRADOURO']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_Nome_Logradouro'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -2736,7 +2739,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_NUMERO']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_Num'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -2746,7 +2749,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_COMPLEMENTO']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_Complemento'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -2756,7 +2759,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_BAIRRO']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_Bairro'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -2766,7 +2769,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_CIDADE']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_Municipio'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -2776,7 +2779,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_CEP']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_CEP'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -2786,7 +2789,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $length = $detahe2['BEN_ENDERECO_CIDADE']['length'];
                 $data = $registrations->$field_id;
                 $result = $data['En_Estado'];
-                
+
                 $result = substr($result, 0, $length);
 
                 return $result;
@@ -2834,54 +2837,54 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $recordsOthers = [];
         $field_TipoConta = array_search(trim($default['field_TipoConta']), $field_labelMap);
         $field_banco = array_search(trim($default['field_banco']), $field_labelMap);
-        $defaultBank = $default['defaultBank'];       
+        $defaultBank = $default['defaultBank'];
         $correntistabb = $default['correntistabb'];
         $countMci460 = 0;
 
         if($default['ducumentsType']['unbanked']){ // Caso exista separação entre bancarizados e desbancarizados
-            
+
             if($defaultBank && $defaultBank ==  '001'){
 
-                foreach ($registrations as $value) {   
-                    
+                foreach ($registrations as $value) {
+
                     if ($value->$field_TipoConta == "Conta corrente" && $value->$correntistabb == "SIM") {
                         $recordsBBCorrente[] = $value;
 
                     } else if ($value->$field_TipoConta == "Conta poupança" && $value->$correntistabb == "SIM"){
                         $recordsBBPoupanca[] = $value;
-                    
+
                     }else{
                         $countMci460 ++;
-                        $recordsOthers = []; 
+                        $recordsOthers = [];
                         $app->log->info($value->number . " - Não incluída no CNAB240 pertence ao MCI460.");
                     }
                 }
-            
+
             }else{
-                foreach ($registrations as $value) {          
-                    if ($this->numberBank($value->$field_banco) == "001" && $value->$correntistabb == "SIM") {             
+                foreach ($registrations as $value) {
+                    if ($this->numberBank($value->$field_banco) == "001" && $value->$correntistabb == "SIM") {
                         if ($value->$field_TipoConta == "Conta corrente") {
                             $recordsBBCorrente[] = $value;
                         } else {
                             $recordsBBPoupanca[] = $value;
                         }
-        
+
                     } else {
                         $countMci460 ++;
                         $recordsOthers = [];
                         $app->log->info($value->number . "Não incluída no CNAB240 pertence ao MCI460.");
                     }
-                } 
+                }
             }
         }else{
-            foreach ($registrations as $value) {          
-                if ($this->numberBank($value->$field_banco) == "001") {               
+            foreach ($registrations as $value) {
+                if ($this->numberBank($value->$field_banco) == "001") {
                     if ($value->$field_TipoConta == "Conta corrente") {
                         $recordsBBCorrente[] = $value;
                     } else {
                         $recordsBBPoupanca[] = $value;
                     }
-    
+
                 } else {
                     $recordsOthers[] = $value;
                 }
@@ -2901,7 +2904,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
              echo "Não foram encontrados registros analise os logs";
              exit();
          }
-        
+
 
         /**
          * Monta o txt analisando as configs. caso tenha que buscar algo no banco de dados,
@@ -3103,7 +3106,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
             unset($_SESSION['problems']);
         }
-        
+
         /**
          * cria o arquivo no servidor e insere o conteuto da váriavel $txt_data
          */
@@ -3133,8 +3136,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      * Importador retorno CNAB240
     */
     public function GET_importFileCnab240()
-    {   
-        
+    {
+
         $this->requireAuthentication();
 
         $app = App::i();
@@ -3156,12 +3159,12 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $inciso2_opportunity_ids = $config['inciso2_opportunity_ids'];
 
         $files = $opportunity->getFiles('cnab240');
-       
-        
+
+
         foreach ($files as $file) {
-            
-            if ($file->id == $file_id) {                
-                if($opportunity_id == $inciso1_opportunity_id || in_array($opportunity_id, $inciso2_opportunity_ids)){                    
+
+            if ($file->id == $file_id) {
+                if($opportunity_id == $inciso1_opportunity_id || in_array($opportunity_id, $inciso2_opportunity_ids)){
                     $this->importCnab240($opportunity, $file->getPath());
                 }
             }
@@ -3173,13 +3176,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     /**
      * Faz o processamento do arquivo importado
      */
-    private function importCnab240(Opportunity $opportunity, string $filename){    
-        $this->requireAuthentication();  
+    private function importCnab240(Opportunity $opportunity, string $filename){
+        $this->requireAuthentication();
         $app = App::i();
         $conn = $app->em->getConnection();
-        $plugin = $app->plugins['AldirBlanc'];   
+        $plugin = $app->plugins['AldirBlanc'];
         $processingDate = new DateTime();
-        $processingDate = $processingDate->format('Y-m-d');    
+        $processingDate = $processingDate->format('Y-m-d');
 
         $result = [];
         $countLine = 1;
@@ -3203,9 +3206,9 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             echo "Essa oportunidade nao é uma oportunidade configurada";
             exit;
         }
-        
+
         $data = $this->mappedCnab($filename);
-        
+
         //Pega a linha do header do lote
         $LOTE1_H = isset($data['LOTE_1']) ? min($data['LOTE_1']) : null;
         $LOTE2_H = isset($data['LOTE_2']) ? min($data['LOTE_2']) : null;
@@ -3215,8 +3218,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $LOTE1_T = isset($data['LOTE_1']) ? max($data['LOTE_1']) : null;
         $LOTE2_T = isset($data['LOTE_2']) ? max($data['LOTE_2']) : null;
         $LOTE3_T = isset($data['LOTE_3']) ? max($data['LOTE_3']) : null;
-        
-        //Faz a busca nos dados do retorno e monta o array $result com todos os dados 
+
+        //Faz a busca nos dados do retorno e monta o array $result com todos os dados
         foreach($data as $key_data => $value){
             $seg = null;
             $cpf = null;
@@ -3235,14 +3238,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 }
             }else if($key_data === "LOTE_1_DATA"){
                 $cont = 1;
-                $lote = 'Corrente BB';                   
+                $lote = 'Corrente BB';
                 foreach($value as $key_r => $r){
-                    if($key_r == $LOTE1_H){ 
+                    if($key_r == $LOTE1_H){
                         //Valida se o lote 1 esta válido
                         $n = $this->getLineData($r, 230, 231);
                         $result['LOTE_1']['LOTE_STATUS']  = $this->validatedCanb($n, $seg, $cpf, $inscri, $lote);
 
-                    }elseif($key_r == $LOTE1_T){}else{ 
+                    }elseif($key_r == $LOTE1_T){}else{
                         $seg = ($key_r % 2) == true ? "A" : "B";
 
                         if($seg === "A"){
@@ -3254,15 +3257,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         else{
                             //Pega o tipo de documento CPF ou CNPJ
                             $tipo = $this->getLineData($r, 17, 17);
-                            
+
                             //Pega o CPF da inscrição
                             $cpf_cnpj = $this->getLineData($r, 19, 31);
                             $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
-                            
+
                             //Firmata o CPF ou CNPJ
                             $cpf_cnpj = substr($cpf_cnpj, -11);
 
-                            //Busca o número da inscrição                           
+                            //Busca o número da inscrição
                             if($this->getLineData($r, 210, 224) != ""){
                                 $inscri = $this->getLineData($r, 210, 224);
 
@@ -3272,7 +3275,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             }else{
                                 $inscri_db = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
                                 $inscri = $inscri_db[0]['id'];
-                                
+
                                 if(!$inscri){
                                     $app->log->info('Inscrição não localizada para o CPF - ' . $cpf_cnpj);
                                     continue;
@@ -3280,23 +3283,23 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             }
                             $result['LOTE_1'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri, $lote);
                         }
-                        
+
                         if($seg === "B"){
                             $cont ++;
                         }
                     }
                 }
             }else if($key_data === "LOTE_2_DATA"){
-                
+
                 $cont = 1;
-                $lote = 'Poupança BB';                
+                $lote = 'Poupança BB';
                 foreach($value as $key_r => $r){
-                    if($key_r == $LOTE2_H){ 
+                    if($key_r == $LOTE2_H){
                         //Valida se o lote 2 esta válido
                         $n = $this->getLineData($r, 230, 231);
                         $result['LOTE_2']['LOTE_STATUS'] = $this->validatedCanb($n, $seg, $cpf, $inscri, $lote);
 
-                    }elseif($key_r == $LOTE2_T){}else{ 
+                    }elseif($key_r == $LOTE2_T){}else{
                         $seg = ($key_r % 2) == true ? "A" : "B";
 
                         if($seg === "A"){
@@ -3307,11 +3310,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         else{
                             //Pega o tipo de documento CPF ou CNPJ
                             $tipo = $this->getLineData($r, 17, 17);
-                            
+
                             //Pega o CPF da inscrição
                             $cpf_cnpj = $this->getLineData($r, 19, 31);
                             $result['LOTE_2'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
-                            
+
                             //Firmata o CPF ou CNPJ
                             $cpf_cnpj = substr($cpf_cnpj, -11);
 
@@ -3338,19 +3341,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         if($seg === "B"){
                             $cont ++;
                         }
-                        
+
                     }
                 }
             }else if($key_data === "LOTE_3_DATA"){
                 $cont = 1;
-                $lote = 'Outros Bancos';               
+                $lote = 'Outros Bancos';
                 foreach($value as $key_r => $r){
-                    if($key_r == $LOTE3_H){ 
+                    if($key_r == $LOTE3_H){
                         //Valida se o lote 3 esta válido
                         $n = $this->getLineData($r, 230, 231);
                         $result['LOTE_3']['LOTE_STATUS'] = $this->validatedCanb($n, $seg, $cpf, $inscri, $lote);
 
-                    }elseif($key_r == $LOTE3_T){}else{ 
+                    }elseif($key_r == $LOTE3_T){}else{
                         $seg = ($key_r % 2) == true ? "A" : "B";
 
                         if($seg === "A"){
@@ -3361,21 +3364,21 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                         else{
                              //Pega o tipo de documento CPF ou CNPJ
                              $tipo = $this->getLineData($r, 17, 17);
-                            
+
                              //Pega o CPF da inscrição
                              $cpf_cnpj = $this->getLineData($r, 19, 31);
                              $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj, $inscri, $lote);
-                             
+
                              //Firmata o CPF ou CNPJ
                              $cpf_cnpj = substr($cpf_cnpj, -11);
- 
+
                              //Busca o número da inscrição
                              if($this->getLineData($r, 210, 224) != ""){
                                  $inscri = $this->getLineData($r, 210, 224);
- 
+
                              }elseif($this->getLineData($r, 33, 62)!=""){
                                  $inscri = $this->getLineData($r, 33, 62);
- 
+
                              }else{
                                 $inscri_db = $conn->fetchAll("select r.id, r.status from registration r join payment p on r.id = p.registration_id where REGEXP_REPLACE(agents_data, '[^A-Za-z0-9\":,]*', '','g') like '%\"documento\":\"{$cpf_cnpj}\"%' and r.status in (1,10)");
                                 $inscri = $inscri_db[0]['id'];
@@ -3387,28 +3390,28 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             }
                             $result['LOTE_3'][$cont] = $this->validatedCanb($code, $seg, $cpf_cnpj,  $inscri, $lote);
                         }
-                        
+
                         if($seg === "B"){
                             $cont ++;
                         }
-                        
+
                     }
                 }
             }else if($key_data === "TREILLER_DATA_ARQ"){}
         }
-      
+
         //Arrays que serão realmente avaliados no processmento do retorno
         $check = ['LOTE_1', 'LOTE_2', 'LOTE_3'];
-       
+
         //Faz o processamento do retono na base do Mapas
         $csv_data = [];
         $contProcess = 0;
         $dataArq = "";
-        foreach($result as $key_result => $value){         
-            
+        foreach($result as $key_result => $value){
+
             if(in_array($key_result, $check)){
                 foreach($value as $key_value => $r){
-                    
+
                     if($key_value != "LOTE_STATUS"){
                          //Conta os registros processados
                         $contProcess++;
@@ -3417,8 +3420,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             //pega o pagamento da inscrição
                             $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
                                 'registration' => preg_replace('/[^\d\-]/', '',$r['inscricao'])
-                            ]); 
-                            
+                            ]);
+
                             //Caso nao exita pagamento ele ignora e insere o log no CSV
                             if(!$payment){
                                 $r['status'] = 'RETORNO NÃO PROCESSADO, PAGAMENTO NÃO ENCONTRADO';
@@ -3426,24 +3429,24 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                 $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO NÃO PROCESSADO - PAGAMENTO NÃO ENCONTRADO" );
                                 continue;
                             }
-                            
+
                             //Remonta o metadado de pagamento com informações do CNAB
-                            $meta_data = []; 
+                            $meta_data = [];
                             $status_txt = $r['status'] ? 'PAGAMENTO EFETUADO' : 'PAGAMENTO NÃO EFETUADO';
                             $reason = $r['reason'];
                             $status_code = $r['status'] ? Payment::STATUS_PAID : Payment::STATUS_FAILED;
-                           
-                            $paymenteMetadata = $payment->metadata;  
-                            
+
+                            $paymenteMetadata = $payment->metadata;
+
                             $registration = $app->repo('Registration')->find(['id' => $r['inscricao']]);
                             $dataprev_raw = json_decode($registration->getMetadata('dataprev_raw'));
                             $monoParentDataprev = !empty((array)$dataprev_raw) ?  mb_strtolower($dataprev_raw->IN_MULH_PROV_MONOPARENT) : 'não';
-                            $monoParentInscricao = mb_strtolower($registration->metadata["field_".$config['monoParentField']]);                            
+                            $monoParentInscricao = mb_strtolower($registration->metadata["field_".$config['monoParentField']]);
                             $monoParental = ($monoParentDataprev ==  'sim' && $monoParentInscricao == 'sim') ? true : false;
-                            
+
                             $meta_data = $paymenteMetadata;
                             $first = false;
-                            if(!(isset($meta_data['return_cnab_info']) ?? false)){                                
+                            if(!(isset($meta_data['return_cnab_info']) ?? false)){
                                 $meta_data['return_cnab_info'] = [
                                     'STATUS_CODE' => $status_code,
                                     'STATUS_TXT' => $status_txt,
@@ -3453,7 +3456,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
                                 $first = true;
                             }
-                            
+
                             $i = $first ? 1 : ((int) $meta_data['return_cnab_info']['PAYMENT_NUMBER'] +1);
                             $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['STATUS_CODE_PAYMENT'] = $status_code;
                             $meta_data['return_cnab_info']['PAYMENT_DATA'][$i]['STATUS_TXT_PAYMENT'] = $status_txt;
@@ -3472,8 +3475,8 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                                     if($value['STATUS_CODE_PAYMENT'] == '10'){
                                         $meta_data['return_cnab_info']['STATUS_CODE'] = 10;
                                         $meta_data['return_cnab_info']['STATUS_TXT'] = 'PAGAMENTO EFETUADO';
-                                        $meta_data['return_cnab_info']['ID_PAYMENT'] = $key; 
-                                        $meta_data['return_cnab_info']['FILE_ID'] = $value['FILE_ID'];                                     
+                                        $meta_data['return_cnab_info']['ID_PAYMENT'] = $key;
+                                        $meta_data['return_cnab_info']['FILE_ID'] = $value['FILE_ID'];
                                         $mess = "PAGAMENTO EFETUADO - ARQUIVO - ". $value['FILE_ID'];
                                         break;
                                     }else{
@@ -3484,13 +3487,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             }else{
                                 $app->log->info("#".$contProcess." - ". $r['inscricao'] . " - RETORNO PROCESSADO - ".$status_txt);
                             }
-               
+
                             //Salva o novo metadado
-                            $payment->metadata = $meta_data;                          
-                            
+                            $payment->metadata = $meta_data;
+
                             $payment->save(true);
-                            
-                            
+
+
                             //Seta o status em texto para o CSV
                             $r['status'] = $consolidado ? "PAGAMENTO CONSOLIDADO NESSE PROCESSAMENTO O RESULTADO FINAL É ".$mess : $status_txt;
 
@@ -3499,33 +3502,33 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                             $r['status'] = "";
                             $app->log->info("#".$contProcess." - ". $r['cpf'] . " - RETORNO NÃO PROCESSADO - FALTA NÚMERO DE INSCRIÇÃO" );
 
-                        }                        
+                        }
                         //Monta o csv de resumo do processamento
-                        $csv_data[] = $r; 
+                        $csv_data[] = $r;
                     }
                 }
-            }           
+            }
         }
-        
+
         //Geração do CSV de resumo
-        $file_name = 'resumo-importacao-cnab240-'.$this->data['file'].'.csv';    
+        $file_name = 'resumo-importacao-cnab240-'.$this->data['file'].'.csv';
         $dir =  PRIVATE_FILES_PATH . 'opportunity/'.$opportunity->id."/temp/";
-        $patch = $dir . $file_name;        
+        $patch = $dir . $file_name;
 
         if (!is_dir($dir)) {
             mkdir($dir, 0700, true);
         }
-       
-        $stream = fopen($patch, 'w');        
+
+        $stream = fopen($patch, 'w');
         $csv = Writer::createFromStream($stream);
         $csv->setDelimiter(';');
         $header = $this->hearderCsvCnab();
         $csv->insertOne($header);
 
-        foreach ($csv_data as $key_csv => $csv_line) {            
+        foreach ($csv_data as $key_csv => $csv_line) {
             $csv->insertOne($csv_line);
-        } 
-        
+        }
+
         $file = new \MapasCulturais\Entities\OpportunityFile([
             'name' => $file_name,
             'type' => 'text/csv$',
@@ -3535,11 +3538,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         ]);
 
         $file->group = 'resumo_cnab';
-        $file->description = 'resumo-retorno'.$this->data['file'];   
-        $file->owner = $opportunity;              
+        $file->description = 'resumo-retorno'.$this->data['file'];
+        $file->owner = $opportunity;
         $file->save(true);
         $arquivos = $opportunity->getFiles('resumo_cnab');
-        
+
         $app->disableAccessControl();
         $opportunity = $app->repo("Opportunity")->find($opportunity->id);
         $opportunity->refresh();
@@ -3547,10 +3550,10 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $files->{basename($filename)} = date("d/m/Y \à\s H:i");
         $opportunity->cnab240_processed_files = $files;
         $opportunity->save(true);
-        $app->enableAccessControl();        
+        $app->enableAccessControl();
         $this->finish("ok");
-    } 
-    
+    }
+
     //###################################################################################################################################
     /**
      * Header do CSV de consolidação importador CNAB240
@@ -3641,30 +3644,30 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                     case '00199999':
                         $result['TREILLER_ARQ'][$countLine] = $countLine;
                         $result['TREILLER_DATA_ARQ'][$countLine] = $linha;
-                        break;                    
+                        break;
                 }
             }
             $countLine ++;
         }
         return $result;
     }
-    
+
     /**
      * Pega o registro dentro de uma determinada posição do CNAB240
      */
     private function getLineData($line, $start, $end){
         $data = "";
-        $char = strlen($line);       
+        $char = strlen($line);
         if(!empty($line)){
             for($i=0; $i<$char; $i++){
                 if($i>=$start && $i<=$end){
                     $data .= $line[$i];
-                    
+
                 }
             }
         }
         return trim($data);
-    }    
+    }
 
     /**
      * Função para retornar o número do banco, levando como base de pesquisa o nome do banco
@@ -3690,15 +3693,15 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         }
         return $result;
     }
-    
+
     /**
      * Retorna o valor do objeto endereço de uma registration
-     *     
+     *
      * @return string
      */
     private function getAddress($field, $attribute, $fieldsID, $registrations, $app, $length){
-        $field_id = $fieldsID[$field];       
-        $fromToAdress = $fieldsID['fromToAdress'];        
+        $field_id = $fieldsID[$field];
+        $fromToAdress = $fieldsID['fromToAdress'];
         $result = " ";
         if($fromToAdress){
             $adress = $this->readingCsvFromTo($fromToAdress);
@@ -3710,26 +3713,26 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             }
         }else{
             if ($field_id) {
-                if (is_string($registrations->$field_id)) {                    
+                if (is_string($registrations->$field_id)) {
                     $result = $registrations->$field_id;
 
                 } elseif (is_array($registrations->$field_id)) {
                     $result = $registrations->$field_id[$attribute];
 
-                } else {                    
+                } else {
                     $address = $registrations->$field_id;
                     if(!$address){
                         $address = json_decode($registrations->getMetadata($field_id));
                     }
 
                     if($address){
-                        $result =  $address->$attribute ?? " ";   
+                        $result =  $address->$attribute ?? " ";
                     }else{
                         $result = " ";
-                    } 
+                    }
                 }
             }
-            
+
             if($length){
                 if (strlen($result) > $length) {
                     $app->log->info("\n".$registrations->number ." ". $field . " > que ". $length . " Char. Truncado!");
@@ -3738,7 +3741,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
                 $app->log->info("\n".$registrations->id . $attribute . " Não encontrado");
             }
         }
-        return $this->normalizeString($result);                  
+        return $this->normalizeString($result);
     }
 
     /**
@@ -3759,13 +3762,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      *
      */
     private function mountTxt($array, $mapped, $txt_data, $register, $complement, $app)
-    {        
+    {
         if ($complement) {
             foreach ($complement as $key => $value) {
                 $array[$key]['default'] = $value;
             }
         }
-        
+
         foreach ($array as $key => $value) {
             if ($value['field_id']) {
                 if (is_callable($mapped[$key])) {
@@ -3791,7 +3794,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             } else {
                 $txt_data .= $this->createString($value);
             }
-        }        
+        }
         return $txt_data;
     }
 
@@ -3870,14 +3873,14 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         $payment = $app->em->getRepository('\\RegistrationPayments\\Payment')->findOneBy([
             'registration' => $register->id
         ]);
-      
-        if(!$payment){                   
+
+        if(!$payment){
             return false;
         }
 
         return true;
     }
-    
+
     /**
      * Pega a string e enquadra a mesma no formato necessario para tender o modelo CNAB 240
      * Caso a string nao atenda o numero de caracteres desejado, ela completa com zero ou espaço em banco
@@ -3933,13 +3936,13 @@ class Remessas extends \MapasCulturais\Controllers\Registration
 
          //Faz a leitura do arquivo
          $csv = Reader::createFromStream($stream);
- 
+
          //Define o limitador do arqivo (, ou ;)
          $csv->setDelimiter(";");
- 
+
          //Seta em que linha deve se iniciar a leitura
          $header_temp = $csv->setHeaderOffset(0);
- 
+
          //Faz o processamento dos dados
          $stmt = (new Statement());
          $results = $stmt->process($csv);
@@ -3947,19 +3950,19 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $data[$key] = $value;
         }
          return $data;
- 
+
     }
 
     private function cpfCsv($filename){
 
         $results = $this->readingCsvFromTo($filename);
-        
+
         $data = [];
         foreach($results as $key => $value){
             $data[$key] = $value['CPF'];
         }
          return $data;
- 
+
     }
 
     // define de qual form a requisição está vindo e pega os dados do request
@@ -3997,7 +4000,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
      */
     private function getFieldId($array, $field_labelMap){
         $result = [];
-        foreach ($array as $key_config => $value) {            
+        foreach ($array as $key_config => $value) {
             if (is_string($value['field_id']) && strlen($value['field_id']) > 0 && $value['field_id'] != 'mapped') {
                 $field_id = array_search(trim($value['field_id']), $field_labelMap);
                 $result[$key_config]['field_id'] = $field_id;
@@ -4542,6 +4545,65 @@ class Remessas extends \MapasCulturais\Controllers\Registration
     }
 
     /** #########################################################################
+     * Funções para o Banpará
+     */
+
+     private function exportBanpara($opportunities)
+     {
+        $app = App::i();
+        $config = $this->config["config-banpara"];
+        if (!isset($config["condition"])) {
+            throw new Exception("Configuração inválida: \"condition\" não " .
+                                "configurada");
+        }
+        $newline = "\r\n";
+        set_time_limit(0);
+        // inicializa contador e variável de saída
+        $nLines = 0;
+        $out = "";
+        $opportunityIDs = [];
+        // percorre as oportunidades
+        foreach ($opportunities as $opportunity) {
+            $registrations = $this->getRegistrations($opportunity, true);
+            /**
+             * Mapeamento de fielsds_id pelo label do campo
+             */
+            $this->registerRegistrationMetadata($opportunity);
+            // processa inscrições
+            $linesBefore = $nLines;
+            while ($registration = $registrations->next()[0]) {
+                // testa a condição configurada
+                if (!$this->genericCondition($config["fieldMap"], $registration,
+                                             $config["condition"])) {
+                    $app->log->info("Ignorando - condição não satisfeita: " .
+                                    $registration->number);
+                    continue;
+                }
+                foreach ($this->getNextPayment($registration) as $payment) {
+                    $amount = $this->genericPaymentAmount($payment);
+                    $details = $this->genericDetails($config, $registration, [
+                        "sequencialRegistro" => ($nLines + 1),
+                        "valorBeneficio" => $amount,
+                        "referencia" => "{$payment->id}",
+                    ]);
+                    $nLines += sizeof($details);
+                    $out .= implode($newline, $details) . $newline;
+                }
+                $app->em->clear();
+            }
+            if ($nLines > $linesBefore) {
+                $opportunityIDs[] = $this->createString([
+                    "default" => $opportunity->id,
+                    "length" => 3,
+                    "type" => "int",
+                ]);
+            }
+        }
+        $this->genericOutput($out, "banpara", "inciso1", $opportunityIDs);
+        return;
+     }
+
+     /** #########################################################################
      * Funções para os PPG10x
      */
 
@@ -5138,11 +5200,11 @@ class Remessas extends \MapasCulturais\Controllers\Registration
         //Seta o timeout
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '768M');
-        
+
         //Exige que o usuário esteja autenticado
         $this->requireAuthentication();
         $app = App::i();
-        
+
         //Pega a oportunidade
         if(!isset($this->data['opportunity']) && empty($this->data['opportunity'])){
             echo "Informe a oportunidade";
@@ -5157,30 +5219,30 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             echo "Não autorizado";
             die();
         }
-        
+
         //Pega as registrations
         $registrations = $app->repo('Registration')->findBy(['opportunity' => $opportunity, 'status' => [1,10]]);
-        
+
         //Cria o metadado e salva o CPF com formato válido
         $app->disableAccessControl();
-        $i = 0;    
+        $i = 0;
         foreach($registrations as $registration){
             $documento = $registration->owner->documento ?? false;
-            
+
             if(!$documento){
                 $app->log->info("#".$i. "-".$registration->id. " - Documento nao encontrado no agente");
                 continue;
             }
-            
-            $fix = preg_replace('/[^0-9]/i', '', $documento);      
-            
+
+            $fix = preg_replace('/[^0-9]/i', '', $documento);
+
             if(strlen($fix) != 11){
                 $app->log->info("#".$i. "-".$registration->id. " - CPF inválido - ". $registration->owner->documento);
 
             }else{
                 $registration->cpf_fix = preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "\$1.\$2.\$3-\$4", substr($fix, -11));
                 $registration->save(true);
-                
+
                 $app->log->info("#".$i. "-".$registration->id. " - Fix aplicado");
             }
             $i ++;

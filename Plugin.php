@@ -68,6 +68,7 @@ class Plugin extends \MapasCulturais\Plugin
             'config-import-cnab240' => require_once env('AB_IMPORT_CANB240', __DIR__ . '/config-import-cnab240.php'),
 
             'prefix_project' =>  env('AB_GERADOR_PROJECT_PREFIX', 'Lei Aldir Blanc - Inciso II | '),
+            'config-banpara' => require_once env('AB_CONFIG_BANPARA', __DIR__ . '/config-banpara.php'),
             'config-mci460' => require_once env('AB_CONFIG_MCI460', __DIR__ . '/config-mci460.php'),
             'config-ppg10x' => require_once env('AB_CONFIG_PPG10x', __DIR__ . '/config-ppg10x.php'),
 
