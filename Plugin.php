@@ -269,11 +269,15 @@ class Plugin extends \MapasCulturais\Plugin
 
         //Insere campo de observações nos modais de pagamento
         $app->hook('template(opportunity.single.payment-edit-single-modal-metadata):begin', function(){
-            $this->part('aldirblanc/observacoes-pagamento');
+            $this->part('aldirblanc/observacoes-pagamento-edit-single');
         });
         
         $app->hook('template(opportunity.single.payment-edit-multiple-modal-metadata):begin', function(){
-            $this->part('aldirblanc/observacoes-pagamento');
+            $this->part('aldirblanc/observacoes-pagamento-edit-multiple');
+        });
+
+        $app->hook('template(opportunity.single.payment-create-multiple-modal-metadata):begin', function(){
+            $this->part('aldirblanc/observacoes-pagamento-create-multiple');
         });
 
         $app->hook('template(<<*>>.main-footer):begin', function() use($plugin) {
