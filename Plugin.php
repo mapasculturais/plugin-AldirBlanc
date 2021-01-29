@@ -281,11 +281,36 @@ class Plugin extends \MapasCulturais\Plugin
             $this->part('aldirblanc/observacoes-pagamento-create-multiple');
         });
 
+        $app->hook('template(opportunity.single.payment-dataRevision-view):end', function(){
+            $this->part('aldirblanc/opportunity-payment-dataRevision-metadata');
+        });
+
+        //Trata o metadado de observação no arqrivo CSV de resultados de pagamentos
+        $app->hook('opportunity.payments.reportCSV', function(&$dataPayments, &$header, &$payments) {
+            
+            $result = [];
+            foreach ($dataPayments as $key_dataPayment => $dataPayment){
+                foreach ($payments as $key_payment => $payment){
+                    if($dataPayment['number']== $payment['inscricao']){
+                        $obs = json_decode($dataPayment['metadata'],true);
+                        $payment['metadata'] = $obs['csv_line']['OBSERVACOES'];
+                        unset($payments[$key_payment]);
+                    }
+                    $result[$key_payment] = $payment;
+                }
+            }
+            
+            $payments =  $result;
+            array_push($header, "OBSERVACAO");
+            
+        });
+        
         $app->hook('template(<<*>>.main-footer):begin', function() use($plugin) {
             if ($plugin->config['link_suporte_no_footer'] && $plugin->config['link_suporte']) {
                 $this->part('aldirblanc/support', ['linkSuporte' => $plugin->config['link_suporte']]);
             }
         });
+        
 
         // adiciona informações do status das validações ao formulário de avaliação
         $app->hook('template(registration.view.evaluationForm.simple):before', function(Registration $registration, $opportunity) use($inciso1Ids, $inciso2Ids) {
