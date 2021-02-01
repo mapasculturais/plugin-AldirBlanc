@@ -268,6 +268,43 @@ class Plugin extends \MapasCulturais\Plugin
             // $app->view->enqueueStyle('app','chat','chat.css');
         }
 
+        //Insere campo de observações nos modais de pagamento
+        $app->hook('template(opportunity.single.payment-edit-single-modal-metadata):begin', function(){
+            $this->part('aldirblanc/observacoes-pagamento-edit-single');
+        });
+        
+        $app->hook('template(opportunity.single.payment-edit-multiple-modal-metadata):begin', function(){
+            $this->part('aldirblanc/observacoes-pagamento-edit-multiple');
+        });
+
+        $app->hook('template(opportunity.single.payment-create-multiple-modal-metadata):begin', function(){
+            $this->part('aldirblanc/observacoes-pagamento-create-multiple');
+        });
+
+        $app->hook('template(opportunity.single.payment-dataRevision-view):end', function(){
+            $this->part('aldirblanc/opportunity-payment-dataRevision-metadata');
+        });
+
+        //Trata o metadado de observação no arqrivo CSV de resultados de pagamentos
+        $app->hook('opportunity.payments.reportCSV', function(&$dataPayments, &$header, &$payments) {
+            
+            $result = [];
+            foreach ($dataPayments as $key_dataPayment => $dataPayment){
+                foreach ($payments as $key_payment => $payment){
+                    if($dataPayment['number']== $payment['inscricao']){
+                        $obs = json_decode($dataPayment['metadata'],true);
+                        $payment['metadata'] = $obs['csv_line']['OBSERVACOES'];
+                        unset($payments[$key_payment]);
+                    }
+                    $result[$key_payment] = $payment;
+                }
+            }
+            
+            $payments =  $result;
+            array_push($header, "OBSERVACAO");
+            
+        });
+
         // define o valor do metadado da data de publicação
 
         $app->hook('entity(Registration).status(<<*>>)', function() use($app) {
