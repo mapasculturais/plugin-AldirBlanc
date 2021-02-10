@@ -140,7 +140,24 @@ class Plugin extends \MapasCulturais\Plugin
                 // 'BCO SANTANDER (BRASIL) S.A' => '033'
              ],
 
-             'ppg_registros' => PRIVATE_FILES_PATH . 'aldirblanc/ppg/registros.csv'
+             'ppg_registros' => PRIVATE_FILES_PATH . 'aldirblanc/ppg/registros.csv',
+
+            'relatorios.inciso1.ownerMetadata' => env('AB_RELATORIOS_INCISO1_OWNER_METADATA', 'raca,genero,En_Municipio,En_Bairro'),
+            'relatorios.inciso1.coletivoMetadata' => env('AB_RELATORIOS_INCISO1_COLETIVO_METADATA', ''),
+            'relatorios.inciso1.spaceMetadata' => env('AB_RELATORIOS_INCISO1_SPACE_METADATA', ''),
+
+            'relatorios.inciso2.ownerMetadata' => env('AB_RELATORIOS_INCISO2_OWNER_METADATA', 'raca,genero,En_Municipio,En_Bairro'),
+            'relatorios.inciso2.coletivoMetadata' => env('AB_RELATORIOS_INCISO2_COLETIVO_METADATA', 'En_Municipio,En_Bairro'),
+            'relatorios.inciso2.spaceMetadata' => env('AB_RELATORIOS_INCISO2_SPACE_METADATA', 'En_Municipio,En_Bairro'),
+
+            'relatorios.inciso3.ownerMetadata' => env('AB_RELATORIOS_INCISO3_OWNER_METADATA', 'raca,genero,En_Municipio,En_Bairro'),
+            'relatorios.inciso3.coletivoMetadata' => env('AB_RELATORIOS_INCISO3_COLETIVO_METADATA', 'En_Municipio,En_Bairro'),
+            'relatorios.inciso3.spaceMetadata' => env('AB_RELATORIOS_INCISO3_SPACE_METADATA', 'En_Municipio,En_Bairro'),
+
+            'relatorios.inciso1.registrationFields' => env('AB_RELATORIOS_INCISO1_REGISTRATION_FIELDS', '{}'),
+            'relatorios.inciso2.registrationFields' => env('AB_RELATORIOS_INCISO2_REGISTRATION_FIELDS', '{}'),
+            'relatorios.inciso3.registrationFields' => env('AB_RELATORIOS_INCISO3_REGISTRATION_FIELDS', '{}'),
+            
         ];
 
         $skipConfig = false;
@@ -254,6 +271,19 @@ class Plugin extends \MapasCulturais\Plugin
         if($plugin->config['zammad_enable']) {
             // $app->view->enqueueStyle('app','chat','chat.css');
         }
+
+        //Insere campo de observações nos modais de pagamento
+        $app->hook('template(opportunity.single.payment-edit-single-modal-metadata):begin', function(){
+            $this->part('aldirblanc/observacoes-pagamento-edit-single');
+        });
+        
+        $app->hook('template(opportunity.single.payment-edit-multiple-modal-metadata):begin', function(){
+            $this->part('aldirblanc/observacoes-pagamento-edit-multiple');
+        });
+
+        $app->hook('template(opportunity.single.payment-create-multiple-modal-metadata):begin', function(){
+            $this->part('aldirblanc/observacoes-pagamento-create-multiple');
+        });
 
         $app->hook('template(<<*>>.main-footer):begin', function() use($plugin) {
             if ($plugin->config['link_suporte_no_footer'] && $plugin->config['link_suporte']) {
@@ -1021,6 +1051,15 @@ class Plugin extends \MapasCulturais\Plugin
             'private' => true,
             'default_value' => '{}',
         ]);
+
+        //Registra o metadado de revisão de CPF
+        $this->registerMetadata('MapasCulturais\Entities\Registration', 'cpf_fix', [
+            'label' => i::__('Revisa formato CPF'),
+            'type' => 'text',
+            'private' => true,
+        ]);
+
+
         // FileGroup para os arquivos de desbancarizados
         $defBankless = new \MapasCulturais\Definitions\FileGroup(
             "bankless",
@@ -1050,6 +1089,17 @@ class Plugin extends \MapasCulturais\Plugin
         );
         $app->registerFileGroup("opportunity", $cnab240);
 
+         // FileGroup para os arquivos do CNAB240
+         $resumo_cnab = new \MapasCulturais\Definitions\FileGroup(
+            "resumo_cnab",
+            ["^text/plain$", "^application/octet-stream$"],
+            "O arquivo enviado não e um arquivo de resumo CNAB240.",
+            false,
+            null,
+            true
+        );
+        $app->registerFileGroup("opportunity", $resumo_cnab);
+
 
         // metadados da oportunidade para suporte a arquivos resumos do CNAB240
         $this->registerMetadata('MapasCulturais\Entities\Opportunity','resumo_cnab240_processed_files', [
@@ -1058,12 +1108,6 @@ class Plugin extends \MapasCulturais\Plugin
             'private' => true,
             'default_value' => '{}',
         ]);
-         // FileGroup para os arquivos de resumo do CNAB240
-         $cnab240Resumo = new \MapasCulturais\Definitions\FileGroup('mediacao-autorizacao', [
-            '^application/plain$',
-            '^application/vnd.ms-excel$'
-        ], ['O arquivo deve ser um documento ou uma imagem .jpg ou .png'], true, null, true);
-        $app->registerFileGroup("opportunity", $cnab240Resumo);
     }
 
     function json($data, $status = 200)
