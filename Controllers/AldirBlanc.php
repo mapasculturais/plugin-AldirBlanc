@@ -863,21 +863,28 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function GET_index()
     {
 
-        $this->requireAuthentication();
-
+        // $this->requireAuthentication();
         $app = App::i();
+        
+        $app->redirect($this->createUrl('encerrado'));
+        return;
 
-        if ($app->user->is('mediador')) {
-            $app->redirect($this->createUrl('cadastro'));
-        } else if ($app->user->aldirblanc_tipo_usuario == 'solicitante') {
-            $app->redirect($this->createUrl('cadastro'));
-        } else {
-            $app->user->aldirblanc_tipo_usuario = 'solicitante';
-            $app->disableAccessControl();
-            $app->user->save(true);
-            $app->enableAccessControl();
-            $app->redirect($this->createUrl('cadastro'));
-        }
+        // if ($app->user->is('mediador')) {
+        //     $app->redirect($this->createUrl('cadastro'));
+        // } else if ($app->user->aldirblanc_tipo_usuario == 'solicitante') {
+        //     $app->redirect($this->createUrl('cadastro'));
+        // } else {
+        //     $app->user->aldirblanc_tipo_usuario = 'solicitante';
+        //     $app->disableAccessControl();
+        //     $app->user->save(true);
+        //     $app->enableAccessControl();
+        //     $app->redirect($this->createUrl('cadastro'));
+        // }
+    }
+
+    function GET_encerrado() {
+        // $this->requireAuthentication();
+        $this->render('encerrado');
     }
 
     function GET_fixregistrationinciso1() {
