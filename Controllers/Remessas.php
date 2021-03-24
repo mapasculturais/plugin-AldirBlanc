@@ -3878,7 +3878,7 @@ class Remessas extends \MapasCulturais\Controllers\Registration
             $diff = $length - $qtd;
         }
 
-        $value['default'] = Normalizer::normalize($value['default'], Normalizer::FORM_D);
+        $value['default'] = Normalizer::normalize((string)$value['default'], Normalizer::FORM_D);
         $regex = isset($value['filter']) ? $value['filter'] : '/[^a-z0-9 ]/i';
         $value['default'] = preg_replace($regex, '', $value['default']);
 
