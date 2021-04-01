@@ -79,7 +79,26 @@ $_params = [
                 ?>
                 <div class="status-card status-<?= $status ?>">
                     <h2 class="status-card--title">Recurso</h2>
-                    <p class="status-card--content"><?= ucfirst($recurso->evaluationData->status); ?></p>
+                    <p class="status-card--content">
+                        <?php
+                        switch ($recurso->evaluationData->status) {
+                            case 10:
+                                echo 'Recurso aprovado';
+                                break;
+
+                            case 3:
+                                echo 'Recurso não selecionado';
+                                break;
+
+                            case 2:
+                                echo 'Recurso inválido';
+                                break;
+
+                            default:
+                                echo 'Recurso em análise';
+                                break;
+                        } ?>
+                    </p>
                 </div>
                 <?php
             } 
