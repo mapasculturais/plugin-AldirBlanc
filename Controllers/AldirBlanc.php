@@ -2351,5 +2351,116 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $cpfClean = str_replace(".","",$cpfClean);
         return $cpfClean;
     }
-    
+
+
+    /**
+     * Endpoint para aplicar selos da AldirBlanc
+     */
+    public function ALL_applySeals()
+    {
+        $this->requireAuthentication();
+       
+        $app = App::i();
+
+        
+        if(!$app->user->is('admin')) {
+            throw new Exception("Não autorizado");
+            exit;
+        }
+
+        if(!$this->plugin->config['apply-seal-aldirblanc']['seal_id']){
+            echo "O ID do selo não está configurado";
+            exit;
+        }
+        
+        $request = $this->data;
+        $data = explode("@", $request['apply']);
+       
+        //Pega todos os ids de todos os incisos
+        $inciso1Ids = [$this->plugin->config['inciso1_opportunity_id']];
+        $inciso2Ids = array_values($this->plugin->config['inciso2_opportunity_ids']);
+        $inciso3Ids = array_values($this->plugin->config['inciso3_opportunity_ids']);
+
+        //Array para parametrizar a query
+        $opp_ids = [];
+        $opp_ids = [
+            'inciso1' => $inciso1Ids,
+            'inciso2' => $inciso2Ids,
+            'inciso3' => $inciso3Ids,
+            'adirblanc' => array_merge($inciso1Ids, $inciso2Ids, $inciso3Ids),
+            'opportunity_id' => $data[1] ?? null
+        ];
+
+        //Pega o selo que esta configurado para ser aplicado
+        $seal_id = $this->plugin->config['apply-seal-aldirblanc']['seal_id'];
+        
+        //Transforma o array de ids em uma str para clausula IN da query
+        $str_ids = is_array($opp_ids[$data[0]]) ? implode(",", $opp_ids[$data[0]]): implode(",", [$opp_ids[$data[0]]]);;
+        
+        //Caso nao encontre ids configurados retorna a mensagem
+        if(strlen($str_ids) <1){
+            echo "Não foram encontrado ids configurados para {$data[0]}";
+            exit;
+        }
+
+        //Pega a conexão
+        $conn = $app->em->getConnection();
+        
+        //Busca todos os ids que dem ser aplicados selos
+        $all = $conn->fetchAll("SELECT 
+        r.agent_id AS agent_id,
+        ar.agent_id AS agent_coletivo_id,
+        sr.space_id AS space_id
+        FROM registration r 
+        LEFT JOIN agent_relation ar ON r.id = ar.object_id AND ar.object_type = 'MapasCulturais\Entities\Registration'
+        LEFT JOIN space_relation sr ON r.id  = sr.object_id  AND sr.object_type = 'MapasCulturais\Entities\Registration'
+        WHERE r.opportunity_id IN ({$str_ids}) AND r.status = 10");
+
+        //Caso nao encontre ids configurados retorna a mensagem
+        if(!$all){
+            echo "Não foram registtros";
+            exit;
+        }
+
+        //Pega o selo configurado 
+        $seal = $app->repo('Seal')->find($seal_id);
+
+        //Separa os ids que devem ter o selo aplicado em uma única lista
+        $apply_ids = [];
+        foreach($all as $ids){
+            $apply_ids['Agent'][] = $ids['agent_id'];
+            $apply_ids['Agent'][] = $ids['agent_coletivo_id'];
+            $apply_ids['Space'][] = $ids['space_id'];
+        }
+
+        //Remove posições vazias da lista
+        $apply_ids['Agent'] = array_filter($apply_ids['Agent']);
+        $apply_ids['Space'] = array_filter($apply_ids['Space']);
+        $apply_ids = array_filter($apply_ids);
+
+        //Faz a aplicação do selo
+        $Applied = [];
+        foreach($apply_ids as $entity => $ids){
+            foreach($ids as $id){
+
+                $seal_exist = $conn->fetchAll("select id from seal_relation sr where sr.object_id = {$id} and sr.object_type = 'MapasCulturais\\Entities\\{$entity}'");
+                if($seal_exist){
+                    $Applied[] = "Já existe selo aplicado para a entidade {$entity}  id:{$id}";
+                    $app->log->debug("Já existe selo aplicado para a entidade {$entity}  id:{$id}");
+                    continue;
+                }
+
+                $obj = $app->repo($entity)->find($id);
+                $obj->createSealRelation($seal);
+                $Applied[] = "Selo aplicado para {$entity}  id:{$id}";
+                $app->em->clear();
+                $app->em->flush($obj);
+            }           
+        }
+        
+        //Exibe o resultado do que foi aplicado
+        foreach($Applied as $value){
+            echo $value. "<br>";
+        }
+    }
 }
