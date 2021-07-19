@@ -2053,6 +2053,12 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             exit;
         }
 
+        //Complementa a query para filtrar os pagamentos
+        $complement = "";
+        if(isset($request['usePayment']) && $request['usePayment']){
+            $complement = "JOIN payment p ON r.id = p.registration_id";
+        }
+
         //Pega a conexão
         $conn = $app->em->getConnection();
         
@@ -2064,6 +2070,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         FROM registration r 
         LEFT JOIN agent_relation ar ON r.id = ar.object_id AND ar.object_type = 'MapasCulturais\Entities\Registration'
         LEFT JOIN space_relation sr ON r.id  = sr.object_id  AND sr.object_type = 'MapasCulturais\Entities\Registration'
+        {$complement}
         WHERE r.opportunity_id IN ({$str_ids}) AND r.status = 10");
 
         //Caso registros retorna a mensagem
