@@ -2410,9 +2410,9 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         LEFT JOIN space_relation sr ON r.id  = sr.object_id  AND sr.object_type = 'MapasCulturais\Entities\Registration'
         WHERE r.opportunity_id IN ({$str_ids}) AND r.status = 10");
 
-        //Caso nao encontre ids configurados retorna a mensagem
+        //Caso registros retorna a mensagem
         if(!$all){
-            echo "Não foram registtros";
+            echo "Não foram registros";
             exit;
         }
 
