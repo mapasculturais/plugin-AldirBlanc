@@ -2367,6 +2367,7 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             exit;
         }
         
+        //Identifica os dados passados como parâmetros
         $request = $this->data;
         $data = explode("@", $request['apply']);
        
@@ -2423,9 +2424,6 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             exit;
         }
 
-        //Pega o selo configurado 
-        $seal = $app->repo('Seal')->find($seal_id);
-
         //Separa os ids que devem ter o selo aplicado em uma única lista
         $apply_ids = [];
         foreach($all as $ids){
@@ -2440,27 +2438,32 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
         $apply_ids = array_filter($apply_ids);
 
         //Faz a aplicação do selo
-        $Applied = [];
+        $applied = [];
         foreach($apply_ids as $entity => $ids){
             foreach($ids as $id){
-
+                
                 $seal_exist = $conn->fetchAll("select id from seal_relation sr where sr.object_id = {$id} and sr.object_type = 'MapasCulturais\\Entities\\{$entity}'");
                 if($seal_exist){
-                    $Applied[] = "Já existe selo aplicado para a entidade {$entity}  id:{$id}";
+                    $applied[] = "Já existe selo aplicado para a entidade {$entity}  id:{$id}";
                     $app->log->debug("Já existe selo aplicado para a entidade {$entity}  id:{$id}");
                     continue;
                 }
-
+                
                 $obj = $app->repo($entity)->find($id);
+                $seal = $app->repo('Seal')->find($seal_id);
+
+                $app->user->profile = $app->repo('Agent')->find($app->user->profile->id);
+
                 $obj->createSealRelation($seal);
-                $Applied[] = "Selo aplicado para {$entity}  id:{$id}";
+                $applied[] = "Selo aplicado para {$entity}  id:{$id}";
+                $app->log->debug("Selo aplicado para {$entity}  id:{$id}");
+                $app->em->flush();
                 $app->em->clear();
-                $app->em->flush($obj);
             }           
         }
         
         //Exibe o resultado do que foi aplicado
-        foreach($Applied as $value){
+        foreach($applied as $value){
             echo $value. "<br>";
         }
     }
