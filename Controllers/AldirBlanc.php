@@ -4,6 +4,7 @@ namespace AldirBlanc\Controllers;
 
 use Exception;
 use MapasCulturais\App;
+use MapasCulturais\Controllers\Seal;
 use MapasCulturais\Entities\Agent;
 use MapasCulturais\Entities\MetaList;
 use MapasCulturais\i;
@@ -2362,14 +2363,15 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             exit;
         }
 
-        if(!$this->plugin->config['apply-seal-aldirblanc']['seal_id']){
-            echo "O ID do selo não está configurado";
-            exit;
-        }
-        
         //Identifica os dados passados como parâmetros
         $request = $this->data;
         $data = explode("@", $request['apply']);
+
+        if(!$this->plugin->config['apply-seal-aldirblanc']['seal_id'] && !isset($request['seal_id'])){
+            echo "O ID do selo não está configurado e não fou passado por parâmetro";
+            exit;
+        }
+        
        
         //Pega todos os ids de todos os incisos
         $inciso1Ids = [$this->plugin->config['inciso1_opportunity_id']];
@@ -2386,8 +2388,8 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
             'opportunity_id' => $data[1] ?? null
         ];
 
-        //Pega o selo que esta configurado para ser aplicado
-        $seal_id = $this->plugin->config['apply-seal-aldirblanc']['seal_id'];
+        //Pega o selo que esta configurado para ser aplicado ou foi passado por parâmetro
+        $seal_id = $this->plugin->config['apply-seal-aldirblanc']['seal_id'] ?: $request['seal_id'];
         
         //Transforma o array de ids em uma str para clausula IN da query
         $str_ids = is_array($opp_ids[$data[0]]) ? implode(",", $opp_ids[$data[0]]): implode(",", [$opp_ids[$data[0]]]);;
@@ -2451,6 +2453,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
                 
                 $obj = $app->repo($entity)->find($id);
                 $seal = $app->repo('Seal')->find($seal_id);
+                if(!$seal){
+                    echo "Não foi encontrado selo com ID {$seal_id}";
+                    exit;
+                }
 
                 $app->user->profile = $app->repo('Agent')->find($app->user->profile->id);
 
