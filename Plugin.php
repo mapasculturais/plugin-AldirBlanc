@@ -764,7 +764,9 @@ class Plugin extends \MapasCulturais\Plugin
             if(!$app->user->is('admin')) {
                 return;
             }
-            $this->part('aldirblanc/generate-opportunities-button');
+
+            //O endpoint desse botão foi desativado após o término da AldirBlanc
+            // $this->part('aldirblanc/generate-opportunities-button');
         });
         
         // add hooks
@@ -875,7 +877,9 @@ class Plugin extends \MapasCulturais\Plugin
             if(!$app->user->is('admin')) {
                 return;
             }
-            $this->part('aldirblanc/generate-mediadores-button');
+
+            //O endpoint desse botão foi desativado após o término da AldirBlanc
+            // $this->part('aldirblanc/generate-mediadores-button');
         });
         $app->hook('auth.successful', function() use($plugin, $app) {
             $opportunities_ids = array_values($plugin->config['inciso2_opportunity_ids']);
