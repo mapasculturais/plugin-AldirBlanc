@@ -1617,6 +1617,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     function GET_generateOpportunities() {
         $this->requireAuthentication();
 
+        //Endpoint desativado após terminoi da AldirBlanc, verificar se devemos remover o mesmo
+        $this->json([]);
+        exit;
+
         $app = App::i();
 
         if(!$app->user->is('admin')) {
@@ -1634,6 +1638,10 @@ class AldirBlanc extends \MapasCulturais\Controllers\Registration
     //Atualiza roles dos mediadores a partir da lista da configuração 
     function GET_atualizarmediadores() {
         $this->requireAuthentication();
+
+        //Endpoint desativado após terminoi da AldirBlanc, verificar se devemos remover o mesmo
+        $this->json([]);
+        exit;
 
         $app = App::i();
 
