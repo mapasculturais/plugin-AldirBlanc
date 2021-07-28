@@ -4,6 +4,4 @@
     <p style="text-align:justify">
         <?= $texto ?>
     </p>
-    
-    <a class="btn btn-accent btn-large" href="<?php echo $app->createUrl('aldirblanc') ?>"><?= $botao ?></a>
 </div>
