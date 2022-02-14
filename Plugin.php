@@ -810,14 +810,14 @@ class Plugin extends \MapasCulturais\Plugin
             $this->part('aldirblanc/subsite-tab-content');
         });
 
-        $app->hook('template(site.index.home-search):end', function () use ($plugin) {
-            $texto = $plugin->config['texto_home'];
-            $botao = $plugin->config['botao_home'];
-            $titulo = $plugin->config['titulo_home'];
-            if($texto || ($botao && !empty($botao)) || $titulo){
-                $this->part('aldirblanc/home-search', ['texto' => $texto, 'botao' => $botao, 'titulo' => $titulo]);
-            }
-        });
+        // $app->hook('template(site.index.home-search):end', function () use ($plugin) {
+        //     $texto = $plugin->config['texto_home'];
+        //     $botao = $plugin->config['botao_home'];
+        //     $titulo = $plugin->config['titulo_home'];
+        //     if($texto || ($botao && !empty($botao)) || $titulo){
+        //         $this->part('aldirblanc/home-search', ['texto' => $texto, 'botao' => $botao, 'titulo' => $titulo]);
+        //     }
+        // });
 
         /**
          * modifica o template do autenticador quando o redirect url for para o plugin aldir blanc
