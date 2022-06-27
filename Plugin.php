@@ -80,21 +80,45 @@ class Plugin extends \MapasCulturais\Plugin
             
             // define a exibição do resultado das avaliações para cada status (1, 2, 3, 8, 10)
             'exibir_resultado_padrao' => (array) json_decode(env('AB_EXIBIR_RESULTADO_PADRAO', '["1", "2", "3", "8", "10"]')),
-            'exibir_resultado_dataprev' => (array) json_decode(env('AB_EXIBIR_RESULTADO_DATAPREV', '[]')),
-            'exibir_resultado_generico' => (array) json_decode(env('AB_EXIBIR_RESULTADO_GENERICO', '[]')),
-            'exibir_resultado_avaliadores' => (array) json_decode(env('AB_EXIBIR_RESULTADO_AVALIADORES', '["10"]')),
+            'exibir_resultado_dataprev' => (array) json_decode(env('AB_EXIBIR_RESULTADO_DATAPREV', '["2","3"]')),
+            'exibir_resultado_generico' => (array) json_decode(env('AB_EXIBIR_RESULTADO_GENERICO', '["1","2","3","8","10"]')),
+            'exibir_resultado_avaliadores' => (array) json_decode(env('AB_EXIBIR_RESULTADO_AVALIADORES', '["1","2","3","8","10"]')),
 
             // array com id dos usuários para não exibir mensagens das avaliações
             'nao_exibir_resultados' => (array) json_decode(env('AB_NAO_EXIBIR_RESULTADOS', '[]')),
 
             // mensagens de status padrao
-            'msg_status_sent' => env('AB_STATUS_SENT_MESSAGE', 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail.'), // STATUS_SENT = 1
-            'msg_status_invalid' => env('AB_STATUS_INVALID_MESSAGE', 'Não atendeu aos requisitos necessários ou os recursos disponíveis foram esgotados, conforme Incisos/Artº da Lei/Regulamentações: No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso V do Art. 6º da Lei nº 14.017/2020, e ao Inciso V do Art. 4º do Decreto 10.464/2020.'), // STATUS_INVALID = 2
-            'msg_status_approved' => env('AB_STATUS_APPROVED_MESSAGE', '<p>Caso tenha optado por transação bancária, brevemente seu benefício será disponibilizado na conta informada.</p>
-        <p>Caso tenha optado por ordem de pagamento, quando disponibilizado o recurso, você poderá realizar o saque diretamente em qualquer agência do Banco do Brasil pessoalmente - apresentando RG e CPF, sem nenhum custo.</p>
-        <p>Em virtude da pandemia da covid-19, algumas agências do Banco do Brasil podem estar operando com restrições e horários diferenciados de funcionamento, conforme determinação do poder público.</p>'), // STATUS_APPROVED = 10
-            'msg_status_notapproved' => env('AB_STATUS_NOTAPPROVED_MESSAGE', 'Não atendeu aos requisitos necessários. Caso não concorde com o resultado, você poderá enviar um novo formulário de solicitação ao benefício - fique atento ao preenchimento dos campos.'), // STATUS_NOTAPPROVED = 3
-            'msg_status_waitlist' => env('AB_STATUS_WAITLIST_MESSAGE', 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.'), //STATUS_WAITLIST = 8
+            'msg_status_sent' => env('AB_STATUS_SENT_MESSAGE', 'Consulte novamente em outro momento. Você também receberá o resultado da sua solicitação por e-mail. NOTA MAPA CULTURAL<p>
+
+            A presente nota vem esclarecer, de forma clara e sucinta, sobre o tratamento de dados pessoais dos(as) proponentes nos editais referentes à LAB/PE. Esses editais levam em consideração as ações emergenciais destinadas ao setor cultural, adotadas durante o estado de calamidade pública, reconhecido pelo Decreto Legislativo nº 6, de 20 de março de 2020.
+            É importante deixar claro que o objetivo do mapa cultural é gerar oportunidades para os(as) proponentes no cenário cultural pernambucano, considerando e permitindo o acesso às informações sobre eventos, programas, espaços e agentes culturais. Por isso, os dados pessoais dos(as) proponentes nos editais referentes à LAB/PE foram tratados para atingir determinada finalidade, a que nesse caso em específico, é a de mapear os dados com o objetivo de entender onde se encontram os grupos culturais do estado de Pernambuco.
+            Por fim, a Secretaria de Cultura do Estado de Pernambuco (SECULT/PE) informa que está amparada pelo disposto no art. 7º, III da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados), e que se responsabiliza quanto ao tratamento dos dados coletados, observando a adequação disposta na Política Estadual de Segurança da Informação (Decreto Nº 49.914/2020), bem como as diretrizes estabelecidas pela Lei Geral de Proteção de Dados (Lei Nº 13.709/2018) e a Política Estadual de Proteção de Dados (Decreto Nº49.265/2020), destacando, desde já, que o tratamento dos dados atenderá tão somente a finalidade destacada na presente Nota.'), // STATUS_SENT = 1
+                        'msg_status_invalid' => env('AB_STATUS_INVALID_MESSAGE', 'Não atendeu aos requisitos necessários ou os recursos disponíveis foram esgotados, conforme Incisos/Artº da Lei/Regulamentações: No preenchimento do Formulário de Inscrição, o requerente não atendeu ao Inciso V do Art. 6º da Lei nº 14.017/2020, e ao Inciso V do Art. 4º do Decreto 10.464/2020.<p>
+            NOTA MAPA CULTURAL<p>
+            
+            A presente nota vem esclarecer, de forma clara e sucinta, sobre o tratamento de dados pessoais dos(as) proponentes nos editais referentes à LAB/PE. Esses editais levam em consideração as ações emergenciais destinadas ao setor cultural, adotadas durante o estado de calamidade pública, reconhecido pelo Decreto Legislativo nº 6, de 20 de março de 2020.
+            É importante deixar claro que o objetivo do mapa cultural é gerar oportunidades para os(as) proponentes no cenário cultural pernambucano, considerando e permitindo o acesso às informações sobre eventos, programas, espaços e agentes culturais. Por isso, os dados pessoais dos(as) proponentes nos editais referentes à LAB/PE foram tratados para atingir determinada finalidade, a que nesse caso em específico, é a de mapear os dados com o objetivo de entender onde se encontram os grupos culturais do estado de Pernambuco.
+            Por fim, a Secretaria de Cultura do Estado de Pernambuco (SECULT/PE) informa que está amparada pelo disposto no art. 7º, III da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados), e que se responsabiliza quanto ao tratamento dos dados coletados, observando a adequação disposta na Política Estadual de Segurança da Informação (Decreto Nº 49.914/2020), bem como as diretrizes estabelecidas pela Lei Geral de Proteção de Dados (Lei Nº 13.709/2018) e a Política Estadual de Proteção de Dados (Decreto Nº49.265/2020), destacando, desde já, que o tratamento dos dados atenderá tão somente a finalidade destacada na presente Nota.'), // STATUS_INVALID = 2
+                        'msg_status_approved' => env('AB_STATUS_APPROVED_MESSAGE', '<p>Caso tenha optado por transação bancária, brevemente seu benefício será disponibilizado na conta informada.</p>
+                    <p>Caso tenha optado por ordem de pagamento, quando disponibilizado o recurso, você poderá realizar o saque diretamente em qualquer agência do Banco do Brasil pessoalmente - apresentando RG e CPF, sem nenhum custo.</p>
+                    <p>Em virtude da pandemia da covid-19, algumas agências do Banco do Brasil podem estar operando com restrições e horários diferenciados de funcionamento, conforme determinação do poder público.</p><p>
+            NOTA MAPA CULTURAL<p>
+            
+            A presente nota vem esclarecer, de forma clara e sucinta, sobre o tratamento de dados pessoais dos(as) proponentes nos editais referentes à LAB/PE. Esses editais levam em consideração as ações emergenciais destinadas ao setor cultural, adotadas durante o estado de calamidade pública, reconhecido pelo Decreto Legislativo nº 6, de 20 de março de 2020.
+            É importante deixar claro que o objetivo do mapa cultural é gerar oportunidades para os(as) proponentes no cenário cultural pernambucano, considerando e permitindo o acesso às informações sobre eventos, programas, espaços e agentes culturais. Por isso, os dados pessoais dos(as) proponentes nos editais referentes à LAB/PE foram tratados para atingir determinada finalidade, a que nesse caso em específico, é a de mapear os dados com o objetivo de entender onde se encontram os grupos culturais do estado de Pernambuco.
+            Por fim, a Secretaria de Cultura do Estado de Pernambuco (SECULT/PE) informa que está amparada pelo disposto no art. 7º, III da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados), e que se responsabiliza quanto ao tratamento dos dados coletados, observando a adequação disposta na Política Estadual de Segurança da Informação (Decreto Nº 49.914/2020), bem como as diretrizes estabelecidas pela Lei Geral de Proteção de Dados (Lei Nº 13.709/2018) e a Política Estadual de Proteção de Dados (Decreto Nº49.265/2020), destacando, desde já, que o tratamento dos dados atenderá tão somente a finalidade destacada na presente Nota.'), // STATUS_APPROVED = 10
+                        'msg_status_notapproved' => env('AB_STATUS_NOTAPPROVED_MESSAGE', 'Não atendeu aos requisitos necessários. Caso não concorde com o resultado, você poderá enviar um novo formulário de solicitação ao benefício - fique atento ao preenchimento dos campios.<p>
+            NOTA MAPA CULTURAL<p>
+            
+            A presente nota vem esclarecer, de forma clara e sucinta, sobre o tratamento de dados pessoais dos(as) proponentes nos editais referentes à LAB/PE. Esses editais levam em consideração as ações emergenciais destinadas ao setor cultural, adotadas durante o estado de calamidade pública, reconhecido pelo Decreto Legislativo nº 6, de 20 de março de 2020.
+            É importante deixar claro que o objetivo do mapa cultural é gerar oportunidades para os(as) proponentes no cenário cultural pernambucano, considerando e permitindo o acesso às informações sobre eventos, programas, espaços e agentes culturais. Por isso, os dados pessoais dos(as) proponentes nos editais referentes à LAB/PE foram tratados para atingir determinada finalidade, a que nesse caso em específico, é a de mapear os dados com o objetivo de entender onde se encontram os grupos culturais do estado de Pernambuco.
+            Por fim, a Secretaria de Cultura do Estado de Pernambuco (SECULT/PE) informa que está amparada pelo disposto no art. 7º, III da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados), e que se responsabiliza quanto ao tratamento dos dados coletados, observando a adequação disposta na Política Estadual de Segurança da Informação (Decreto Nº 49.914/2020), bem como as diretrizes estabelecidas pela Lei Geral de Proteção de Dados (Lei Nº 13.709/2018) e a Política Estadual de Proteção de Dados (Decreto Nº49.265/2020), destacando, desde já, que o tratamento dos dados atenderá tão somente a finalidade destacada na presente Nota.'), // STATUS_NOTAPPROVED = 3
+                        'msg_status_waitlist' => env('AB_STATUS_WAITLIST_MESSAGE', 'Os recursos disponibilizados já foram destinados. Para sua solicitação ser aprovada será necessário aguardar possível liberação de recursos. Em caso de aprovação, você também será notificado por e-mail. Consulte novamente em outro momento.<p>
+            NOTA MAPA CULTURAL<p>
+            
+            A presente nota vem esclarecer, de forma clara e sucinta, sobre o tratamento de dados pessoais dos(as) proponentes nos editais referentes à LAB/PE. Esses editais levam em consideração as ações emergenciais destinadas ao setor cultural, adotadas durante o estado de calamidade pública, reconhecido pelo Decreto Legislativo nº 6, de 20 de março de 2020.
+            É importante deixar claro que o objetivo do mapa cultural é gerar oportunidades para os(as) proponentes no cenário cultural pernambucano, considerando e permitindo o acesso às informações sobre eventos, programas, espaços e agentes culturais. Por isso, os dados pessoais dos(as) proponentes nos editais referentes à LAB/PE foram tratados para atingir determinada finalidade, a que nesse caso em específico, é a de mapear os dados com o objetivo de entender onde se encontram os grupos culturais do estado de Pernambuco.
+            Por fim, a Secretaria de Cultura do Estado de Pernambuco (SECULT/PE) informa que está amparada pelo disposto no art. 7º, III da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados), e que se responsabiliza quanto ao tratamento dos dados coletados, observando a adequação disposta na Política Estadual de Segurança da Informação (Decreto Nº 49.914/2020), bem como as diretrizes estabelecidas pela Lei Geral de Proteção de Dados (Lei Nº 13.709/2018) e a Política Estadual de Proteção de Dados (Decreto Nº49.265/2020), destacando, desde já, que o tratamento dos dados atenderá tão somente a finalidade destacada na presente Nota.'), //STATUS_WAITLIST = 8
 
             // mensagem padrão para recurso das inscrições com status 2 e 3
             'msg_recurso' => env('AB_MENSAGEM_RECURSO', ''),
@@ -281,11 +305,11 @@ class Plugin extends \MapasCulturais\Plugin
             $this->part('aldirblanc/observacoes-pagamento-create-multiple');
         });
 
-        $app->hook('template(<<*>>.main-footer):begin', function() use($plugin) {
-            if ($plugin->config['link_suporte_no_footer'] && $plugin->config['link_suporte']) {
-                $this->part('aldirblanc/support', ['linkSuporte' => $plugin->config['link_suporte']]);
-            }
-        });
+        // $app->hook('template(<<*>>.main-footer):begin', function() use($plugin) {
+        //     if ($plugin->config['link_suporte_no_footer'] && $plugin->config['link_suporte']) {
+        //         $this->part('aldirblanc/support', ['linkSuporte' => $plugin->config['link_suporte']]);
+        //     }
+        // });
 
         // adiciona informações do status das validações ao formulário de avaliação
         $app->hook('template(registration.view.evaluationForm.simple):before', function(Registration $registration, $opportunity) use($inciso1Ids, $inciso2Ids) {
