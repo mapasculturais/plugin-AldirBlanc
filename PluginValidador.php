@@ -85,6 +85,13 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
          * @TODO: implementar para metodo de avaliação documental
          */
         $app->hook('entity(Registration).consolidateResult', function(&$result, $caller) use($plugin, $app) {
+            
+            $opp_ids = $plugin->opportunitiesIds;
+
+            if(!in_array($this->opportunity->id, $opp_ids)){
+                return;
+            }
+
             // só aplica quando a consolidação partir da avaliação do usuário validador 
             if (!$caller->user->equals($plugin->getUser())) {
                 return;
