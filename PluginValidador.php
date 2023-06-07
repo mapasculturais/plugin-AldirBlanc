@@ -86,6 +86,7 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
          */
         $app->hook('entity(Registration).consolidateResult', function(&$result, $caller) use($plugin, $app) {
             // só aplica quando a consolidação partir da avaliação do usuário validador 
+            if(!$caller){return;}
             if (!$caller->user->equals($plugin->getUser())) {
                 return;
             }
