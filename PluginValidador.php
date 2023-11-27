@@ -188,7 +188,7 @@ abstract class PluginValidador extends \MapasCulturais\Plugin
                 $ids[] = $aldirblanc->config['inciso1_opportunity_id'];
             }
             
-            if (in_array($opportunity->id, $ids)) {
+            if ($opportunity && in_array($opportunity->id, $ids)) {
                 
                 $user = $plugin->getUser();
                 if (!in_array($opportunity->id, $user->aldirblanc_avaliador)) {
